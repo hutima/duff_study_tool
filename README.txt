@@ -1,5 +1,5 @@
-Greek Flashcards PWA for Netlify
-================================
+Greek Flashcards PWA (GitHub Pages)
+===================================
 
 Seventh-pass revision (based on the sixth-pass consolidation below).
 Adds wrong-answer explanations to grammar questions: when a learner
@@ -204,7 +204,14 @@ app.js / pos_logic.js consumes:
 
 DEPLOYMENT
 ----------
-Drag this folder (or a zip of its contents) into Netlify Drop.
+This repo is published with GitHub Pages.
+
+Typical flow:
+1) Push changes to the configured Pages branch.
+2) Wait for the Pages workflow/deploy to finish.
+3) Open the published URL and do one online load so the service
+   worker refreshes cached assets.
+
 On iPhone: open the deployed site in Safari, then Share > Add to
 Home Screen. Open the home-screen app once while online so the
 service worker caches the app shell, then it works offline.

@@ -34,7 +34,6 @@
     <div class="header-top">
       <div></div>
       <div class="theme-switcher" role="group" aria-label="Color theme">
-        <button class="theme-btn active" id="themeSystemBtn" type="button" onclick="setThemeMode('system')">System</button>
         <button class="theme-btn" id="themeDarkBtn" type="button" onclick="setThemeMode('dark')">Dark</button>
         <button class="theme-btn" id="themeLightBtn" type="button" onclick="setThemeMode('light')">Light</button>
       </div>
@@ -45,35 +44,47 @@
     <div class="wycliffe">Wycliffe College · WYB1513YY · Spring–Summer 2026</div>
   </header>
 
-  <div class="selector-section profile-section">
-    <span class="selector-label">App View</span>
+  <div class="quick-start">
+    <button class="quick-btn" type="button" onclick="openStudySelector()">Choose session</button>
+    <button class="quick-btn quick-primary" type="button" onclick="startStudying()">Start studying</button>
+    <div class="mode-group app-profile-group" role="group" aria-label="Study mode shortcut">
+      <button class="mode-btn active" id="modeShortcutVocabBtn" type="button" onclick="setStudyMode('vocab')">Vocab</button>
+      <button class="mode-btn" id="modeShortcutMorphBtn" type="button" onclick="setStudyMode('morph')">Grammar</button>
+    </div>
+    <button class="quick-btn" type="button" onclick="openAnalyticsOverlay()">Progress</button>
+    <button class="quick-btn" type="button" onclick="openShortcutsModal()">Keyboard shortcuts</button>
+  </div>
+
+  <div class="selector-summary" id="selectorSummary">
+    Session selector opens as a frame when you tap the card or “Choose session.”
+  </div>
+
+  <details class="utility-section">
+    <summary>Options</summary>
     <div class="profile-controls">
       <div class="mode-group app-profile-group" role="group" aria-label="App view">
         <button class="mode-btn active" id="profileVocabOnlyBtn" type="button" onclick="setAppProfile('vocab_only')">Vocab only</button>
         <button class="mode-btn" id="profileVocabGrammarBtn" type="button" onclick="setAppProfile('vocab_grammar')">Vocab + Grammar</button>
       </div>
-      <button class="ctrl-btn" type="button" onclick="exportProgressJson()">Export progress</button>
-      <button class="ctrl-btn" type="button" onclick="triggerImportProgress()">Import progress</button>
-      <button class="ctrl-btn" type="button" onclick="openAnalyticsOverlay()">Analytics</button>
       <button class="ctrl-btn notice-btn" type="button" onclick="showDisclaimerModal()">Study aid notice</button>
     </div>
     <div class="profile-note" id="profileNote">Simplified vocabulary layout. Shared time tracking still runs across the whole app.</div>
     <div class="app-notice" id="appNotice">Unofficial student-made AI study aid. Verify against course content and official materials.</div>
-  </div>
+  </details>
 
-  <div class="selector-section">
-    <span class="selector-label">Study Session</span>
-    <div class="sessions-grid" id="sessionsGrid"></div>
-  </div>
-
-  <div class="selector-section">
-    <span class="selector-label">Or Build a Custom Chapter / Other Deck</span>
-    <div class="sessions-grid" id="chaptersGrid"></div>
-  </div>
+  <details class="utility-section">
+    <summary>Progress tools</summary>
+    <div class="profile-controls">
+      <button class="ctrl-btn" type="button" onclick="exportProgressJson()">Export progress</button>
+      <button class="ctrl-btn" type="button" onclick="triggerImportProgress()">Import progress</button>
+      <button class="ctrl-btn" type="button" onclick="openAnalyticsOverlay()">Analytics</button>
+    </div>
+  </details>
 
   <div class="ornament">✦ · · · ✦</div>
 
-  
+  <details class="utility-section">
+    <summary>Advanced review settings</summary>
 <div class="controls-bar" id="controlsBar">
     <div class="mode-group" role="group" aria-label="Study mode">
       <button class="mode-btn active" id="modeVocabBtn" type="button" onclick="setStudyMode('vocab')">Vocabulary</button>
@@ -109,11 +120,12 @@
     <button class="ctrl-btn" id="resetDeckBtn" type="button" onclick="resetCurrentDeck()">Reset deck</button>
     <button class="ctrl-btn" type="button" onclick="resetAllStats()">Reset stats</button>
   </div>
+  </details>
 
   <div class="card-area" id="cardArea">
     <div class="empty-state">
       <div class="big">αβγ</div>
-      Select a study session above to begin.
+      Tap to choose a session and start studying.
     </div>
   </div>
 
@@ -129,11 +141,14 @@
     <button class="mark-btn mark-easy"  onclick="markCard('easy')">✓ Easy</button>
   </div>
 
-  <div class="review-panel" id="reviewPanel">
+  <details class="utility-section">
+    <summary>Progress</summary>
+    <div class="review-panel show" id="reviewPanel">
     <div class="review-title">Session Progress</div>
     <div class="review-stats" id="reviewStats"></div>
     <div class="review-list" id="reviewList"></div>
   </div>
+  </details>
 
 </div>
 
@@ -188,6 +203,43 @@
   </div>
 </div>
 
+<div class="consent-overlay analytics-overlay study-selector-overlay" id="studySelectorOverlay" aria-hidden="true">
+  <div class="consent-modal analytics-modal study-selector-modal" role="dialog" aria-modal="true" aria-labelledby="studySelectorTitle">
+    <div class="analytics-header-row">
+      <div>
+        <div class="consent-label">Start studying</div>
+        <h2 id="studySelectorTitle">Choose session</h2>
+      </div>
+      <button class="ctrl-btn" type="button" onclick="closeStudySelector()">Close</button>
+    </div>
+    <div class="selector-section">
+      <span class="selector-label">Course sessions</span>
+      <div class="sessions-grid" id="sessionsGrid"></div>
+    </div>
+    <div class="selector-section">
+      <span class="selector-label">Manual chapter selection</span>
+      <div class="sessions-grid" id="chaptersGrid"></div>
+    </div>
+  </div>
+</div>
+
+<div class="consent-overlay" id="shortcutsOverlay" aria-hidden="true">
+  <div class="consent-modal" role="dialog" aria-modal="true" aria-labelledby="shortcutsTitle">
+    <div class="consent-label">Keyboard shortcuts</div>
+    <h2 id="shortcutsTitle">Use the keyboard while studying</h2>
+    <div class="consent-copy">
+      <p>Flip card: <strong>Space</strong> / <strong>Enter</strong></p>
+      <p>Navigate: <strong>←</strong> <strong>→</strong> (or <strong>↑</strong> <strong>↓</strong>)</p>
+      <p>Mark confidence: <strong>1</strong> Hard, <strong>2</strong> Uncertain, <strong>3</strong> Easy</p>
+      <p>Quick marks: <strong>R</strong> = Hard, <strong>K</strong> = Easy</p>
+      <p>Grammar options: <strong>1–4</strong> chooses answer</p>
+    </div>
+    <div class="consent-actions">
+      <button class="ctrl-btn consent-primary" type="button" onclick="closeShortcutsModal()">Close</button>
+    </div>
+  </div>
+</div>
+
 <div class="consent-overlay" id="consentOverlay" aria-hidden="true">
   <div class="consent-modal" role="dialog" aria-modal="true" aria-labelledby="consentTitle">
     <div class="consent-label">Before you begin</div>
@@ -196,6 +248,7 @@
       <p>This study tool was made with AI by a student. It is unofficial and may contain mistakes, omissions, or misleading answers.</p>
       <p>Always check vocabulary, parsing, grammar explanations, and quiz content against your course content, instructor guidance, and official materials.</p>
       <p>This app is meant to help with review and memorization, not to replace assigned coursework or authoritative sources.</p>
+      <p>Quick start: flip a card, then mark <strong>Hard</strong>, <strong>Uncertain</strong>, or <strong>Easy</strong>.</p>
     </div>
     <label class="consent-check-row" id="consentCheckRow">
       <input type="checkbox" id="consentCheckbox">
@@ -212,6 +265,6 @@
 <script defer src="js/data/supplemental.js?v=27"></script>
 <script defer src="js/data/grammar.js?v=27"></script>
 <script defer src="js/logic/pos_logic.js?v=27"></script>
-<script defer src="js/app/main.bundle.js?v=27"></script>
+<script type="module" src="js/app/main.js?v=28"></script>
 </body>
 </html>
