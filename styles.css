@@ -923,6 +923,10 @@
     padding: 10px 12px;
   }
 
+  .notice-row + .utility-section {
+    margin-top: 8px;
+  }
+
   .utility-section summary {
     cursor: pointer;
     list-style: none;
