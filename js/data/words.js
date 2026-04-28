@@ -3209,7 +3209,7 @@ const SETS = {
 const SESSIONS = [
   {
     "id": "wk1t",
-    "tag": "Week 1 · Tue May 5",
+    "tag": "Week 1",
     "label": "Chapters 1-3",
     "sets": [
       "1",
@@ -3222,7 +3222,7 @@ const SESSIONS = [
   },
   {
     "id": "wk1f",
-    "tag": "Week 1 · Fri May 8",
+    "tag": "Week 1",
     "label": "Chapters 4-5",
     "sets": [
       "4",
@@ -3234,7 +3234,7 @@ const SESSIONS = [
   },
   {
     "id": "wk2t",
-    "tag": "Week 2 · Tue May 12",
+    "tag": "Week 2",
     "label": "Chapter 6",
     "sets": [
       "6"
@@ -3244,7 +3244,7 @@ const SESSIONS = [
   },
   {
     "id": "wk2f",
-    "tag": "Week 2 · Fri May 15",
+    "tag": "Week 2",
     "label": "Chapter 7",
     "sets": [
       "7"
@@ -3254,7 +3254,7 @@ const SESSIONS = [
   },
   {
     "id": "wk3t",
-    "tag": "Week 3 · Tue May 19",
+    "tag": "Week 3",
     "label": "Chapter 8",
     "sets": [
       "8",
@@ -3265,7 +3265,7 @@ const SESSIONS = [
   },
   {
     "id": "wk3f",
-    "tag": "Week 3 · Fri May 22",
+    "tag": "Week 3",
     "label": "Chapter 9",
     "sets": [
       "9",
@@ -3276,7 +3276,7 @@ const SESSIONS = [
   },
   {
     "id": "wk4t",
-    "tag": "Week 4 · Tue May 26",
+    "tag": "Week 4",
     "label": "Chapters 10-11",
     "sets": [
       "10",
@@ -3307,7 +3307,7 @@ const SESSIONS = [
   },
   {
     "id": "wk5t",
-    "tag": "Week 5 · Tue June 9",
+    "tag": "Week 5",
     "label": "Chapters 12-13",
     "sets": [
       "12",
@@ -3318,7 +3318,7 @@ const SESSIONS = [
   },
   {
     "id": "wk5f",
-    "tag": "Week 5 · Fri June 12",
+    "tag": "Week 5",
     "label": "Chapter 14",
     "sets": [
       "14"
@@ -3328,7 +3328,7 @@ const SESSIONS = [
   },
   {
     "id": "wk6t",
-    "tag": "Week 6 · Tue June 16",
+    "tag": "Week 6",
     "label": "Chapter 15",
     "sets": [
       "15",
@@ -3339,7 +3339,7 @@ const SESSIONS = [
   },
   {
     "id": "wk6f",
-    "tag": "Week 6 · Fri June 19",
+    "tag": "Week 6",
     "label": "Chapter 16",
     "sets": [
       "16",
@@ -3350,7 +3350,7 @@ const SESSIONS = [
   },
   {
     "id": "wk7t",
-    "tag": "Week 7 · Tue June 23",
+    "tag": "Week 7",
     "label": "Chapter 17",
     "sets": [
       "17",
@@ -3361,7 +3361,7 @@ const SESSIONS = [
   },
   {
     "id": "wk7f",
-    "tag": "Week 7 · Fri June 26",
+    "tag": "Week 7",
     "label": "Chapter 18",
     "sets": [
       "18",
@@ -3372,7 +3372,7 @@ const SESSIONS = [
   },
   {
     "id": "wk8t",
-    "tag": "Week 8 · Tue June 30",
+    "tag": "Week 8",
     "label": "Chapter 19",
     "sets": [
       "19",
@@ -3383,7 +3383,7 @@ const SESSIONS = [
   },
   {
     "id": "wk8f",
-    "tag": "Week 8 · Fri July 3",
+    "tag": "Week 8",
     "label": "Chapter 20",
     "sets": [
       "20",
@@ -3442,18 +3442,18 @@ window.SESSIONS = SESSIONS;
 
 
 // ──────────────────────────────────────────────────────
-//  WEEKLY COURSE-SUPPLEMENT PATCH
+//  WEEKLY SUPPLEMENT PATCH
 // ──────────────────────────────────────────────────────
 (function () {
   const weekLabels = {
-    W1O: 'Week 1 - Course Supplement',
-    W2O: 'Week 2 - Course Supplement',
-    W3O: 'Week 3 - Course Supplement',
-    W4O: 'Week 4 - Course Supplement',
-    W5O: 'Week 5 - Course Supplement',
-    W6O: 'Week 6 - Course Supplement',
-    W7O: 'Week 7 - Course Supplement',
-    W8O: 'Week 8 - Course Supplement'
+    W1O: 'Week 1 - Supplement',
+    W2O: 'Week 2 - Supplement',
+    W3O: 'Week 3 - Supplement',
+    W4O: 'Week 4 - Supplement',
+    W5O: 'Week 5 - Supplement',
+    W6O: 'Week 6 - Supplement',
+    W7O: 'Week 7 - Supplement',
+    W8O: 'Week 8 - Supplement'
   };
 
   Object.entries(weekLabels).forEach(([key, label]) => {
@@ -3475,7 +3475,7 @@ window.SESSIONS = SESSIONS;
     wk3t: { summary: 'Middle voice · εἰμί infinitive / participle' },
     wk3f: { summary: 'Demonstratives · personal pronouns' },
     wk4t: { summary: 'Relative pronouns · second aorist · liquid futures' },
-    mt:   { summary: 'Weeks 1–4 chapters + course supplements' },
+    mt:   { summary: 'Weeks 1–4 chapters + supplements' },
     wk5t: { summary: 'Third declension stems · second / third declension' },
     wk5f: { summary: 'Participial paradigms' },
     wk6t: { summary: 'Passive endings · passive moods / participles' },
@@ -3484,7 +3484,7 @@ window.SESSIONS = SESSIONS;
     wk7f: { summary: 'Indefinite constructions · 3rd person imperative' },
     wk8t: { summary: '-μι present active verbs' },
     wk8f: { summary: '-μι other tenses · middle voice' },
-    all:  { summary: 'Ch. 1–20 + weekly course supplements' }
+    all:  { summary: 'Ch. 1–20 + weekly supplements' }
   };
 
   window.SESSIONS.forEach(session => {

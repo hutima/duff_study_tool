@@ -446,7 +446,7 @@
   .stat-known { color: #7ab88a; }
   .stat-unsure { color: var(--gold); }
   .stat-total { color: var(--muted); }
-  .review-list { max-height: 200px; overflow-y: auto; }
+  .review-list { max-height: 260px; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
   .review-list::-webkit-scrollbar { width: 4px; }
   .review-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
   .review-item {
@@ -927,6 +927,11 @@
 
   .utility-section[open] summary {
     margin-bottom: 10px;
+  }
+
+
+  .utility-section-open {
+    padding-top: 14px;
   }
 
   .study-selector-modal {
