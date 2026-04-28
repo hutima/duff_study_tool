@@ -8,7 +8,7 @@ export function stripInitialNominalArticle(text) {
 }
 
 export function isMorphCard(card) {
-  return !!(card && card.type === 'morphology');
+  return !!(card && card.kind === 'morph');
 }
 
 export function getGreekAlphabetSortKey(card) {

@@ -10,35 +10,36 @@ import { compareGreekAlphabetical } from '../utils/greekSort.js';
 
 // Domain — SRS
 import { SRS_DAY_MS, SRS_AGAIN_MS, SRS_UNCERTAIN_MIN_MS, SRS_NEAR_WINDOW_MS, SRS_CYCLE_ADVANCE_MS } from '../domain/srs/constants.js';
-import { msFromDays, msFromHours, setProgressDelay, getRemainingProgressDelayMs, setMinimumProgressDelay,
+import { msFromDays, setProgressDelay, setMinimumProgressDelay,
          getSrsEase, getSrsStage, getLastEasyIntervalDays, getNextEasyIntervalDays,
          getEasyDelayMs, getUncertainDelayMs, formatRemainingForTable } from '../domain/srs/scheduler.js';
-import { getConfidenceSample, recordConfidenceSample, getConfidencePct, computeCardXpAward } from '../domain/srs/confidence.js';
+import { recordConfidenceSample, getConfidencePct, computeCardXpAward } from '../domain/srs/confidence.js';
 
 // Domain — Gamification
 import { XP_LEVELS, REVIEW_XP_SCHEDULE } from '../domain/gamification/levels.js';
 
 // Domain — Deck
-import { isChapterKey, sortSetKeys, displaySetShortLabel, sourceHint, expandSessionSets } from '../domain/deck/ordering.js';
+import { isChapterKey, sortSetKeys, sourceHint, expandSessionSets } from '../domain/deck/ordering.js';
 import { getSelectedVocabCards, getSelectedGrammarCards, getAllVocabKeys, getAllChapterKeys,
-         getAllVocabCards, getAllGrammarCards, getChapterVocabCards, getChapterGrammarCards,
+         getAllVocabCards, getAllGrammarCards, getChapterVocabCards,
          getCardReviewLeft, getCardReviewRight, getCardMetaLine, getCardAuxLine } from '../domain/deck/filters.js';
 
 // Domain — Grammar
 import { buildGrammarSupportHtml } from '../domain/grammar/explanations.js';
 
 // State
-import { STATE_MIGRATIONS, summarizePersistedState, formatPersistedStateSummary, isLegacyOrphanedMorphId } from '../state/migrations.js';
-import { sanitizeGamificationState } from '../state/store.js';
-
-const STORAGE_KEY = 'greekFlashcardsStateV18';
-const CONSENT_STORAGE_KEY = 'greekFlashcardsConsentV1';
-const THEME_STORAGE_KEY = 'greekFlashcardsThemeMode';
-const PROGRESS_EXPORT_FORMAT = 'greek-flashcards-progress-export';
-const PROGRESS_EXPORT_VERSION = 2;
-const STUDY_IDLE_MS = 90 * 1000;
-const STUDY_SESSION_BREAK_MS = 30 * 60 * 1000;
-const MAX_STUDY_SESSION_HISTORY = 500;
+import { STATE_MIGRATIONS, summarizePersistedState, formatPersistedStateSummary } from '../state/migrations.js';
+import {
+  sanitizeGamificationState,
+  STORAGE_KEY,
+  CONSENT_STORAGE_KEY,
+  THEME_STORAGE_KEY,
+  PROGRESS_EXPORT_FORMAT,
+  PROGRESS_EXPORT_VERSION,
+  STUDY_IDLE_MS,
+  STUDY_SESSION_BREAK_MS,
+  MAX_STUDY_SESSION_HISTORY
+} from '../state/store.js';
 let appUsageStats = {
   totalMs: 0,
   dailyMs: {},
@@ -70,56 +71,6 @@ let toastActive = false;
 let morphSelfCheck = false;
 let morphAnswerState = { answered: false, revealed: false, selfRated: false, selectedIndex: -1, isCorrect: null };
 let morphPendingAdvance = false;
-
-// ═══════════════════════════════════════════════════════
-//  STATE MIGRATIONS
-//  Each entry: { name, match(saved) -> bool, migrate(saved) -> saved }
-//  Applied in order during restoreState. Add new entries when
-//  the persisted shape changes in a breaking way.
-//
-//  Version history:
-//    V10 → V12  Card-ID format change (two migrations below).
-//    V12 → V16  Silent schema additions only (new optional fields
-//               on progress entries: ease, srsStage, lastEasyIntervalDays,
-//               confidence samples, dueAt). All older saves are forward-
-//               compatible with the V16 reader, so no migration entry
-//               was needed.
-//    V16 → V17  Grammar files consolidated from three (grammar.js +
-//               grammar_extra.js + grammar_focus.js) into one
-//               (grammar.js). Item indices within each chapter set
-//               were reorganized, so existing `grammar-…` card IDs
-//               no longer match. Vocabulary IDs are unaffected.
-//               Migration: drop saved deck order (cheap to rebuild)
-//               and clear orphaned grammar progress/marks entries.
-// ═══════════════════════════════════════════════════════
-
-function getCurrentGrammarAndMorphCardIdSet() {
-  const ids = new Set();
-
-  try {
-    if (window.buildGrammarCardsForKeys && window.GRAMMAR_SETS && typeof window.GRAMMAR_SETS === 'object') {
-      const grammarKeys = Object.keys(window.GRAMMAR_SETS);
-      window.buildGrammarCardsForKeys(grammarKeys).forEach(card => {
-        if (card?.id) ids.add(card.id);
-      });
-    }
-  } catch (err) {
-    console.warn('Could not enumerate current grammar card ids for migration safety.', err);
-  }
-
-  try {
-    if (window.buildMorphologyCardsForKeys && window.MORPHOLOGY_SETS && typeof window.MORPHOLOGY_SETS === 'object') {
-      const morphKeys = Object.keys(window.MORPHOLOGY_SETS);
-      window.buildMorphologyCardsForKeys(morphKeys).forEach(card => {
-        if (card?.id) ids.add(card.id);
-      });
-    }
-  } catch (err) {
-    console.warn('Could not enumerate current morphology card ids for migration safety.', err);
-  }
-
-  return ids;
-}
 
 let deckStates = {};
 let globalWordMarks = {};
@@ -193,6 +144,10 @@ function isVocabOnlyProfile() {
 
 function canAccessGrammarUi() {
   return !isVocabOnlyProfile();
+}
+
+function getSessions() {
+  return Array.isArray(window.SESSIONS) ? window.SESSIONS : [];
 }
 
 function getProfileDescription() {
@@ -578,7 +533,7 @@ function advanceScheduledCards(cards = originalDeck, advanceMs = SRS_CYCLE_ADVAN
     const progress = getWordProgress(card.id);
     if (progress.dueAt && progress.dueAt > now) {
       progress.dueAt = Math.max(now, progress.dueAt - advanceMs);
-      progress.intervalDays = Math.max(0, (progress.dueAt - now) / (24 * 60 * 60 * 1000));
+      progress.intervalDays = Math.max(0, (progress.dueAt - now) / SRS_DAY_MS);
     }
   });
 }
@@ -1515,7 +1470,7 @@ function restoreState() {
       return false;
     }
 
-    currentSession = saved.currentSessionId ? window.SESSIONS.find(s => s.id === saved.currentSessionId) || null : null;
+    currentSession = saved.currentSessionId ? getSessions().find(s => s.id === saved.currentSessionId) || null : null;
 
     const selectedCards = getSelectedCards(selectedKeys);
     originalDeck = requiredOnly ? selectedCards.filter(card => card.required) : selectedCards;
@@ -1583,7 +1538,7 @@ function isSessionFullySelected(session, keys = selectedKeys) {
 
 function findExactSessionMatch(keys = selectedKeys) {
   const normalizedKeys = sortSetKeys((keys || []).map(String));
-  return window.SESSIONS.find(session => {
+  return getSessions().find(session => {
     const sessionKeys = expandSessionSets(session);
     return sessionKeys.length === normalizedKeys.length && sessionKeys.every((key, idx) => key === normalizedKeys[idx]);
   }) || null;
@@ -1591,7 +1546,7 @@ function findExactSessionMatch(keys = selectedKeys) {
 
 function setActiveSessionButton() {
   document.querySelectorAll('.session-btn').forEach(btn => {
-    const session = window.SESSIONS.find(s => s.id === btn.dataset.sessionId);
+    const session = getSessions().find(s => s.id === btn.dataset.sessionId);
     btn.classList.toggle('active', !!session && isSessionFullySelected(session));
   });
 }
@@ -1609,7 +1564,7 @@ function setActiveSetButtons() {
 function buildSessions() {
   const grid = document.getElementById('sessionsGrid');
   grid.innerHTML = '';
-  (window.SESSIONS || []).forEach(s => {
+  getSessions().forEach(s => {
     const btn = document.createElement('button');
     btn.className = 'session-btn' + (s.special ? ' special' : '');
     btn.id = 'sess-' + s.id;
@@ -1664,7 +1619,7 @@ function loadDeckFromKeys(keys, sessionId = null) {
 
   selectedKeys = sortSetKeys(keys.map(String));
   currentSession = sessionId
-    ? window.SESSIONS.find(s => s.id === sessionId) || findExactSessionMatch(selectedKeys)
+    ? getSessions().find(s => s.id === sessionId) || findExactSessionMatch(selectedKeys)
     : findExactSessionMatch(selectedKeys);
 
   const selectedCards = getSelectedCards(selectedKeys);
@@ -3763,5 +3718,3 @@ if ('serviceWorker' in navigator) {
       .catch(() => {});
   });
 }
-
-
