@@ -1607,7 +1607,6 @@ function toggleSession(session) {
   }
 
   loadDeckFromKeys(nextKeys, null);
-  closeStudySelector();
 }
 
 function toggleSet(key) {
@@ -1636,7 +1635,6 @@ function toggleSet(key) {
   }
 
   loadDeckFromKeys(selectedKeys, null);
-  closeStudySelector();
 }
 
 // ═══════════════════════════════════════════════════════
