@@ -3,7 +3,7 @@
 // GitHub Pages note: all app-shell URLs are resolved relative to the
 // service worker registration scope so this works both at a domain root
 // and at a project path such as https://user.github.io/repository/.
-const CACHE_NAME = 'greek-flashcards-pwa-v28-github-pages';
+const CACHE_NAME = 'greek-flashcards-pwa-v29-github-pages';
 const BASE_URL = new URL('./', self.registration.scope);
 
 const APP_SHELL_PATHS = [
@@ -31,6 +31,7 @@ const APP_SHELL_PATHS = [
   'js/domain/srs/scheduler.js?v=25',
   'js/domain/srs/confidence.js?v=25',
   'js/domain/gamification/levels.js?v=25',
+  'js/domain/gamification/usageStats.js?v=29',
   'js/domain/deck/ordering.js?v=27',
   'js/domain/deck/filters.js?v=25',
   'js/domain/grammar/explanations.js?v=25',
@@ -45,8 +46,11 @@ const APP_SHELL = APP_SHELL_PATHS.map(path => new URL(path, BASE_URL).toString()
 const INDEX_URL = new URL('index.html', BASE_URL).toString();
 
 self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));
-  self.skipWaiting();
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(APP_SHELL))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', event => {

@@ -4,41 +4,51 @@
 
 // Utils
 import { clamp, isPlainObject, shuffleArray, escapeHtml, cloneForUndo } from '../utils/helpers.js';
-import { formatUsageDuration, formatAnalyticsDate, formatAnalyticsDateTime, getUsageDayKey, addDailyDurationSlice } from '../utils/time.js';
+import { formatUsageDuration, formatAnalyticsDate, formatAnalyticsDateTime, getUsageDayKey } from '../utils/time.js';
 import { getStorage, isLikelyIOS } from '../utils/storage.js';
 import { compareGreekAlphabetical } from '../utils/greekSort.js';
 
 // Domain — SRS
 import { SRS_DAY_MS, SRS_AGAIN_MS, SRS_UNCERTAIN_MIN_MS, SRS_NEAR_WINDOW_MS, SRS_CYCLE_ADVANCE_MS } from '../domain/srs/constants.js';
-import { msFromDays, msFromHours, setProgressDelay, getRemainingProgressDelayMs, setMinimumProgressDelay,
+import { msFromDays, setProgressDelay, setMinimumProgressDelay,
          getSrsEase, getSrsStage, getLastEasyIntervalDays, getNextEasyIntervalDays,
          getEasyDelayMs, getUncertainDelayMs, formatRemainingForTable } from '../domain/srs/scheduler.js';
-import { getConfidenceSample, recordConfidenceSample, getConfidencePct, computeCardXpAward } from '../domain/srs/confidence.js';
+import { recordConfidenceSample, getConfidencePct, computeCardXpAward } from '../domain/srs/confidence.js';
 
 // Domain — Gamification
 import { XP_LEVELS, REVIEW_XP_SCHEDULE } from '../domain/gamification/levels.js';
+import {
+  sanitizeUsageStats,
+  accumulateUsageTime as accumulateUsageTimeForStats,
+  accumulateActiveStudyTime as accumulateActiveStudyTimeForStats,
+  finalizeStudySession as finalizeStudySessionForStats,
+  noteStudyInteraction as noteStudyInteractionForStats,
+  getUsageMsForDay,
+  getActiveStudyMsForDay
+} from '../domain/gamification/usageStats.js';
 
 // Domain — Deck
-import { isChapterKey, sortSetKeys, displaySetShortLabel, sourceHint, expandSessionSets } from '../domain/deck/ordering.js';
+import { isChapterKey, sortSetKeys, sourceHint, expandSessionSets } from '../domain/deck/ordering.js';
 import { getSelectedVocabCards, getSelectedGrammarCards, getAllVocabKeys, getAllChapterKeys,
-         getAllVocabCards, getAllGrammarCards, getChapterVocabCards, getChapterGrammarCards,
+         getAllVocabCards, getAllGrammarCards, getChapterVocabCards,
          getCardReviewLeft, getCardReviewRight, getCardMetaLine, getCardAuxLine } from '../domain/deck/filters.js';
 
 // Domain — Grammar
 import { buildGrammarSupportHtml } from '../domain/grammar/explanations.js';
 
 // State
-import { STATE_MIGRATIONS, summarizePersistedState, formatPersistedStateSummary, isLegacyOrphanedMorphId } from '../state/migrations.js';
-import { sanitizeGamificationState } from '../state/store.js';
-
-const STORAGE_KEY = 'greekFlashcardsStateV18';
-const CONSENT_STORAGE_KEY = 'greekFlashcardsConsentV1';
-const THEME_STORAGE_KEY = 'greekFlashcardsThemeMode';
-const PROGRESS_EXPORT_FORMAT = 'greek-flashcards-progress-export';
-const PROGRESS_EXPORT_VERSION = 2;
-const STUDY_IDLE_MS = 90 * 1000;
-const STUDY_SESSION_BREAK_MS = 30 * 60 * 1000;
-const MAX_STUDY_SESSION_HISTORY = 500;
+import { STATE_MIGRATIONS, summarizePersistedState, formatPersistedStateSummary } from '../state/migrations.js';
+import {
+  sanitizeGamificationState,
+  STORAGE_KEY,
+  CONSENT_STORAGE_KEY,
+  THEME_STORAGE_KEY,
+  PROGRESS_EXPORT_FORMAT,
+  PROGRESS_EXPORT_VERSION,
+  STUDY_IDLE_MS,
+  STUDY_SESSION_BREAK_MS,
+  MAX_STUDY_SESSION_HISTORY
+} from '../state/store.js';
 let appUsageStats = {
   totalMs: 0,
   dailyMs: {},
@@ -70,56 +80,6 @@ let toastActive = false;
 let morphSelfCheck = false;
 let morphAnswerState = { answered: false, revealed: false, selfRated: false, selectedIndex: -1, isCorrect: null };
 let morphPendingAdvance = false;
-
-// ═══════════════════════════════════════════════════════
-//  STATE MIGRATIONS
-//  Each entry: { name, match(saved) -> bool, migrate(saved) -> saved }
-//  Applied in order during restoreState. Add new entries when
-//  the persisted shape changes in a breaking way.
-//
-//  Version history:
-//    V10 → V12  Card-ID format change (two migrations below).
-//    V12 → V16  Silent schema additions only (new optional fields
-//               on progress entries: ease, srsStage, lastEasyIntervalDays,
-//               confidence samples, dueAt). All older saves are forward-
-//               compatible with the V16 reader, so no migration entry
-//               was needed.
-//    V16 → V17  Grammar files consolidated from three (grammar.js +
-//               grammar_extra.js + grammar_focus.js) into one
-//               (grammar.js). Item indices within each chapter set
-//               were reorganized, so existing `grammar-…` card IDs
-//               no longer match. Vocabulary IDs are unaffected.
-//               Migration: drop saved deck order (cheap to rebuild)
-//               and clear orphaned grammar progress/marks entries.
-// ═══════════════════════════════════════════════════════
-
-function getCurrentGrammarAndMorphCardIdSet() {
-  const ids = new Set();
-
-  try {
-    if (window.buildGrammarCardsForKeys && window.GRAMMAR_SETS && typeof window.GRAMMAR_SETS === 'object') {
-      const grammarKeys = Object.keys(window.GRAMMAR_SETS);
-      window.buildGrammarCardsForKeys(grammarKeys).forEach(card => {
-        if (card?.id) ids.add(card.id);
-      });
-    }
-  } catch (err) {
-    console.warn('Could not enumerate current grammar card ids for migration safety.', err);
-  }
-
-  try {
-    if (window.buildMorphologyCardsForKeys && window.MORPHOLOGY_SETS && typeof window.MORPHOLOGY_SETS === 'object') {
-      const morphKeys = Object.keys(window.MORPHOLOGY_SETS);
-      window.buildMorphologyCardsForKeys(morphKeys).forEach(card => {
-        if (card?.id) ids.add(card.id);
-      });
-    }
-  } catch (err) {
-    console.warn('Could not enumerate current morphology card ids for migration safety.', err);
-  }
-
-  return ids;
-}
 
 let deckStates = {};
 let globalWordMarks = {};
@@ -193,6 +153,10 @@ function isVocabOnlyProfile() {
 
 function canAccessGrammarUi() {
   return !isVocabOnlyProfile();
+}
+
+function getSessions() {
+  return Array.isArray(window.SESSIONS) ? window.SESSIONS : [];
 }
 
 function getProfileDescription() {
@@ -342,130 +306,46 @@ function syncLayoutVisibility() {
 }
 
 function ensureUsageStats(stats = appUsageStats) {
-  const safe = stats && typeof stats === 'object' ? stats : {};
-  safe.totalMs = Number.isFinite(safe.totalMs) ? Math.max(0, safe.totalMs) : 0;
-  safe.dailyMs = safe.dailyMs && typeof safe.dailyMs === 'object' ? safe.dailyMs : {};
-  safe.activeStudyMs = Number.isFinite(safe.activeStudyMs) ? Math.max(0, safe.activeStudyMs) : 0;
-  safe.activeDailyMs = safe.activeDailyMs && typeof safe.activeDailyMs === 'object' ? safe.activeDailyMs : {};
-  safe.lastActiveAt = Number.isFinite(safe.lastActiveAt) ? safe.lastActiveAt : 0;
-  safe.lastStudyInteractionAt = Number.isFinite(safe.lastStudyInteractionAt) ? safe.lastStudyInteractionAt : 0;
-  safe.lastStudyCountedAt = Number.isFinite(safe.lastStudyCountedAt) ? safe.lastStudyCountedAt : 0;
-  safe.firstStudyAt = Number.isFinite(safe.firstStudyAt) ? safe.firstStudyAt : 0;
-  safe.studySessionHistory = Array.isArray(safe.studySessionHistory)
-    ? safe.studySessionHistory
-        .filter(entry => entry && typeof entry === 'object')
-        .map(entry => ({
-          startedAt: Number.isFinite(entry.startedAt) ? Math.max(0, entry.startedAt) : 0,
-          endedAt: Number.isFinite(entry.endedAt) ? Math.max(0, entry.endedAt) : 0,
-          durationMs: Number.isFinite(entry.durationMs) ? Math.max(0, entry.durationMs) : 0,
-          interactionCount: Number.isFinite(entry.interactionCount) ? Math.max(0, entry.interactionCount) : 0
-        }))
-        .filter(entry => entry.startedAt && entry.endedAt && entry.durationMs > 0)
-        .slice(-MAX_STUDY_SESSION_HISTORY)
-    : [];
-  safe.currentStudySession = safe.currentStudySession && typeof safe.currentStudySession === 'object'
-    ? {
-        startedAt: Number.isFinite(safe.currentStudySession.startedAt) ? Math.max(0, safe.currentStudySession.startedAt) : 0,
-        durationMs: Number.isFinite(safe.currentStudySession.durationMs) ? Math.max(0, safe.currentStudySession.durationMs) : 0,
-        interactionCount: Number.isFinite(safe.currentStudySession.interactionCount) ? Math.max(0, safe.currentStudySession.interactionCount) : 0
-      }
-    : null;
-  if (safe.currentStudySession && !safe.currentStudySession.startedAt) safe.currentStudySession = null;
-  safe.cardXpEarned = Number.isFinite(safe.cardXpEarned) ? Math.max(0, safe.cardXpEarned) : -1;
+  const safe = sanitizeUsageStats(stats, MAX_STUDY_SESSION_HISTORY);
   if (stats !== safe) appUsageStats = safe;
   return safe;
 }
 
-function addUsageSlice(startTs, durationMs) {
-  if (!durationMs || durationMs <= 0) return;
-  const usage = ensureUsageStats();
-  addDailyDurationSlice(usage.dailyMs, startTs, durationMs);
-  usage.totalMs += durationMs;
-}
-
-function addActiveStudySlice(startTs, durationMs) {
-  if (!durationMs || durationMs <= 0) return;
-  const usage = ensureUsageStats();
-  addDailyDurationSlice(usage.activeDailyMs, startTs, durationMs);
-  usage.activeStudyMs += durationMs;
-  if (usage.currentStudySession) {
-    usage.currentStudySession.durationMs = (usage.currentStudySession.durationMs || 0) + durationMs;
-  }
-}
-
 function accumulateUsageTime(now = Date.now()) {
   const usage = ensureUsageStats();
-  if (!usage.lastActiveAt) {
-    usage.lastActiveAt = now;
-    return 0;
-  }
-  const rawDelta = now - usage.lastActiveAt;
-  const delta = clamp(rawDelta, 0, 10 * 60 * 1000);
-  if (delta > 0) addUsageSlice(usage.lastActiveAt, delta);
-  usage.lastActiveAt = now;
-  return delta;
+  return accumulateUsageTimeForStats(usage, now);
 }
 
 function accumulateActiveStudyTime(now = Date.now()) {
   const usage = ensureUsageStats();
-  if (!usage.lastStudyInteractionAt || !usage.lastStudyCountedAt) return 0;
-  const eligibleEnd = Math.min(now, usage.lastStudyInteractionAt + STUDY_IDLE_MS);
-  const delta = clamp(eligibleEnd - usage.lastStudyCountedAt, 0, STUDY_IDLE_MS);
-  if (delta > 0) {
-    addActiveStudySlice(usage.lastStudyCountedAt, delta);
-    usage.lastStudyCountedAt = eligibleEnd;
-  }
-  return delta;
+  return accumulateActiveStudyTimeForStats(usage, STUDY_IDLE_MS, now);
 }
 
 function finalizeStudySession(now = Date.now()) {
   const usage = ensureUsageStats();
-  accumulateActiveStudyTime(now);
-  if (usage.currentStudySession && usage.currentStudySession.startedAt && usage.currentStudySession.durationMs > 0) {
-    usage.studySessionHistory.push({
-      startedAt: usage.currentStudySession.startedAt,
-      endedAt: usage.lastStudyCountedAt || now,
-      durationMs: usage.currentStudySession.durationMs,
-      interactionCount: usage.currentStudySession.interactionCount || 0
-    });
-    usage.studySessionHistory = usage.studySessionHistory.slice(-MAX_STUDY_SESSION_HISTORY);
-  }
-  usage.currentStudySession = null;
-  usage.lastStudyInteractionAt = 0;
-  usage.lastStudyCountedAt = 0;
+  finalizeStudySessionForStats(usage, STUDY_IDLE_MS, MAX_STUDY_SESSION_HISTORY, now);
 }
 
 function noteStudyInteraction(now = Date.now()) {
-  if (document.hidden || !selectedKeys.length) return;
   const usage = ensureUsageStats();
-  if (!usage.firstStudyAt) usage.firstStudyAt = now;
-
-  if (usage.lastStudyInteractionAt && now - usage.lastStudyInteractionAt > STUDY_SESSION_BREAK_MS) {
-    finalizeStudySession(now);
-  }
-
-  if (!usage.currentStudySession) {
-    usage.currentStudySession = {
-      startedAt: now,
-      durationMs: 0,
-      interactionCount: 0
-    };
-  }
-
-  accumulateActiveStudyTime(now);
-  usage.lastStudyInteractionAt = now;
-  if (!usage.lastStudyCountedAt) usage.lastStudyCountedAt = now;
-  usage.currentStudySession.interactionCount = (usage.currentStudySession.interactionCount || 0) + 1;
+  noteStudyInteractionForStats(usage, {
+    now,
+    documentHidden: document.hidden,
+    hasSelectedCards: selectedKeys.length > 0,
+    studyIdleMs: STUDY_IDLE_MS,
+    studySessionBreakMs: STUDY_SESSION_BREAK_MS,
+    maxStudySessionHistory: MAX_STUDY_SESSION_HISTORY
+  });
 }
 
 function getTodayUsageMs() {
   const usage = ensureUsageStats();
-  return usage.dailyMs[getUsageDayKey()] || 0;
+  return getUsageMsForDay(usage, getUsageDayKey());
 }
 
 function getTodayActiveStudyMs() {
   const usage = ensureUsageStats();
-  return usage.activeDailyMs[getUsageDayKey()] || 0;
+  return getActiveStudyMsForDay(usage, getUsageDayKey());
 }
 
 function updateUsageMeta() {
@@ -578,7 +458,7 @@ function advanceScheduledCards(cards = originalDeck, advanceMs = SRS_CYCLE_ADVAN
     const progress = getWordProgress(card.id);
     if (progress.dueAt && progress.dueAt > now) {
       progress.dueAt = Math.max(now, progress.dueAt - advanceMs);
-      progress.intervalDays = Math.max(0, (progress.dueAt - now) / (24 * 60 * 60 * 1000));
+      progress.intervalDays = Math.max(0, (progress.dueAt - now) / SRS_DAY_MS);
     }
   });
 }
@@ -1515,7 +1395,7 @@ function restoreState() {
       return false;
     }
 
-    currentSession = saved.currentSessionId ? window.SESSIONS.find(s => s.id === saved.currentSessionId) || null : null;
+    currentSession = saved.currentSessionId ? getSessions().find(s => s.id === saved.currentSessionId) || null : null;
 
     const selectedCards = getSelectedCards(selectedKeys);
     originalDeck = requiredOnly ? selectedCards.filter(card => card.required) : selectedCards;
@@ -1583,7 +1463,7 @@ function isSessionFullySelected(session, keys = selectedKeys) {
 
 function findExactSessionMatch(keys = selectedKeys) {
   const normalizedKeys = sortSetKeys((keys || []).map(String));
-  return window.SESSIONS.find(session => {
+  return getSessions().find(session => {
     const sessionKeys = expandSessionSets(session);
     return sessionKeys.length === normalizedKeys.length && sessionKeys.every((key, idx) => key === normalizedKeys[idx]);
   }) || null;
@@ -1591,7 +1471,7 @@ function findExactSessionMatch(keys = selectedKeys) {
 
 function setActiveSessionButton() {
   document.querySelectorAll('.session-btn').forEach(btn => {
-    const session = window.SESSIONS.find(s => s.id === btn.dataset.sessionId);
+    const session = getSessions().find(s => s.id === btn.dataset.sessionId);
     btn.classList.toggle('active', !!session && isSessionFullySelected(session));
   });
 }
@@ -1609,7 +1489,7 @@ function setActiveSetButtons() {
 function buildSessions() {
   const grid = document.getElementById('sessionsGrid');
   grid.innerHTML = '';
-  (window.SESSIONS || []).forEach(s => {
+  getSessions().forEach(s => {
     const btn = document.createElement('button');
     btn.className = 'session-btn' + (s.special ? ' special' : '');
     btn.id = 'sess-' + s.id;
@@ -1664,7 +1544,7 @@ function loadDeckFromKeys(keys, sessionId = null) {
 
   selectedKeys = sortSetKeys(keys.map(String));
   currentSession = sessionId
-    ? window.SESSIONS.find(s => s.id === sessionId) || findExactSessionMatch(selectedKeys)
+    ? getSessions().find(s => s.id === sessionId) || findExactSessionMatch(selectedKeys)
     : findExactSessionMatch(selectedKeys);
 
   const selectedCards = getSelectedCards(selectedKeys);
@@ -3763,5 +3643,3 @@ if ('serviceWorker' in navigator) {
       .catch(() => {});
   });
 }
-
-
