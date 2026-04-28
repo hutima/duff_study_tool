@@ -61,7 +61,7 @@ let appUsageStats = {
   studySessionHistory: [],
   currentStudySession: null
 };
-let appProfile = 'vocab_only';
+let appProfile = 'vocab_grammar';
 let appGamification = { lastCelebratedLevel: null, lastCelebratedBadgeDay: null, lastEarnedAchievementIds: [] };
 let hasAcceptedDisclaimer = false;
 let disclaimerModalRequiresAgreement = false;
@@ -148,7 +148,7 @@ function isMorphologyMode() {
 }
 
 function isVocabOnlyProfile() {
-  return appProfile === 'vocab_only';
+  return false;
 }
 
 function canAccessGrammarUi() {
@@ -160,9 +160,7 @@ function getSessions() {
 }
 
 function getProfileDescription() {
-  return isVocabOnlyProfile()
-    ? 'Simplified vocabulary layout. Shared time tracking still runs across the whole app.'
-    : 'Full layout with vocabulary and grammar. Time totals stay shared, while progress remains separate by module.';
+  return 'Full layout with vocabulary and grammar. Time totals stay shared, while progress remains separate by module.';
 }
 
 function isMorphCard(card) {
@@ -175,7 +173,6 @@ function resetMorphAnswerState() {
 }
 
 function getModeDescription() {
-  if (isVocabOnlyProfile()) return 'Vocabulary Flashcards';
   return isMorphologyMode() ? 'Grammar Quiz' : 'Vocabulary Flashcards';
 }
 
@@ -241,9 +238,6 @@ function syncToggleButtons() {
   const modeMorphBtn    = document.getElementById('modeMorphBtn');
   const modeShortcutVocabBtn = document.getElementById('modeShortcutVocabBtn');
   const modeShortcutMorphBtn = document.getElementById('modeShortcutMorphBtn');
-  const profileVocabOnlyBtn = document.getElementById('profileVocabOnlyBtn');
-  const profileVocabGrammarBtn = document.getElementById('profileVocabGrammarBtn');
-  const profileNote = document.getElementById('profileNote');
   const resetDeckBtn = document.getElementById('resetDeckBtn');
 
   if (shuffleSwitch)   shuffleSwitch.classList.toggle('on',   !!shuffled);
@@ -260,9 +254,6 @@ function syncToggleButtons() {
   if (modeMorphBtn)    modeMorphBtn.classList.toggle('active', studyMode === 'morph');
   if (modeShortcutVocabBtn) modeShortcutVocabBtn.classList.toggle('active', studyMode === 'vocab');
   if (modeShortcutMorphBtn) modeShortcutMorphBtn.classList.toggle('active', studyMode === 'morph');
-  if (profileVocabOnlyBtn) profileVocabOnlyBtn.classList.toggle('active', isVocabOnlyProfile());
-  if (profileVocabGrammarBtn) profileVocabGrammarBtn.classList.toggle('active', !isVocabOnlyProfile());
-  if (profileNote) profileNote.textContent = getProfileDescription();
   syncThemeButtons();
   if (resetDeckBtn) {
     resetDeckBtn.textContent = spacedRepetition ? 'Reset spaced' : 'Reset unspaced';
@@ -885,9 +876,7 @@ function sanitizeImportedState(candidate) {
   state.globalWordMarks = isPlainObject(candidate.globalWordMarks) ? candidate.globalWordMarks : {};
   state.globalWordProgress = isPlainObject(candidate.globalWordProgress) ? candidate.globalWordProgress : {};
   state.studyMode = candidate.studyMode === 'morph' ? 'morph' : 'vocab';
-  state.appProfile = candidate.appProfile === 'vocab_only' || candidate.appProfile === 'vocab_grammar'
-    ? candidate.appProfile
-    : 'vocab_only';
+  state.appProfile = 'vocab_grammar';
   state.gamification = sanitizeGamificationState(candidate.gamification);
   state.shuffled = candidate.shuffled !== false;
   state.requiredOnly = !!candidate.requiredOnly;
@@ -1368,12 +1357,10 @@ function restoreState() {
     requiredOnly = !!saved.requiredOnly;
     directionToGreek = !!saved.directionToGreek;
     spacedRepetition = saved.spacedRepetition !== false;
-    appProfile = saved.appProfile === 'vocab_only' || saved.appProfile === 'vocab_grammar'
-      ? saved.appProfile
-      : 'vocab_only';
+    appProfile = 'vocab_grammar';
     const hadSavedAchievementSnapshot = Array.isArray(saved?.gamification?.lastEarnedAchievementIds);
     appGamification = sanitizeGamificationState(saved.gamification);
-    studyMode = saved.studyMode === 'morph' && appProfile === 'vocab_grammar' ? 'morph' : 'vocab';
+    studyMode = saved.studyMode === 'morph' ? 'morph' : 'vocab';
     morphSelfCheck = !!saved.morphSelfCheck;
     shuffled = saved.shuffled !== false;
     deckStates = saved.deckStates && typeof saved.deckStates === 'object' ? saved.deckStates : {};
@@ -2009,17 +1996,12 @@ function setStudyMode(mode) {
 }
 
 function setAppProfile(profile) {
-  const nextProfile = profile === 'vocab_grammar' ? 'vocab_grammar' : 'vocab_only';
+  const nextProfile = 'vocab_grammar';
   if (appProfile === nextProfile) return;
 
   saveCurrentDeckStateToBank();
   appProfile = nextProfile;
   clearSpacedUndoSnapshot();
-
-  if (!canAccessGrammarUi() && studyMode === 'morph') {
-    studyMode = 'vocab';
-    resetMorphAnswerState();
-  }
 
   ensureDirectionalStores();
   marks = getDirectionalMarksStore();
@@ -3700,7 +3682,7 @@ function preventDoubleTapZoom(el) {
   }, false);
 }
 
-['shuffleToggle','requiredToggle','directionToggle','spacedToggle','selfCheckToggle','modeVocabBtn','modeMorphBtn','modeShortcutVocabBtn','modeShortcutMorphBtn','themeSystemBtn','themeDarkBtn','themeLightBtn','profileVocabOnlyBtn','profileVocabGrammarBtn'].forEach(id => {
+['shuffleToggle','requiredToggle','directionToggle','spacedToggle','selfCheckToggle','modeVocabBtn','modeMorphBtn','modeShortcutVocabBtn','modeShortcutMorphBtn','themeSystemBtn','themeDarkBtn','themeLightBtn'].forEach(id => {
   const el = document.getElementById(id);
   if (el) preventDoubleTapZoom(el);
 });

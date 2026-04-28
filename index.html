@@ -55,30 +55,18 @@
     <button class="quick-btn" type="button" onclick="openShortcutsModal()">Keyboard shortcuts</button>
   </div>
 
-  <div class="selector-summary" id="selectorSummary">
-    Session selector opens as a frame when you tap the card or “Choose session”.
-  </div>
-
   <details class="utility-section">
     <summary>Options</summary>
     <div class="profile-controls">
-      <div class="mode-group app-profile-group" role="group" aria-label="App view">
-        <button class="mode-btn active" id="profileVocabOnlyBtn" type="button" onclick="setAppProfile('vocab_only')">Vocab only</button>
-        <button class="mode-btn" id="profileVocabGrammarBtn" type="button" onclick="setAppProfile('vocab_grammar')">Vocab + Grammar</button>
-      </div>
       <button class="ctrl-btn notice-btn" type="button" onclick="showDisclaimerModal()">Study aid notice</button>
     </div>
-    <div class="profile-note" id="profileNote">Simplified vocabulary layout. Shared time tracking still runs across the whole app.</div>
     <div class="app-notice" id="appNotice">Unofficial student-made AI study aid. Verify against course content and official materials.</div>
   </details>
 
   <details class="utility-section">
     <summary>Progress tools</summary>
-    <div class="profile-controls">
-      <button class="ctrl-btn" type="button" onclick="exportProgressJson()">Export progress</button>
-      <button class="ctrl-btn" type="button" onclick="triggerImportProgress()">Import progress</button>
-      <button class="ctrl-btn" type="button" onclick="openAnalyticsOverlay()">Analytics</button>
-    </div>
+    <button class="ctrl-btn" type="button" onclick="exportProgressJson()">Export progress</button>
+    <button class="ctrl-btn" type="button" onclick="triggerImportProgress()">Import progress</button>
   </details>
 
   <div class="ornament">✦ · · · ✦</div>
