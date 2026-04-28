@@ -18,8 +18,8 @@
 (function(){
   try {
     var mode = localStorage.getItem("greekFlashcardsThemeMode") || "system";
-    var prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
-    var resolved = mode === "system" ? (prefersLight ? "light" : "dark") : mode;
+    var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    var resolved = mode === "system" ? (prefersDark ? "dark" : "light") : mode;
     document.documentElement.setAttribute("data-theme", resolved);
   } catch (err) {
     document.documentElement.setAttribute("data-theme", "dark");
@@ -34,6 +34,7 @@
     <div class="header-top">
       <div></div>
       <div class="theme-switcher" role="group" aria-label="Color theme">
+        <button class="theme-btn" id="themeSystemBtn" type="button" onclick="setThemeMode('system')">System</button>
         <button class="theme-btn" id="themeDarkBtn" type="button" onclick="setThemeMode('dark')">Dark</button>
         <button class="theme-btn" id="themeLightBtn" type="button" onclick="setThemeMode('light')">Light</button>
       </div>
