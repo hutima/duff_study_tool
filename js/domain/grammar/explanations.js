@@ -4,7 +4,7 @@ import { CONCEPT_EXAMPLES } from '../../data/concept_examples.js';
 import { GRAMMAR_EXAMPLE_MAP } from '../../data/grammar_examples.js';
 
 export function isMorphCard(card) {
-  return !!(card && card.type === 'morphology');
+  return !!(card && card.kind === 'morph');
 }
 
 export function normalizeParsingLabel(text) {

@@ -45,8 +45,11 @@ const APP_SHELL = APP_SHELL_PATHS.map(path => new URL(path, BASE_URL).toString()
 const INDEX_URL = new URL('index.html', BASE_URL).toString();
 
 self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));
-  self.skipWaiting();
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(APP_SHELL))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', event => {
