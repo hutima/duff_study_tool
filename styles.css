@@ -878,7 +878,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
     align-items: center;
   }
 
@@ -906,7 +906,7 @@
     grid-template-columns: auto minmax(0, 1fr);
     gap: 12px;
     align-items: start;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
   }
 
   .selector-summary {
@@ -921,10 +921,6 @@
     border-radius: 10px;
     margin-bottom: 12px;
     padding: 10px 12px;
-  }
-
-  .notice-row + .utility-section {
-    margin-top: 8px;
   }
 
   .utility-section summary {

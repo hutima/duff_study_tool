@@ -178,7 +178,8 @@ function getModeDescription() {
 
 function resolveThemeMode(mode = themeMode) {
   if (mode === 'light' || mode === 'dark') return mode;
-  return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  return prefersDark ? 'dark' : 'light';
 }
 
 function applyThemeMode(mode = themeMode, persist = true) {
@@ -214,7 +215,7 @@ function initializeThemeMode() {
   applyThemeMode(themeMode, false);
 
   if (window.matchMedia) {
-    const media = window.matchMedia('(prefers-color-scheme: light)');
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = () => {
       if (themeMode === 'system') applyThemeMode('system', false);
     };
@@ -3155,7 +3156,6 @@ function computeTodayStats(activeDailyMs, cards, marksStore, progressStore) {
   const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
   const todayTs = todayStart.getTime();
 
-  const seenIds = new Set();
   const sourceEntries = progressStore && typeof progressStore === 'object'
     ? Object.entries(progressStore)
     : [];
@@ -3165,11 +3165,9 @@ function computeTodayStats(activeDailyMs, cards, marksStore, progressStore) {
       if (!p) return;
       if (p.lastReviewedAt && p.lastReviewedAt >= todayTs) {
         reviewedToday++;
-        seenIds.add(cardId);
       }
       if (p.firstConfirmedAt && p.firstConfirmedAt >= todayTs) {
         newToday++;
-        seenIds.add(cardId);
       }
     });
   } else {
@@ -3181,7 +3179,7 @@ function computeTodayStats(activeDailyMs, cards, marksStore, progressStore) {
     });
   }
 
-  const firstCardTodayEarned = reviewedToday > 0 || newToday > 0 || todayMs > 0 || seenIds.size > 0;
+  const firstCardTodayEarned = reviewedToday > 0 || newToday > 0;
   return { todayMs, reviewedToday, newToday, firstCardTodayEarned };
 }
 
