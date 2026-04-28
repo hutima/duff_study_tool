@@ -901,6 +901,14 @@
     background: rgba(201,168,76,0.08);
   }
 
+  .notice-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 10px;
+    align-items: start;
+    margin-bottom: 12px;
+  }
+
   .selector-summary {
     color: var(--muted);
     font-size: 14px;
@@ -930,8 +938,8 @@
   }
 
 
-  .utility-section-open {
-    padding-top: 14px;
+  .review-shell {
+    margin-bottom: 12px;
   }
 
   .study-selector-modal {
@@ -970,6 +978,13 @@
   .notice-btn {
     border-color: var(--gold-dim);
     color: var(--gold-light);
+    white-space: nowrap;
+  }
+
+  @media (max-width: 760px) {
+    .notice-row {
+      grid-template-columns: 1fr;
+    }
   }
 
   .consent-overlay {

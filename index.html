@@ -55,13 +55,10 @@
     <button class="quick-btn" type="button" onclick="openShortcutsModal()">Keyboard shortcuts</button>
   </div>
 
-  <details class="utility-section">
-    <summary>Options</summary>
-    <div class="profile-controls">
-      <button class="ctrl-btn notice-btn" type="button" onclick="showDisclaimerModal()">Study aid notice</button>
-    </div>
+  <div class="notice-row">
+    <button class="ctrl-btn notice-btn" type="button" onclick="showDisclaimerModal()">Study aid notice</button>
     <div class="app-notice" id="appNotice">Unofficial student-made AI study aid. Verify against course content and official materials.</div>
-  </details>
+  </div>
 
   <details class="utility-section">
     <summary>Progress tools</summary>
@@ -129,7 +126,7 @@
     <button class="mark-btn mark-easy"  onclick="markCard('easy')">✓ Easy</button>
   </div>
 
-  <section class="utility-section utility-section-open">
+  <section class="review-shell">
     <div class="review-panel show" id="reviewPanel">
     <div class="review-title">Progress</div>
     <div class="review-stats" id="reviewStats"></div>
