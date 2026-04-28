@@ -239,6 +239,8 @@ function syncToggleButtons() {
   const selfCheckToggle = document.getElementById('selfCheckToggle');
   const modeVocabBtn    = document.getElementById('modeVocabBtn');
   const modeMorphBtn    = document.getElementById('modeMorphBtn');
+  const modeShortcutVocabBtn = document.getElementById('modeShortcutVocabBtn');
+  const modeShortcutMorphBtn = document.getElementById('modeShortcutMorphBtn');
   const profileVocabOnlyBtn = document.getElementById('profileVocabOnlyBtn');
   const profileVocabGrammarBtn = document.getElementById('profileVocabGrammarBtn');
   const profileNote = document.getElementById('profileNote');
@@ -256,6 +258,8 @@ function syncToggleButtons() {
   if (selfCheckToggle) selfCheckToggle.setAttribute('aria-checked', (morphSelfCheck && isMorphologyMode()) ? 'true' : 'false');
   if (modeVocabBtn)    modeVocabBtn.classList.toggle('active', studyMode === 'vocab');
   if (modeMorphBtn)    modeMorphBtn.classList.toggle('active', studyMode === 'morph');
+  if (modeShortcutVocabBtn) modeShortcutVocabBtn.classList.toggle('active', studyMode === 'vocab');
+  if (modeShortcutMorphBtn) modeShortcutMorphBtn.classList.toggle('active', studyMode === 'morph');
   if (profileVocabOnlyBtn) profileVocabOnlyBtn.classList.toggle('active', isVocabOnlyProfile());
   if (profileVocabGrammarBtn) profileVocabGrammarBtn.classList.toggle('active', !isVocabOnlyProfile());
   if (profileNote) profileNote.textContent = getProfileDescription();
@@ -1606,7 +1610,7 @@ function toggleSession(session) {
     originalDeck = [];
     marks = getDirectionalMarksStore();
     currentIdx = 0;
-    document.getElementById('cardArea').innerHTML = '<div class="empty-state"><div class="big">αβγ</div>Select a study session above to begin.</div>';
+    document.getElementById('cardArea').innerHTML = '<div class="empty-state"><div class="big">αβγ</div>Tap to choose a session and start studying.</div>';
     clearSpacedUndoSnapshot();
     syncToggleButtons();
     renderReview();
@@ -1615,6 +1619,7 @@ function toggleSession(session) {
   }
 
   loadDeckFromKeys(nextKeys, null);
+  closeStudySelector();
 }
 
 function toggleSet(key) {
@@ -1634,7 +1639,7 @@ function toggleSet(key) {
     originalDeck = [];
     marks = {};
     currentIdx = 0;
-    document.getElementById('cardArea').innerHTML = '<div class="empty-state"><div class="big">αβγ</div>Select a study session above to begin.</div>';
+    document.getElementById('cardArea').innerHTML = '<div class="empty-state"><div class="big">αβγ</div>Tap to choose a session and start studying.</div>';
     clearSpacedUndoSnapshot();
     syncToggleButtons();
     renderReview();
@@ -1643,6 +1648,7 @@ function toggleSet(key) {
   }
 
   loadDeckFromKeys(selectedKeys, null);
+  closeStudySelector();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -2424,6 +2430,7 @@ function handleConsentAction() {
   const storage = getStorage();
   if (storage) storage.setItem(CONSENT_STORAGE_KEY, 'accepted');
   closeDisclaimerModal();
+  openStudySelector();
 }
 
 function initializeConsentGate() {
@@ -2452,6 +2459,14 @@ function isTransferModalOpen() {
   return !!document.getElementById('transferOverlay')?.classList.contains('show');
 }
 
+function isStudySelectorOpen() {
+  return !!document.getElementById('studySelectorOverlay')?.classList.contains('show');
+}
+
+function isShortcutsModalOpen() {
+  return !!document.getElementById('shortcutsOverlay')?.classList.contains('show');
+}
+
 // ═══════════════════════════════════════════════════════
 //  KEYBOARD + INIT
 // ═══════════════════════════════════════════════════════
@@ -2474,7 +2489,48 @@ function closeAnalyticsOverlay() {
   if (!overlay) return;
   overlay.classList.remove('show');
   overlay.setAttribute('aria-hidden', 'true');
-  if (!isDisclaimerModalOpen() && !isTransferModalOpen()) document.body.classList.remove('modal-open');
+  if (!isDisclaimerModalOpen() && !isTransferModalOpen() && !isStudySelectorOpen() && !isShortcutsModalOpen()) document.body.classList.remove('modal-open');
+}
+
+function openStudySelector() {
+  const overlay = document.getElementById('studySelectorOverlay');
+  if (!overlay) return;
+  overlay.classList.add('show');
+  overlay.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('modal-open');
+}
+
+function closeStudySelector() {
+  const overlay = document.getElementById('studySelectorOverlay');
+  if (!overlay) return;
+  overlay.classList.remove('show');
+  overlay.setAttribute('aria-hidden', 'true');
+  if (!isDisclaimerModalOpen() && !isTransferModalOpen() && !isAnalyticsModalOpen() && !isShortcutsModalOpen()) document.body.classList.remove('modal-open');
+}
+
+function openShortcutsModal() {
+  const overlay = document.getElementById('shortcutsOverlay');
+  if (!overlay) return;
+  overlay.classList.add('show');
+  overlay.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('modal-open');
+}
+
+function closeShortcutsModal() {
+  const overlay = document.getElementById('shortcutsOverlay');
+  if (!overlay) return;
+  overlay.classList.remove('show');
+  overlay.setAttribute('aria-hidden', 'true');
+  if (!isDisclaimerModalOpen() && !isTransferModalOpen() && !isAnalyticsModalOpen() && !isStudySelectorOpen()) document.body.classList.remove('modal-open');
+}
+
+function startStudying() {
+  if (!selectedKeys.length) {
+    openStudySelector();
+    return;
+  }
+  const cardArea = document.getElementById('cardArea');
+  if (cardArea) cardArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 
@@ -3563,7 +3619,9 @@ function renderAnalyticsOverlay() {
 
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && isAnalyticsModalOpen()) { closeAnalyticsOverlay(); return; }
-  if (isDisclaimerModalOpen() || isTransferModalOpen() || isAnalyticsModalOpen()) return;
+  if (e.key === 'Escape' && isStudySelectorOpen()) { closeStudySelector(); return; }
+  if (e.key === 'Escape' && isShortcutsModalOpen()) { closeShortcutsModal(); return; }
+  if (isDisclaimerModalOpen() || isTransferModalOpen() || isAnalyticsModalOpen() || isStudySelectorOpen() || isShortcutsModalOpen()) return;
   if (!selectedKeys.length) return;
 
   if (isMorphologyMode()) {
@@ -3595,10 +3653,12 @@ const GLOBAL_CLICK_HANDLERS = {
   flipCard, navigate, markCard, answerMorphologyChoice,
   revealMorphologyAnswer, rateMorphologySelfCheck, returnSeenCardToDeck,
   closeAnalyticsOverlay, closeTransferModal, exportProgressJson,
+  closeShortcutsModal, closeStudySelector,
   handleConsentAction, handleTransferPrimaryAction, handleTransferSecondaryAction,
+  openShortcutsModal, openStudySelector,
   openAnalyticsOverlay, resetAllStats, resetCurrentDeck, reshuffleEligible,
   restoreSpacedUndo, setAppProfile, setStudyMode, setThemeMode,
-  showDisclaimerModal, toggleDirection, toggleMorphSelfCheck,
+  showDisclaimerModal, startStudying, toggleDirection, toggleMorphSelfCheck,
   toggleRequiredOnly, toggleShuffle, toggleSpacedRepetition, triggerImportProgress
 };
 if (typeof globalThis !== 'undefined') Object.assign(globalThis, GLOBAL_CLICK_HANDLERS);
@@ -3616,6 +3676,15 @@ buildSessions();
 buildChapterSelector();
 initializeConsentGate();
 
+const cardArea = document.getElementById('cardArea');
+if (cardArea) {
+  cardArea.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!target || !(target instanceof Element)) return;
+    if (target.closest('.empty-state')) openStudySelector();
+  });
+}
+
 startUsageTracking();
 syncLayoutVisibility();
 renderProgress();
@@ -3631,7 +3700,7 @@ function preventDoubleTapZoom(el) {
   }, false);
 }
 
-['shuffleToggle','requiredToggle','directionToggle','spacedToggle','selfCheckToggle','modeVocabBtn','modeMorphBtn','themeSystemBtn','themeDarkBtn','themeLightBtn','profileVocabOnlyBtn','profileVocabGrammarBtn'].forEach(id => {
+['shuffleToggle','requiredToggle','directionToggle','spacedToggle','selfCheckToggle','modeVocabBtn','modeMorphBtn','modeShortcutVocabBtn','modeShortcutMorphBtn','themeSystemBtn','themeDarkBtn','themeLightBtn','profileVocabOnlyBtn','profileVocabGrammarBtn'].forEach(id => {
   const el = document.getElementById(id);
   if (el) preventDoubleTapZoom(el);
 });
