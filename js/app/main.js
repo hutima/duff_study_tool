@@ -2533,6 +2533,7 @@ function installTouchSafeTapBridge() {
   let syntheticTapDispatchDepth = 0;
   let activeTouchGesture = null;
   let activePointerGesture = null;
+  let pointerTapHandledAt = 0;
 
   function getTapTarget(startEl) {
     if (!startEl || !startEl.closest) return null;
@@ -2645,6 +2646,7 @@ function installTouchSafeTapBridge() {
 
   function onTouchLikeStart(event) {
     if (shouldIgnoreTouchEvent(event)) return;
+    if (event.type.startsWith('touch') && pointerTapHandledAt && (Date.now() - pointerTapHandledAt) < 900) return;
     if (event.defaultPrevented) return;
     if (event.touches && event.touches.length > 1) {
       activeTouchGesture = null;
@@ -2659,12 +2661,14 @@ function installTouchSafeTapBridge() {
 
   function onTouchLikeMove(event) {
     if (shouldIgnoreTouchEvent(event)) return;
+    if (event.type.startsWith('touch') && pointerTapHandledAt && (Date.now() - pointerTapHandledAt) < 900) return;
     if (event.type === 'pointermove') updateGesture(activePointerGesture, event);
     else updateGesture(activeTouchGesture, event);
   }
 
   function onTouchLikeTap(event) {
     if (shouldIgnoreTouchEvent(event)) return;
+    if (event.type.startsWith('touch') && pointerTapHandledAt && (Date.now() - pointerTapHandledAt) < 900) return;
     const gesture = event.type === 'pointerup' ? activePointerGesture : activeTouchGesture;
     updateGesture(gesture, event);
     if (!gesture) return;
@@ -2684,12 +2688,14 @@ function installTouchSafeTapBridge() {
 
     lastTouchTriggeredEl = gestureTarget;
     lastTouchTriggeredAt = now;
+    if (event.type === 'pointerup') pointerTapHandledAt = now;
     event.preventDefault();
     dispatchSyntheticClick(gestureTarget);
   }
 
   function onTouchLikeCancel(event) {
     if (shouldIgnoreTouchEvent(event)) return;
+    if (event.type.startsWith('touch') && pointerTapHandledAt && (Date.now() - pointerTapHandledAt) < 900) return;
     clearGestureForEvent(event);
   }
 
