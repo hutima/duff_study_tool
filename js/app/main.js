@@ -1971,6 +1971,9 @@ function markCard(outcome) {
 
 
 function setStudyMode(mode) {
+  const readerView = document.getElementById('readerView');
+  if (readerView && readerView.style.display !== 'none') closeReaderView();
+
   const nextMode = mode === 'morph' && canAccessGrammarUi() ? 'morph' : 'vocab';
   if (studyMode === nextMode) return;
 
@@ -3623,7 +3626,117 @@ document.addEventListener('keydown', e => {
 });
 
 // ═══════════════════════════════════════════════════════
-//  GLOBAL EXPORTS — needed for HTML onclick handlers
+//  GRADED READER
+// ═══════════════════════════════════════════════════════
+
+let readerActiveChapter = null;
+
+const READER_STUDY_ELEMENTS = ['#quickStart', '.quick-start', '.notice-row', '.utility-section',
+  '.ornament', '.card-area', '#cardArea', '#navRow', '#markRow', '.review-shell'];
+
+function getReaderData() {
+  return (typeof window !== 'undefined' && window.GRADED_READER) ? window.GRADED_READER : null;
+}
+
+function getReaderChapters() {
+  const data = getReaderData();
+  if (!data) return [];
+  return Object.keys(data).map(Number).sort((a, b) => a - b);
+}
+
+function openReaderView() {
+  const readerView = document.getElementById('readerView');
+  if (!readerView) return;
+
+  // Hide study UI
+  const studyIds = ['cardArea', 'navRow', 'markRow'];
+  studyIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  document.querySelectorAll('.quick-start, .notice-row, .utility-section, .ornament, .review-shell').forEach(el => {
+    el.style.display = 'none';
+  });
+
+  readerView.style.display = 'block';
+
+  // Mark reader tab active
+  const vocabBtn = document.getElementById('modeShortcutVocabBtn');
+  const morphBtn = document.getElementById('modeShortcutMorphBtn');
+  const readerBtn = document.getElementById('modeShortcutReaderBtn');
+  if (vocabBtn) vocabBtn.classList.remove('active');
+  if (morphBtn) morphBtn.classList.remove('active');
+  if (readerBtn) readerBtn.classList.add('active');
+
+  buildReaderChapterStrip();
+
+  if (readerActiveChapter === null) {
+    const chapters = getReaderChapters();
+    readerActiveChapter = chapters.length ? chapters[0] : null;
+  }
+  renderReaderBody();
+}
+
+function closeReaderView() {
+  const readerView = document.getElementById('readerView');
+  if (readerView) readerView.style.display = 'none';
+
+  // Restore study UI visibility via syncLayoutVisibility
+  document.querySelectorAll('.quick-start, .notice-row, .utility-section, .ornament, .review-shell').forEach(el => {
+    el.style.display = '';
+  });
+
+  // Restore reader tab inactive
+  const readerBtn = document.getElementById('modeShortcutReaderBtn');
+  if (readerBtn) readerBtn.classList.remove('active');
+
+  syncToggleButtons();
+  syncLayoutVisibility();
+}
+
+function buildReaderChapterStrip() {
+  const strip = document.getElementById('readerChapterStrip');
+  if (!strip) return;
+  const chapters = getReaderChapters();
+  strip.innerHTML = chapters.map(ch => {
+    const data = getReaderData();
+    const count = data && data[ch] ? data[ch].length : 0;
+    return `<button class="reader-ch-btn${ch === readerActiveChapter ? ' active' : ''}" type="button" role="tab" aria-selected="${ch === readerActiveChapter}" onclick="selectReaderChapter(${ch})">Ch ${ch}<span class="reader-verse-count">${count}</span></button>`;
+  }).join('');
+}
+
+function selectReaderChapter(ch) {
+  readerActiveChapter = ch;
+  buildReaderChapterStrip();
+  renderReaderBody();
+
+  // Scroll reader body into view smoothly
+  const body = document.getElementById('readerBody');
+  if (body) body.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderReaderBody() {
+  const container = document.getElementById('readerBody');
+  if (!container) return;
+  const data = getReaderData();
+  if (!data || readerActiveChapter === null) {
+    container.innerHTML = '<div class="reader-empty">No data available.</div>';
+    return;
+  }
+  const verses = data[readerActiveChapter];
+  if (!verses || !verses.length) {
+    container.innerHTML = '<div class="reader-empty">No verses for this chapter.</div>';
+    return;
+  }
+  const html = verses.map(v => {
+    const greek = escapeHtml(v.g);
+    const ref = escapeHtml(v.r);
+    return `<div class="reader-verse"><span class="reader-verse-greek">${greek}</span><span class="reader-verse-ref">${ref}</span></div>`;
+  }).join('');
+  container.innerHTML = html;
+}
+
+
 //  Export these BEFORE startup runs, so one later init error does not
 //  leave the page rendered-but-unclickable.
 // ═══════════════════════════════════════════════════════
@@ -3637,7 +3750,8 @@ const GLOBAL_CLICK_HANDLERS = {
   openAnalyticsOverlay, resetAllStats, resetCurrentDeck, reshuffleEligible,
   restoreSpacedUndo, setAppProfile, setStudyMode, setThemeMode,
   showDisclaimerModal, startStudying, toggleDirection, toggleMorphSelfCheck,
-  toggleRequiredOnly, toggleShuffle, toggleSpacedRepetition, triggerImportProgress
+  toggleRequiredOnly, toggleShuffle, toggleSpacedRepetition, triggerImportProgress,
+  openReaderView, closeReaderView, selectReaderChapter
 };
 if (typeof globalThis !== 'undefined') Object.assign(globalThis, GLOBAL_CLICK_HANDLERS);
 if (typeof window !== 'undefined' && window !== globalThis) Object.assign(window, GLOBAL_CLICK_HANDLERS);
