@@ -1607,7 +1607,6 @@ function toggleSession(session) {
   }
 
   loadDeckFromKeys(nextKeys, null);
-  closeStudySelector();
 }
 
 function toggleSet(key) {
@@ -1636,7 +1635,6 @@ function toggleSet(key) {
   }
 
   loadDeckFromKeys(selectedKeys, null);
-  closeStudySelector();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1773,6 +1771,7 @@ function renderCard() {
           <span class="card-label">Greek</span>
           <div class="card-greek">${formatGreekHeadword(card.g)}</div>
           <div class="card-hint">${card.sourceLabel}</div>
+          ${buildReaderTranslationReveal(card)}
           <div class="flip-hint">click to reveal →</div>
         </div>`;
     backHTML = `
@@ -1789,6 +1788,7 @@ function renderCard() {
           <span class="card-label">English</span>
           <div class="card-english">${card.e || '—'}</div>
           <div class="card-hint">${card.sourceLabel}</div>
+          ${buildReaderTranslationReveal(card)}
           <div class="flip-hint">click to reveal →</div>
         </div>`;
     backHTML = `
@@ -1810,6 +1810,57 @@ function renderCard() {
 
   isFlipped = false;
   renderProgress();
+}
+
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function buildReaderTranslationReveal(card) {
+  if (!card || !card.revealTranslationOnTap) return '';
+  const lines = Array.isArray(card.translationLines) ? card.translationLines.filter(Boolean) : [];
+  const verseRef = card.verseRef ? ` data-verse-ref="${escapeHtml(card.verseRef)}"` : '';
+  const source = card.translationSource ? `<div class="reader-translation-source">${escapeHtml(card.translationSource)}</div>` : '';
+  const items = lines.length
+    ? lines.map(line => `<div class="reader-translation-line">${escapeHtml(line)}</div>`).join('')
+    : '<div class="reader-translation-line reader-loading">Tap to load translation</div>';
+  return `<button class="reader-translation-toggle" type="button" onclick="toggleReaderTranslation(event)">Reveal translation</button>
+    <div class="reader-translation" hidden${verseRef}>${items}${source}</div>`;
+}
+
+async function toggleReaderTranslation(event) {
+  event.stopPropagation();
+  const button = event.currentTarget;
+  const panel = button && button.nextElementSibling;
+  if (!panel) return;
+  const hidden = panel.hasAttribute('hidden');
+  if (!hidden) {
+    panel.setAttribute('hidden', 'hidden');
+    button.textContent = 'Reveal translation';
+    return;
+  }
+  if (panel.dataset.verseRef && !panel.dataset.loaded) {
+    const status = panel.querySelector('.reader-loading');
+    if (status) status.textContent = 'Loading translation…';
+    try {
+      const res = await fetch(`https://bible-api.com/${encodeURIComponent(panel.dataset.verseRef)}?translation=kjv`);
+      if (!res.ok) throw new Error('Translation lookup failed');
+      const data = await res.json();
+      const text = String(data.text || '').trim();
+      panel.innerHTML = `<div class="reader-translation-line">${escapeHtml(text || 'Translation unavailable')}</div><div class="reader-translation-source">KJV (bible-api.com)</div>`;
+      panel.dataset.loaded = '1';
+    } catch (err) {
+      panel.innerHTML = '<div class="reader-translation-line">Translation unavailable.</div>';
+    }
+  }
+  panel.removeAttribute('hidden');
+  button.textContent = 'Hide translation';
 }
 
 function flipCard() {
@@ -1973,6 +2024,9 @@ function markCard(outcome) {
 
 
 function setStudyMode(mode) {
+  const readerView = document.getElementById('readerView');
+  if (readerView && readerView.style.display !== 'none') closeReaderView();
+
   const nextMode = mode === 'morph' && canAccessGrammarUi() ? 'morph' : 'vocab';
   if (studyMode === nextMode) return;
 
@@ -3625,7 +3679,117 @@ document.addEventListener('keydown', e => {
 });
 
 // ═══════════════════════════════════════════════════════
-//  GLOBAL EXPORTS — needed for HTML onclick handlers
+//  GRADED READER
+// ═══════════════════════════════════════════════════════
+
+let readerActiveChapter = null;
+
+const READER_STUDY_ELEMENTS = ['#quickStart', '.quick-start', '.notice-row', '.utility-section',
+  '.ornament', '.card-area', '#cardArea', '#navRow', '#markRow', '.review-shell'];
+
+function getReaderData() {
+  return (typeof window !== 'undefined' && window.GRADED_READER) ? window.GRADED_READER : null;
+}
+
+function getReaderChapters() {
+  const data = getReaderData();
+  if (!data) return [];
+  return Object.keys(data).map(Number).sort((a, b) => a - b);
+}
+
+function openReaderView() {
+  const readerView = document.getElementById('readerView');
+  if (!readerView) return;
+
+  // Hide study UI
+  const studyIds = ['cardArea', 'navRow', 'markRow'];
+  studyIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  document.querySelectorAll('.quick-start, .notice-row, .utility-section, .ornament, .review-shell').forEach(el => {
+    el.style.display = 'none';
+  });
+
+  readerView.style.display = 'block';
+
+  // Mark reader tab active
+  const vocabBtn = document.getElementById('modeShortcutVocabBtn');
+  const morphBtn = document.getElementById('modeShortcutMorphBtn');
+  const readerBtn = document.getElementById('modeShortcutReaderBtn');
+  if (vocabBtn) vocabBtn.classList.remove('active');
+  if (morphBtn) morphBtn.classList.remove('active');
+  if (readerBtn) readerBtn.classList.add('active');
+
+  buildReaderChapterStrip();
+
+  if (readerActiveChapter === null) {
+    const chapters = getReaderChapters();
+    readerActiveChapter = chapters.length ? chapters[0] : null;
+  }
+  renderReaderBody();
+}
+
+function closeReaderView() {
+  const readerView = document.getElementById('readerView');
+  if (readerView) readerView.style.display = 'none';
+
+  // Restore study UI visibility via syncLayoutVisibility
+  document.querySelectorAll('.quick-start, .notice-row, .utility-section, .ornament, .review-shell').forEach(el => {
+    el.style.display = '';
+  });
+
+  // Restore reader tab inactive
+  const readerBtn = document.getElementById('modeShortcutReaderBtn');
+  if (readerBtn) readerBtn.classList.remove('active');
+
+  syncToggleButtons();
+  syncLayoutVisibility();
+}
+
+function buildReaderChapterStrip() {
+  const strip = document.getElementById('readerChapterStrip');
+  if (!strip) return;
+  const chapters = getReaderChapters();
+  strip.innerHTML = chapters.map(ch => {
+    const data = getReaderData();
+    const count = data && data[ch] ? data[ch].length : 0;
+    return `<button class="reader-ch-btn${ch === readerActiveChapter ? ' active' : ''}" type="button" role="tab" aria-selected="${ch === readerActiveChapter}" onclick="selectReaderChapter(${ch})">Ch ${ch}<span class="reader-verse-count">${count}</span></button>`;
+  }).join('');
+}
+
+function selectReaderChapter(ch) {
+  readerActiveChapter = ch;
+  buildReaderChapterStrip();
+  renderReaderBody();
+
+  // Scroll reader body into view smoothly
+  const body = document.getElementById('readerBody');
+  if (body) body.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderReaderBody() {
+  const container = document.getElementById('readerBody');
+  if (!container) return;
+  const data = getReaderData();
+  if (!data || readerActiveChapter === null) {
+    container.innerHTML = '<div class="reader-empty">No data available.</div>';
+    return;
+  }
+  const verses = data[readerActiveChapter];
+  if (!verses || !verses.length) {
+    container.innerHTML = '<div class="reader-empty">No verses for this chapter.</div>';
+    return;
+  }
+  const html = verses.map(v => {
+    const greek = escapeHtml(v.g);
+    const ref = escapeHtml(v.r);
+    return `<div class="reader-verse"><span class="reader-verse-greek">${greek}</span><span class="reader-verse-ref">${ref}</span></div>`;
+  }).join('');
+  container.innerHTML = html;
+}
+
+
 //  Export these BEFORE startup runs, so one later init error does not
 //  leave the page rendered-but-unclickable.
 // ═══════════════════════════════════════════════════════
@@ -3639,7 +3803,9 @@ const GLOBAL_CLICK_HANDLERS = {
   openAnalyticsOverlay, resetAllStats, resetCurrentDeck, reshuffleEligible,
   restoreSpacedUndo, setAppProfile, setStudyMode, setThemeMode,
   showDisclaimerModal, startStudying, toggleDirection, toggleMorphSelfCheck,
-  toggleRequiredOnly, toggleShuffle, toggleSpacedRepetition, triggerImportProgress
+  toggleReaderTranslation, toggleRequiredOnly, toggleShuffle, toggleSpacedRepetition, triggerImportProgress
+  toggleRequiredOnly, toggleShuffle, toggleSpacedRepetition, triggerImportProgress,
+  openReaderView, closeReaderView, selectReaderChapter
 };
 if (typeof globalThis !== 'undefined') Object.assign(globalThis, GLOBAL_CLICK_HANDLERS);
 if (typeof window !== 'undefined' && window !== globalThis) Object.assign(window, GLOBAL_CLICK_HANDLERS);
