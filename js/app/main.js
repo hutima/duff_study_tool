@@ -1577,16 +1577,33 @@ function loadSession(session) {
   loadDeckFromKeys(expandSessionSets(session), session.id);
 }
 
+function getSessionIdsForKeys(keys = selectedKeys) {
+  return getSessions()
+    .filter(session => isSessionFullySelected(session, keys))
+    .map(session => session.id);
+}
+
 function toggleSession(session) {
   saveCurrentDeckStateToBank();
 
   const sessionKeys = expandSessionSets(session);
   if (!sessionKeys.length) return;
 
-  const alreadySelected = isSessionFullySelected(session);
-  const nextKeys = alreadySelected
-    ? selectedKeys.filter(key => !sessionKeys.includes(key))
-    : sortSetKeys([...new Set([...selectedKeys, ...sessionKeys])]);
+  const activeSessionIds = new Set(getSessionIdsForKeys(selectedKeys));
+  const alreadySelected = activeSessionIds.has(session.id);
+
+  let nextKeys;
+  if (alreadySelected) {
+    const remainingSessionIds = [...activeSessionIds].filter(id => id !== session.id);
+    const keysFromRemainingSessions = remainingSessionIds.flatMap(id => {
+      const remainingSession = getSessions().find(s => s.id === id);
+      return remainingSession ? expandSessionSets(remainingSession) : [];
+    });
+    const manuallySelectedKeys = selectedKeys.filter(key => !sessionKeys.includes(key));
+    nextKeys = sortSetKeys([...new Set([...manuallySelectedKeys, ...keysFromRemainingSessions])]);
+  } else {
+    nextKeys = sortSetKeys([...new Set([...selectedKeys, ...sessionKeys])]);
+  }
 
   currentSession = null;
 
