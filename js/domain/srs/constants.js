@@ -6,5 +6,6 @@ export const SRS_UNCERTAIN_MIN_MS = 60 * 60 * 1000;
 export const SRS_UNCERTAIN_CAP_MS = SRS_UNCERTAIN_MIN_MS;
 export const SRS_UNSPACED_RECOVERY_MS = SRS_UNCERTAIN_MIN_MS;
 export const SRS_GUIDE_STEPS_DAYS = [1, 3, 5, 7];
+export const SRS_MAX_INTERVAL_DAYS = 30;
 export const SRS_NEAR_WINDOW_MS = 30 * 60 * 1000;
 export const SRS_CYCLE_ADVANCE_MS = 60 * 60 * 1000;
