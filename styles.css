@@ -1919,3 +1919,16 @@
       gap: 16px;
     }
   }
+
+.reader-translation-toggle {
+  margin-top: 10px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,.35);
+  color: inherit;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: .8rem;
+}
+.reader-translation { margin-top: 8px; font-size: .92rem; line-height: 1.4; }
+.reader-translation-source { opacity: .8; font-size: .78rem; margin-top: 6px; }
+.reader-loading { opacity: .8; }
