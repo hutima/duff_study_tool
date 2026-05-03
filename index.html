@@ -51,6 +51,7 @@
     <div class="mode-group app-profile-group" role="group" aria-label="Study mode shortcut">
       <button class="mode-btn active" id="modeShortcutVocabBtn" type="button" onclick="setStudyMode('vocab')">Vocab</button>
       <button class="mode-btn" id="modeShortcutMorphBtn" type="button" onclick="setStudyMode('morph')">Grammar</button>
+      <button class="mode-btn" id="modeShortcutReaderBtn" type="button" onclick="openReaderView()">Reader</button>
     </div>
     <button class="quick-btn" type="button" onclick="openAnalyticsOverlay()">Progress</button>
     <button class="quick-btn" type="button" onclick="openShortcutsModal()">Keyboard shortcuts</button>
@@ -113,6 +114,19 @@
       <div class="big">αβγ</div>
       Tap to choose a session and start studying.
     </div>
+  </div>
+
+  <!-- ── Graded Reader View ── -->
+  <div class="reader-view" id="readerView" style="display:none" aria-label="Graded Reader">
+    <div class="reader-header">
+      <div class="reader-title-row">
+        <h2 class="reader-heading">Graded Reader</h2>
+        <button class="ctrl-btn" type="button" onclick="closeReaderView()">← Back to study</button>
+      </div>
+      <p class="reader-desc">Verses readable without outside help after completing each chapter of Duff's <em>Elements</em>. Greek text: SBL GNT.</p>
+      <div class="reader-chapter-strip" id="readerChapterStrip" role="tablist" aria-label="Select chapter"></div>
+    </div>
+    <div class="reader-body" id="readerBody"></div>
   </div>
 
   <div class="nav-row" id="navRow" style="display:none">
@@ -204,6 +218,9 @@
     <div class="selector-section">
       <span class="selector-label">Manual chapter selection</span>
       <div class="sessions-grid" id="chaptersGrid"></div>
+    </div>
+    <div class="analytics-footer-row">
+      <button class="ctrl-btn" type="button" onclick="closeStudySelector()">Close</button>
     </div>
   </div>
 </div>
