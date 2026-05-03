@@ -1771,6 +1771,7 @@ function renderCard() {
           <span class="card-label">Greek</span>
           <div class="card-greek">${formatGreekHeadword(card.g)}</div>
           <div class="card-hint">${card.sourceLabel}</div>
+          ${buildReaderTranslationReveal(card)}
           <div class="flip-hint">click to reveal →</div>
         </div>`;
     backHTML = `
@@ -1787,6 +1788,7 @@ function renderCard() {
           <span class="card-label">English</span>
           <div class="card-english">${card.e || '—'}</div>
           <div class="card-hint">${card.sourceLabel}</div>
+          ${buildReaderTranslationReveal(card)}
           <div class="flip-hint">click to reveal →</div>
         </div>`;
     backHTML = `
@@ -1808,6 +1810,57 @@ function renderCard() {
 
   isFlipped = false;
   renderProgress();
+}
+
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function buildReaderTranslationReveal(card) {
+  if (!card || !card.revealTranslationOnTap) return '';
+  const lines = Array.isArray(card.translationLines) ? card.translationLines.filter(Boolean) : [];
+  const verseRef = card.verseRef ? ` data-verse-ref="${escapeHtml(card.verseRef)}"` : '';
+  const source = card.translationSource ? `<div class="reader-translation-source">${escapeHtml(card.translationSource)}</div>` : '';
+  const items = lines.length
+    ? lines.map(line => `<div class="reader-translation-line">${escapeHtml(line)}</div>`).join('')
+    : '<div class="reader-translation-line reader-loading">Tap to load translation</div>';
+  return `<button class="reader-translation-toggle" type="button" onclick="toggleReaderTranslation(event)">Reveal translation</button>
+    <div class="reader-translation" hidden${verseRef}>${items}${source}</div>`;
+}
+
+async function toggleReaderTranslation(event) {
+  event.stopPropagation();
+  const button = event.currentTarget;
+  const panel = button && button.nextElementSibling;
+  if (!panel) return;
+  const hidden = panel.hasAttribute('hidden');
+  if (!hidden) {
+    panel.setAttribute('hidden', 'hidden');
+    button.textContent = 'Reveal translation';
+    return;
+  }
+  if (panel.dataset.verseRef && !panel.dataset.loaded) {
+    const status = panel.querySelector('.reader-loading');
+    if (status) status.textContent = 'Loading translation…';
+    try {
+      const res = await fetch(`https://bible-api.com/${encodeURIComponent(panel.dataset.verseRef)}?translation=kjv`);
+      if (!res.ok) throw new Error('Translation lookup failed');
+      const data = await res.json();
+      const text = String(data.text || '').trim();
+      panel.innerHTML = `<div class="reader-translation-line">${escapeHtml(text || 'Translation unavailable')}</div><div class="reader-translation-source">KJV (bible-api.com)</div>`;
+      panel.dataset.loaded = '1';
+    } catch (err) {
+      panel.innerHTML = '<div class="reader-translation-line">Translation unavailable.</div>';
+    }
+  }
+  panel.removeAttribute('hidden');
+  button.textContent = 'Hide translation';
 }
 
 function flipCard() {
@@ -3750,6 +3803,7 @@ const GLOBAL_CLICK_HANDLERS = {
   openAnalyticsOverlay, resetAllStats, resetCurrentDeck, reshuffleEligible,
   restoreSpacedUndo, setAppProfile, setStudyMode, setThemeMode,
   showDisclaimerModal, startStudying, toggleDirection, toggleMorphSelfCheck,
+  toggleReaderTranslation, toggleRequiredOnly, toggleShuffle, toggleSpacedRepetition, triggerImportProgress
   toggleRequiredOnly, toggleShuffle, toggleSpacedRepetition, triggerImportProgress,
   openReaderView, closeReaderView, selectReaderChapter
 };
