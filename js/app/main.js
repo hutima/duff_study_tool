@@ -1630,7 +1630,7 @@ function toggleSession(session) {
   const alreadySelected = isSessionFullySelected(session);
   const nextKeys = alreadySelected
     ? selectedKeys.filter(key => !sessionKeys.includes(key))
-    : sortSetKeys([...new Set([...selectedKeys, ...sessionKeys])]);
+    : [...sessionKeys];
 
   currentSession = null;
 
