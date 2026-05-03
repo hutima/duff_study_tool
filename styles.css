@@ -1919,3 +1919,128 @@
       gap: 16px;
     }
   }
+
+  /* ── Reader Tab ── */
+  .reader-view {
+    margin-bottom: 28px;
+  }
+
+  .reader-intro {
+    font-style: italic;
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    line-height: 1.6;
+  }
+
+  .reader-chapter {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 8px;
+    background: var(--surface);
+    overflow: hidden;
+  }
+
+  .reader-chapter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    cursor: pointer;
+    list-style: none;
+    -webkit-user-select: none;
+    user-select: none;
+    gap: 12px;
+    touch-action: manipulation;
+  }
+
+  .reader-chapter-header::-webkit-details-marker { display: none; }
+  .reader-chapter-header::marker { display: none; }
+
+  .reader-chapter[open] > .reader-chapter-header {
+    border-bottom: 1px solid var(--border);
+    background: rgba(201,168,76,0.04);
+  }
+
+  .reader-ch-label {
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gold);
+    flex: 1;
+  }
+
+  .reader-chapter[open] > .reader-chapter-header .reader-ch-label {
+    color: var(--gold-light);
+  }
+
+  .reader-ch-arrow {
+    font-size: 11px;
+    color: var(--gold-dim);
+    transition: transform 0.2s;
+    display: inline-block;
+  }
+
+  .reader-chapter[open] > .reader-chapter-header .reader-ch-arrow {
+    transform: rotate(90deg);
+  }
+
+  .reader-ch-count {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .reader-verse-list {
+    padding: 0;
+  }
+
+  .reader-verse {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .reader-verse:last-child {
+    border-bottom: none;
+  }
+
+  .reader-verse-greek {
+    font-family: 'Noto Serif', serif;
+    font-size: 16px;
+    color: var(--cream);
+    line-height: 1.65;
+    flex: 1;
+  }
+
+  .reader-verse-ref {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.8px;
+    color: var(--gold-dim);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 480px) {
+    .reader-verse {
+      flex-direction: column;
+      gap: 4px;
+    }
+    .reader-verse-ref {
+      align-self: flex-end;
+    }
+    .reader-verse-greek {
+      font-size: 15px;
+    }
+  }

@@ -80,6 +80,8 @@ let toastActive = false;
 let morphSelfCheck = false;
 let morphAnswerState = { answered: false, revealed: false, selfRated: false, selectedIndex: -1, isCorrect: null };
 let morphPendingAdvance = false;
+let isReaderMode = false;
+let readerViewBuilt = false;
 
 let deckStates = {};
 let globalWordMarks = {};
@@ -239,6 +241,7 @@ function syncToggleButtons() {
   const modeMorphBtn    = document.getElementById('modeMorphBtn');
   const modeShortcutVocabBtn = document.getElementById('modeShortcutVocabBtn');
   const modeShortcutMorphBtn = document.getElementById('modeShortcutMorphBtn');
+  const modeShortcutReaderBtn = document.getElementById('modeShortcutReaderBtn');
   const resetDeckBtn = document.getElementById('resetDeckBtn');
 
   if (shuffleSwitch)   shuffleSwitch.classList.toggle('on',   !!shuffled);
@@ -253,8 +256,9 @@ function syncToggleButtons() {
   if (selfCheckToggle) selfCheckToggle.setAttribute('aria-checked', (morphSelfCheck && isMorphologyMode()) ? 'true' : 'false');
   if (modeVocabBtn)    modeVocabBtn.classList.toggle('active', studyMode === 'vocab');
   if (modeMorphBtn)    modeMorphBtn.classList.toggle('active', studyMode === 'morph');
-  if (modeShortcutVocabBtn) modeShortcutVocabBtn.classList.toggle('active', studyMode === 'vocab');
-  if (modeShortcutMorphBtn) modeShortcutMorphBtn.classList.toggle('active', studyMode === 'morph');
+  if (modeShortcutVocabBtn) modeShortcutVocabBtn.classList.toggle('active', !isReaderMode && studyMode === 'vocab');
+  if (modeShortcutMorphBtn) modeShortcutMorphBtn.classList.toggle('active', !isReaderMode && studyMode === 'morph');
+  if (modeShortcutReaderBtn) modeShortcutReaderBtn.classList.toggle('active', isReaderMode);
   syncThemeButtons();
   if (resetDeckBtn) {
     resetDeckBtn.textContent = spacedRepetition ? 'Reset spaced' : 'Reset unspaced';
@@ -298,6 +302,20 @@ function syncLayoutVisibility() {
       nextBtn.textContent = spacedRepetition ? 'Again →' : 'Next →';
       nextBtn.classList.toggle('spaced-again', !!spacedRepetition);
     }
+  }
+
+  // Reader mode overrides — must come last to take effect
+  const readerViewEl = document.getElementById('readerView');
+  const cardAreaEl = document.getElementById('cardArea');
+  const reviewShellEl = document.querySelector('.review-shell');
+  const advancedSettingsEl = document.getElementById('advancedSettingsDetails');
+  if (readerViewEl) readerViewEl.style.display = isReaderMode ? '' : 'none';
+  if (cardAreaEl) cardAreaEl.style.display = isReaderMode ? 'none' : '';
+  if (reviewShellEl) reviewShellEl.style.display = isReaderMode ? 'none' : '';
+  if (advancedSettingsEl) advancedSettingsEl.style.display = isReaderMode ? 'none' : '';
+  if (isReaderMode) {
+    if (navRow) navRow.style.display = 'none';
+    if (markRow) markRow.style.display = 'none';
   }
 }
 
@@ -614,7 +632,21 @@ function buildStudyDeck(cards, options = {}) {
     }
   }
 
-  const deferredCards = cards.filter(card => !isCardDue(card));
+  let deferredCards = cards.filter(card => !isCardDue(card));
+
+  // 1/600 chance for each seen deferred card to be randomly promoted back to due
+  let hadRandomPromotion = false;
+  deferredCards.forEach(card => {
+    const progress = getWordProgress(card.id);
+    if (progress.seenCount > 0 && Math.random() < 1 / 600) {
+      progress.dueAt = Date.now();
+      hadRandomPromotion = true;
+    }
+  });
+  if (hadRandomPromotion) {
+    dueCards = cards.filter(isCardDue);
+    deferredCards = cards.filter(card => !isCardDue(card));
+  }
 
   // Preserve existing order of due cards already in the current deck;
   // append newly-eligible cards (including "(x) return to deck" and
@@ -1395,7 +1427,13 @@ function restoreState() {
     const savedDeckState = deckStates[getDeckStateKey(selectedKeys, requiredOnly)] || null;
     marks = getDirectionalMarksStore();
     const restoredDeck = savedDeckState ? reorderDeckFromIds(originalDeck, savedDeckState.deckIds) : null;
-    deck = restoredDeck || buildStudyDeck(originalDeck);
+    if (spacedRepetition && restoredDeck) {
+      deck = restoredDeck;
+      activeDeckCount = restoredDeck.length;
+      deck = buildStudyDeck(originalDeck);
+    } else {
+      deck = restoredDeck || buildStudyDeck(originalDeck);
+    }
     resetUnspacedCycleState();
     activeDeckCount = spacedRepetition ? getDueCount(originalDeck) : originalDeck.filter(card => marks[card.id] !== 'known').length;
     currentIdx = savedDeckState && Number.isInteger(savedDeckState.currentIdx)
@@ -1547,7 +1585,13 @@ function loadDeckFromKeys(keys, sessionId = null) {
   marks = getDirectionalMarksStore();
   if (savedDeckState) {
     const restoredDeck = reorderDeckFromIds(originalDeck, savedDeckState.deckIds);
-    deck = restoredDeck || buildStudyDeck(originalDeck);
+    if (spacedRepetition && restoredDeck) {
+      deck = restoredDeck;
+      activeDeckCount = restoredDeck.length;
+      deck = buildStudyDeck(originalDeck);
+    } else {
+      deck = restoredDeck || buildStudyDeck(originalDeck);
+    }
     activeDeckCount = spacedRepetition ? getDueCount(originalDeck) : originalDeck.filter(card => marks[card.id] !== 'known').length;
     currentIdx = Number.isInteger(savedDeckState.currentIdx)
       ? Math.min(Math.max(savedDeckState.currentIdx, 0), spacedRepetition ? activeDeckCount : deck.length)
@@ -1586,7 +1630,7 @@ function toggleSession(session) {
   const alreadySelected = isSessionFullySelected(session);
   const nextKeys = alreadySelected
     ? selectedKeys.filter(key => !sessionKeys.includes(key))
-    : sortSetKeys([...new Set([...selectedKeys, ...sessionKeys])]);
+    : [...sessionKeys];
 
   currentSession = null;
 
@@ -1972,6 +2016,12 @@ function markCard(outcome) {
 
 function setStudyMode(mode) {
   const nextMode = mode === 'morph' && canAccessGrammarUi() ? 'morph' : 'vocab';
+  if (isReaderMode) {
+    isReaderMode = false;
+    syncToggleButtons();
+    syncLayoutVisibility();
+    if (studyMode === nextMode) return;
+  }
   if (studyMode === nextMode) return;
 
   saveCurrentDeckStateToBank();
@@ -2035,7 +2085,7 @@ function toggleShuffle() {
   syncToggleButtons();
 
   if (spacedRepetition) {
-    deck = buildStudyDeck(originalDeck);
+    deck = buildStudyDeck(originalDeck, { forceShuffle: shuffled });
     currentIdx = Math.min(currentIdx, activeDeckCount);
   } else {
     const activeCards = getRemainingCards();
@@ -2795,7 +2845,7 @@ function getCertaintyBucketForCard(card, marksStore) {
   if ((!progress.seenCount && confidence === null) && marksStore?.[card.id] !== 'known') return 'unseen';
   if (marksStore?.[card.id] === 'known') return '100';
   if (confidence === null) return progress.seenCount ? '0' : 'unseen';
-  if (confidence >= 75) return '100';
+  if (confidence >= 80) return '100';
   if (confidence >= 25) return '50';
   return '0';
 }
@@ -3623,6 +3673,43 @@ document.addEventListener('keydown', e => {
 });
 
 // ═══════════════════════════════════════════════════════
+//  READER TAB
+// ═══════════════════════════════════════════════════════
+function openReaderTab() {
+  isReaderMode = true;
+  if (!readerViewBuilt) {
+    buildReaderView();
+    readerViewBuilt = true;
+  }
+  syncToggleButtons();
+  syncLayoutVisibility();
+}
+
+function buildReaderView() {
+  const container = document.getElementById('readerView');
+  if (!container) return;
+  const chapters = Array.isArray(window.READER_CHAPTERS) ? window.READER_CHAPTERS : [];
+  if (!chapters.length) {
+    container.innerHTML = '<div class="reader-intro">Reader data not available.</div>';
+    return;
+  }
+
+  let html = '<div class="reader-intro">Verses from the New Testament readable after completing each chapter of Duff’s <em>Elements of New Testament Greek</em>. Greek text: SBL GNT.</div>';
+
+  for (const ch of chapters) {
+    const count = ch.verses.length;
+    const label = count === 1 ? '1 verse' : `${count} verses`;
+    html += `<details class="reader-chapter"><summary class="reader-chapter-header"><span class="reader-ch-label">After Chapter ${ch.chapter}</span><span class="reader-ch-count">${label}</span><span class="reader-ch-arrow" aria-hidden="true">▶</span></summary><div class="reader-verse-list">`;
+    for (const v of ch.verses) {
+      html += `<div class="reader-verse"><span class="reader-verse-greek">${escapeHtml(v.g)}</span><span class="reader-verse-ref">${escapeHtml(v.r)}</span></div>`;
+    }
+    html += '</div></details>';
+  }
+
+  container.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════
 //  GLOBAL EXPORTS — needed for HTML onclick handlers
 //  Export these BEFORE startup runs, so one later init error does not
 //  leave the page rendered-but-unclickable.
@@ -3637,7 +3724,8 @@ const GLOBAL_CLICK_HANDLERS = {
   openAnalyticsOverlay, resetAllStats, resetCurrentDeck, reshuffleEligible,
   restoreSpacedUndo, setAppProfile, setStudyMode, setThemeMode,
   showDisclaimerModal, startStudying, toggleDirection, toggleMorphSelfCheck,
-  toggleRequiredOnly, toggleShuffle, toggleSpacedRepetition, triggerImportProgress
+  toggleRequiredOnly, toggleShuffle, toggleSpacedRepetition, triggerImportProgress,
+  openReaderTab
 };
 if (typeof globalThis !== 'undefined') Object.assign(globalThis, GLOBAL_CLICK_HANDLERS);
 if (typeof window !== 'undefined' && window !== globalThis) Object.assign(window, GLOBAL_CLICK_HANDLERS);
@@ -3678,7 +3766,7 @@ function preventDoubleTapZoom(el) {
   }, false);
 }
 
-['shuffleToggle','requiredToggle','directionToggle','spacedToggle','selfCheckToggle','modeVocabBtn','modeMorphBtn','modeShortcutVocabBtn','modeShortcutMorphBtn','themeSystemBtn','themeDarkBtn','themeLightBtn'].forEach(id => {
+['shuffleToggle','requiredToggle','directionToggle','spacedToggle','selfCheckToggle','modeVocabBtn','modeMorphBtn','modeShortcutVocabBtn','modeShortcutMorphBtn','modeShortcutReaderBtn','themeSystemBtn','themeDarkBtn','themeLightBtn'].forEach(id => {
   const el = document.getElementById(id);
   if (el) preventDoubleTapZoom(el);
 });

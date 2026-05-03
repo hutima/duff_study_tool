@@ -1,5 +1,5 @@
 // SRS scheduling logic — pure functions, no state access
-import { SRS_DAY_MS, SRS_AGAIN_MS, SRS_UNCERTAIN_MIN_MS, SRS_UNSPACED_RECOVERY_MS, SRS_GUIDE_STEPS_DAYS } from './constants.js';
+import { SRS_DAY_MS, SRS_AGAIN_MS, SRS_UNCERTAIN_MIN_MS, SRS_UNSPACED_RECOVERY_MS, SRS_GUIDE_STEPS_DAYS, SRS_MAX_INTERVAL_DAYS } from './constants.js';
 import { clamp } from '../../utils/helpers.js';
 
 export function msFromDays(days) {
@@ -68,7 +68,7 @@ export function getNextEasyIntervalDays(progress) {
     Number.isFinite(Number(progress?.intervalDays)) ? Math.max(0, Number(progress.intervalDays)) : 0
   );
   const proposedDays = previousDays * getSrsEase(progress);
-  return Math.max(Math.round(proposedDays), Math.ceil(previousDays + 1));
+  return Math.min(SRS_MAX_INTERVAL_DAYS, Math.max(Math.round(proposedDays), Math.ceil(previousDays + 1)));
 }
 
 export function getEasyDelayMs(progress) {

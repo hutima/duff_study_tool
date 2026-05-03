@@ -9,7 +9,7 @@ const BASE_URL = new URL('./', self.registration.scope);
 const APP_SHELL_PATHS = [
   './',
   'index.html',
-  'styles.css?v=30',
+  'styles.css?v=31',
   'manifest.json?v=24',
   'favicon.svg?v=24',
   'js/data/words.js?v=30',
