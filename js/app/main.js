@@ -2547,7 +2547,10 @@ function installTouchSafeTapBridge() {
   }
 
   function shouldIgnoreTouchEvent(event) {
+    const hasTouchSupport = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
     if (event.type === 'pointerup' || event.type === 'pointerdown' || event.type === 'pointermove' || event.type === 'pointercancel') {
+      // On iOS/Safari, pointer + touch streams can both fire for one tap; prefer touch events to avoid double-cancel paths.
+      if (hasTouchSupport) return true;
       return event.pointerType && event.pointerType !== 'touch' && event.pointerType !== 'pen';
     }
     return false;
