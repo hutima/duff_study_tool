@@ -2641,6 +2641,12 @@ function installTouchSafeTapBridge() {
     }
   }
 
+  function isNativeClickPreferred(el) {
+    if (!el || !el.tagName) return false;
+    const tag = el.tagName.toLowerCase();
+    return tag === 'button' || tag === 'a' || tag === 'input' || tag === 'select' || tag === 'textarea' || tag === 'summary' || tag === 'label';
+  }
+
   function onTouchLikeStart(event) {
     if (shouldIgnoreTouchEvent(event)) return;
     if (event.defaultPrevented) return;
@@ -2682,6 +2688,11 @@ function installTouchSafeTapBridge() {
 
     lastTouchTriggeredEl = gestureTarget;
     lastTouchTriggeredAt = now;
+
+    if (isNativeClickPreferred(gestureTarget)) {
+      return;
+    }
+
     event.preventDefault();
     dispatchSyntheticClick(gestureTarget);
   }
