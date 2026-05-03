@@ -632,7 +632,21 @@ function buildStudyDeck(cards, options = {}) {
     }
   }
 
-  const deferredCards = cards.filter(card => !isCardDue(card));
+  let deferredCards = cards.filter(card => !isCardDue(card));
+
+  // 1/600 chance for each seen deferred card to be randomly promoted back to due
+  let hadRandomPromotion = false;
+  deferredCards.forEach(card => {
+    const progress = getWordProgress(card.id);
+    if (progress.seenCount > 0 && Math.random() < 1 / 600) {
+      progress.dueAt = Date.now();
+      hadRandomPromotion = true;
+    }
+  });
+  if (hadRandomPromotion) {
+    dueCards = cards.filter(isCardDue);
+    deferredCards = cards.filter(card => !isCardDue(card));
+  }
 
   // Preserve existing order of due cards already in the current deck;
   // append newly-eligible cards (including "(x) return to deck" and
@@ -1413,7 +1427,13 @@ function restoreState() {
     const savedDeckState = deckStates[getDeckStateKey(selectedKeys, requiredOnly)] || null;
     marks = getDirectionalMarksStore();
     const restoredDeck = savedDeckState ? reorderDeckFromIds(originalDeck, savedDeckState.deckIds) : null;
-    deck = restoredDeck || buildStudyDeck(originalDeck);
+    if (spacedRepetition && restoredDeck) {
+      deck = restoredDeck;
+      activeDeckCount = restoredDeck.length;
+      deck = buildStudyDeck(originalDeck);
+    } else {
+      deck = restoredDeck || buildStudyDeck(originalDeck);
+    }
     resetUnspacedCycleState();
     activeDeckCount = spacedRepetition ? getDueCount(originalDeck) : originalDeck.filter(card => marks[card.id] !== 'known').length;
     currentIdx = savedDeckState && Number.isInteger(savedDeckState.currentIdx)
@@ -1565,7 +1585,13 @@ function loadDeckFromKeys(keys, sessionId = null) {
   marks = getDirectionalMarksStore();
   if (savedDeckState) {
     const restoredDeck = reorderDeckFromIds(originalDeck, savedDeckState.deckIds);
-    deck = restoredDeck || buildStudyDeck(originalDeck);
+    if (spacedRepetition && restoredDeck) {
+      deck = restoredDeck;
+      activeDeckCount = restoredDeck.length;
+      deck = buildStudyDeck(originalDeck);
+    } else {
+      deck = restoredDeck || buildStudyDeck(originalDeck);
+    }
     activeDeckCount = spacedRepetition ? getDueCount(originalDeck) : originalDeck.filter(card => marks[card.id] !== 'known').length;
     currentIdx = Number.isInteger(savedDeckState.currentIdx)
       ? Math.min(Math.max(savedDeckState.currentIdx, 0), spacedRepetition ? activeDeckCount : deck.length)
@@ -2059,7 +2085,7 @@ function toggleShuffle() {
   syncToggleButtons();
 
   if (spacedRepetition) {
-    deck = buildStudyDeck(originalDeck);
+    deck = buildStudyDeck(originalDeck, { forceShuffle: shuffled });
     currentIdx = Math.min(currentIdx, activeDeckCount);
   } else {
     const activeCards = getRemainingCards();
@@ -2819,7 +2845,7 @@ function getCertaintyBucketForCard(card, marksStore) {
   if ((!progress.seenCount && confidence === null) && marksStore?.[card.id] !== 'known') return 'unseen';
   if (marksStore?.[card.id] === 'known') return '100';
   if (confidence === null) return progress.seenCount ? '0' : 'unseen';
-  if (confidence >= 75) return '100';
+  if (confidence >= 80) return '100';
   if (confidence >= 25) return '50';
   return '0';
 }
