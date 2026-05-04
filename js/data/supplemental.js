@@ -77,15 +77,43 @@
     { g: 'τοῖς, -οῖς', e: 'the / def. art. / neut./dat./pl.', required: false },
     { g: 'τά, -ά',    e: 'the / def. art. / neut./acc./pl.',   required: false },
 
-    // ἀρχή — 1st declension feminine (8 cards)
-    { g: 'ἀρχή, -ή',    e: 'beginning / fem./nom./sing.', required: false },
-    { g: 'ἀρχῆς, -ῆς',  e: 'beginning / fem./gen./sing.', required: false },
-    { g: 'ἀρχῇ, -ῇ',    e: 'beginning / fem./dat./sing.', required: false },
-    { g: 'ἀρχήν, -ήν',  e: 'beginning / fem./acc./sing.', required: false },
-    { g: 'ἀρχαί, -αί',  e: 'beginnings / fem./nom./pl.',  required: false },
-    { g: 'ἀρχῶν, -ῶν',  e: 'beginnings / fem./gen./pl.',  required: false },
-    { g: 'ἀρχαῖς, -αῖς', e: 'beginnings / fem./dat./pl.', required: false },
-    { g: 'ἀρχάς, -άς',  e: 'beginnings / fem./acc./pl.',  required: false },
+    // φιλέω — ε-contract verb, pres. act. ind. (6 cards)
+    { g: 'φιλῶ, -ῶ',           e: 'I love / pres. act. ind. (ε-contract) / 1st sing.',       required: false },
+    { g: 'φιλεῖς, -εῖς',       e: 'you love / pres. act. ind. (ε-contract) / 2nd sing.',      required: false },
+    { g: 'φιλεῖ, -εῖ',         e: 'he/she/it loves / pres. act. ind. (ε-contract) / 3rd sing.', required: false },
+    { g: 'φιλοῦμεν, -οῦμεν',   e: 'we love / pres. act. ind. (ε-contract) / 1st pl.',         required: false },
+    { g: 'φιλεῖτε, -εῖτε',     e: 'you love / pres. act. ind. (ε-contract) / 2nd pl.',        required: false },
+    { g: 'φιλοῦσι(ν), -οῦσι(ν)', e: 'they love / pres. act. ind. (ε-contract) / 3rd pl.',    required: false },
+
+    // ἀρχή — variant fem., -η type (nom./gen. sg. -η/-ης) (8 cards)
+    { g: 'ἀρχή, -ή',    e: 'beginning / fem./nom./sing. (-η type)', required: false },
+    { g: 'ἀρχῆς, -ῆς',  e: 'beginning / fem./gen./sing. (-η type)', required: false },
+    { g: 'ἀρχῇ, -ῇ',    e: 'beginning / fem./dat./sing. (-η type)', required: false },
+    { g: 'ἀρχήν, -ήν',  e: 'beginning / fem./acc./sing. (-η type)', required: false },
+    { g: 'ἀρχαί, -αί',  e: 'beginnings / fem./nom./pl. (-η type)',  required: false },
+    { g: 'ἀρχῶν, -ῶν',  e: 'beginnings / fem./gen./pl. (-η type)',  required: false },
+    { g: 'ἀρχαῖς, -αῖς', e: 'beginnings / fem./dat./pl. (-η type)', required: false },
+    { g: 'ἀρχάς, -άς',  e: 'beginnings / fem./acc./pl. (-η type)',  required: false },
+
+    // ἡμέρα — variant fem., -α type (nom./gen. sg. -α/-ας) (8 cards)
+    { g: 'ἡμέρα, -α',     e: 'day / fem./nom./sing. (-α type)', required: false },
+    { g: 'ἡμέρας, -ας',   e: 'day / fem./gen./sing. (-α type)', required: false },
+    { g: 'ἡμέρᾳ, -ᾳ',    e: 'day / fem./dat./sing. (-α type)', required: false },
+    { g: 'ἡμέραν, -αν',   e: 'day / fem./acc./sing. (-α type)', required: false },
+    { g: 'ἡμέραι, -αι',   e: 'days / fem./nom./pl. (-α type)',  required: false },
+    { g: 'ἡμερῶν, -ῶν',   e: 'days / fem./gen./pl. (-α type)',  required: false },
+    { g: 'ἡμέραις, -αις', e: 'days / fem./dat./pl. (-α type)',  required: false },
+    { g: 'ἡμέρας, -ας',   e: 'days / fem./acc./pl. (-α type)',  required: false },
+
+    // δόξα — variant fem., mixed type (nom. -α, gen. -ης) (8 cards)
+    { g: 'δόξα, -α',     e: 'glory / fem./nom./sing. (mixed type)', required: false },
+    { g: 'δόξης, -ης',   e: 'glory / fem./gen./sing. (mixed type)', required: false },
+    { g: 'δόξῃ, -ῃ',     e: 'glory / fem./dat./sing. (mixed type)', required: false },
+    { g: 'δόξαν, -αν',   e: 'glory / fem./acc./sing. (mixed type)', required: false },
+    { g: 'δόξαι, -αι',   e: 'glories / fem./nom./pl. (mixed type)', required: false },
+    { g: 'δοξῶν, -ῶν',   e: 'glories / fem./gen./pl. (mixed type)', required: false },
+    { g: 'δόξαις, -αις', e: 'glories / fem./dat./pl. (mixed type)', required: false },
+    { g: 'δόξας, -ας',   e: 'glories / fem./acc./pl. (mixed type)', required: false },
 
     // ἔργον — 2nd declension neuter (8 cards)
     { g: 'ἔργον, -ον',  e: 'work / neut./nom./sing.', required: false },
@@ -126,6 +154,66 @@
     { g: 'αὐτῶν, -ῶν',   e: 'of them/themselves / neut./gen./pl.', required: false },
     { g: 'αὐτοῖς, -οῖς', e: 'to/for them/themselves / neut./dat./pl.', required: false },
     { g: 'αὐτά, -ά',     e: 'them/themselves / neut./acc./pl.', required: false },
+
+    // πολύς — masculine (8 cards)
+    { g: 'πολύς, -ύς',    e: 'much, many / masc./nom./sing.', required: false },
+    { g: 'πολλοῦ, -οῦ',   e: 'much, many / masc./gen./sing.', required: false },
+    { g: 'πολλῷ, -ῷ',     e: 'much, many / masc./dat./sing.', required: false },
+    { g: 'πολύν, -ύν',    e: 'much, many / masc./acc./sing.', required: false },
+    { g: 'πολλοί, -οί',   e: 'much, many / masc./nom./pl.',   required: false },
+    { g: 'πολλῶν, -ῶν',   e: 'much, many / masc./gen./pl.',   required: false },
+    { g: 'πολλοῖς, -οῖς', e: 'much, many / masc./dat./pl.',   required: false },
+    { g: 'πολλούς, -ούς', e: 'much, many / masc./acc./pl.',   required: false },
+
+    // πολύς — feminine (8 cards)
+    { g: 'πολλή, -ή',     e: 'much, many / fem./nom./sing.',  required: false },
+    { g: 'πολλῆς, -ῆς',   e: 'much, many / fem./gen./sing.',  required: false },
+    { g: 'πολλῇ, -ῇ',     e: 'much, many / fem./dat./sing.',  required: false },
+    { g: 'πολλήν, -ήν',   e: 'much, many / fem./acc./sing.',  required: false },
+    { g: 'πολλαί, -αί',   e: 'much, many / fem./nom./pl.',    required: false },
+    { g: 'πολλῶν, -ῶν',   e: 'much, many / fem./gen./pl.',    required: false },
+    { g: 'πολλαῖς, -αῖς', e: 'much, many / fem./dat./pl.',    required: false },
+    { g: 'πολλάς, -άς',   e: 'much, many / fem./acc./pl.',    required: false },
+
+    // πολύς — neuter (8 cards)
+    { g: 'πολύ, -ύ',      e: 'much / neut./nom./sing.',       required: false },
+    { g: 'πολλοῦ, -οῦ',   e: 'much / neut./gen./sing.',       required: false },
+    { g: 'πολλῷ, -ῷ',     e: 'much / neut./dat./sing.',       required: false },
+    { g: 'πολύ, -ύ',      e: 'much / neut./acc./sing.',       required: false },
+    { g: 'πολλά, -ά',     e: 'many / neut./nom./pl.',         required: false },
+    { g: 'πολλῶν, -ῶν',   e: 'many / neut./gen./pl.',         required: false },
+    { g: 'πολλοῖς, -οῖς', e: 'many / neut./dat./pl.',         required: false },
+    { g: 'πολλά, -ά',     e: 'many / neut./acc./pl.',         required: false },
+
+    // μέγας — masculine (8 cards)
+    { g: 'μέγας, -ας',     e: 'great / masc./nom./sing.', required: false },
+    { g: 'μεγάλου, -ου',   e: 'great / masc./gen./sing.', required: false },
+    { g: 'μεγάλῳ, -ῳ',    e: 'great / masc./dat./sing.', required: false },
+    { g: 'μέγαν, -αν',     e: 'great / masc./acc./sing.', required: false },
+    { g: 'μεγάλοι, -οι',   e: 'great / masc./nom./pl.',   required: false },
+    { g: 'μεγάλων, -ων',   e: 'great / masc./gen./pl.',   required: false },
+    { g: 'μεγάλοις, -οις', e: 'great / masc./dat./pl.',   required: false },
+    { g: 'μεγάλους, -ους', e: 'great / masc./acc./pl.',   required: false },
+
+    // μέγας — feminine (8 cards)
+    { g: 'μεγάλη, -η',     e: 'great / fem./nom./sing.',  required: false },
+    { g: 'μεγάλης, -ης',   e: 'great / fem./gen./sing.',  required: false },
+    { g: 'μεγάλῃ, -ῃ',    e: 'great / fem./dat./sing.',  required: false },
+    { g: 'μεγάλην, -ην',   e: 'great / fem./acc./sing.',  required: false },
+    { g: 'μεγάλαι, -αι',   e: 'great / fem./nom./pl.',    required: false },
+    { g: 'μεγάλων, -ων',   e: 'great / fem./gen./pl.',    required: false },
+    { g: 'μεγάλαις, -αις', e: 'great / fem./dat./pl.',    required: false },
+    { g: 'μεγάλας, -ας',   e: 'great / fem./acc./pl.',    required: false },
+
+    // μέγας — neuter (8 cards)
+    { g: 'μέγα, -α',       e: 'great / neut./nom./sing.', required: false },
+    { g: 'μεγάλου, -ου',   e: 'great / neut./gen./sing.', required: false },
+    { g: 'μεγάλῳ, -ῳ',    e: 'great / neut./dat./sing.', required: false },
+    { g: 'μέγα, -α',       e: 'great / neut./acc./sing.', required: false },
+    { g: 'μεγάλα, -α',     e: 'great / neut./nom./pl.',   required: false },
+    { g: 'μεγάλων, -ων',   e: 'great / neut./gen./pl.',   required: false },
+    { g: 'μεγάλοις, -οις', e: 'great / neut./dat./pl.',   required: false },
+    { g: 'μεγάλα, -α',     e: 'great / neut./acc./pl.',   required: false },
   ];
 
   const SUPPLEMENTAL_GRAMMAR_SETS = {
