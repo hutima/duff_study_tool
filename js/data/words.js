@@ -3487,6 +3487,80 @@ window.SESSIONS = SESSIONS;
     all:  { summary: 'Ch. 1–20 + weekly supplements' }
   };
 
+
+
+  const week1SupplementCards = [
+    // λύω present active indicative
+    { g: 'λύω', e: 'λύω — present active indicative, 1st singular', required: false },
+    { g: 'λύεις', e: 'λύω — present active indicative, 2nd singular', required: false },
+    { g: 'λύει', e: 'λύω — present active indicative, 3rd singular', required: false },
+    { g: 'λύομεν', e: 'λύω — present active indicative, 1st plural', required: false },
+    { g: 'λύετε', e: 'λύω — present active indicative, 2nd plural', required: false },
+    { g: 'λύουσι(ν)', e: 'λύω — present active indicative, 3rd plural', required: false },
+
+    // εἰμί present active indicative
+    { g: 'εἰμί', e: 'εἰμί — present active indicative, 1st singular', required: false },
+    { g: 'εἶ', e: 'εἰμί — present active indicative, 2nd singular', required: false },
+    { g: 'ἐστί(ν)', e: 'εἰμί — present active indicative, 3rd singular', required: false },
+    { g: 'ἐσμέν', e: 'εἰμί — present active indicative, 1st plural', required: false },
+    { g: 'ἐστέ', e: 'εἰμί — present active indicative, 2nd plural', required: false },
+    { g: 'εἰσί(ν)', e: 'εἰμί — present active indicative, 3rd plural', required: false },
+
+    // Definite article + ἀρχή (feminine)
+    { g: 'ἡ ἀρχή', e: 'nominative singular feminine (article + noun)', required: false },
+    { g: 'τῆς ἀρχῆς', e: 'genitive singular feminine (article + noun)', required: false },
+    { g: 'τῇ ἀρχῇ', e: 'dative singular feminine (article + noun)', required: false },
+    { g: 'τὴν ἀρχήν', e: 'accusative singular feminine (article + noun)', required: false },
+    { g: 'αἱ ἀρχαί', e: 'nominative plural feminine (article + noun)', required: false },
+    { g: 'τῶν ἀρχῶν', e: 'genitive plural feminine (article + noun)', required: false },
+    { g: 'ταῖς ἀρχαῖς', e: 'dative plural feminine (article + noun)', required: false },
+    { g: 'τὰς ἀρχάς', e: 'accusative plural feminine (article + noun)', required: false },
+
+    // Definite article + ἔργον (neuter)
+    { g: 'τὸ ἔργον', e: 'nominative singular neuter (article + noun)', required: false },
+    { g: 'τοῦ ἔργου', e: 'genitive singular neuter (article + noun)', required: false },
+    { g: 'τῷ ἔργῳ', e: 'dative singular neuter (article + noun)', required: false },
+    { g: 'τὸ ἔργον', e: 'accusative singular neuter (article + noun)', required: false },
+    { g: 'τὰ ἔργα', e: 'nominative plural neuter (article + noun)', required: false },
+    { g: 'τῶν ἔργων', e: 'genitive plural neuter (article + noun)', required: false },
+    { g: 'τοῖς ἔργοις', e: 'dative plural neuter (article + noun)', required: false },
+    { g: 'τὰ ἔργα', e: 'accusative plural neuter (article + noun)', required: false },
+
+    // αὐτός paradigm (masculine / feminine / neuter)
+    { g: 'αὐτός', e: 'nominative singular masculine', required: false },
+    { g: 'αὐτοῦ', e: 'genitive singular masculine/neuter', required: false },
+    { g: 'αὐτῷ', e: 'dative singular masculine/neuter', required: false },
+    { g: 'αὐτόν', e: 'accusative singular masculine', required: false },
+    { g: 'αὐτή', e: 'nominative singular feminine', required: false },
+    { g: 'αὐτῆς', e: 'genitive singular feminine', required: false },
+    { g: 'αὐτῇ', e: 'dative singular feminine', required: false },
+    { g: 'αὐτήν', e: 'accusative singular feminine', required: false },
+    { g: 'αὐτό', e: 'nominative singular neuter', required: false },
+    { g: 'αὐτοῦ', e: 'genitive singular neuter', required: false },
+    { g: 'αὐτῷ', e: 'dative singular neuter', required: false },
+    { g: 'αὐτό', e: 'accusative singular neuter', required: false },
+    { g: 'αὐτοί', e: 'nominative plural masculine', required: false },
+    { g: 'αὐτῶν', e: 'genitive plural masculine/feminine/neuter', required: false },
+    { g: 'αὐτοῖς', e: 'dative plural masculine/neuter', required: false },
+    { g: 'αὐτούς', e: 'accusative plural masculine', required: false },
+    { g: 'αὐταί', e: 'nominative plural feminine', required: false },
+    { g: 'αὐτῶν', e: 'genitive plural feminine', required: false },
+    { g: 'αὐταῖς', e: 'dative plural feminine', required: false },
+    { g: 'αὐτάς', e: 'accusative plural feminine', required: false },
+    { g: 'αὐτά', e: 'nominative plural neuter', required: false },
+    { g: 'αὐτῶν', e: 'genitive plural neuter', required: false },
+    { g: 'αὐτοῖς', e: 'dative plural neuter', required: false },
+    { g: 'αὐτά', e: 'accusative plural neuter', required: false }
+  ];
+
+  const existingW1O = window.SETS.W1O && Array.isArray(window.SETS.W1O.cards) ? window.SETS.W1O.cards : [];
+  const mergedW1O = [...existingW1O];
+  week1SupplementCards.forEach(card => {
+    if (!mergedW1O.some(existing => existing.g === card.g && existing.e === card.e)) {
+      mergedW1O.push(card);
+    }
+  });
+  if (window.SETS.W1O) window.SETS.W1O.cards = mergedW1O;
   window.SESSIONS.forEach(session => {
     const update = sessionUpdates[session.id];
     if (update) Object.assign(session, update);
