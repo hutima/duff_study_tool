@@ -3185,82 +3185,82 @@ const SETS = {
         "required": true
       },
       {
-        "g": "ἡ ἀρχή",
+        "g": "(ἡ) ἀρχή, -ή",
         "e": "the beginning (nom. sing.)",
         "required": true
       },
       {
-        "g": "τῆς ἀρχῆς",
+        "g": "(τῆς) ἀρχῆς, -ῆς",
         "e": "of the beginning (gen. sing.)",
         "required": true
       },
       {
-        "g": "τῇ ἀρχῇ",
+        "g": "(τῇ) ἀρχῇ, -ῇ",
         "e": "to/for the beginning (dat. sing.)",
         "required": true
       },
       {
-        "g": "τήν ἀρχήν",
+        "g": "(τὴν) ἀρχήν, -ήν",
         "e": "the beginning (acc. sing.)",
         "required": true
       },
       {
-        "g": "αἱ ἀρχαί",
+        "g": "(αἱ) ἀρχαί, -αί",
         "e": "the beginnings (nom. pl.)",
         "required": true
       },
       {
-        "g": "τῶν ἀρχῶν",
+        "g": "(τῶν) ἀρχῶν, -ῶν",
         "e": "of the beginnings (gen. pl.)",
         "required": true
       },
       {
-        "g": "ταῖς ἀρχαῖς",
+        "g": "(ταῖς) ἀρχαῖς, -αῖς",
         "e": "to/for the beginnings (dat. pl.)",
         "required": true
       },
       {
-        "g": "τάς ἀρχάς",
+        "g": "(τὰς) ἀρχάς, -άς",
         "e": "the beginnings (acc. pl.)",
         "required": true
       },
       {
-        "g": "τὸ ἔργον",
+        "g": "(τὸ) ἔργον, -ον",
         "e": "the work (nom. sing.)",
         "required": true
       },
       {
-        "g": "τοῦ ἔργου",
+        "g": "(τοῦ) ἔργου, -ου",
         "e": "of the work (gen. sing.)",
         "required": true
       },
       {
-        "g": "τῷ ἔργῳ",
+        "g": "(τῷ) ἔργῳ, -ῳ",
         "e": "to/for the work (dat. sing.)",
         "required": true
       },
       {
-        "g": "τὸ ἔργον",
+        "g": "(τὸ) ἔργον, -ον",
         "e": "the work (acc. sing.)",
         "required": true
       },
       {
-        "g": "τὰ ἔργα",
+        "g": "(τὰ) ἔργα, -α",
         "e": "the works (nom. pl.)",
         "required": true
       },
       {
-        "g": "τῶν ἔργων",
+        "g": "(τῶν) ἔργων, -ων",
         "e": "of the works (gen. pl.)",
         "required": true
       },
       {
-        "g": "τοῖς ἔργοις",
+        "g": "(τοῖς) ἔργοις, -οις",
         "e": "to/for the works (dat. pl.)",
         "required": true
       },
       {
-        "g": "τὰ ἔργα",
+        "g": "(τὰ) ἔργα, -α",
         "e": "the works (acc. pl.)",
         "required": true
       },
@@ -4067,24 +4067,24 @@ window.SESSIONS = SESSIONS;
     { g: 'εἰσί(ν)', e: 'εἰμί — present active indicative, 3rd plural', required: false },
 
     // Definite article + ἀρχή (feminine)
-    { g: 'ἡ ἀρχή', e: 'nominative singular feminine (article + noun)', required: false },
-    { g: 'τῆς ἀρχῆς', e: 'genitive singular feminine (article + noun)', required: false },
-    { g: 'τῇ ἀρχῇ', e: 'dative singular feminine (article + noun)', required: false },
-    { g: 'τὴν ἀρχήν', e: 'accusative singular feminine (article + noun)', required: false },
-    { g: 'αἱ ἀρχαί', e: 'nominative plural feminine (article + noun)', required: false },
-    { g: 'τῶν ἀρχῶν', e: 'genitive plural feminine (article + noun)', required: false },
-    { g: 'ταῖς ἀρχαῖς', e: 'dative plural feminine (article + noun)', required: false },
-    { g: 'τὰς ἀρχάς', e: 'accusative plural feminine (article + noun)', required: false },
+    { g: '(ἡ) ἀρχή, -ή', e: 'the beginning', required: false },
+    { g: '(τῆς) ἀρχῆς, -ῆς', e: 'of/from the beginning', required: false },
+    { g: '(τῇ) ἀρχῇ, -ῇ', e: 'to/for/in the beginning', required: false },
+    { g: '(τὴν) ἀρχήν, -ήν', e: 'the beginning', required: false },
+    { g: '(αἱ) ἀρχαί, -αί', e: 'the beginnings', required: false },
+    { g: '(τῶν) ἀρχῶν, -ῶν', e: 'of/from the beginnings', required: false },
+    { g: '(ταῖς) ἀρχαῖς, -αῖς', e: 'to/for/in the beginnings', required: false },
+    { g: '(τὰς) ἀρχάς, -άς', e: 'the beginnings', required: false },
 
     // Definite article + ἔργον (neuter)
-    { g: 'τὸ ἔργον', e: 'nominative singular neuter (article + noun)', required: false },
-    { g: 'τοῦ ἔργου', e: 'genitive singular neuter (article + noun)', required: false },
-    { g: 'τῷ ἔργῳ', e: 'dative singular neuter (article + noun)', required: false },
-    { g: 'τὸ ἔργον', e: 'accusative singular neuter (article + noun)', required: false },
-    { g: 'τὰ ἔργα', e: 'nominative plural neuter (article + noun)', required: false },
-    { g: 'τῶν ἔργων', e: 'genitive plural neuter (article + noun)', required: false },
-    { g: 'τοῖς ἔργοις', e: 'dative plural neuter (article + noun)', required: false },
-    { g: 'τὰ ἔργα', e: 'accusative plural neuter (article + noun)', required: false },
+    { g: '(τὸ) ἔργον, -ον', e: 'the work/deed', required: false },
+    { g: '(τοῦ) ἔργου, -ου', e: 'of/from the work/deed', required: false },
+    { g: '(τῷ) ἔργῳ, -ῳ', e: 'to/for/in the work/deed', required: false },
+    { g: '(τὸ) ἔργον, -ον', e: 'the work/deed', required: false },
+    { g: '(τὰ) ἔργα, -α', e: 'the works/deeds', required: false },
+    { g: '(τῶν) ἔργων, -ων', e: 'of/from the works/deeds', required: false },
+    { g: '(τοῖς) ἔργοις, -οις', e: 'to/for/in the works/deeds', required: false },
+    { g: '(τὰ) ἔργα, -α', e: 'the works/deeds', required: false },
 
     // αὐτός paradigm (masculine / feminine / neuter)
     { g: 'αὐτός', e: 'nominative singular masculine', required: false },
