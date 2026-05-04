@@ -39,15 +39,93 @@
 
 
   const SUPPLEMENTAL_VOCAB_CARDS = [
-    { g: 'λύω, λύεις, λύει, λύομεν, λύετε, λύουσι(ν)', e: 'λύω present active indicative: 1sg, 2sg, 3sg, 1pl, 2pl, 3pl', required: false },
-    { g: 'ὁ, τοῦ, τῷ, τόν, οἱ, τῶν, τοῖς, τούς', e: 'definite article masculine: nom/gen/dat/acc singular and plural', required: false },
-    { g: 'ἡ, τῆς, τῇ, τήν, αἱ, τῶν, ταῖς, τάς', e: 'definite article feminine: nom/gen/dat/acc singular and plural', required: false },
-    { g: 'τό, τοῦ, τῷ, τό, τά, τῶν, τοῖς, τά', e: 'definite article neuter: nom/gen/dat/acc singular and plural', required: false },
-    { g: 'ἡ ἀρχή, τῆς ἀρχῆς, τῇ ἀρχῇ, τὴν ἀρχήν · αἱ ἀρχαί, τῶν ἀρχῶν, ταῖς ἀρχαῖς, τὰς ἀρχάς', e: 'ἀρχή (feminine) with article: nom/gen/dat/acc singular and plural', required: false },
-    { g: 'τὸ ἔργον, τοῦ ἔργου, τῷ ἔργῳ, τὸ ἔργον · τὰ ἔργα, τῶν ἔργων, τοῖς ἔργοις, τὰ ἔργα', e: 'ἔργον (neuter) with article: nom/gen/dat/acc singular and plural', required: false },
-    { g: 'αὐτός, αὐτοῦ, αὐτῷ, αὐτόν · αὐτοί, αὐτῶν, αὐτοῖς, αὐτούς', e: 'αὐτός masculine: nom/gen/dat/acc singular and plural', required: false },
-    { g: 'αὐτή, αὐτῆς, αὐτῇ, αὐτήν · αὐταί, αὐτῶν, αὐταῖς, αὐτάς', e: 'αὐτός feminine: nom/gen/dat/acc singular and plural', required: false },
-    { g: 'αὐτό, αὐτοῦ, αὐτῷ, αὐτό · αὐτά, αὐτῶν, αὐτοῖς, αὐτά', e: 'αὐτός neuter: nom/gen/dat/acc singular and plural', required: false }
+    // λύω — present active indicative (6 cards)
+    { g: 'λύω, -ω',         e: 'I untie / pres. act. ind. / 1st sing.',       required: false },
+    { g: 'λύεις, -εις',     e: 'you untie / pres. act. ind. / 2nd sing.',      required: false },
+    { g: 'λύει, -ει',       e: 'he/she/it unties / pres. act. ind. / 3rd sing.', required: false },
+    { g: 'λύομεν, -ομεν',   e: 'we untie / pres. act. ind. / 1st pl.',         required: false },
+    { g: 'λύετε, -ετε',     e: 'you untie / pres. act. ind. / 2nd pl.',        required: false },
+    { g: 'λύουσι(ν), -ουσι(ν)', e: 'they untie / pres. act. ind. / 3rd pl.',  required: false },
+
+    // Definite article — masculine (8 cards)
+    { g: 'ὁ, -ο',     e: 'the / def. art. / masc./nom./sing.', required: false },
+    { g: 'τοῦ, -οῦ',  e: 'the / def. art. / masc./gen./sing.', required: false },
+    { g: 'τῷ, -ῷ',    e: 'the / def. art. / masc./dat./sing.', required: false },
+    { g: 'τόν, -όν',  e: 'the / def. art. / masc./acc./sing.', required: false },
+    { g: 'οἱ, -οι',   e: 'the / def. art. / masc./nom./pl.',   required: false },
+    { g: 'τῶν, -ῶν',  e: 'the / def. art. / masc./gen./pl.',   required: false },
+    { g: 'τοῖς, -οῖς', e: 'the / def. art. / masc./dat./pl.', required: false },
+    { g: 'τούς, -ούς', e: 'the / def. art. / masc./acc./pl.', required: false },
+
+    // Definite article — feminine (8 cards)
+    { g: 'ἡ, -η',     e: 'the / def. art. / fem./nom./sing.',  required: false },
+    { g: 'τῆς, -ῆς',  e: 'the / def. art. / fem./gen./sing.',  required: false },
+    { g: 'τῇ, -ῇ',    e: 'the / def. art. / fem./dat./sing.',  required: false },
+    { g: 'τήν, -ήν',  e: 'the / def. art. / fem./acc./sing.',  required: false },
+    { g: 'αἱ, -αι',   e: 'the / def. art. / fem./nom./pl.',    required: false },
+    { g: 'τῶν, -ῶν',  e: 'the / def. art. / fem./gen./pl.',    required: false },
+    { g: 'ταῖς, -αῖς', e: 'the / def. art. / fem./dat./pl.', required: false },
+    { g: 'τάς, -άς',  e: 'the / def. art. / fem./acc./pl.',    required: false },
+
+    // Definite article — neuter (8 cards)
+    { g: 'τό, -ό',    e: 'the / def. art. / neut./nom./sing.', required: false },
+    { g: 'τοῦ, -οῦ',  e: 'the / def. art. / neut./gen./sing.', required: false },
+    { g: 'τῷ, -ῷ',    e: 'the / def. art. / neut./dat./sing.', required: false },
+    { g: 'τό, -ό',    e: 'the / def. art. / neut./acc./sing.', required: false },
+    { g: 'τά, -ά',    e: 'the / def. art. / neut./nom./pl.',   required: false },
+    { g: 'τῶν, -ῶν',  e: 'the / def. art. / neut./gen./pl.',   required: false },
+    { g: 'τοῖς, -οῖς', e: 'the / def. art. / neut./dat./pl.', required: false },
+    { g: 'τά, -ά',    e: 'the / def. art. / neut./acc./pl.',   required: false },
+
+    // ἀρχή — 1st declension feminine (8 cards)
+    { g: 'ἀρχή, -ή',    e: 'beginning / fem./nom./sing.', required: false },
+    { g: 'ἀρχῆς, -ῆς',  e: 'beginning / fem./gen./sing.', required: false },
+    { g: 'ἀρχῇ, -ῇ',    e: 'beginning / fem./dat./sing.', required: false },
+    { g: 'ἀρχήν, -ήν',  e: 'beginning / fem./acc./sing.', required: false },
+    { g: 'ἀρχαί, -αί',  e: 'beginnings / fem./nom./pl.',  required: false },
+    { g: 'ἀρχῶν, -ῶν',  e: 'beginnings / fem./gen./pl.',  required: false },
+    { g: 'ἀρχαῖς, -αῖς', e: 'beginnings / fem./dat./pl.', required: false },
+    { g: 'ἀρχάς, -άς',  e: 'beginnings / fem./acc./pl.',  required: false },
+
+    // ἔργον — 2nd declension neuter (8 cards)
+    { g: 'ἔργον, -ον',  e: 'work / neut./nom./sing.', required: false },
+    { g: 'ἔργου, -ου',  e: 'work / neut./gen./sing.', required: false },
+    { g: 'ἔργῳ, -ῳ',    e: 'work / neut./dat./sing.', required: false },
+    { g: 'ἔργον, -ον',  e: 'work / neut./acc./sing.', required: false },
+    { g: 'ἔργα, -α',    e: 'works / neut./nom./pl.',  required: false },
+    { g: 'ἔργων, -ων',  e: 'works / neut./gen./pl.',  required: false },
+    { g: 'ἔργοις, -οις', e: 'works / neut./dat./pl.', required: false },
+    { g: 'ἔργα, -α',    e: 'works / neut./acc./pl.',  required: false },
+
+    // αὐτός — masculine (8 cards)
+    { g: 'αὐτός, -ός',   e: 'he/himself / masc./nom./sing.', required: false },
+    { g: 'αὐτοῦ, -οῦ',   e: 'of him/himself / masc./gen./sing.', required: false },
+    { g: 'αὐτῷ, -ῷ',     e: 'to/for him/himself / masc./dat./sing.', required: false },
+    { g: 'αὐτόν, -όν',   e: 'him/himself / masc./acc./sing.', required: false },
+    { g: 'αὐτοί, -οί',   e: 'they/themselves / masc./nom./pl.', required: false },
+    { g: 'αὐτῶν, -ῶν',   e: 'of them/themselves / masc./gen./pl.', required: false },
+    { g: 'αὐτοῖς, -οῖς', e: 'to/for them/themselves / masc./dat./pl.', required: false },
+    { g: 'αὐτούς, -ούς', e: 'them/themselves / masc./acc./pl.', required: false },
+
+    // αὐτός — feminine (8 cards)
+    { g: 'αὐτή, -ή',     e: 'she/herself / fem./nom./sing.', required: false },
+    { g: 'αὐτῆς, -ῆς',   e: 'of her/herself / fem./gen./sing.', required: false },
+    { g: 'αὐτῇ, -ῇ',     e: 'to/for her/herself / fem./dat./sing.', required: false },
+    { g: 'αὐτήν, -ήν',   e: 'her/herself / fem./acc./sing.', required: false },
+    { g: 'αὐταί, -αί',   e: 'they/themselves / fem./nom./pl.', required: false },
+    { g: 'αὐτῶν, -ῶν',   e: 'of them/themselves / fem./gen./pl.', required: false },
+    { g: 'αὐταῖς, -αῖς', e: 'to/for them/themselves / fem./dat./pl.', required: false },
+    { g: 'αὐτάς, -άς',   e: 'them/themselves / fem./acc./pl.', required: false },
+
+    // αὐτός — neuter (8 cards)
+    { g: 'αὐτό, -ό',     e: 'it/itself / neut./nom./sing.', required: false },
+    { g: 'αὐτοῦ, -οῦ',   e: 'of it/itself / neut./gen./sing.', required: false },
+    { g: 'αὐτῷ, -ῷ',     e: 'to/for it/itself / neut./dat./sing.', required: false },
+    { g: 'αὐτό, -ό',     e: 'it/itself / neut./acc./sing.', required: false },
+    { g: 'αὐτά, -ά',     e: 'they/themselves / neut./nom./pl.', required: false },
+    { g: 'αὐτῶν, -ῶν',   e: 'of them/themselves / neut./gen./pl.', required: false },
+    { g: 'αὐτοῖς, -οῖς', e: 'to/for them/themselves / neut./dat./pl.', required: false },
+    { g: 'αὐτά, -ά',     e: 'them/themselves / neut./acc./pl.', required: false },
   ];
 
   const SUPPLEMENTAL_GRAMMAR_SETS = {
