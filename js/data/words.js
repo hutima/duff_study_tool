@@ -3143,6 +3143,196 @@ const SETS = {
         "g": "ὅσος, -η, -ον",
         "e": "as/how great/much",
         "required": true
+      },
+      {
+        "g": "ὁ",
+        "e": "the (masc. nom. sing.)",
+        "required": true
+      },
+      {
+        "g": "τοῦ",
+        "e": "of the (masc./neut. gen. sing.)",
+        "required": true
+      },
+      {
+        "g": "τῷ",
+        "e": "to/for the (masc./neut. dat. sing.)",
+        "required": true
+      },
+      {
+        "g": "τόν",
+        "e": "the (masc. acc. sing.)",
+        "required": true
+      },
+      {
+        "g": "οἱ",
+        "e": "the (masc. nom. pl.)",
+        "required": true
+      },
+      {
+        "g": "τῶν",
+        "e": "of the (gen. pl.)",
+        "required": true
+      },
+      {
+        "g": "τοῖς",
+        "e": "to/for the (masc./neut. dat. pl.)",
+        "required": true
+      },
+      {
+        "g": "τούς",
+        "e": "the (masc. acc. pl.)",
+        "required": true
+      },
+      {
+        "g": "ἡ ἀρχή",
+        "e": "the beginning (nom. sing.)",
+        "required": true
+      },
+      {
+        "g": "τῆς ἀρχῆς",
+        "e": "of the beginning (gen. sing.)",
+        "required": true
+      },
+      {
+        "g": "τῇ ἀρχῇ",
+        "e": "to/for the beginning (dat. sing.)",
+        "required": true
+      },
+      {
+        "g": "τήν ἀρχήν",
+        "e": "the beginning (acc. sing.)",
+        "required": true
+      },
+      {
+        "g": "αἱ ἀρχαί",
+        "e": "the beginnings (nom. pl.)",
+        "required": true
+      },
+      {
+        "g": "τῶν ἀρχῶν",
+        "e": "of the beginnings (gen. pl.)",
+        "required": true
+      },
+      {
+        "g": "ταῖς ἀρχαῖς",
+        "e": "to/for the beginnings (dat. pl.)",
+        "required": true
+      },
+      {
+        "g": "τάς ἀρχάς",
+        "e": "the beginnings (acc. pl.)",
+        "required": true
+      },
+      {
+        "g": "τὸ ἔργον",
+        "e": "the work (nom. sing.)",
+        "required": true
+      },
+      {
+        "g": "τοῦ ἔργου",
+        "e": "of the work (gen. sing.)",
+        "required": true
+      },
+      {
+        "g": "τῷ ἔργῳ",
+        "e": "to/for the work (dat. sing.)",
+        "required": true
+      },
+      {
+        "g": "τὸ ἔργον",
+        "e": "the work (acc. sing.)",
+        "required": true
+      },
+      {
+        "g": "τὰ ἔργα",
+        "e": "the works (nom. pl.)",
+        "required": true
+      },
+      {
+        "g": "τῶν ἔργων",
+        "e": "of the works (gen. pl.)",
+        "required": true
+      },
+      {
+        "g": "τοῖς ἔργοις",
+        "e": "to/for the works (dat. pl.)",
+        "required": true
+      },
+      {
+        "g": "τὰ ἔργα",
+        "e": "the works (acc. pl.)",
+        "required": true
+      },
+      {
+        "g": "αὐτός",
+        "e": "self / he (nom. sing. masc.)",
+        "required": true
+      },
+      {
+        "g": "αὐτοῦ",
+        "e": "of him / of it (gen. sing. masc./neut.)",
+        "required": true
+      },
+      {
+        "g": "αὐτῷ",
+        "e": "to him / to it (dat. sing. masc./neut.)",
+        "required": true
+      },
+      {
+        "g": "αὐτόν",
+        "e": "him (acc. sing. masc.)",
+        "required": true
+      },
+      {
+        "g": "αὐτοί",
+        "e": "they (nom. pl. masc.)",
+        "required": true
+      },
+      {
+        "g": "αὐτῶν",
+        "e": "of them (gen. pl.)",
+        "required": true
+      },
+      {
+        "g": "αὐτοῖς",
+        "e": "to them (dat. pl. masc./neut.)",
+        "required": true
+      },
+      {
+        "g": "αὐτούς",
+        "e": "them (acc. pl. masc.)",
+        "required": true
+      },
+      {
+        "g": "λύω",
+        "e": "I untie (1st person sing.)",
+        "required": true
+      },
+      {
+        "g": "λύεις",
+        "e": "you untie (2nd person sing.)",
+        "required": true
+      },
+      {
+        "g": "λύει",
+        "e": "he/she/it unties (3rd person sing.)",
+        "required": true
+      },
+      {
+        "g": "λύομεν",
+        "e": "we untie (1st person pl.)",
+        "required": true
+      },
+      {
+        "g": "λύετε",
+        "e": "you all untie (2nd person pl.)",
+        "required": true
+      },
+      {
+        "g": "λύουσι(ν)",
+        "e": "they untie (3rd person pl.)",
+        "required": true
       }
     ]
   },
