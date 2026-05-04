@@ -212,6 +212,54 @@
             { form: 'φιλοῦσι(ν)', answer: 'present active indicative, 3rd plural' }
           ]
         },
+
+        {
+          family: 'Contract verb present active indicative (vocab-style)',
+          lemma: 'φιλέω',
+          gloss: 'I love, like',
+          questions: [
+            { form: 'φιλῶ', answer: '1st person sing.', note: 'I love / like' },
+            { form: 'φιλεῖς', answer: '2nd person sing.', note: 'you (sing.) love / like' },
+            { form: 'φιλεῖ', answer: '3rd person sing.', note: 'he/she/it loves / likes' },
+            { form: 'φιλοῦμεν', answer: '1st person pl.', note: 'we love / like' },
+            { form: 'φιλεῖτε', answer: '2nd person pl.', note: 'you (pl.) love / like' },
+            { form: 'φιλοῦσι(ν)', answer: '3rd person pl.', note: 'they love / like' }
+          ]
+        },
+        {
+          family: 'Variant feminine 1st-declension endings',
+          lemma: 'ἡμέρα / δόξα / ἀρχή',
+          gloss: 'day / glory / beginning',
+          questions: [
+            { form: 'ἡμέρα', answer: 'nom. sing. fem.', note: 'day (subject)' },
+            { form: 'ἡμέραν', answer: 'acc. sing. fem.', note: 'day (object)' },
+            { form: 'ἡμέρᾳ', answer: 'dat. sing. fem.', note: 'to/for day' },
+            { form: 'ἡμέρας', answer: 'gen. sing. fem.', note: 'of day' },
+            { form: 'δόξα', answer: 'nom. sing. fem.', note: 'glory (subject)' },
+            { form: 'δόξαν', answer: 'acc. sing. fem.', note: 'glory (object)' },
+            { form: 'δόξῃ', answer: 'dat. sing. fem.', note: 'to/for glory' },
+            { form: 'δόξης', answer: 'gen. sing. fem.', note: 'of glory' },
+            { form: 'ἀρχή', answer: 'nom. sing. fem.', note: 'beginning (subject)' },
+            { form: 'ἀρχήν', answer: 'acc. sing. fem.', note: 'beginning (object)' },
+            { form: 'ἀρχῇ', answer: 'dat. sing. fem.', note: 'to/for beginning' },
+            { form: 'ἀρχῆς', answer: 'gen. sing. fem.', note: 'of beginning' }
+          ]
+        },
+        {
+          family: 'πολύς and μέγας core forms',
+          lemma: 'πολύς / μέγας',
+          gloss: 'much/many / great',
+          questions: [
+            { form: 'πολύς', answer: 'nom. sing. masc.', note: 'much/many (masc. subject)' },
+            { form: 'πολλοῦ', answer: 'gen. sing. masc./neut.', note: 'of much/many' },
+            { form: 'πολλῷ', answer: 'dat. sing. masc./neut.', note: 'to/for much/many' },
+            { form: 'πολύν', answer: 'acc. sing. masc.', note: 'much/many (masc. object)' },
+            { form: 'μέγας', answer: 'nom. sing. masc.', note: 'great (masc. subject)' },
+            { form: 'μεγάλου', answer: 'gen. sing. masc./neut.', note: 'of great' },
+            { form: 'μεγάλῳ', answer: 'dat. sing. masc./neut.', note: 'to/for great' },
+            { form: 'μέγαν', answer: 'acc. sing. masc.', note: 'great (masc. object)' }
+          ]
+        },
         {
           family: 'Pronoun paradigm',
           lemma: 'αὐτός, αὐτή, αὐτό',
