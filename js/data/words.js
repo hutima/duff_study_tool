@@ -3130,7 +3130,7 @@ const SETS = {
     ]
   },
   "W1O": {
-    "label": "Week 1 - Other",
+    "label": "Week 1 - Supplement",
     "type": "other",
     "week": 1,
     "cards": [
@@ -3146,237 +3146,227 @@ const SETS = {
       },
       {
         "g": "ὁ",
-        "e": "the (masc. nom. sing.)",
+        "e": "the",
         "required": true
       },
       {
         "g": "τοῦ",
-        "e": "of the (masc./neut. gen. sing.)",
+        "e": "of the",
         "required": true
       },
       {
         "g": "τῷ",
-        "e": "to/for the (masc./neut. dat. sing.)",
+        "e": "to/for the",
         "required": true
       },
       {
         "g": "τόν",
-        "e": "the (masc. acc. sing.)",
+        "e": "the",
         "required": true
       },
       {
         "g": "οἱ",
-        "e": "the (masc. nom. pl.)",
+        "e": "the",
         "required": true
       },
       {
         "g": "τῶν",
-        "e": "of the (gen. pl.)",
+        "e": "of the",
         "required": true
       },
       {
         "g": "τοῖς",
-        "e": "to/for the (masc./neut. dat. pl.)",
+        "e": "to/for the",
         "required": true
       },
       {
         "g": "τούς",
-        "e": "the (masc. acc. pl.)",
+        "e": "the",
         "required": true
       },
       {
         "g": "(ἡ) ἀρχή, -ή",
-        "e": "the beginning (nom. sing.)",
+        "e": "the beginning",
         "required": true
       },
       {
         "g": "(τῆς) ἀρχῆς, -ῆς",
-        "e": "of the beginning (gen. sing.)",
+        "e": "of the beginning",
         "required": true
       },
       {
         "g": "(τῇ) ἀρχῇ, -ῇ",
-        "e": "to/for the beginning (dat. sing.)",
+        "e": "to/for the beginning",
         "required": true
       },
       {
         "g": "(τὴν) ἀρχήν, -ήν",
-        "e": "the beginning (acc. sing.)",
+        "e": "the beginning",
         "required": true
       },
       {
         "g": "(αἱ) ἀρχαί, -αί",
-        "e": "the beginnings (nom. pl.)",
+        "e": "the beginnings",
         "required": true
       },
       {
         "g": "(τῶν) ἀρχῶν, -ῶν",
-        "e": "of the beginnings (gen. pl.)",
+        "e": "of the beginnings",
         "required": true
       },
       {
         "g": "(ταῖς) ἀρχαῖς, -αῖς",
-        "e": "to/for the beginnings (dat. pl.)",
+        "e": "to/for the beginnings",
         "required": true
       },
       {
         "g": "(τὰς) ἀρχάς, -άς",
-        "e": "the beginnings (acc. pl.)",
+        "e": "the beginnings",
         "required": true
       },
       {
         "g": "(τὸ) ἔργον, -ον",
-        "e": "the work (nom. sing.)",
+        "e": "the work",
         "required": true
       },
       {
         "g": "(τοῦ) ἔργου, -ου",
-        "e": "of the work (gen. sing.)",
+        "e": "of the work",
         "required": true
       },
       {
         "g": "(τῷ) ἔργῳ, -ῳ",
-        "e": "to/for the work (dat. sing.)",
-        "required": true
-      },
-      {
-        "g": "(τὸ) ἔργον, -ον",
-        "e": "the work (acc. sing.)",
+        "e": "to/for the work",
         "required": true
       },
       {
         "g": "(τὰ) ἔργα, -α",
-        "e": "the works (nom. pl.)",
+        "e": "the works",
         "required": true
       },
       {
         "g": "(τῶν) ἔργων, -ων",
-        "e": "of the works (gen. pl.)",
+        "e": "of the works",
         "required": true
       },
       {
         "g": "(τοῖς) ἔργοις, -οις",
-        "e": "to/for the works (dat. pl.)",
+        "e": "to/for the works",
         "required": true
       },
       {
-        "g": "(τὰ) ἔργα, -α",
-        "e": "the works (acc. pl.)",
+        "g": "αὐτός, -ός",
+        "e": "he / himself / same",
         "required": true
       },
       {
-        "g": "αὐτός",
-        "e": "self / he (nom. sing. masc.)",
+        "g": "αὐτοῦ, -οῦ",
+        "e": "of/from him/it",
         "required": true
       },
       {
-        "g": "αὐτοῦ",
-        "e": "of him / of it (gen. sing. masc./neut.)",
+        "g": "αὐτῷ, -ῷ",
+        "e": "to/for him/it",
         "required": true
       },
       {
-        "g": "αὐτῷ",
-        "e": "to him / to it (dat. sing. masc./neut.)",
+        "g": "αὐτόν, -όν",
+        "e": "him / himself / same",
         "required": true
       },
       {
-        "g": "αὐτόν",
-        "e": "him (acc. sing. masc.)",
+        "g": "αὐτοί, -οί",
+        "e": "they / themselves / same ones",
         "required": true
       },
       {
-        "g": "αὐτοί",
-        "e": "they (nom. pl. masc.)",
+        "g": "αὐτῶν, -ῶν",
+        "e": "of/from them",
         "required": true
       },
       {
-        "g": "αὐτῶν",
-        "e": "of them (gen. pl.)",
+        "g": "αὐτοῖς, -οῖς",
+        "e": "to/for them",
         "required": true
       },
       {
-        "g": "αὐτοῖς",
-        "e": "to them (dat. pl. masc./neut.)",
+        "g": "αὐτούς, -ούς",
+        "e": "them / themselves / same ones",
         "required": true
       },
       {
-        "g": "αὐτούς",
-        "e": "them (acc. pl. masc.)",
+        "g": "λύω, -ω",
+        "e": "I loose/untie",
         "required": true
       },
       {
-        "g": "λύω",
-        "e": "I untie (1st person sing.)",
+        "g": "λύεις, -εις",
+        "e": "you loose/untie",
         "required": true
       },
       {
-        "g": "λύεις",
-        "e": "you untie (2nd person sing.)",
+        "g": "λύει, -ει",
+        "e": "he/she/it looses/unties",
         "required": true
       },
       {
-        "g": "λύει",
-        "e": "he/she/it unties (3rd person sing.)",
+        "g": "λύομεν, -ομεν",
+        "e": "we loose/untie",
         "required": true
       },
       {
-        "g": "λύομεν",
-        "e": "we untie (1st person pl.)",
+        "g": "λύετε, -ετε",
+        "e": "you all loose/untie",
         "required": true
       },
       {
-        "g": "λύετε",
-        "e": "you all untie (2nd person pl.)",
-        "required": true
-      },
-      {
-        "g": "λύουσι(ν)",
-        "e": "they untie (3rd person pl.)",
+        "g": "λύουσι(ν), -ουσι(ν)",
+        "e": "they loose/untie",
         "required": true
       },
       {
         "g": "ἡ, -η",
-        "e": "the / def. art. / fem./nom./sing.",
+        "e": "the",
         "required": true
       },
       {
         "g": "τῆς, -ῆς",
-        "e": "the / def. art. / fem./gen./sing.",
+        "e": "of the",
         "required": true
       },
       {
         "g": "τῇ, -ῇ",
-        "e": "the / def. art. / fem./dat./sing.",
+        "e": "to/for the",
         "required": true
       },
       {
         "g": "τήν, -ήν",
-        "e": "the / def. art. / fem./acc./sing.",
+        "e": "the",
         "required": true
       },
       {
         "g": "αἱ, -αι",
-        "e": "the / def. art. / fem./nom./pl.",
+        "e": "the",
         "required": true
       },
       {
         "g": "ταῖς, -αῖς",
-        "e": "the / def. art. / fem./dat./pl.",
+        "e": "to/for the",
         "required": true
       },
       {
         "g": "τάς, -άς",
-        "e": "the / def. art. / fem./acc./pl.",
+        "e": "the",
         "required": true
       },
       {
         "g": "τό, -ό",
-        "e": "the / def. art. / neut./nom./acc./sing.",
+        "e": "the",
         "required": true
       },
       {
         "g": "τά, -ά",
-        "e": "the / def. art. / neut./nom./acc./pl.",
+        "e": "the",
         "required": true
       },
       {
@@ -3491,47 +3481,47 @@ const SETS = {
       },
       {
         "g": "αὐτή, -ή",
-        "e": "she/herself / fem./nom./sing.",
+        "e": "she / herself / same",
         "required": true
       },
       {
         "g": "αὐτῆς, -ῆς",
-        "e": "of her/herself / fem./gen./sing.",
+        "e": "of/from her",
         "required": true
       },
       {
         "g": "αὐτῇ, -ῇ",
-        "e": "to/for her/herself / fem./dat./sing.",
+        "e": "to/for her",
         "required": true
       },
       {
         "g": "αὐτήν, -ήν",
-        "e": "her/herself / fem./acc./sing.",
+        "e": "her / herself / same",
         "required": true
       },
       {
         "g": "αὐταί, -αί",
-        "e": "they/themselves / fem./nom./pl.",
+        "e": "they / themselves / same ones",
         "required": true
       },
       {
         "g": "αὐταῖς, -αῖς",
-        "e": "to/for them/themselves / fem./dat./pl.",
+        "e": "to/for them",
         "required": true
       },
       {
         "g": "αὐτάς, -άς",
-        "e": "them/themselves / fem./acc./pl.",
+        "e": "them / themselves / same ones",
         "required": true
       },
       {
         "g": "αὐτό, -ό",
-        "e": "it/itself / neut./nom./acc./sing.",
+        "e": "it / itself / same",
         "required": true
       },
       {
         "g": "αὐτά, -ά",
-        "e": "they/themselves / neut./nom./acc./pl.",
+        "e": "they/them / themselves / same things",
         "required": true
       },
       {
@@ -3703,11 +3693,41 @@ const SETS = {
         "g": "μεγάλα, -α",
         "e": "great / neut./nom./acc./pl.",
         "required": true
+      },
+      {
+        "g": "εἰμί, -μί",
+        "e": "I am",
+        "required": false
+      },
+      {
+        "g": "εἶ, -εἶ",
+        "e": "you are",
+        "required": false
+      },
+      {
+        "g": "ἐστί(ν), -στί(ν)",
+        "e": "he/she/it is",
+        "required": false
+      },
+      {
+        "g": "ἐσμέν, -μέν",
+        "e": "we are",
+        "required": false
+      },
+      {
+        "g": "ἐστέ, -τέ",
+        "e": "you all are",
+        "required": false
+      },
+      {
+        "g": "εἰσί(ν), -σί(ν)",
+        "e": "they are",
+        "required": false
       }
     ]
   },
   "W3O": {
-    "label": "Week 3 - Other",
+    "label": "Week 3 - Supplement",
     "type": "other",
     "week": 3,
     "cards": [
@@ -3724,7 +3744,7 @@ const SETS = {
     ]
   },
   "W6O": {
-    "label": "Week 6 - Other",
+    "label": "Week 6 - Supplement",
     "type": "other",
     "week": 6,
     "cards": [
@@ -3736,7 +3756,7 @@ const SETS = {
     ]
   },
   "W7O": {
-    "label": "Week 7 - Other",
+    "label": "Week 7 - Supplement",
     "type": "other",
     "week": 7,
     "cards": [
@@ -3748,7 +3768,7 @@ const SETS = {
     ]
   },
   "W8O": {
-    "label": "Week 8 - Other",
+    "label": "Week 8 - Supplement",
     "type": "other",
     "week": 8,
     "cards": [
@@ -3763,6 +3783,30 @@ const SETS = {
         "required": true
       }
     ]
+  },
+  "EXTRA": {
+    "label": "Extra Review",
+    "type": "other",
+    "week": null,
+    "cards": []
+  },
+  "W2O": {
+    "label": "Week 2 - Supplement",
+    "type": "other",
+    "week": 2,
+    "cards": []
+  },
+  "W4O": {
+    "label": "Week 4 - Supplement",
+    "type": "other",
+    "week": 4,
+    "cards": []
+  },
+  "W5O": {
+    "label": "Week 5 - Supplement",
+    "type": "other",
+    "week": 5,
+    "cards": []
   }
 };
 
@@ -3778,7 +3822,7 @@ const SESSIONS = [
       "W1O"
     ],
     "special": false,
-    "summary": "Ch. 1, Ch. 2, Ch. 3"
+    "summary": "Alphabet · λύω / φιλέω · article / noun patterns"
   },
   {
     "id": "wk1f",
@@ -3790,7 +3834,7 @@ const SESSIONS = [
       "W1O"
     ],
     "special": false,
-    "summary": "Ch. 4, Ch. 5"
+    "summary": "Cases / adjectives · αὐτός · εἰμί"
   },
   {
     "id": "wk2t",
@@ -3800,7 +3844,7 @@ const SESSIONS = [
       "6"
     ],
     "special": false,
-    "summary": "Ch. 6"
+    "summary": "Indicative paradigms · contract indicative"
   },
   {
     "id": "wk2f",
@@ -3810,7 +3854,7 @@ const SESSIONS = [
       "7"
     ],
     "special": false,
-    "summary": "Ch. 7"
+    "summary": "Moods · imperative · active participles"
   },
   {
     "id": "wk3t",
@@ -3821,7 +3865,7 @@ const SESSIONS = [
       "W3O"
     ],
     "special": false,
-    "summary": "Ch. 8"
+    "summary": "Middle voice · εἰμί infinitive / participle"
   },
   {
     "id": "wk3f",
@@ -3832,7 +3876,7 @@ const SESSIONS = [
       "W3O"
     ],
     "special": false,
-    "summary": "Ch. 9"
+    "summary": "Demonstratives · personal pronouns"
   },
   {
     "id": "wk4t",
@@ -3843,7 +3887,7 @@ const SESSIONS = [
       "11"
     ],
     "special": false,
-    "summary": "Ch. 10, Ch. 11"
+    "summary": "Relative pronouns · second aorist · liquid futures"
   },
   {
     "id": "mt",
@@ -3863,7 +3907,7 @@ const SESSIONS = [
       "11"
     ],
     "special": true,
-    "summary": "Ch. 1, Ch. 2, Ch. 3, Ch. 4, Ch. 5, Ch. 6, Ch. 7, Ch. 8, Ch. 9, Ch. 10, Ch. 11"
+    "summary": "Weeks 1–4 chapters + supplements"
   },
   {
     "id": "wk5t",
@@ -3874,7 +3918,7 @@ const SESSIONS = [
       "13"
     ],
     "special": false,
-    "summary": "Ch. 12, Ch. 13"
+    "summary": "Third declension stems · second / third declension"
   },
   {
     "id": "wk5f",
@@ -3884,7 +3928,7 @@ const SESSIONS = [
       "14"
     ],
     "special": false,
-    "summary": "Ch. 14"
+    "summary": "Participial paradigms"
   },
   {
     "id": "wk6t",
@@ -3895,7 +3939,7 @@ const SESSIONS = [
       "W6O"
     ],
     "special": false,
-    "summary": "Ch. 15"
+    "summary": "Passive endings · passive moods / participles"
   },
   {
     "id": "wk6f",
@@ -3906,7 +3950,7 @@ const SESSIONS = [
       "W6O"
     ],
     "special": false,
-    "summary": "Ch. 16"
+    "summary": "Perfect · pluperfect · irregular passive forms"
   },
   {
     "id": "wk7t",
@@ -3917,7 +3961,7 @@ const SESSIONS = [
       "W7O"
     ],
     "special": false,
-    "summary": "Ch. 17"
+    "summary": "Subjunctive mood · aspect"
   },
   {
     "id": "wk7f",
@@ -3928,7 +3972,7 @@ const SESSIONS = [
       "W7O"
     ],
     "special": false,
-    "summary": "Ch. 18"
+    "summary": "Indefinite constructions · 3rd person imperative"
   },
   {
     "id": "wk8t",
@@ -3939,7 +3983,7 @@ const SESSIONS = [
       "W8O"
     ],
     "special": false,
-    "summary": "Ch. 19"
+    "summary": "-μι present active verbs"
   },
   {
     "id": "wk8f",
@@ -3950,7 +3994,7 @@ const SESSIONS = [
       "W8O"
     ],
     "special": false,
-    "summary": "Ch. 20"
+    "summary": "-μι other tenses · middle voice"
   },
   {
     "id": "all",
@@ -3984,7 +4028,7 @@ const SESSIONS = [
       "W8O"
     ],
     "special": true,
-    "summary": "Ch. 1-20 + Others"
+    "summary": "Ch. 1–20 + weekly supplements"
   }
 ];
 
@@ -3999,130 +4043,3 @@ if (!SETS.EXTRA) {
 
 window.SETS = SETS;
 window.SESSIONS = SESSIONS;
-
-
-// ──────────────────────────────────────────────────────
-//  WEEKLY SUPPLEMENT PATCH
-// ──────────────────────────────────────────────────────
-(function () {
-  const weekLabels = {
-    W1O: 'Week 1 - Supplement',
-    W2O: 'Week 2 - Supplement',
-    W3O: 'Week 3 - Supplement',
-    W4O: 'Week 4 - Supplement',
-    W5O: 'Week 5 - Supplement',
-    W6O: 'Week 6 - Supplement',
-    W7O: 'Week 7 - Supplement',
-    W8O: 'Week 8 - Supplement'
-  };
-
-  Object.entries(weekLabels).forEach(([key, label]) => {
-    if (!window.SETS[key]) {
-      const week = Number((key.match(/W(\d+)O/) || [])[1] || 0);
-      window.SETS[key] = { label, type: 'other', week, cards: [] };
-    } else {
-      window.SETS[key].label = label;
-      window.SETS[key].type = 'other';
-      if (!Array.isArray(window.SETS[key].cards)) window.SETS[key].cards = [];
-    }
-  });
-
-  const sessionUpdates = {
-    wk1t: { summary: 'Alphabet · λύω / φιλέω · article / noun patterns' },
-    wk1f: { summary: 'Cases / adjectives · αὐτός · εἰμί' },
-    wk2t: { summary: 'Indicative paradigms · contract indicative' },
-    wk2f: { summary: 'Moods · imperative · active participles' },
-    wk3t: { summary: 'Middle voice · εἰμί infinitive / participle' },
-    wk3f: { summary: 'Demonstratives · personal pronouns' },
-    wk4t: { summary: 'Relative pronouns · second aorist · liquid futures' },
-    mt:   { summary: 'Weeks 1–4 chapters + supplements' },
-    wk5t: { summary: 'Third declension stems · second / third declension' },
-    wk5f: { summary: 'Participial paradigms' },
-    wk6t: { summary: 'Passive endings · passive moods / participles' },
-    wk6f: { summary: 'Perfect · pluperfect · irregular passive forms' },
-    wk7t: { summary: 'Subjunctive mood · aspect' },
-    wk7f: { summary: 'Indefinite constructions · 3rd person imperative' },
-    wk8t: { summary: '-μι present active verbs' },
-    wk8f: { summary: '-μι other tenses · middle voice' },
-    all:  { summary: 'Ch. 1–20 + weekly supplements' }
-  };
-
-
-
-  const week1SupplementCards = [
-    // λύω present active indicative
-    { g: 'λύω, -ω', e: 'I loose/untie', required: false },
-    { g: 'λύεις, -εις', e: 'you loose/untie', required: false },
-    { g: 'λύει, -ει', e: 'he/she/it looses/unties', required: false },
-    { g: 'λύομεν, -ομεν', e: 'we loose/untie', required: false },
-    { g: 'λύετε, -ετε', e: 'you all loose/untie', required: false },
-    { g: 'λύουσι(ν), -ουσι(ν)', e: 'they loose/untie', required: false },
-
-    // εἰμί present active indicative
-    { g: 'εἰμί, -μί', e: 'I am', required: false },
-    { g: 'εἶ, -εἶ', e: 'you are', required: false },
-    { g: 'ἐστί(ν), -στί(ν)', e: 'he/she/it is', required: false },
-    { g: 'ἐσμέν, -μέν', e: 'we are', required: false },
-    { g: 'ἐστέ, -τέ', e: 'you all are', required: false },
-    { g: 'εἰσί(ν), -σί(ν)', e: 'they are', required: false },
-
-    // Definite article + ἀρχή (feminine)
-    { g: '(ἡ) ἀρχή, -ή', e: 'the beginning', required: false },
-    { g: '(τῆς) ἀρχῆς, -ῆς', e: 'of/from the beginning', required: false },
-    { g: '(τῇ) ἀρχῇ, -ῇ', e: 'to/for/in the beginning', required: false },
-    { g: '(τὴν) ἀρχήν, -ήν', e: 'the beginning', required: false },
-    { g: '(αἱ) ἀρχαί, -αί', e: 'the beginnings', required: false },
-    { g: '(τῶν) ἀρχῶν, -ῶν', e: 'of/from the beginnings', required: false },
-    { g: '(ταῖς) ἀρχαῖς, -αῖς', e: 'to/for/in the beginnings', required: false },
-    { g: '(τὰς) ἀρχάς, -άς', e: 'the beginnings', required: false },
-
-    // Definite article + ἔργον (neuter)
-    { g: '(τὸ) ἔργον, -ον', e: 'the work/deed', required: false },
-    { g: '(τοῦ) ἔργου, -ου', e: 'of/from the work/deed', required: false },
-    { g: '(τῷ) ἔργῳ, -ῳ', e: 'to/for/in the work/deed', required: false },
-    { g: '(τὸ) ἔργον, -ον', e: 'the work/deed', required: false },
-    { g: '(τὰ) ἔργα, -α', e: 'the works/deeds', required: false },
-    { g: '(τῶν) ἔργων, -ων', e: 'of/from the works/deeds', required: false },
-    { g: '(τοῖς) ἔργοις, -οις', e: 'to/for/in the works/deeds', required: false },
-    { g: '(τὰ) ἔργα, -α', e: 'the works/deeds', required: false },
-
-    // αὐτός paradigm (masculine / feminine / neuter)
-    { g: 'αὐτός, -ός', e: 'he / himself / same', required: false },
-    { g: 'αὐτοῦ, -οῦ', e: 'of/from him/it', required: false },
-    { g: 'αὐτῷ, -ῷ', e: 'to/for/in him/it', required: false },
-    { g: 'αὐτόν, -όν', e: 'him / himself / same', required: false },
-    { g: 'αὐτή, -ή', e: 'she / herself / same', required: false },
-    { g: 'αὐτῆς, -ῆς', e: 'of/from her', required: false },
-    { g: 'αὐτῇ, -ῇ', e: 'to/for/in her', required: false },
-    { g: 'αὐτήν, -ήν', e: 'her / herself / same', required: false },
-    { g: 'αὐτό, -ό', e: 'it / itself / same', required: false },
-    { g: 'αὐτοῦ, -οῦ', e: 'of/from it', required: false },
-    { g: 'αὐτῷ, -ῷ', e: 'to/for/in it', required: false },
-    { g: 'αὐτό, -ό', e: 'it / itself / same', required: false },
-    { g: 'αὐτοί, -οί', e: 'they / themselves / same ones', required: false },
-    { g: 'αὐτῶν, -ῶν', e: 'of/from them', required: false },
-    { g: 'αὐτοῖς, -οῖς', e: 'to/for/in them', required: false },
-    { g: 'αὐτούς, -ούς', e: 'them / themselves / same ones', required: false },
-    { g: 'αὐταί, -αί', e: 'they / themselves / same ones', required: false },
-    { g: 'αὐτῶν, -ῶν', e: 'of/from them', required: false },
-    { g: 'αὐταῖς, -αῖς', e: 'to/for/in them', required: false },
-    { g: 'αὐτάς, -άς', e: 'them / themselves / same ones', required: false },
-    { g: 'αὐτά, -ά', e: 'they / themselves / same things', required: false },
-    { g: 'αὐτῶν, -ῶν', e: 'of/from them', required: false },
-    { g: 'αὐτοῖς, -οῖς', e: 'to/for/in them', required: false },
-    { g: 'αὐτά, -ά', e: 'them / themselves / same things', required: false }
-  ];
-
-  const existingW1O = window.SETS.W1O && Array.isArray(window.SETS.W1O.cards) ? window.SETS.W1O.cards : [];
-  const mergedW1O = [...existingW1O];
-  week1SupplementCards.forEach(card => {
-    if (!mergedW1O.some(existing => existing.g === card.g && existing.e === card.e)) {
-      mergedW1O.push(card);
-    }
-  });
-  if (window.SETS.W1O) window.SETS.W1O.cards = mergedW1O;
-  window.SESSIONS.forEach(session => {
-    const update = sessionUpdates[session.id];
-    if (update) Object.assign(session, update);
-  });
-})();
