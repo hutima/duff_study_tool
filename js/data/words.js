@@ -3136,592 +3136,592 @@ const SETS = {
     "cards": [
       {
         "g": "ἄλλος, -η, -ο",
-        "e": "another, different / adj. masc.-fem.-neut. endings",
+        "e": "another, different (adj. masc., fem., neut. endings)",
         "required": true
       },
       {
         "g": "ὅσος, -η, -ον",
-        "e": "as/how great/much / adj. masc.-fem.-neut. endings",
+        "e": "as, how great, much (adj. masc., fem., neut. endings)",
         "required": true
       },
       {
         "g": "ὁ",
-        "e": "the / masc./nom./sing.",
+        "e": "the (nom., sing., masc.)",
         "required": true
       },
       {
         "g": "τοῦ",
-        "e": "of/from the / masc.-neut./gen./sing.",
+        "e": "of, from the (gen., sing., masc.-neut.)",
         "required": true
       },
       {
         "g": "τῷ",
-        "e": "to/for/in the / masc.-neut./dat./sing.",
+        "e": "to, for, in the (dat., sing., masc.-neut.)",
         "required": true
       },
       {
         "g": "τόν",
-        "e": "the / masc./acc./sing.",
+        "e": "the (acc., sing., masc.)",
         "required": true
       },
       {
         "g": "οἱ",
-        "e": "the / masc./nom./pl.",
+        "e": "the (nom., pl., masc.)",
         "required": true
       },
       {
         "g": "τῶν",
-        "e": "of/from the / masc.-fem.-neut./gen./pl.",
+        "e": "of, from the (gen., pl., masc.-fem.-neut.)",
         "required": true
       },
       {
         "g": "τοῖς",
-        "e": "to/for/in the / masc.-neut./dat./pl.",
+        "e": "to, for, in the (dat., pl., masc.-neut.)",
         "required": true
       },
       {
         "g": "τούς",
-        "e": "the / masc./acc./pl.",
+        "e": "the (acc., pl., masc.)",
         "required": true
       },
       {
         "g": "(ἡ) ἀρχή, -ή",
-        "e": "the beginning / 1st decl./fem./nom./sing.",
+        "e": "the beginning (nom., sing., fem., 1st decl.)",
         "required": true
       },
       {
         "g": "(τῆς) ἀρχῆς, -ῆς",
-        "e": "of/from the beginning / 1st decl./fem./gen./sing.",
+        "e": "of, from the beginning (gen., sing., fem., 1st decl.)",
         "required": true
       },
       {
         "g": "(τῇ) ἀρχῇ, -ῇ",
-        "e": "to/for/in the beginning / 1st decl./fem./dat./sing.",
+        "e": "to, for, in the beginning (dat., sing., fem., 1st decl.)",
         "required": true
       },
       {
         "g": "(τὴν) ἀρχήν, -ήν",
-        "e": "the beginning / 1st decl./fem./acc./sing.",
+        "e": "the beginning (acc., sing., fem., 1st decl.)",
         "required": true
       },
       {
         "g": "(αἱ) ἀρχαί, -αί",
-        "e": "the beginnings / 1st decl./fem./nom./pl.",
+        "e": "the beginnings (nom., pl., fem., 1st decl.)",
         "required": true
       },
       {
         "g": "(τῶν) ἀρχῶν, -ῶν",
-        "e": "of/from the beginnings / 1st decl./fem./gen./pl.",
+        "e": "of, from the beginnings (gen., pl., fem., 1st decl.)",
         "required": true
       },
       {
         "g": "(ταῖς) ἀρχαῖς, -αῖς",
-        "e": "to/for/in the beginnings / 1st decl./fem./dat./pl.",
+        "e": "to, for, in the beginnings (dat., pl., fem., 1st decl.)",
         "required": true
       },
       {
         "g": "(τὰς) ἀρχάς, -άς",
-        "e": "the beginnings / 1st decl./fem./acc./pl.",
+        "e": "the beginnings (acc., pl., fem., 1st decl.)",
         "required": true
       },
       {
         "g": "(τὸ) ἔργον, -ον",
-        "e": "the work/deed / 2nd decl./neut./nom.-acc./sing.",
+        "e": "the work, deed (nom.-acc., sing., neut., 2nd decl.)",
         "required": true
       },
       {
         "g": "(τοῦ) ἔργου, -ου",
-        "e": "of/from the work/deed / 2nd decl./neut./gen./sing.",
+        "e": "of, from the work, deed (gen., sing., neut., 2nd decl.)",
         "required": true
       },
       {
         "g": "(τῷ) ἔργῳ, -ῳ",
-        "e": "to/for/in the work/deed / 2nd decl./neut./dat./sing.",
+        "e": "to, for, in the work, deed (dat., sing., neut., 2nd decl.)",
         "required": true
       },
       {
         "g": "(τὰ) ἔργα, -α",
-        "e": "the works/deeds / 2nd decl./neut./nom.-acc./pl.",
+        "e": "the works, deeds (nom.-acc., pl., neut., 2nd decl.)",
         "required": true
       },
       {
         "g": "(τῶν) ἔργων, -ων",
-        "e": "of/from the works/deeds / 2nd decl./neut./gen./pl.",
+        "e": "of, from the works, deeds (gen., pl., neut., 2nd decl.)",
         "required": true
       },
       {
         "g": "(τοῖς) ἔργοις, -οις",
-        "e": "to/for/in the works/deeds / 2nd decl./neut./dat./pl.",
+        "e": "to, for, in the works, deeds (dat., pl., neut., 2nd decl.)",
         "required": true
       },
       {
         "g": "αὐτός, -ός",
-        "e": "he / himself / same / masc./nom./sing.",
+        "e": "he, himself, same (nom., sing., masc.)",
         "required": true
       },
       {
         "g": "αὐτοῦ, -οῦ",
-        "e": "of/from him/it / masc.-neut./gen./sing.",
+        "e": "of, from him or it (gen., sing., masc.-neut.)",
         "required": true
       },
       {
         "g": "αὐτῷ, -ῷ",
-        "e": "to/for him/it / masc.-neut./dat./sing.",
+        "e": "to, for him or it (dat., sing., masc.-neut.)",
         "required": true
       },
       {
         "g": "αὐτόν, -όν",
-        "e": "him / himself / same / masc./acc./sing.",
+        "e": "him, himself, same (acc., sing., masc.)",
         "required": true
       },
       {
         "g": "αὐτοί, -οί",
-        "e": "they / themselves / same ones / masc./nom./pl.",
+        "e": "they, themselves, same ones (nom., pl., masc.)",
         "required": true
       },
       {
         "g": "αὐτῶν, -ῶν",
-        "e": "of/from them / masc.-fem.-neut./gen./pl.",
+        "e": "of, from them (gen., pl., masc.-fem.-neut.)",
         "required": true
       },
       {
         "g": "αὐτοῖς, -οῖς",
-        "e": "to/for them / masc.-neut./dat./pl.",
+        "e": "to, for them (dat., pl., masc.-neut.)",
         "required": true
       },
       {
         "g": "αὐτούς, -ούς",
-        "e": "them / themselves / same ones / masc./acc./pl.",
+        "e": "them, themselves, same ones (acc., pl., masc.)",
         "required": true
       },
       {
         "g": "λύω, -ω",
-        "e": "I loose/untie / 1st person sing.",
+        "e": "I loose, untie (1st person, sing.)",
         "required": true
       },
       {
         "g": "λύεις, -εις",
-        "e": "you loose/untie / 2nd person sing.",
+        "e": "you loose, untie (2nd person, sing.)",
         "required": true
       },
       {
         "g": "λύει, -ει",
-        "e": "he/she/it looses/unties / 3rd person sing.",
+        "e": "he, she, or it looses, unties (3rd person, sing.)",
         "required": true
       },
       {
         "g": "λύομεν, -ομεν",
-        "e": "we loose/untie / 1st person pl.",
+        "e": "we loose, untie (1st person, pl.)",
         "required": true
       },
       {
         "g": "λύετε, -ετε",
-        "e": "you all loose/untie / 2nd person pl.",
+        "e": "you all loose, untie (2nd person, pl.)",
         "required": true
       },
       {
         "g": "λύουσι(ν), -ουσι(ν)",
-        "e": "they loose/untie / 3rd person pl.",
+        "e": "they loose, untie (3rd person, pl.)",
         "required": true
       },
       {
         "g": "ἡ, -η",
-        "e": "the / fem./nom./sing.",
+        "e": "the (nom., sing., fem.)",
         "required": true
       },
       {
         "g": "τῆς, -ῆς",
-        "e": "of/from the / fem./gen./sing.",
+        "e": "of, from the (gen., sing., fem.)",
         "required": true
       },
       {
         "g": "τῇ, -ῇ",
-        "e": "to/for/in the / fem./dat./sing.",
+        "e": "to, for, in the (dat., sing., fem.)",
         "required": true
       },
       {
         "g": "τήν, -ήν",
-        "e": "the / fem./acc./sing.",
+        "e": "the (acc., sing., fem.)",
         "required": true
       },
       {
         "g": "αἱ, -αι",
-        "e": "the / fem./nom./pl.",
+        "e": "the (nom., pl., fem.)",
         "required": true
       },
       {
         "g": "ταῖς, -αῖς",
-        "e": "to/for/in the / fem./dat./pl.",
+        "e": "to, for, in the (dat., pl., fem.)",
         "required": true
       },
       {
         "g": "τάς, -άς",
-        "e": "the / fem./acc./pl.",
+        "e": "the (acc., pl., fem.)",
         "required": true
       },
       {
         "g": "τό, -ό",
-        "e": "the / neut./nom.-acc./sing.",
+        "e": "the (nom.-acc., sing., neut.)",
         "required": true
       },
       {
         "g": "τά, -ά",
-        "e": "the / neut./nom.-acc./pl.",
+        "e": "the (nom.-acc., pl., neut.)",
         "required": true
       },
       {
         "g": "φιλῶ, -ῶ",
-        "e": "I love / 1st sing.",
+        "e": "I love (1st person, sing.)",
         "required": true
       },
       {
         "g": "φιλεῖς, -εῖς",
-        "e": "you love / 2nd sing.",
+        "e": "you love (2nd person, sing.)",
         "required": true
       },
       {
         "g": "φιλεῖ, -εῖ",
-        "e": "he/she/it loves / 3rd sing.",
+        "e": "he, she, or it loves (3rd person, sing.)",
         "required": true
       },
       {
         "g": "φιλοῦμεν, -οῦμεν",
-        "e": "we love / 1st pl.",
+        "e": "we love (1st person, pl.)",
         "required": true
       },
       {
         "g": "φιλεῖτε, -εῖτε",
-        "e": "you love / 2nd pl.",
+        "e": "you love (2nd person, pl.)",
         "required": true
       },
       {
         "g": "φιλοῦσι(ν), -οῦσι(ν)",
-        "e": "they love / 3rd pl.",
+        "e": "they love (3rd person, pl.)",
         "required": true
       },
       {
         "g": "ἡμέρα, -α",
-        "e": "day / fem./nom./sing. (-α type)",
+        "e": "day (nom., fem., sing., -α type)",
         "required": true
       },
       {
         "g": "ἡμέρας, -ας",
-        "e": "of day / fem./gen./sing. (-α type)",
+        "e": "of day (gen., fem., sing., -α type)",
         "required": true
       },
       {
         "g": "ἡμέρᾳ, -ᾳ",
-        "e": "to/for day / fem./dat./sing. (-α type)",
+        "e": "to, for day (dat., fem., sing., -α type)",
         "required": true
       },
       {
         "g": "ἡμέραν, -αν",
-        "e": "day / fem./acc./sing. (-α type)",
+        "e": "day (acc., fem., sing., -α type)",
         "required": true
       },
       {
         "g": "ἡμέραι, -αι",
-        "e": "days / fem./nom./pl. (-α type)",
+        "e": "days (nom., fem., pl., -α type)",
         "required": true
       },
       {
         "g": "ἡμερῶν, -ῶν",
-        "e": "of days / fem./gen./pl. (-α type)",
+        "e": "of days (gen., fem., pl., -α type)",
         "required": true
       },
       {
         "g": "ἡμέραις, -αις",
-        "e": "to/for days / fem./dat./pl. (-α type)",
+        "e": "to, for days (dat., fem., pl., -α type)",
         "required": true
       },
       {
         "g": "ἡμέρας, -ας",
-        "e": "days / fem./acc./pl. (-α type)",
+        "e": "days (acc., fem., pl., -α type)",
         "required": true
       },
       {
         "g": "δόξα, -α",
-        "e": "glory / fem./nom./sing. (mixed type)",
+        "e": "glory (nom., fem., sing., mixed type)",
         "required": true
       },
       {
         "g": "δόξης, -ης",
-        "e": "of glory / fem./gen./sing. (mixed type)",
+        "e": "of glory (gen., fem., sing., mixed type)",
         "required": true
       },
       {
         "g": "δόξῃ, -ῃ",
-        "e": "to/for glory / fem./dat./sing. (mixed type)",
+        "e": "to, for glory (dat., fem., sing., mixed type)",
         "required": true
       },
       {
         "g": "δόξαν, -αν",
-        "e": "glory / fem./acc./sing. (mixed type)",
+        "e": "glory (acc., fem., sing., mixed type)",
         "required": true
       },
       {
         "g": "δόξαι, -αι",
-        "e": "glories / fem./nom./pl. (mixed type)",
+        "e": "glories (nom., fem., pl., mixed type)",
         "required": true
       },
       {
         "g": "δοξῶν, -ῶν",
-        "e": "of glories / fem./gen./pl. (mixed type)",
+        "e": "of glories (gen., fem., pl., mixed type)",
         "required": true
       },
       {
         "g": "δόξαις, -αις",
-        "e": "to/for glories / fem./dat./pl. (mixed type)",
+        "e": "to, for glories (dat., fem., pl., mixed type)",
         "required": true
       },
       {
         "g": "δόξας, -ας",
-        "e": "glories / fem./acc./pl. (mixed type)",
+        "e": "glories (acc., fem., pl., mixed type)",
         "required": true
       },
       {
         "g": "αὐτή, -ή",
-        "e": "she / herself / same / fem./nom./sing.",
+        "e": "she, herself, same (nom., sing., fem.)",
         "required": true
       },
       {
         "g": "αὐτῆς, -ῆς",
-        "e": "of/from her / fem./gen./sing.",
+        "e": "of, from her (gen., sing., fem.)",
         "required": true
       },
       {
         "g": "αὐτῇ, -ῇ",
-        "e": "to/for her / fem./dat./sing.",
+        "e": "to, for her (dat., sing., fem.)",
         "required": true
       },
       {
         "g": "αὐτήν, -ήν",
-        "e": "her / herself / same / fem./acc./sing.",
+        "e": "her, herself, same (acc., sing., fem.)",
         "required": true
       },
       {
         "g": "αὐταί, -αί",
-        "e": "they / themselves / same ones / fem./nom./pl.",
+        "e": "they, themselves, same ones (nom., pl., fem.)",
         "required": true
       },
       {
         "g": "αὐταῖς, -αῖς",
-        "e": "to/for them / fem./dat./pl.",
+        "e": "to, for them (dat., pl., fem.)",
         "required": true
       },
       {
         "g": "αὐτάς, -άς",
-        "e": "them / themselves / same ones / fem./acc./pl.",
+        "e": "them, themselves, same ones (acc., pl., fem.)",
         "required": true
       },
       {
         "g": "αὐτό, -ό",
-        "e": "it / itself / same / neut./nom.-acc./sing.",
+        "e": "it, itself, same (nom.-acc., sing., neut.)",
         "required": true
       },
       {
         "g": "αὐτά, -ά",
-        "e": "they/them / themselves / same things / neut./nom.-acc./pl.",
+        "e": "they or them, themselves, same things (nom.-acc., pl., neut.)",
         "required": true
       },
       {
         "g": "πολύς, -ύς",
-        "e": "much, many / masc./nom./sing.",
+        "e": "much, many (nom., sing., masc.)",
         "required": true
       },
       {
         "g": "πολλοῦ, -οῦ",
-        "e": "much, many / masc./gen./sing.",
+        "e": "much, many (gen., sing., masc.)",
         "required": true
       },
       {
         "g": "πολλῷ, -ῷ",
-        "e": "much, many / masc./dat./sing.",
+        "e": "much, many (dat., sing., masc.)",
         "required": true
       },
       {
         "g": "πολύν, -ύν",
-        "e": "much, many / masc./acc./sing.",
+        "e": "much, many (acc., sing., masc.)",
         "required": true
       },
       {
         "g": "πολλοί, -οί",
-        "e": "much, many / masc./nom./pl.",
+        "e": "much, many (nom., pl., masc.)",
         "required": true
       },
       {
         "g": "πολλῶν, -ῶν",
-        "e": "much, many / gen./pl.",
+        "e": "much, many (gen., pl.)",
         "required": true
       },
       {
         "g": "πολλοῖς, -οῖς",
-        "e": "much, many / masc./dat./pl.",
+        "e": "much, many (dat., pl., masc.)",
         "required": true
       },
       {
         "g": "πολλούς, -ούς",
-        "e": "much, many / masc./acc./pl.",
+        "e": "much, many (acc., pl., masc.)",
         "required": true
       },
       {
         "g": "πολλή, -ή",
-        "e": "much, many / fem./nom./sing.",
+        "e": "much, many (nom., sing., fem.)",
         "required": true
       },
       {
         "g": "πολλῆς, -ῆς",
-        "e": "much, many / fem./gen./sing.",
+        "e": "much, many (gen., sing., fem.)",
         "required": true
       },
       {
         "g": "πολλῇ, -ῇ",
-        "e": "much, many / fem./dat./sing.",
+        "e": "much, many (dat., sing., fem.)",
         "required": true
       },
       {
         "g": "πολλήν, -ήν",
-        "e": "much, many / fem./acc./sing.",
+        "e": "much, many (acc., sing., fem.)",
         "required": true
       },
       {
         "g": "πολλαί, -αί",
-        "e": "much, many / fem./nom./pl.",
+        "e": "much, many (nom., pl., fem.)",
         "required": true
       },
       {
         "g": "πολλαῖς, -αῖς",
-        "e": "much, many / fem./dat./pl.",
+        "e": "much, many (dat., pl., fem.)",
         "required": true
       },
       {
         "g": "πολλάς, -άς",
-        "e": "much, many / fem./acc./pl.",
+        "e": "much, many (acc., pl., fem.)",
         "required": true
       },
       {
         "g": "πολύ, -ύ",
-        "e": "much, many / neut./nom./acc./sing.",
+        "e": "much, many (nom., acc., sing., neut.)",
         "required": true
       },
       {
         "g": "πολλά, -ά",
-        "e": "much, many / neut./nom./acc./pl.",
+        "e": "much, many (nom., acc., pl., neut.)",
         "required": true
       },
       {
         "g": "μέγας, -ας",
-        "e": "great / masc./nom./sing.",
+        "e": "great (nom., sing., masc.)",
         "required": true
       },
       {
         "g": "μεγάλου, -ου",
-        "e": "great / masc./gen./sing.",
+        "e": "great (gen., sing., masc.)",
         "required": true
       },
       {
         "g": "μεγάλῳ, -ῳ",
-        "e": "great / masc./dat./sing.",
+        "e": "great (dat., sing., masc.)",
         "required": true
       },
       {
         "g": "μέγαν, -αν",
-        "e": "great / masc./acc./sing.",
+        "e": "great (acc., sing., masc.)",
         "required": true
       },
       {
         "g": "μεγάλοι, -οι",
-        "e": "great / masc./nom./pl.",
+        "e": "great (nom., pl., masc.)",
         "required": true
       },
       {
         "g": "μεγάλων, -ων",
-        "e": "great / gen./pl.",
+        "e": "great (gen., pl.)",
         "required": true
       },
       {
         "g": "μεγάλοις, -οις",
-        "e": "great / masc./dat./pl.",
+        "e": "great (dat., pl., masc.)",
         "required": true
       },
       {
         "g": "μεγάλους, -ους",
-        "e": "great / masc./acc./pl.",
+        "e": "great (acc., pl., masc.)",
         "required": true
       },
       {
         "g": "μεγάλη, -η",
-        "e": "great / fem./nom./sing.",
+        "e": "great (nom., sing., fem.)",
         "required": true
       },
       {
         "g": "μεγάλης, -ης",
-        "e": "great / fem./gen./sing.",
+        "e": "great (gen., sing., fem.)",
         "required": true
       },
       {
         "g": "μεγάλῃ, -ῃ",
-        "e": "great / fem./dat./sing.",
+        "e": "great (dat., sing., fem.)",
         "required": true
       },
       {
         "g": "μεγάλην, -ην",
-        "e": "great / fem./acc./sing.",
+        "e": "great (acc., sing., fem.)",
         "required": true
       },
       {
         "g": "μεγάλαι, -αι",
-        "e": "great / fem./nom./pl.",
+        "e": "great (nom., pl., fem.)",
         "required": true
       },
       {
         "g": "μεγάλαις, -αις",
-        "e": "great / fem./dat./pl.",
+        "e": "great (dat., pl., fem.)",
         "required": true
       },
       {
         "g": "μεγάλας, -ας",
-        "e": "great / fem./acc./pl.",
+        "e": "great (acc., pl., fem.)",
         "required": true
       },
       {
         "g": "μέγα, -α",
-        "e": "great / neut./nom./acc./sing.",
+        "e": "great (nom., acc., sing., neut.)",
         "required": true
       },
       {
         "g": "μεγάλα, -α",
-        "e": "great / neut./nom./acc./pl.",
+        "e": "great (nom., acc., pl., neut.)",
         "required": true
       },
       {
         "g": "εἰμί, -μί",
-        "e": "I am / 1st person sing.",
+        "e": "I am (1st person, sing.)",
         "required": false
       },
       {
         "g": "εἶ, -εἶ",
-        "e": "you are / 2nd person sing.",
+        "e": "you are (2nd person, sing.)",
         "required": false
       },
       {
         "g": "ἐστί(ν), -στί(ν)",
-        "e": "he/she/it is / 3rd person sing.",
+        "e": "he, she, or it is (3rd person, sing.)",
         "required": false
       },
       {
         "g": "ἐσμέν, -μέν",
-        "e": "we are / 1st person pl.",
+        "e": "we are (1st person, pl.)",
         "required": false
       },
       {
         "g": "ἐστέ, -τέ",
-        "e": "you all are / 2nd person pl.",
+        "e": "you all are (2nd person, pl.)",
         "required": false
       },
       {
         "g": "εἰσί(ν), -σί(ν)",
-        "e": "they are / 3rd person pl.",
+        "e": "they are (3rd person, pl.)",
         "required": false
       }
     ]
