@@ -1,16 +1,16 @@
 // ═══════════════════════════════════════════════════════════════════════
-//  CUSTOM GRAMMAR PRACTICE SET — SUPPLEMENT
+//  WEEK 1 SUPPLEMENT PARADIGM PATCH
 // ═══════════════════════════════════════════════════════════════════════
 //  Swap this file when you want a different custom practice set.
 //
 //  UI behavior:
-//  - The set appears as “Supplement” in the custom deck selector.
-//  - It is grammar-only: 0 vocabulary cards, grammar cards only.
+//  - The cards are merged into the Week 1 Supplement deck (W1O).
+//  - It includes quick-flip vocabulary-style paradigm cards plus grammar drills.
 //  - The card shape mirrors grammar.js so the main grammar logic can stay
 //    unchanged.
 
 (function () {
-  const SET_KEY = 'SUPPLEMENT';
+  const SET_KEY = 'W1O';
 
   const PERSON_CHOICES = [
     'I / 1st singular',
@@ -37,10 +37,23 @@
     'accusative plural masculine'
   ];
 
+
+  const SUPPLEMENTAL_VOCAB_CARDS = [
+    { g: 'λύω, λύεις, λύει, λύομεν, λύετε, λύουσι(ν)', e: 'λύω present active indicative: 1sg, 2sg, 3sg, 1pl, 2pl, 3pl', required: false },
+    { g: 'ὁ, τοῦ, τῷ, τόν, οἱ, τῶν, τοῖς, τούς', e: 'definite article masculine: nom/gen/dat/acc singular and plural', required: false },
+    { g: 'ἡ, τῆς, τῇ, τήν, αἱ, τῶν, ταῖς, τάς', e: 'definite article feminine: nom/gen/dat/acc singular and plural', required: false },
+    { g: 'τό, τοῦ, τῷ, τό, τά, τῶν, τοῖς, τά', e: 'definite article neuter: nom/gen/dat/acc singular and plural', required: false },
+    { g: 'ἡ ἀρχή, τῆς ἀρχῆς, τῇ ἀρχῇ, τὴν ἀρχήν · αἱ ἀρχαί, τῶν ἀρχῶν, ταῖς ἀρχαῖς, τὰς ἀρχάς', e: 'ἀρχή (feminine) with article: nom/gen/dat/acc singular and plural', required: false },
+    { g: 'τὸ ἔργον, τοῦ ἔργου, τῷ ἔργῳ, τὸ ἔργον · τὰ ἔργα, τῶν ἔργων, τοῖς ἔργοις, τὰ ἔργα', e: 'ἔργον (neuter) with article: nom/gen/dat/acc singular and plural', required: false },
+    { g: 'αὐτός, αὐτοῦ, αὐτῷ, αὐτόν · αὐτοί, αὐτῶν, αὐτοῖς, αὐτούς', e: 'αὐτός masculine: nom/gen/dat/acc singular and plural', required: false },
+    { g: 'αὐτή, αὐτῆς, αὐτῇ, αὐτήν · αὐταί, αὐτῶν, αὐταῖς, αὐτάς', e: 'αὐτός feminine: nom/gen/dat/acc singular and plural', required: false },
+    { g: 'αὐτό, αὐτοῦ, αὐτῷ, αὐτό · αὐτά, αὐτῶν, αὐτοῖς, αὐτά', e: 'αὐτός neuter: nom/gen/dat/acc singular and plural', required: false }
+  ];
+
   const SUPPLEMENTAL_GRAMMAR_SETS = {
     [SET_KEY]: {
-      label: 'Supplement',
-      notes: 'Custom grammar practice: simple present active endings, λύω examples, and nominative/accusative masculine noun endings.',
+      label: 'Week 1 - Supplement',
+      notes: 'Custom grammar + paradigm drill set: λύω, article patterns, and declensions with full singular/plural case coverage.',
       items: [
         {
           family: 'Present active indicative endings',
@@ -250,11 +263,14 @@
   };
 
   if (window.SETS && typeof window.SETS === 'object') {
+    const base = window.SETS[SET_KEY] || { label: 'Week 1 - Supplement', type: 'other', week: 1, cards: [] };
+    const existingCards = Array.isArray(base.cards) ? base.cards : [];
     window.SETS[SET_KEY] = {
-      label: 'Supplement',
+      ...base,
+      label: 'Week 1 - Supplement',
       type: 'other',
-      week: null,
-      cards: []
+      week: 1,
+      cards: [...existingCards, ...SUPPLEMENTAL_VOCAB_CARDS]
     };
   }
 
