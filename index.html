@@ -13,7 +13,7 @@
 <title>Elementary NT Greek — Flashcards</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Noto+Serif:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=30">
+<link rel="stylesheet" href="styles.css?v=31">
 <script>
 (function(){
   try {
@@ -51,6 +51,7 @@
     <div class="mode-group app-profile-group" role="group" aria-label="Study mode shortcut">
       <button class="mode-btn active" id="modeShortcutVocabBtn" type="button" onclick="setStudyMode('vocab')">Vocab</button>
       <button class="mode-btn" id="modeShortcutMorphBtn" type="button" onclick="setStudyMode('morph')">Grammar</button>
+      <button class="mode-btn" id="modeShortcutReaderBtn" type="button" onclick="openReaderTab()">Reader</button>
     </div>
     <button class="quick-btn" type="button" onclick="openAnalyticsOverlay()">Progress</button>
     <button class="quick-btn" type="button" onclick="openShortcutsModal()">Keyboard shortcuts</button>
@@ -69,7 +70,7 @@
 
   <div class="ornament">✦ · · · ✦</div>
 
-  <details class="utility-section">
+  <details class="utility-section" id="advancedSettingsDetails">
     <summary>Advanced review settings</summary>
 <div class="controls-bar" id="controlsBar">
     <div class="mode-group" role="group" aria-label="Study mode">
@@ -107,6 +108,8 @@
     <button class="ctrl-btn" type="button" onclick="resetAllStats()">Reset stats</button>
   </div>
   </details>
+
+  <div id="readerView" class="reader-view" style="display:none"></div>
 
   <div class="card-area" id="cardArea">
     <div class="empty-state">
@@ -205,6 +208,9 @@
       <span class="selector-label">Manual chapter selection</span>
       <div class="sessions-grid" id="chaptersGrid"></div>
     </div>
+    <div class="analytics-footer-row">
+      <button class="ctrl-btn" type="button" onclick="closeStudySelector()">Close</button>
+    </div>
   </div>
 </div>
 
@@ -249,6 +255,7 @@
 <script defer src="js/data/morphology.js?v=30"></script>
 <script defer src="js/data/supplemental.js?v=30"></script>
 <script defer src="js/data/grammar.js?v=30"></script>
+<script defer src="js/data/reader.js?v=31"></script>
 <script defer src="js/logic/pos_logic.js?v=30"></script>
 <script type="module" src="js/app/main.js?v=31"></script>
 </body>
