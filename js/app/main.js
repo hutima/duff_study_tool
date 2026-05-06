@@ -143,6 +143,10 @@ let unspacedPendingRecycle = false;
 let unspacedCycleState = {};
 let spacedUndoSnapshot = null;
 
+// Each known card has a 1-in-6000 chance per reveal to drift back
+// into the unspaced active pile for occasional long-tail review.
+const KNOWN_CARD_RANDOM_RETURN_FLIP_ODDS = 6000;
+
 let marks = {};
 
 function isMorphologyMode() {
@@ -861,6 +865,43 @@ function getRemainingCards() {
     return deck.slice(0, activeDeckCount);
   }
   return deck.filter(card => marks[card.id] !== 'known');
+}
+
+function moveCardToBackOfActivePile(card) {
+  if (!card) return false;
+  const directionalMarks = getDirectionalMarksStore();
+
+  const currentCardId = deck[currentIdx]?.id || null;
+  directionalMarks[card.id] = 'unsure';
+  marks = directionalMarks;
+
+  deck = deck.filter(candidate => candidate.id !== card.id);
+  const splitAt = deck.findIndex(candidate => marks[candidate.id] === 'known');
+  const insertAt = splitAt === -1 ? deck.length : splitAt;
+  deck.splice(insertAt, 0, card);
+
+  activeDeckCount = originalDeck.filter(candidate => marks[candidate.id] !== 'known').length;
+  if (currentCardId) {
+    const restoredIdx = deck.findIndex(candidate => candidate.id === currentCardId);
+    if (restoredIdx >= 0) currentIdx = restoredIdx;
+  }
+  unspacedPendingRecycle = false;
+  return true;
+}
+
+function maybeReturnKnownCardToActivePile() {
+  if (spacedRepetition || isMorphologyMode() || KNOWN_CARD_RANDOM_RETURN_FLIP_ODDS <= 0) return false;
+  if (!originalDeck.length || currentIdx >= deck.length) return false;
+
+  const currentCardId = deck[currentIdx]?.id || null;
+  const knownCards = originalDeck.filter(card => card.id !== currentCardId && marks[card.id] === 'known');
+  if (!knownCards.length) return false;
+
+  const returnChance = Math.min(1, knownCards.length / KNOWN_CARD_RANDOM_RETURN_FLIP_ODDS);
+  if (Math.random() >= returnChance) return false;
+
+  const card = knownCards[Math.floor(Math.random() * knownCards.length)];
+  return moveCardToBackOfActivePile(card);
 }
 
 
@@ -1860,6 +1901,12 @@ function flipCard() {
   noteStudyInteraction();
   isFlipped = !isFlipped;
   wrapper.classList.toggle('flipped', isFlipped);
+
+  if (isFlipped && maybeReturnKnownCardToActivePile()) {
+    renderProgress();
+    renderReview();
+    saveState();
+  }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -2377,9 +2424,7 @@ function returnSeenCardToDeck(encodedId) {
   const card = originalDeck.find(c => c.id === cardId);
   if (!card) return;
 
-  const directionalMarks = getDirectionalMarksStore();
-  directionalMarks[cardId] = 'unsure';
-  marks = directionalMarks;
+  moveCardToBackOfActivePile(card);
 
   const progress = getWordProgress(cardId);
   progress.dueAt = Date.now();
@@ -2398,11 +2443,8 @@ function returnSeenCardToDeck(encodedId) {
       currentIdx = Math.min(currentIdx, activeDeckCount - 1);
     }
   } else {
-    deck = deck.filter(c => c.id !== cardId);
-    const splitAt = deck.findIndex(c => marks[c.id] === 'known');
-    const insertAt = splitAt === -1 ? deck.length : splitAt;
-    deck.splice(insertAt, 0, card);
-    currentIdx = Math.min(insertAt, Math.max(deck.length - 1, 0));
+    const returnedIdx = deck.findIndex(c => c.id === cardId);
+    currentIdx = returnedIdx >= 0 ? returnedIdx : Math.min(currentIdx, Math.max(deck.length - 1, 0));
     isFlipped = false;
   }
 
