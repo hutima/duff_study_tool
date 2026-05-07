@@ -1,16 +1,16 @@
 // ═══════════════════════════════════════════════════════════════════════
-//  CUSTOM GRAMMAR PRACTICE SET — SUPPLEMENT
+//  WEEK 1 SUPPLEMENT PARADIGM PATCH
 // ═══════════════════════════════════════════════════════════════════════
 //  Swap this file when you want a different custom practice set.
 //
 //  UI behavior:
-//  - The set appears as “Supplement” in the custom deck selector.
-//  - It is grammar-only: 0 vocabulary cards, grammar cards only.
+//  - The cards are merged into the Week 1 Supplement deck (W1O).
+//  - It includes quick-flip vocabulary-style paradigm cards plus grammar drills.
 //  - The card shape mirrors grammar.js so the main grammar logic can stay
 //    unchanged.
 
 (function () {
-  const SET_KEY = 'SUPPLEMENT';
+  const SET_KEY = 'W1O';
 
   const PERSON_CHOICES = [
     'I / 1st singular',
@@ -37,10 +37,13 @@
     'accusative plural masculine'
   ];
 
+
+  const SUPPLEMENTAL_VOCAB_CARDS = [];
+
   const SUPPLEMENTAL_GRAMMAR_SETS = {
     [SET_KEY]: {
-      label: 'Supplement',
-      notes: 'Custom grammar practice: simple present active endings, λύω examples, and nominative/accusative masculine noun endings.',
+      label: 'Week 1 - Supplement',
+      notes: 'Custom grammar + paradigm drill set: λύω, article patterns, and declensions with full singular/plural case coverage.',
       items: [
         {
           family: 'Present active indicative endings',
@@ -250,11 +253,14 @@
   };
 
   if (window.SETS && typeof window.SETS === 'object') {
+    const base = window.SETS[SET_KEY] || { label: 'Week 1 - Supplement', type: 'other', week: 1, cards: [] };
+    const existingCards = Array.isArray(base.cards) ? base.cards : [];
     window.SETS[SET_KEY] = {
-      label: 'Supplement',
+      ...base,
+      label: 'Week 1 - Supplement',
       type: 'other',
-      week: null,
-      cards: []
+      week: 1,
+      cards: [...existingCards, ...SUPPLEMENTAL_VOCAB_CARDS]
     };
   }
 

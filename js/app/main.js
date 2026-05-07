@@ -80,6 +80,8 @@ let toastActive = false;
 let morphSelfCheck = false;
 let morphAnswerState = { answered: false, revealed: false, selfRated: false, selectedIndex: -1, isCorrect: null };
 let morphPendingAdvance = false;
+let isReaderMode = false;
+let readerViewBuilt = false;
 
 let deckStates = {};
 let globalWordMarks = {};
@@ -140,6 +142,10 @@ let activeDeckCount = 0;
 let unspacedPendingRecycle = false;
 let unspacedCycleState = {};
 let spacedUndoSnapshot = null;
+
+// Each known card has a 1-in-6000 chance per reveal to drift back
+// into the unspaced active pile for occasional long-tail review.
+const KNOWN_CARD_RANDOM_RETURN_FLIP_ODDS = 6000;
 
 let marks = {};
 
@@ -268,7 +274,6 @@ function syncToggleButtons() {
   const modeShortcutVocabBtn = document.getElementById('modeShortcutVocabBtn');
   const modeShortcutMorphBtn = document.getElementById('modeShortcutMorphBtn');
   const modeShortcutReaderBtn = document.getElementById('modeShortcutReaderBtn');
-  const modeShortcutMemorizationBtn = document.getElementById('modeShortcutMemorizationBtn');
   const resetDeckBtn = document.getElementById('resetDeckBtn');
 
   if (shuffleSwitch)   shuffleSwitch.classList.toggle('on',   !!shuffled);
@@ -283,12 +288,9 @@ function syncToggleButtons() {
   if (selfCheckToggle) selfCheckToggle.setAttribute('aria-checked', (morphSelfCheck && isMorphologyMode()) ? 'true' : 'false');
   if (modeVocabBtn)    modeVocabBtn.classList.toggle('active', studyMode === 'vocab');
   if (modeMorphBtn)    modeMorphBtn.classList.toggle('active', studyMode === 'morph');
-  if (modeReaderBtn)   modeReaderBtn.classList.toggle('active', studyMode === 'reader');
-  if (modeMemorizationBtn) modeMemorizationBtn.classList.toggle('active', studyMode === 'memorization');
-  if (modeShortcutVocabBtn) modeShortcutVocabBtn.classList.toggle('active', studyMode === 'vocab');
-  if (modeShortcutMorphBtn) modeShortcutMorphBtn.classList.toggle('active', studyMode === 'morph');
-  if (modeShortcutReaderBtn) modeShortcutReaderBtn.classList.toggle('active', studyMode === 'reader');
-  if (modeShortcutMemorizationBtn) modeShortcutMemorizationBtn.classList.toggle('active', studyMode === 'memorization');
+  if (modeShortcutVocabBtn) modeShortcutVocabBtn.classList.toggle('active', !isReaderMode && studyMode === 'vocab');
+  if (modeShortcutMorphBtn) modeShortcutMorphBtn.classList.toggle('active', !isReaderMode && studyMode === 'morph');
+  if (modeShortcutReaderBtn) modeShortcutReaderBtn.classList.toggle('active', isReaderMode);
   syncThemeButtons();
   if (resetDeckBtn) {
     resetDeckBtn.textContent = spacedRepetition ? 'Reset spaced' : 'Reset unspaced';
@@ -341,6 +343,20 @@ function syncLayoutVisibility() {
       nextBtn.textContent = spacedRepetition ? 'Again →' : 'Next →';
       nextBtn.classList.toggle('spaced-again', !!spacedRepetition);
     }
+  }
+
+  // Reader mode overrides — must come last to take effect
+  const readerViewEl = document.getElementById('readerView');
+  const cardAreaEl = document.getElementById('cardArea');
+  const reviewShellEl = document.querySelector('.review-shell');
+  const advancedSettingsEl = document.getElementById('advancedSettingsDetails');
+  if (readerViewEl) readerViewEl.style.display = isReaderMode ? '' : 'none';
+  if (cardAreaEl) cardAreaEl.style.display = isReaderMode ? 'none' : '';
+  if (reviewShellEl) reviewShellEl.style.display = isReaderMode ? 'none' : '';
+  if (advancedSettingsEl) advancedSettingsEl.style.display = isReaderMode ? 'none' : '';
+  if (isReaderMode) {
+    if (navRow) navRow.style.display = 'none';
+    if (markRow) markRow.style.display = 'none';
   }
 }
 
@@ -657,7 +673,21 @@ function buildStudyDeck(cards, options = {}) {
     }
   }
 
-  const deferredCards = cards.filter(card => !isCardDue(card));
+  let deferredCards = cards.filter(card => !isCardDue(card));
+
+  // 1/600 chance for each seen deferred card to be randomly promoted back to due
+  let hadRandomPromotion = false;
+  deferredCards.forEach(card => {
+    const progress = getWordProgress(card.id);
+    if (progress.seenCount > 0 && Math.random() < 1 / 600) {
+      progress.dueAt = Date.now();
+      hadRandomPromotion = true;
+    }
+  });
+  if (hadRandomPromotion) {
+    dueCards = cards.filter(isCardDue);
+    deferredCards = cards.filter(card => !isCardDue(card));
+  }
 
   // Preserve existing order of due cards already in the current deck;
   // append newly-eligible cards (including "(x) return to deck" and
@@ -872,6 +902,43 @@ function getRemainingCards() {
     return deck.slice(0, activeDeckCount);
   }
   return deck.filter(card => marks[card.id] !== 'known');
+}
+
+function moveCardToBackOfActivePile(card) {
+  if (!card) return false;
+  const directionalMarks = getDirectionalMarksStore();
+
+  const currentCardId = deck[currentIdx]?.id || null;
+  directionalMarks[card.id] = 'unsure';
+  marks = directionalMarks;
+
+  deck = deck.filter(candidate => candidate.id !== card.id);
+  const splitAt = deck.findIndex(candidate => marks[candidate.id] === 'known');
+  const insertAt = splitAt === -1 ? deck.length : splitAt;
+  deck.splice(insertAt, 0, card);
+
+  activeDeckCount = originalDeck.filter(candidate => marks[candidate.id] !== 'known').length;
+  if (currentCardId) {
+    const restoredIdx = deck.findIndex(candidate => candidate.id === currentCardId);
+    if (restoredIdx >= 0) currentIdx = restoredIdx;
+  }
+  unspacedPendingRecycle = false;
+  return true;
+}
+
+function maybeReturnKnownCardToActivePile() {
+  if (spacedRepetition || isMorphologyMode() || KNOWN_CARD_RANDOM_RETURN_FLIP_ODDS <= 0) return false;
+  if (!originalDeck.length || currentIdx >= deck.length) return false;
+
+  const currentCardId = deck[currentIdx]?.id || null;
+  const knownCards = originalDeck.filter(card => card.id !== currentCardId && marks[card.id] === 'known');
+  if (!knownCards.length) return false;
+
+  const returnChance = Math.min(1, knownCards.length / KNOWN_CARD_RANDOM_RETURN_FLIP_ODDS);
+  if (Math.random() >= returnChance) return false;
+
+  const card = knownCards[Math.floor(Math.random() * knownCards.length)];
+  return moveCardToBackOfActivePile(card);
 }
 
 
@@ -1438,7 +1505,13 @@ function restoreState() {
     const savedDeckState = deckStates[getDeckStateKey(selectedKeys, requiredOnly)] || null;
     marks = getDirectionalMarksStore();
     const restoredDeck = savedDeckState ? reorderDeckFromIds(originalDeck, savedDeckState.deckIds) : null;
-    deck = restoredDeck || buildStudyDeck(originalDeck);
+    if (spacedRepetition && restoredDeck) {
+      deck = restoredDeck;
+      activeDeckCount = restoredDeck.length;
+      deck = buildStudyDeck(originalDeck);
+    } else {
+      deck = restoredDeck || buildStudyDeck(originalDeck);
+    }
     resetUnspacedCycleState();
     activeDeckCount = spacedRepetition ? getDueCount(originalDeck) : originalDeck.filter(card => marks[card.id] !== 'known').length;
     currentIdx = savedDeckState && Number.isInteger(savedDeckState.currentIdx)
@@ -1590,7 +1663,13 @@ function loadDeckFromKeys(keys, sessionId = null) {
   marks = getDirectionalMarksStore();
   if (savedDeckState) {
     const restoredDeck = reorderDeckFromIds(originalDeck, savedDeckState.deckIds);
-    deck = restoredDeck || buildStudyDeck(originalDeck);
+    if (spacedRepetition && restoredDeck) {
+      deck = restoredDeck;
+      activeDeckCount = restoredDeck.length;
+      deck = buildStudyDeck(originalDeck);
+    } else {
+      deck = restoredDeck || buildStudyDeck(originalDeck);
+    }
     activeDeckCount = spacedRepetition ? getDueCount(originalDeck) : originalDeck.filter(card => marks[card.id] !== 'known').length;
     currentIdx = Number.isInteger(savedDeckState.currentIdx)
       ? Math.min(Math.max(savedDeckState.currentIdx, 0), spacedRepetition ? activeDeckCount : deck.length)
@@ -1650,7 +1729,6 @@ function toggleSession(session) {
   }
 
   loadDeckFromKeys(nextKeys, null);
-  closeStudySelector();
 }
 
 function toggleSet(key) {
@@ -1679,7 +1757,6 @@ function toggleSet(key) {
   }
 
   loadDeckFromKeys(selectedKeys, null);
-  closeStudySelector();
 }
 
 
@@ -1928,6 +2005,12 @@ function flipCard() {
   noteStudyInteraction();
   isFlipped = !isFlipped;
   wrapper.classList.toggle('flipped', isFlipped);
+
+  if (isFlipped && maybeReturnKnownCardToActivePile()) {
+    renderProgress();
+    renderReview();
+    saveState();
+  }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -2083,7 +2166,13 @@ function markCard(outcome) {
 
 
 function setStudyMode(mode) {
-  const nextMode = normalizeStudyMode(mode);
+  const nextMode = mode === 'morph' && canAccessGrammarUi() ? 'morph' : 'vocab';
+  if (isReaderMode) {
+    isReaderMode = false;
+    syncToggleButtons();
+    syncLayoutVisibility();
+    if (studyMode === nextMode) return;
+  }
   if (studyMode === nextMode) return;
 
   saveCurrentDeckStateToBank();
@@ -2161,7 +2250,7 @@ function toggleShuffle() {
   syncToggleButtons();
 
   if (spacedRepetition) {
-    deck = buildStudyDeck(originalDeck);
+    deck = buildStudyDeck(originalDeck, { forceShuffle: shuffled });
     currentIdx = Math.min(currentIdx, activeDeckCount);
   } else {
     const activeCards = getRemainingCards();
@@ -2453,9 +2542,7 @@ function returnSeenCardToDeck(encodedId) {
   const card = originalDeck.find(c => c.id === cardId);
   if (!card) return;
 
-  const directionalMarks = getDirectionalMarksStore();
-  directionalMarks[cardId] = 'unsure';
-  marks = directionalMarks;
+  moveCardToBackOfActivePile(card);
 
   const progress = getWordProgress(cardId);
   progress.dueAt = Date.now();
@@ -2474,11 +2561,8 @@ function returnSeenCardToDeck(encodedId) {
       currentIdx = Math.min(currentIdx, activeDeckCount - 1);
     }
   } else {
-    deck = deck.filter(c => c.id !== cardId);
-    const splitAt = deck.findIndex(c => marks[c.id] === 'known');
-    const insertAt = splitAt === -1 ? deck.length : splitAt;
-    deck.splice(insertAt, 0, card);
-    currentIdx = Math.min(insertAt, Math.max(deck.length - 1, 0));
+    const returnedIdx = deck.findIndex(c => c.id === cardId);
+    currentIdx = returnedIdx >= 0 ? returnedIdx : Math.min(currentIdx, Math.max(deck.length - 1, 0));
     isFlipped = false;
   }
 
@@ -2921,7 +3005,7 @@ function getCertaintyBucketForCard(card, marksStore) {
   if ((!progress.seenCount && confidence === null) && marksStore?.[card.id] !== 'known') return 'unseen';
   if (marksStore?.[card.id] === 'known') return '100';
   if (confidence === null) return progress.seenCount ? '0' : 'unseen';
-  if (confidence >= 75) return '100';
+  if (confidence >= 80) return '100';
   if (confidence >= 25) return '50';
   return '0';
 }
@@ -3749,6 +3833,43 @@ document.addEventListener('keydown', e => {
 });
 
 // ═══════════════════════════════════════════════════════
+//  READER TAB
+// ═══════════════════════════════════════════════════════
+function openReaderTab() {
+  isReaderMode = true;
+  if (!readerViewBuilt) {
+    buildReaderView();
+    readerViewBuilt = true;
+  }
+  syncToggleButtons();
+  syncLayoutVisibility();
+}
+
+function buildReaderView() {
+  const container = document.getElementById('readerView');
+  if (!container) return;
+  const chapters = Array.isArray(window.READER_CHAPTERS) ? window.READER_CHAPTERS : [];
+  if (!chapters.length) {
+    container.innerHTML = '<div class="reader-intro">Reader data not available.</div>';
+    return;
+  }
+
+  let html = '<div class="reader-intro">Verses from the New Testament readable after completing each chapter of Duff’s <em>Elements of New Testament Greek</em>. Greek text: SBL GNT.</div>';
+
+  for (const ch of chapters) {
+    const count = ch.verses.length;
+    const label = count === 1 ? '1 verse' : `${count} verses`;
+    html += `<details class="reader-chapter"><summary class="reader-chapter-header"><span class="reader-ch-label">After Chapter ${ch.chapter}</span><span class="reader-ch-count">${label}</span><span class="reader-ch-arrow" aria-hidden="true">▶</span></summary><div class="reader-verse-list">`;
+    for (const v of ch.verses) {
+      html += `<div class="reader-verse"><span class="reader-verse-greek">${escapeHtml(v.g)}</span><span class="reader-verse-ref">${escapeHtml(v.r)}</span></div>`;
+    }
+    html += '</div></details>';
+  }
+
+  container.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════
 //  GLOBAL EXPORTS — needed for HTML onclick handlers
 //  Export these BEFORE startup runs, so one later init error does not
 //  leave the page rendered-but-unclickable.
@@ -3763,7 +3884,8 @@ const GLOBAL_CLICK_HANDLERS = {
   openAnalyticsOverlay, resetAllStats, resetCurrentDeck, reshuffleEligible,
   restoreSpacedUndo, setAppProfile, setMemorizationWeek, setStudyMode, setThemeMode,
   showDisclaimerModal, startStudying, toggleDirection, toggleMorphSelfCheck,
-  toggleRequiredOnly, toggleShuffle, toggleSpacedRepetition, triggerImportProgress
+  toggleRequiredOnly, toggleShuffle, toggleSpacedRepetition, triggerImportProgress,
+  openReaderTab
 };
 if (typeof globalThis !== 'undefined') Object.assign(globalThis, GLOBAL_CLICK_HANDLERS);
 if (typeof window !== 'undefined' && window !== globalThis) Object.assign(window, GLOBAL_CLICK_HANDLERS);
@@ -3806,7 +3928,7 @@ function preventDoubleTapZoom(el) {
   }, false);
 }
 
-['shuffleToggle','requiredToggle','directionToggle','spacedToggle','selfCheckToggle','modeVocabBtn','modeMorphBtn','modeReaderBtn','modeMemorizationBtn','modeShortcutVocabBtn','modeShortcutMorphBtn','modeShortcutReaderBtn','modeShortcutMemorizationBtn','themeSystemBtn','themeDarkBtn','themeLightBtn'].forEach(id => {
+['shuffleToggle','requiredToggle','directionToggle','spacedToggle','selfCheckToggle','modeVocabBtn','modeMorphBtn','modeShortcutVocabBtn','modeShortcutMorphBtn','modeShortcutReaderBtn','themeSystemBtn','themeDarkBtn','themeLightBtn'].forEach(id => {
   const el = document.getElementById(id);
   if (el) preventDoubleTapZoom(el);
 });

@@ -22,6 +22,7 @@ const APP_SHELL_PATHS = [
   'js/data/grammar_examples.js?v=25',
   'js/data/setMeta.js?v=25',
   'js/logic/pos_logic.js?v=30',
+  'js/data/reader.js?v=31',
   'js/app/main.js?v=31',
   'js/app/main.bundle.js?v=30',
   'js/utils/helpers.js?v=25',
