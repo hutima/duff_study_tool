@@ -155,10 +155,6 @@ function isReaderMode() {
   return studyMode === 'reader';
 }
 
-function isMemorizationMode() {
-  return studyMode === 'memorization';
-}
-
 function isCardStudyMode() {
   return studyMode === 'vocab' || studyMode === 'morph' || studyMode === 'reader';
 }
@@ -186,7 +182,6 @@ function getProfileDescription() {
 function normalizeStudyMode(mode) {
   if (mode === 'morph' && canAccessGrammarUi()) return 'morph';
   if (mode === 'reader') return 'reader';
-  if (mode === 'memorization') return 'memorization';
   return 'vocab';
 }
 
@@ -202,7 +197,6 @@ function resetMorphAnswerState() {
 function getModeDescription() {
   if (isMorphologyMode()) return 'Grammar Quiz';
   if (isReaderMode()) return 'Reader';
-  if (isMemorizationMode()) return 'Memorization by Week';
   return 'Vocabulary Flashcards';
 }
 
@@ -268,11 +262,9 @@ function syncToggleButtons() {
   const modeVocabBtn    = document.getElementById('modeVocabBtn');
   const modeMorphBtn    = document.getElementById('modeMorphBtn');
   const modeReaderBtn   = document.getElementById('modeReaderBtn');
-  const modeMemorizationBtn = document.getElementById('modeMemorizationBtn');
   const modeShortcutVocabBtn = document.getElementById('modeShortcutVocabBtn');
   const modeShortcutMorphBtn = document.getElementById('modeShortcutMorphBtn');
   const modeShortcutReaderBtn = document.getElementById('modeShortcutReaderBtn');
-  const modeShortcutMemorizationBtn = document.getElementById('modeShortcutMemorizationBtn');
   const resetDeckBtn = document.getElementById('resetDeckBtn');
 
   if (shuffleSwitch)   shuffleSwitch.classList.toggle('on',   !!shuffled);
@@ -288,11 +280,9 @@ function syncToggleButtons() {
   if (modeVocabBtn)    modeVocabBtn.classList.toggle('active', studyMode === 'vocab');
   if (modeMorphBtn)    modeMorphBtn.classList.toggle('active', studyMode === 'morph');
   if (modeReaderBtn)   modeReaderBtn.classList.toggle('active', studyMode === 'reader');
-  if (modeMemorizationBtn) modeMemorizationBtn.classList.toggle('active', studyMode === 'memorization');
   if (modeShortcutVocabBtn) modeShortcutVocabBtn.classList.toggle('active', studyMode === 'vocab');
   if (modeShortcutMorphBtn) modeShortcutMorphBtn.classList.toggle('active', studyMode === 'morph');
   if (modeShortcutReaderBtn) modeShortcutReaderBtn.classList.toggle('active', studyMode === 'reader');
-  if (modeShortcutMemorizationBtn) modeShortcutMemorizationBtn.classList.toggle('active', studyMode === 'memorization');
   syncThemeButtons();
   if (resetDeckBtn) {
     resetDeckBtn.textContent = spacedRepetition ? 'Reset spaced' : 'Reset unspaced';
@@ -319,14 +309,12 @@ function syncLayoutVisibility() {
   const selfCheckToggle = document.getElementById('selfCheckToggle');
   const modeGroup = document.querySelector('.mode-group[aria-label="Study mode"]');
   const cardArea = document.getElementById('cardArea');
-  const memorizationShell = document.getElementById('memorizationShell');
   const reviewShell = document.querySelector('.review-shell');
   const cardMode = isCardStudyMode();
   const reviewDeckMode = isReviewDeckMode();
 
   if (controlsBar) controlsBar.style.display = 'flex';
   if (cardArea) cardArea.style.display = cardMode ? '' : 'none';
-  if (memorizationShell) memorizationShell.style.display = isMemorizationMode() ? '' : 'none';
   if (reviewShell) reviewShell.style.display = reviewDeckMode ? '' : 'none';
   if (navRow) navRow.style.display = reviewDeckMode && selectedKeys.length ? 'flex' : 'none';
   if (markRow) markRow.style.display = reviewDeckMode && selectedKeys.length && !isMorphologyMode() ? 'flex' : 'none';
@@ -1749,9 +1737,6 @@ function toggleSet(key) {
 }
 
 
-function setMemorizationWeek() {}
-function renderMemorizationModule() {}
-
 function renderReaderModule() {
   const area = document.getElementById('cardArea');
   if (!area) return;
@@ -2124,13 +2109,6 @@ function setStudyMode(mode) {
   ensureDirectionalStores();
   marks = getDirectionalMarksStore();
   syncToggleButtons();
-
-  if (isMemorizationMode()) {
-    renderMemorizationModule();
-    renderProgress();
-    saveState();
-    return;
-  }
 
   if (isReaderMode()) {
     renderReaderModule();
@@ -3794,7 +3772,7 @@ const GLOBAL_CLICK_HANDLERS = {
   handleConsentAction, handleTransferPrimaryAction, handleTransferSecondaryAction,
   openShortcutsModal, openStudySelector,
   openAnalyticsOverlay, resetAllStats, resetCurrentDeck, reshuffleEligible,
-  restoreSpacedUndo, setAppProfile, setMemorizationWeek, setStudyMode, setThemeMode,
+  restoreSpacedUndo, setAppProfile, setStudyMode, setThemeMode,
   showDisclaimerModal, startStudying, toggleDirection, toggleMorphSelfCheck,
   toggleRequiredOnly, toggleShuffle, toggleSpacedRepetition, triggerImportProgress,
   openReaderTab
@@ -3813,7 +3791,6 @@ if (!restoreState()) {
 buildSessions();
 buildChapterSelector();
 initializeConsentGate();
-if (isMemorizationMode()) renderMemorizationModule();
 if (isReaderMode()) renderReaderModule();
 
 const cardArea = document.getElementById('cardArea');
@@ -3840,7 +3817,7 @@ function preventDoubleTapZoom(el) {
   }, false);
 }
 
-['shuffleToggle','requiredToggle','directionToggle','spacedToggle','selfCheckToggle','modeVocabBtn','modeMorphBtn','modeReaderBtn','modeMemorizationBtn','modeShortcutVocabBtn','modeShortcutMorphBtn','modeShortcutReaderBtn','modeShortcutMemorizationBtn','themeSystemBtn','themeDarkBtn','themeLightBtn'].forEach(id => {
+['shuffleToggle','requiredToggle','directionToggle','spacedToggle','selfCheckToggle','modeVocabBtn','modeMorphBtn','modeReaderBtn','modeShortcutVocabBtn','modeShortcutMorphBtn','modeShortcutReaderBtn','themeSystemBtn','themeDarkBtn','themeLightBtn'].forEach(id => {
   const el = document.getElementById(id);
   if (el) preventDoubleTapZoom(el);
 });
