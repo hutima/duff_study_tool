@@ -3,13 +3,14 @@
 // GitHub Pages note: all app-shell URLs are resolved relative to the
 // service worker registration scope so this works both at a domain root
 // and at a project path such as https://user.github.io/repository/.
-const CACHE_NAME = 'greek-flashcards-pwa-v33-github-pages';
+const CACHE_NAME = 'greek-flashcards-pwa-v34-github-pages';
 const BASE_URL = new URL('./', self.registration.scope);
 
 const APP_SHELL_PATHS = [
   './',
   'index.html',
-  'styles.css?v=32',
+  'pages/memorization.html',
+  'styles.css?v=33',
   'manifest.json?v=24',
   'favicon.svg?v=24',
   'js/data/words.js?v=30',
@@ -23,7 +24,7 @@ const APP_SHELL_PATHS = [
   'js/data/setMeta.js?v=25',
   'js/logic/pos_logic.js?v=30',
   'js/data/reader.js?v=31',
-  'js/app/main.js?v=31',
+  'js/app/main.js?v=32',
   'js/app/main.bundle.js?v=30',
   'js/utils/helpers.js?v=25',
   'js/utils/time.js?v=25',
@@ -73,10 +74,10 @@ self.addEventListener('fetch', event => {
       fetch(req)
         .then(res => {
           const copy = res.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(INDEX_URL, copy));
+          caches.open(CACHE_NAME).then(cache => cache.put(req, copy));
           return res;
         })
-        .catch(() => caches.match(INDEX_URL))
+        .catch(() => caches.match(req).then(cached => cached || caches.match(INDEX_URL)))
     );
     return;
   }

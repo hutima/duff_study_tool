@@ -13,7 +13,7 @@
 <title>Elementary NT Greek — Flashcards</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Noto+Serif:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=32">
+<link rel="stylesheet" href="styles.css?v=33">
 <script>
 (function(){
   try {
@@ -52,7 +52,7 @@
       <button class="mode-btn active" id="modeShortcutVocabBtn" type="button" onclick="setStudyMode('vocab')">Vocab</button>
       <button class="mode-btn" id="modeShortcutMorphBtn" type="button" onclick="setStudyMode('morph')">Grammar</button>
       <button class="mode-btn" id="modeShortcutReaderBtn" type="button" onclick="openReaderTab()">Reader</button>
-      <button class="mode-btn" id="modeShortcutMemorizationBtn" type="button" onclick="setStudyMode('memorization')">Memorization</button>
+      <a class="mode-btn" id="modeShortcutMemorizationBtn" href="pages/memorization.html">Memorization</a>
     </div>
     <button class="quick-btn" type="button" onclick="openAnalyticsOverlay()">Progress</button>
     <button class="quick-btn" type="button" onclick="openShortcutsModal()">Keyboard shortcuts</button>
@@ -78,7 +78,7 @@
       <button class="mode-btn active" id="modeVocabBtn" type="button" onclick="setStudyMode('vocab')">Vocabulary</button>
       <button class="mode-btn" id="modeMorphBtn" type="button" onclick="setStudyMode('morph')">Grammar</button>
       <button class="mode-btn" id="modeReaderBtn" type="button" onclick="setStudyMode('reader')">Reader</button>
-      <button class="mode-btn" id="modeMemorizationBtn" type="button" onclick="setStudyMode('memorization')">Memorization</button>
+      <a class="mode-btn" id="modeMemorizationBtn" href="pages/memorization.html">Memorization</a>
     </div>
     <span class="progress-text" id="progressText">0 / 0</span>
     <span class="progress-percent" id="progressPercent">0%</span>
@@ -133,14 +133,7 @@
     <button class="mark-btn mark-easy"  onclick="markCard('easy')">✓ Easy</button>
   </div>
 
-  <section class="memorization-shell" id="memorizationShell" aria-label="Koine Greek memorization by week" style="display:none">
-    <div class="memorization-nav">
-      <button class="ctrl-btn" type="button" onclick="setStudyMode('vocab')">← Back to cards</button>
-    </div>
-    <iframe src="pages/memorization.html" title="Koine Greek Memorization Tables" class="memorization-iframe"></iframe>
-  </section>
-
-  <section class="review-shell">
+<section class="review-shell">
     <div class="review-panel show" id="reviewPanel">
     <div class="review-title">Progress</div>
     <div class="review-stats" id="reviewStats"></div>
@@ -267,6 +260,6 @@
 <script defer src="js/data/grammar.js?v=30"></script>
 <script defer src="js/data/reader.js?v=31"></script>
 <script defer src="js/logic/pos_logic.js?v=30"></script>
-<script type="module" src="js/app/main.js?v=31"></script>
+<script type="module" src="js/app/main.js?v=32"></script>
 </body>
 </html>
