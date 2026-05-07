@@ -1919,3 +1919,206 @@
       gap: 16px;
     }
   }
+
+  .memorization-shell {
+    margin: 18px 0 20px;
+  }
+
+  .memorization-card {
+    border: 1px solid var(--border);
+    background: linear-gradient(180deg, var(--surface), var(--surface-2));
+    border-radius: 18px;
+    padding: 18px;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .memorization-eyebrow {
+    color: var(--gold-dim);
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .memorization-card h2,
+  .memorization-card h3 {
+    margin: 0;
+    color: var(--cream);
+    font-family: 'Cinzel', serif;
+  }
+
+  .memorization-card h2 {
+    font-size: clamp(24px, 5vw, 34px);
+  }
+
+  .memorization-intro {
+    color: var(--muted);
+    margin: 8px 0 16px;
+    line-height: 1.45;
+  }
+
+  .memorization-week-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .memorization-week-btn {
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--muted);
+    border-radius: 999px;
+    min-height: 40px;
+    padding: 9px 12px;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .memorization-week-btn.active {
+    border-color: var(--gold-dim);
+    background: rgba(201,168,76,0.12);
+    color: var(--gold-light);
+  }
+
+  .memorization-week-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+
+  .memorization-week-label {
+    color: var(--gold-light);
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .memorization-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .memorization-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 620px;
+    color: var(--cream);
+  }
+
+  .memorization-table th,
+  .memorization-table td {
+    border: 1px solid var(--border);
+    padding: 12px;
+    text-align: left;
+    vertical-align: top;
+    line-height: 1.45;
+  }
+
+  .memorization-table thead th {
+    color: var(--gold-light);
+    background: rgba(201,168,76,0.08);
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+  }
+
+  .memorization-table tbody th {
+    width: 24%;
+    color: var(--gold-dim);
+    font-weight: 700;
+  }
+
+  .memorization-forms {
+    font-family: 'EB Garamond', 'Noto Serif', serif;
+    font-size: 18px;
+  }
+
+  .memorization-empty {
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    color: var(--muted);
+    padding: 18px;
+    text-align: center;
+  }
+
+  @media (max-width: 680px) {
+    .memorization-card {
+      padding: 14px;
+      border-radius: 14px;
+    }
+
+    .memorization-week-tabs {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .memorization-week-btn {
+      width: 100%;
+    }
+
+    .memorization-week-heading {
+      display: block;
+    }
+
+    .memorization-week-heading .ctrl-btn {
+      margin-top: 10px;
+      width: 100%;
+    }
+
+    .memorization-table {
+      min-width: 0;
+    }
+
+    .memorization-table,
+    .memorization-table thead,
+    .memorization-table tbody,
+    .memorization-table tr,
+    .memorization-table th,
+    .memorization-table td {
+      display: block;
+    }
+
+    .memorization-table thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+
+    .memorization-table tr {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+
+    .memorization-table th,
+    .memorization-table td {
+      border: 0;
+      border-bottom: 1px solid var(--border);
+      width: auto;
+    }
+
+    .memorization-table td:last-child {
+      border-bottom: 0;
+    }
+
+    .memorization-table td::before {
+      display: block;
+      color: var(--gold-light);
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .memorization-table td:nth-child(2)::before { content: 'Forms to recite'; }
+    .memorization-table td:nth-child(3)::before { content: 'Memory cue'; }
+  }
