@@ -16,6 +16,7 @@ const APP_SHELL_PATHS = [
   'js/data/morphology.js?v=30',
   'js/data/supplemental.js?v=30',
   'js/data/grammar.js?v=30',
+  'js/data/memorization.js?v=31',
   'js/data/parsing_examples.js?v=25',
   'js/data/concept_examples.js?v=25',
   'js/data/grammar_examples.js?v=25',

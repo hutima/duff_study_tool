@@ -76,6 +76,8 @@
     <div class="mode-group" role="group" aria-label="Study mode">
       <button class="mode-btn active" id="modeVocabBtn" type="button" onclick="setStudyMode('vocab')">Vocabulary</button>
       <button class="mode-btn" id="modeMorphBtn" type="button" onclick="setStudyMode('morph')">Grammar</button>
+      <button class="mode-btn" id="modeReaderBtn" type="button" onclick="setStudyMode('reader')">Reader</button>
+      <button class="mode-btn" id="modeMemorizationBtn" type="button" onclick="setStudyMode('memorization')">Memorization</button>
     </div>
     <span class="progress-text" id="progressText">0 / 0</span>
     <span class="progress-percent" id="progressPercent">0%</span>
@@ -129,6 +131,16 @@
     <button class="mark-btn mark-pass"  onclick="markCard('pass')">~ Uncertain</button>
     <button class="mark-btn mark-easy"  onclick="markCard('easy')">✓ Easy</button>
   </div>
+
+  <section class="memorization-shell" id="memorizationShell" aria-label="Koine Greek memorization by week" style="display:none">
+    <div class="memorization-card">
+      <div class="memorization-eyebrow">Koine Greek Memorization</div>
+      <h2>Memorization by week</h2>
+      <p class="memorization-intro">Phone-friendly weekly tables for quick paradigm recitation and review.</p>
+      <div class="memorization-week-tabs" id="memorizationWeekTabs" role="tablist" aria-label="Memorization weeks"></div>
+      <div class="memorization-table-wrap" id="memorizationTableWrap"></div>
+    </div>
+  </section>
 
   <section class="review-shell">
     <div class="review-panel show" id="reviewPanel">

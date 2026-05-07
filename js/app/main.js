@@ -153,6 +153,22 @@ function isMorphologyMode() {
   return studyMode === 'morph';
 }
 
+function isReaderMode() {
+  return studyMode === 'reader';
+}
+
+function isMemorizationMode() {
+  return studyMode === 'memorization';
+}
+
+function isCardStudyMode() {
+  return studyMode === 'vocab' || studyMode === 'morph' || studyMode === 'reader';
+}
+
+function isReviewDeckMode() {
+  return studyMode === 'vocab' || studyMode === 'morph';
+}
+
 function isVocabOnlyProfile() {
   return false;
 }
@@ -166,7 +182,14 @@ function getSessions() {
 }
 
 function getProfileDescription() {
-  return 'Full layout with vocabulary and grammar. Time totals stay shared, while progress remains separate by module.';
+  return 'Full layout with vocabulary, grammar, reader, and memorization. Time totals stay shared, while progress remains separate by module.';
+}
+
+function normalizeStudyMode(mode) {
+  if (mode === 'morph' && canAccessGrammarUi()) return 'morph';
+  if (mode === 'reader') return 'reader';
+  if (mode === 'memorization') return 'memorization';
+  return 'vocab';
 }
 
 function isMorphCard(card) {
@@ -179,7 +202,10 @@ function resetMorphAnswerState() {
 }
 
 function getModeDescription() {
-  return isMorphologyMode() ? 'Grammar Quiz' : 'Vocabulary Flashcards';
+  if (isMorphologyMode()) return 'Grammar Quiz';
+  if (isReaderMode()) return 'Reader';
+  if (isMemorizationMode()) return 'Memorization by Week';
+  return 'Vocabulary Flashcards';
 }
 
 function resolveThemeMode(mode = themeMode) {
@@ -243,6 +269,8 @@ function syncToggleButtons() {
   const selfCheckToggle = document.getElementById('selfCheckToggle');
   const modeVocabBtn    = document.getElementById('modeVocabBtn');
   const modeMorphBtn    = document.getElementById('modeMorphBtn');
+  const modeReaderBtn   = document.getElementById('modeReaderBtn');
+  const modeMemorizationBtn = document.getElementById('modeMemorizationBtn');
   const modeShortcutVocabBtn = document.getElementById('modeShortcutVocabBtn');
   const modeShortcutMorphBtn = document.getElementById('modeShortcutMorphBtn');
   const modeShortcutReaderBtn = document.getElementById('modeShortcutReaderBtn');
@@ -288,14 +316,23 @@ function syncLayoutVisibility() {
   const requiredToggle = document.getElementById('requiredToggle');
   const selfCheckToggle = document.getElementById('selfCheckToggle');
   const modeGroup = document.querySelector('.mode-group[aria-label="Study mode"]');
+  const cardArea = document.getElementById('cardArea');
+  const memorizationShell = document.getElementById('memorizationShell');
+  const reviewShell = document.querySelector('.review-shell');
+  const cardMode = isCardStudyMode();
+  const reviewDeckMode = isReviewDeckMode();
 
   if (controlsBar) controlsBar.style.display = 'flex';
-  if (navRow) navRow.style.display = selectedKeys.length ? 'flex' : 'none';
-  if (markRow) markRow.style.display = selectedKeys.length && !isMorphologyMode() ? 'flex' : 'none';
-  if (directionToggle) directionToggle.style.display = isMorphologyMode() ? 'none' : 'flex';
-  if (requiredToggle) requiredToggle.style.display = isMorphologyMode() ? 'none' : 'flex';
+  if (cardArea) cardArea.style.display = cardMode ? '' : 'none';
+  if (memorizationShell) memorizationShell.style.display = isMemorizationMode() ? '' : 'none';
+  if (reviewShell) reviewShell.style.display = reviewDeckMode ? '' : 'none';
+  if (navRow) navRow.style.display = reviewDeckMode && selectedKeys.length ? 'flex' : 'none';
+  if (markRow) markRow.style.display = reviewDeckMode && selectedKeys.length && !isMorphologyMode() ? 'flex' : 'none';
+  if (directionToggle) directionToggle.style.display = studyMode === 'vocab' ? 'flex' : 'none';
+  if (requiredToggle) requiredToggle.style.display = studyMode === 'vocab' ? 'flex' : 'none';
   if (selfCheckToggle) selfCheckToggle.style.display = isMorphologyMode() && canAccessGrammarUi() ? 'flex' : 'none';
   if (modeGroup) modeGroup.style.display = canAccessGrammarUi() ? 'inline-flex' : 'none';
+  if (!reviewDeckMode) return;
   if (prevBtn) prevBtn.style.display = spacedRepetition && !isMorphologyMode() ? 'none' : '';
   if (undoBtn) undoBtn.style.display = spacedRepetition && !isMorphologyMode() && !!spacedUndoSnapshot ? '' : 'none';
   if (nextBtn) {
@@ -949,7 +986,7 @@ function sanitizeImportedState(candidate) {
   state.deckStates = isPlainObject(candidate.deckStates) ? candidate.deckStates : {};
   state.globalWordMarks = isPlainObject(candidate.globalWordMarks) ? candidate.globalWordMarks : {};
   state.globalWordProgress = isPlainObject(candidate.globalWordProgress) ? candidate.globalWordProgress : {};
-  state.studyMode = candidate.studyMode === 'morph' ? 'morph' : 'vocab';
+  state.studyMode = normalizeStudyMode(candidate.studyMode);
   state.appProfile = 'vocab_grammar';
   state.gamification = sanitizeGamificationState(candidate.gamification);
   state.shuffled = candidate.shuffled !== false;
@@ -1434,7 +1471,7 @@ function restoreState() {
     appProfile = 'vocab_grammar';
     const hadSavedAchievementSnapshot = Array.isArray(saved?.gamification?.lastEarnedAchievementIds);
     appGamification = sanitizeGamificationState(saved.gamification);
-    studyMode = saved.studyMode === 'morph' ? 'morph' : 'vocab';
+    studyMode = normalizeStudyMode(saved.studyMode);
     morphSelfCheck = !!saved.morphSelfCheck;
     shuffled = saved.shuffled !== false;
     deckStates = saved.deckStates && typeof saved.deckStates === 'object' ? saved.deckStates : {};
@@ -1720,6 +1757,73 @@ function toggleSet(key) {
   }
 
   loadDeckFromKeys(selectedKeys, null);
+}
+
+
+function getMemorizationWeeks() {
+  return Array.isArray(window.KOINE_GREEK_MEMORIZATION_PHONE_TABLES)
+    ? window.KOINE_GREEK_MEMORIZATION_PHONE_TABLES
+    : [];
+}
+
+let activeMemorizationWeekIndex = 0;
+
+function setMemorizationWeek(index) {
+  const weeks = getMemorizationWeeks();
+  activeMemorizationWeekIndex = Math.max(0, Math.min(Number(index) || 0, Math.max(weeks.length - 1, 0)));
+  renderMemorizationModule();
+}
+
+function renderMemorizationModule() {
+  const tabsEl = document.getElementById('memorizationWeekTabs');
+  const wrapEl = document.getElementById('memorizationTableWrap');
+  if (!tabsEl || !wrapEl) return;
+
+  const weeks = getMemorizationWeeks();
+  if (!weeks.length) {
+    tabsEl.innerHTML = '';
+    wrapEl.innerHTML = '<div class="memorization-empty">No memorization tables are available.</div>';
+    return;
+  }
+
+  activeMemorizationWeekIndex = Math.max(0, Math.min(activeMemorizationWeekIndex, weeks.length - 1));
+  tabsEl.innerHTML = weeks.map((week, index) => `
+    <button class="memorization-week-btn ${index === activeMemorizationWeekIndex ? 'active' : ''}" type="button" role="tab" aria-selected="${index === activeMemorizationWeekIndex ? 'true' : 'false'}" onclick="setMemorizationWeek(${index})">
+      ${escapeHtml(week.week || `Week ${index + 1}`)}
+    </button>
+  `).join('');
+
+  const week = weeks[activeMemorizationWeekIndex];
+  const rows = Array.isArray(week.rows) ? week.rows : [];
+  wrapEl.innerHTML = `
+    <div class="memorization-week-heading">
+      <div>
+        <div class="memorization-week-label">${escapeHtml(week.week || 'Weekly Review')}</div>
+        <h3>${escapeHtml(week.focus || 'Memorization focus')}</h3>
+      </div>
+      <button class="ctrl-btn" type="button" onclick="setStudyMode('vocab')">Back to cards</button>
+    </div>
+    <table class="memorization-table">
+      <thead>
+        <tr><th>Item</th><th>Forms to recite</th><th>Memory cue</th></tr>
+      </thead>
+      <tbody>
+        ${rows.map(row => `
+          <tr>
+            <th scope="row">${escapeHtml(row.item || '')}</th>
+            <td class="memorization-forms">${escapeHtml(row.forms || '')}</td>
+            <td>${escapeHtml(row.cue || '')}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+function renderReaderPlaceholder() {
+  const area = document.getElementById('cardArea');
+  if (!area) return;
+  area.innerHTML = '<div class="empty-state"><div class="big">βίβλος</div>Reader module placeholder. Use Memorize for the weekly phone tables or switch back to cards.</div>';
 }
 
 // ═══════════════════════════════════════════════════════
@@ -2078,6 +2182,20 @@ function setStudyMode(mode) {
   ensureDirectionalStores();
   marks = getDirectionalMarksStore();
   syncToggleButtons();
+
+  if (isMemorizationMode()) {
+    renderMemorizationModule();
+    renderProgress();
+    saveState();
+    return;
+  }
+
+  if (isReaderMode()) {
+    renderReaderPlaceholder();
+    renderProgress();
+    saveState();
+    return;
+  }
 
   if (!selectedKeys.length) {
     saveState();
@@ -3692,7 +3810,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && isStudySelectorOpen()) { closeStudySelector(); return; }
   if (e.key === 'Escape' && isShortcutsModalOpen()) { closeShortcutsModal(); return; }
   if (isDisclaimerModalOpen() || isTransferModalOpen() || isAnalyticsModalOpen() || isStudySelectorOpen() || isShortcutsModalOpen()) return;
-  if (!selectedKeys.length) return;
+  if (!isReviewDeckMode() || !selectedKeys.length) return;
 
   if (isMorphologyMode()) {
     if (e.key === 'ArrowRight' || e.key === 'ArrowDown') navigate(1);
@@ -3764,7 +3882,7 @@ const GLOBAL_CLICK_HANDLERS = {
   handleConsentAction, handleTransferPrimaryAction, handleTransferSecondaryAction,
   openShortcutsModal, openStudySelector,
   openAnalyticsOverlay, resetAllStats, resetCurrentDeck, reshuffleEligible,
-  restoreSpacedUndo, setAppProfile, setStudyMode, setThemeMode,
+  restoreSpacedUndo, setAppProfile, setMemorizationWeek, setStudyMode, setThemeMode,
   showDisclaimerModal, startStudying, toggleDirection, toggleMorphSelfCheck,
   toggleRequiredOnly, toggleShuffle, toggleSpacedRepetition, triggerImportProgress,
   openReaderTab
@@ -3783,6 +3901,8 @@ if (!restoreState()) {
 buildSessions();
 buildChapterSelector();
 initializeConsentGate();
+if (isMemorizationMode()) renderMemorizationModule();
+if (isReaderMode()) renderReaderPlaceholder();
 
 const cardArea = document.getElementById('cardArea');
 if (cardArea) {
