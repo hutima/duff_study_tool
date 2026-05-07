@@ -80,8 +80,6 @@ let toastActive = false;
 let morphSelfCheck = false;
 let morphAnswerState = { answered: false, revealed: false, selfRated: false, selectedIndex: -1, isCorrect: null };
 let morphPendingAdvance = false;
-let isReaderMode = false;
-let readerViewBuilt = false;
 
 let deckStates = {};
 let globalWordMarks = {};
@@ -274,6 +272,7 @@ function syncToggleButtons() {
   const modeShortcutVocabBtn = document.getElementById('modeShortcutVocabBtn');
   const modeShortcutMorphBtn = document.getElementById('modeShortcutMorphBtn');
   const modeShortcutReaderBtn = document.getElementById('modeShortcutReaderBtn');
+  const modeShortcutMemorizationBtn = document.getElementById('modeShortcutMemorizationBtn');
   const resetDeckBtn = document.getElementById('resetDeckBtn');
 
   if (shuffleSwitch)   shuffleSwitch.classList.toggle('on',   !!shuffled);
@@ -288,9 +287,12 @@ function syncToggleButtons() {
   if (selfCheckToggle) selfCheckToggle.setAttribute('aria-checked', (morphSelfCheck && isMorphologyMode()) ? 'true' : 'false');
   if (modeVocabBtn)    modeVocabBtn.classList.toggle('active', studyMode === 'vocab');
   if (modeMorphBtn)    modeMorphBtn.classList.toggle('active', studyMode === 'morph');
-  if (modeShortcutVocabBtn) modeShortcutVocabBtn.classList.toggle('active', !isReaderMode && studyMode === 'vocab');
-  if (modeShortcutMorphBtn) modeShortcutMorphBtn.classList.toggle('active', !isReaderMode && studyMode === 'morph');
-  if (modeShortcutReaderBtn) modeShortcutReaderBtn.classList.toggle('active', isReaderMode);
+  if (modeReaderBtn)   modeReaderBtn.classList.toggle('active', studyMode === 'reader');
+  if (modeMemorizationBtn) modeMemorizationBtn.classList.toggle('active', studyMode === 'memorization');
+  if (modeShortcutVocabBtn) modeShortcutVocabBtn.classList.toggle('active', studyMode === 'vocab');
+  if (modeShortcutMorphBtn) modeShortcutMorphBtn.classList.toggle('active', studyMode === 'morph');
+  if (modeShortcutReaderBtn) modeShortcutReaderBtn.classList.toggle('active', studyMode === 'reader');
+  if (modeShortcutMemorizationBtn) modeShortcutMemorizationBtn.classList.toggle('active', studyMode === 'memorization');
   syncThemeButtons();
   if (resetDeckBtn) {
     resetDeckBtn.textContent = spacedRepetition ? 'Reset spaced' : 'Reset unspaced';
@@ -345,19 +347,6 @@ function syncLayoutVisibility() {
     }
   }
 
-  // Reader mode overrides — must come last to take effect
-  const readerViewEl = document.getElementById('readerView');
-  const cardAreaEl = document.getElementById('cardArea');
-  const reviewShellEl = document.querySelector('.review-shell');
-  const advancedSettingsEl = document.getElementById('advancedSettingsDetails');
-  if (readerViewEl) readerViewEl.style.display = isReaderMode ? '' : 'none';
-  if (cardAreaEl) cardAreaEl.style.display = isReaderMode ? 'none' : '';
-  if (reviewShellEl) reviewShellEl.style.display = isReaderMode ? 'none' : '';
-  if (advancedSettingsEl) advancedSettingsEl.style.display = isReaderMode ? 'none' : '';
-  if (isReaderMode) {
-    if (navRow) navRow.style.display = 'none';
-    if (markRow) markRow.style.display = 'none';
-  }
 }
 
 function ensureUsageStats(stats = appUsageStats) {
@@ -1820,10 +1809,26 @@ function renderMemorizationModule() {
   `;
 }
 
-function renderReaderPlaceholder() {
+function renderReaderModule() {
   const area = document.getElementById('cardArea');
   if (!area) return;
-  area.innerHTML = '<div class="empty-state"><div class="big">βίβλος</div>Reader module placeholder. Use Memorize for the weekly phone tables or switch back to cards.</div>';
+  const chapters = Array.isArray(window.READER_CHAPTERS) ? window.READER_CHAPTERS : [];
+  if (!chapters.length) {
+    area.innerHTML = '<div class="empty-state"><div class="big">βίβλος</div>Reader data not available.</div>';
+    return;
+  }
+  let html = '<div class="reader-wrap"><div class="reader-intro">Verses from the New Testament readable after completing each chapter of Duff\'s <em>Elements of New Testament Greek</em>. Greek text: SBL GNT.</div>';
+  for (const ch of chapters) {
+    const count = ch.verses.length;
+    const label = count === 1 ? '1 verse' : `${count} verses`;
+    html += `<details class="reader-chapter"><summary class="reader-chapter-header"><span class="reader-ch-label">After Chapter ${ch.chapter}</span><span class="reader-ch-count">${label}</span><span class="reader-ch-arrow" aria-hidden="true">▶</span></summary><div class="reader-verse-list">`;
+    for (const v of ch.verses) {
+      html += `<div class="reader-verse"><span class="reader-verse-greek">${escapeHtml(v.g)}</span><span class="reader-verse-ref">${escapeHtml(v.r)}</span></div>`;
+    }
+    html += '</div></details>';
+  }
+  html += '</div>';
+  area.innerHTML = html;
 }
 
 // ═══════════════════════════════════════════════════════
@@ -2166,13 +2171,7 @@ function markCard(outcome) {
 
 
 function setStudyMode(mode) {
-  const nextMode = mode === 'morph' && canAccessGrammarUi() ? 'morph' : 'vocab';
-  if (isReaderMode) {
-    isReaderMode = false;
-    syncToggleButtons();
-    syncLayoutVisibility();
-    if (studyMode === nextMode) return;
-  }
+  const nextMode = normalizeStudyMode(mode);
   if (studyMode === nextMode) return;
 
   saveCurrentDeckStateToBank();
@@ -2191,7 +2190,7 @@ function setStudyMode(mode) {
   }
 
   if (isReaderMode()) {
-    renderReaderPlaceholder();
+    renderReaderModule();
     renderProgress();
     saveState();
     return;
@@ -3836,37 +3835,7 @@ document.addEventListener('keydown', e => {
 //  READER TAB
 // ═══════════════════════════════════════════════════════
 function openReaderTab() {
-  isReaderMode = true;
-  if (!readerViewBuilt) {
-    buildReaderView();
-    readerViewBuilt = true;
-  }
-  syncToggleButtons();
-  syncLayoutVisibility();
-}
-
-function buildReaderView() {
-  const container = document.getElementById('readerView');
-  if (!container) return;
-  const chapters = Array.isArray(window.READER_CHAPTERS) ? window.READER_CHAPTERS : [];
-  if (!chapters.length) {
-    container.innerHTML = '<div class="reader-intro">Reader data not available.</div>';
-    return;
-  }
-
-  let html = '<div class="reader-intro">Verses from the New Testament readable after completing each chapter of Duff’s <em>Elements of New Testament Greek</em>. Greek text: SBL GNT.</div>';
-
-  for (const ch of chapters) {
-    const count = ch.verses.length;
-    const label = count === 1 ? '1 verse' : `${count} verses`;
-    html += `<details class="reader-chapter"><summary class="reader-chapter-header"><span class="reader-ch-label">After Chapter ${ch.chapter}</span><span class="reader-ch-count">${label}</span><span class="reader-ch-arrow" aria-hidden="true">▶</span></summary><div class="reader-verse-list">`;
-    for (const v of ch.verses) {
-      html += `<div class="reader-verse"><span class="reader-verse-greek">${escapeHtml(v.g)}</span><span class="reader-verse-ref">${escapeHtml(v.r)}</span></div>`;
-    }
-    html += '</div></details>';
-  }
-
-  container.innerHTML = html;
+  setStudyMode('reader');
 }
 
 // ═══════════════════════════════════════════════════════
@@ -3902,7 +3871,7 @@ buildSessions();
 buildChapterSelector();
 initializeConsentGate();
 if (isMemorizationMode()) renderMemorizationModule();
-if (isReaderMode()) renderReaderPlaceholder();
+if (isReaderMode()) renderReaderModule();
 
 const cardArea = document.getElementById('cardArea');
 if (cardArea) {
@@ -3928,7 +3897,7 @@ function preventDoubleTapZoom(el) {
   }, false);
 }
 
-['shuffleToggle','requiredToggle','directionToggle','spacedToggle','selfCheckToggle','modeVocabBtn','modeMorphBtn','modeShortcutVocabBtn','modeShortcutMorphBtn','modeShortcutReaderBtn','themeSystemBtn','themeDarkBtn','themeLightBtn'].forEach(id => {
+['shuffleToggle','requiredToggle','directionToggle','spacedToggle','selfCheckToggle','modeVocabBtn','modeMorphBtn','modeReaderBtn','modeMemorizationBtn','modeShortcutVocabBtn','modeShortcutMorphBtn','modeShortcutReaderBtn','modeShortcutMemorizationBtn','themeSystemBtn','themeDarkBtn','themeLightBtn'].forEach(id => {
   const el = document.getElementById(id);
   if (el) preventDoubleTapZoom(el);
 });
