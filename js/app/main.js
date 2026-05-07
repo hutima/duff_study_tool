@@ -1749,65 +1749,8 @@ function toggleSet(key) {
 }
 
 
-function getMemorizationWeeks() {
-  return Array.isArray(window.KOINE_GREEK_MEMORIZATION_PHONE_TABLES)
-    ? window.KOINE_GREEK_MEMORIZATION_PHONE_TABLES
-    : [];
-}
-
-let activeMemorizationWeekIndex = 0;
-
-function setMemorizationWeek(index) {
-  const weeks = getMemorizationWeeks();
-  activeMemorizationWeekIndex = Math.max(0, Math.min(Number(index) || 0, Math.max(weeks.length - 1, 0)));
-  renderMemorizationModule();
-}
-
-function renderMemorizationModule() {
-  const tabsEl = document.getElementById('memorizationWeekTabs');
-  const wrapEl = document.getElementById('memorizationTableWrap');
-  if (!tabsEl || !wrapEl) return;
-
-  const weeks = getMemorizationWeeks();
-  if (!weeks.length) {
-    tabsEl.innerHTML = '';
-    wrapEl.innerHTML = '<div class="memorization-empty">No memorization tables are available.</div>';
-    return;
-  }
-
-  activeMemorizationWeekIndex = Math.max(0, Math.min(activeMemorizationWeekIndex, weeks.length - 1));
-  tabsEl.innerHTML = weeks.map((week, index) => `
-    <button class="memorization-week-btn ${index === activeMemorizationWeekIndex ? 'active' : ''}" type="button" role="tab" aria-selected="${index === activeMemorizationWeekIndex ? 'true' : 'false'}" onclick="setMemorizationWeek(${index})">
-      ${escapeHtml(week.week || `Week ${index + 1}`)}
-    </button>
-  `).join('');
-
-  const week = weeks[activeMemorizationWeekIndex];
-  const rows = Array.isArray(week.rows) ? week.rows : [];
-  wrapEl.innerHTML = `
-    <div class="memorization-week-heading">
-      <div>
-        <div class="memorization-week-label">${escapeHtml(week.week || 'Weekly Review')}</div>
-        <h3>${escapeHtml(week.focus || 'Memorization focus')}</h3>
-      </div>
-      <button class="ctrl-btn" type="button" onclick="setStudyMode('vocab')">Back to cards</button>
-    </div>
-    <table class="memorization-table">
-      <thead>
-        <tr><th>Item</th><th>Forms to recite</th><th>Memory cue</th></tr>
-      </thead>
-      <tbody>
-        ${rows.map(row => `
-          <tr>
-            <th scope="row">${escapeHtml(row.item || '')}</th>
-            <td class="memorization-forms">${escapeHtml(row.forms || '')}</td>
-            <td>${escapeHtml(row.cue || '')}</td>
-          </tr>
-        `).join('')}
-      </tbody>
-    </table>
-  `;
-}
+function setMemorizationWeek() {}
+function renderMemorizationModule() {}
 
 function renderReaderModule() {
   const area = document.getElementById('cardArea');

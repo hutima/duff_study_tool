@@ -2044,3 +2044,21 @@
       font-size: 15px;
     }
   }
+}
+
+.memorization-shell {
+  padding: 0 0 24px;
+}
+
+.memorization-nav {
+  padding: 12px 0 10px;
+}
+
+.memorization-iframe {
+  display: block;
+  width: 100%;
+  height: calc(100vh - 160px);
+  min-height: 480px;
+  border: none;
+  border-radius: 14px;
+}
