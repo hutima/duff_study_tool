@@ -572,5 +572,54 @@ footer { color:#aaa08c; padding:20px 16px; text-align:center; border-top:1px sol
 </main>
 <footer>Single-file HTML version. Rebuilt from the weekly memorization summary PDFs; Greek text was checked against the rendered pages and corrected where OCR produced rough readings.</footer>
 </div>
+<script>
+(function () {
+  var STORAGE_KEY = 'memCollapseState';
+
+  function getKey(el) {
+    var section = el.closest('section.week');
+    if (!section) return null;
+    var weekId = section.id;
+    if (el.classList.contains('week-collapsible')) return weekId;
+    var weekDetails = section.querySelector('details.week-collapsible');
+    if (!weekDetails) return null;
+    var siblings = Array.from(weekDetails.querySelectorAll(':scope > details'));
+    var idx = siblings.indexOf(el);
+    if (idx === -1) return null;
+    return weekId + ':' + idx;
+  }
+
+  function loadState() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+    catch (e) { return {}; }
+  }
+
+  function saveState(state) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    catch (e) {}
+  }
+
+  var allDetails = document.querySelectorAll('section.week details');
+
+  var state = loadState();
+  allDetails.forEach(function (el) {
+    var key = getKey(el);
+    if (key !== null && Object.prototype.hasOwnProperty.call(state, key)) {
+      if (state[key]) el.setAttribute('open', '');
+      else el.removeAttribute('open');
+    }
+  });
+
+  allDetails.forEach(function (el) {
+    el.addEventListener('toggle', function () {
+      var key = getKey(el);
+      if (key === null) return;
+      var s = loadState();
+      s[key] = el.open;
+      saveState(s);
+    });
+  });
+})();
+</script>
 </body>
 </html>
