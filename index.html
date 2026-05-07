@@ -52,6 +52,7 @@
       <button class="mode-btn active" id="modeShortcutVocabBtn" type="button" onclick="setStudyMode('vocab')">Vocab</button>
       <button class="mode-btn" id="modeShortcutMorphBtn" type="button" onclick="setStudyMode('morph')">Grammar</button>
       <button class="mode-btn" id="modeShortcutReaderBtn" type="button" onclick="openReaderTab()">Reader</button>
+      <button class="mode-btn" id="modeShortcutMemorizationBtn" type="button" onclick="setStudyMode('memorization')">Memorization</button>
     </div>
     <button class="quick-btn" type="button" onclick="openAnalyticsOverlay()">Progress</button>
     <button class="quick-btn" type="button" onclick="openShortcutsModal()">Keyboard shortcuts</button>
@@ -133,13 +134,10 @@
   </div>
 
   <section class="memorization-shell" id="memorizationShell" aria-label="Koine Greek memorization by week" style="display:none">
-    <div class="memorization-card">
-      <div class="memorization-eyebrow">Koine Greek Memorization</div>
-      <h2>Memorization by week</h2>
-      <p class="memorization-intro">Phone-friendly weekly tables for quick paradigm recitation and review.</p>
-      <div class="memorization-week-tabs" id="memorizationWeekTabs" role="tablist" aria-label="Memorization weeks"></div>
-      <div class="memorization-table-wrap" id="memorizationTableWrap"></div>
+    <div class="memorization-nav">
+      <button class="ctrl-btn" type="button" onclick="setStudyMode('vocab')">← Back to cards</button>
     </div>
+    <iframe src="koine_greek_memorization_phone_tables_themed.html" title="Koine Greek Memorization Tables" class="memorization-iframe"></iframe>
   </section>
 
   <section class="review-shell">
