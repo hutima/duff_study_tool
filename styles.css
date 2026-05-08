@@ -569,6 +569,8 @@
     .chapters-grid { grid-template-columns: repeat(2, 1fr); }
     .card-wrapper { height: 240px; }
     .controls-bar { flex-direction: column; align-items: flex-start; }
+    .mode-group { display: flex; width: 100%; }
+    .mode-group .mode-btn { flex: 1; text-align: center; padding: 8px 4px; }
   }
 
   .mode-group {
