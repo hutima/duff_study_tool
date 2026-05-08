@@ -1,5 +1,5 @@
 // Deck ordering and set key helpers
-import { CHAPTER_TO_WEEK, SESSION_WEEK_META } from '../../data/setMeta.js';
+import { CHAPTER_TO_WEEK } from '../../data/setMeta.js';
 
 function getSets() {
   return window.SETS && typeof window.SETS === 'object' ? window.SETS : {};
@@ -61,8 +61,6 @@ export function getOtherKeysForWeeks(weeks) {
 }
 
 export function expandSessionSets(session) {
-  const baseSets = (session?.sets || []).map(String);
-  const weeks = SESSION_WEEK_META[session?.id] || [];
-  const dynamicOthers = getOtherKeysForWeeks(weeks);
-  return sortSetKeys([...new Set([...baseSets, ...dynamicOthers])]);
+  const baseSets = (session?.sets || []).map(String).filter(isChapterKey);
+  return sortSetKeys([...new Set(baseSets)]);
 }
