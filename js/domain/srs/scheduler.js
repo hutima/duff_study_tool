@@ -90,19 +90,19 @@ export function getEasyDelayMs(progress) {
 }
 
 export function getUncertainDelayMs(progress) {
-  // Confident cards (≥70% recent accuracy) scale with their current interval
-  // up to the 24h ceiling, so they're not over-reviewed.
-  // Shaky cards (<70%) stay at the 1h minimum to keep review pressure up
-  // and ensure they're seen again well within a weekly quiz cycle.
+  // Delay for an 'uncertain/pass' outcome, tiered by recent confidence:
+  //   <70%  → 1h floor (keep review pressure up before weekly quizzes)
+  //   70–89% → ½ previous interval, capped at 1 week
+  //   ≥90%  → ½ previous interval, capped at 30 days (normal easy-interval ceiling)
   const pct = getConfidencePct(progress);
-  const isConfident = pct !== null && pct >= 70;
-  if (!isConfident) return SRS_UNCERTAIN_MIN_MS;
+  if (pct === null || pct < 70) return SRS_UNCERTAIN_MIN_MS;
   const prevIntervalDays = Number(progress?.intervalDays) || 0;
-  if (prevIntervalDays > 0) {
-    const halfMs = msFromDays(prevIntervalDays * 0.5);
-    return clamp(halfMs, SRS_UNCERTAIN_MIN_MS, SRS_UNCERTAIN_MAX_MS);
-  }
-  return SRS_UNCERTAIN_MIN_MS;
+  if (prevIntervalDays <= 0) return SRS_UNCERTAIN_MIN_MS;
+  const halfMs = msFromDays(prevIntervalDays * 0.5);
+  const ceiling = pct >= 90
+    ? msFromDays(SRS_MAX_INTERVAL_DAYS)
+    : SRS_UNCERTAIN_MAX_MS;
+  return clamp(halfMs, SRS_UNCERTAIN_MIN_MS, ceiling);
 }
 
 export function formatRemainingForTable(dueAt) {
