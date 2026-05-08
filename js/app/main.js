@@ -139,12 +139,30 @@ let spacedRepetition = true;
 let activeDeckCount = 0;
 let unspacedPendingRecycle = false;
 let unspacedCycleState = {};
+let unspacedDeferredIds = new Set(); // 'pass' cards excluded from current pass
+let unspacedFlipCount = 0;           // forward navigations since last periodic reshuffle
 let spacedUndoSnapshot = null;
+
+// Fixed 1-in-N chance per flip (not scaled by pool size) to return one
+// random known card to the active pile. 100 → ~1 return per 100 flips.
+const KNOWN_CARD_RANDOM_RETURN_FLIP_ODDS = 100;
 
 let marks = {};
 
 function isMorphologyMode() {
   return studyMode === 'morph';
+}
+
+function isReaderMode() {
+  return studyMode === 'reader';
+}
+
+function isCardStudyMode() {
+  return studyMode === 'vocab' || studyMode === 'morph' || studyMode === 'reader';
+}
+
+function isReviewDeckMode() {
+  return studyMode === 'vocab' || studyMode === 'morph';
 }
 
 function isVocabOnlyProfile() {
@@ -160,7 +178,13 @@ function getSessions() {
 }
 
 function getProfileDescription() {
-  return 'Full layout with vocabulary and grammar. Time totals stay shared, while progress remains separate by module.';
+  return 'Full layout with vocabulary, grammar, reader, and memorization. Time totals stay shared, while progress remains separate by module.';
+}
+
+function normalizeStudyMode(mode) {
+  if (mode === 'morph' && canAccessGrammarUi()) return 'morph';
+  if (mode === 'reader') return 'reader';
+  return 'vocab';
 }
 
 function isMorphCard(card) {
@@ -173,7 +197,9 @@ function resetMorphAnswerState() {
 }
 
 function getModeDescription() {
-  return isMorphologyMode() ? 'Grammar Quiz' : 'Vocabulary Flashcards';
+  if (isMorphologyMode()) return 'Grammar Quiz';
+  if (isReaderMode()) return 'Reader';
+  return 'Vocabulary Flashcards';
 }
 
 function resolveThemeMode(mode = themeMode) {
@@ -237,8 +263,10 @@ function syncToggleButtons() {
   const selfCheckToggle = document.getElementById('selfCheckToggle');
   const modeVocabBtn    = document.getElementById('modeVocabBtn');
   const modeMorphBtn    = document.getElementById('modeMorphBtn');
+  const modeReaderBtn   = document.getElementById('modeReaderBtn');
   const modeShortcutVocabBtn = document.getElementById('modeShortcutVocabBtn');
   const modeShortcutMorphBtn = document.getElementById('modeShortcutMorphBtn');
+  const modeShortcutReaderBtn = document.getElementById('modeShortcutReaderBtn');
   const resetDeckBtn = document.getElementById('resetDeckBtn');
 
   if (shuffleSwitch)   shuffleSwitch.classList.toggle('on',   !!shuffled);
@@ -253,8 +281,10 @@ function syncToggleButtons() {
   if (selfCheckToggle) selfCheckToggle.setAttribute('aria-checked', (morphSelfCheck && isMorphologyMode()) ? 'true' : 'false');
   if (modeVocabBtn)    modeVocabBtn.classList.toggle('active', studyMode === 'vocab');
   if (modeMorphBtn)    modeMorphBtn.classList.toggle('active', studyMode === 'morph');
+  if (modeReaderBtn)   modeReaderBtn.classList.toggle('active', studyMode === 'reader');
   if (modeShortcutVocabBtn) modeShortcutVocabBtn.classList.toggle('active', studyMode === 'vocab');
   if (modeShortcutMorphBtn) modeShortcutMorphBtn.classList.toggle('active', studyMode === 'morph');
+  if (modeShortcutReaderBtn) modeShortcutReaderBtn.classList.toggle('active', studyMode === 'reader');
   syncThemeButtons();
   if (resetDeckBtn) {
     resetDeckBtn.textContent = spacedRepetition ? 'Reset spaced' : 'Reset unspaced';
@@ -280,14 +310,21 @@ function syncLayoutVisibility() {
   const requiredToggle = document.getElementById('requiredToggle');
   const selfCheckToggle = document.getElementById('selfCheckToggle');
   const modeGroup = document.querySelector('.mode-group[aria-label="Study mode"]');
+  const cardArea = document.getElementById('cardArea');
+  const reviewShell = document.querySelector('.review-shell');
+  const cardMode = isCardStudyMode();
+  const reviewDeckMode = isReviewDeckMode();
 
   if (controlsBar) controlsBar.style.display = 'flex';
-  if (navRow) navRow.style.display = selectedKeys.length ? 'flex' : 'none';
-  if (markRow) markRow.style.display = selectedKeys.length && !isMorphologyMode() ? 'flex' : 'none';
-  if (directionToggle) directionToggle.style.display = isMorphologyMode() ? 'none' : 'flex';
-  if (requiredToggle) requiredToggle.style.display = isMorphologyMode() ? 'none' : 'flex';
+  if (cardArea) cardArea.style.display = cardMode ? '' : 'none';
+  if (reviewShell) reviewShell.style.display = reviewDeckMode ? '' : 'none';
+  if (navRow) navRow.style.display = reviewDeckMode && selectedKeys.length ? 'flex' : 'none';
+  if (markRow) markRow.style.display = reviewDeckMode && selectedKeys.length && !isMorphologyMode() ? 'flex' : 'none';
+  if (directionToggle) directionToggle.style.display = studyMode === 'vocab' ? 'flex' : 'none';
+  if (requiredToggle) requiredToggle.style.display = studyMode === 'vocab' ? 'flex' : 'none';
   if (selfCheckToggle) selfCheckToggle.style.display = isMorphologyMode() && canAccessGrammarUi() ? 'flex' : 'none';
   if (modeGroup) modeGroup.style.display = canAccessGrammarUi() ? 'inline-flex' : 'none';
+  if (!reviewDeckMode) return;
   if (prevBtn) prevBtn.style.display = spacedRepetition && !isMorphologyMode() ? 'none' : '';
   if (undoBtn) undoBtn.style.display = spacedRepetition && !isMorphologyMode() && !!spacedUndoSnapshot ? '' : 'none';
   if (nextBtn) {
@@ -299,6 +336,7 @@ function syncLayoutVisibility() {
       nextBtn.classList.toggle('spaced-again', !!spacedRepetition);
     }
   }
+
 }
 
 function ensureUsageStats(stats = appUsageStats) {
@@ -407,6 +445,8 @@ function startUsageTracking() {
 
 function resetUnspacedCycleState() {
   unspacedCycleState = {};
+  unspacedDeferredIds = new Set();
+  unspacedFlipCount = 0;
 }
 
 function getUnspacedCycleEntry(cardId) {
@@ -477,7 +517,7 @@ function getWordProgress(cardId) {
     existing.firstSeenAt = Number.isFinite(existing.firstSeenAt) ? Math.max(0, existing.firstSeenAt) : 0;
     existing.firstConfirmedAt = Number.isFinite(existing.firstConfirmedAt) ? Math.max(0, existing.firstConfirmedAt) : 0;
     existing.confidence = Number.isFinite(existing.confidence) ? Math.max(0, existing.confidence) : 0;
-    existing.confidenceHistory = Array.isArray(existing.confidenceHistory) ? existing.confidenceHistory.filter(value => Number.isFinite(value)).slice(-4) : [];
+    existing.confidenceHistory = Array.isArray(existing.confidenceHistory) ? existing.confidenceHistory.filter(value => Number.isFinite(value)).slice(-10) : [];
     return existing;
   }
   const fresh = {
@@ -614,7 +654,21 @@ function buildStudyDeck(cards, options = {}) {
     }
   }
 
-  const deferredCards = cards.filter(card => !isCardDue(card));
+  let deferredCards = cards.filter(card => !isCardDue(card));
+
+  // 1/600 chance for each seen deferred card to be randomly promoted back to due
+  let hadRandomPromotion = false;
+  deferredCards.forEach(card => {
+    const progress = getWordProgress(card.id);
+    if (progress.seenCount > 0 && Math.random() < 1 / 600) {
+      progress.dueAt = Date.now();
+      hadRandomPromotion = true;
+    }
+  });
+  if (hadRandomPromotion) {
+    dueCards = cards.filter(isCardDue);
+    deferredCards = cards.filter(card => !isCardDue(card));
+  }
 
   // Preserve existing order of due cards already in the current deck;
   // append newly-eligible cards (including "(x) return to deck" and
@@ -661,6 +715,10 @@ function recordStudyOutcome(cardId, outcome, reviewedAt = Date.now()) {
   progress.lastReviewedAt = reviewedAt;
   progress.firstSeenAt = progress.firstSeenAt || reviewedAt;
   recordConfidenceSample(progress, outcome);
+  if (!progress.firstConfirmedAt) {
+    const pct = getConfidencePct(progress);
+    if (pct !== null && pct >= 70) progress.firstConfirmedAt = reviewedAt;
+  }
   if (outcome === 'easy' || outcome === 'known') {
     progress.passCount += 1;
     progress.firstConfirmedAt = progress.firstConfirmedAt || reviewedAt;
@@ -831,6 +889,57 @@ function getRemainingCards() {
   return deck.filter(card => marks[card.id] !== 'known');
 }
 
+function moveCardToBackOfActivePile(card) {
+  if (!card) return false;
+  const directionalMarks = getDirectionalMarksStore();
+
+  const currentCardId = deck[currentIdx]?.id || null;
+  directionalMarks[card.id] = 'unsure';
+  marks = directionalMarks;
+
+  deck = deck.filter(candidate => candidate.id !== card.id);
+  const splitAt = deck.findIndex(candidate => marks[candidate.id] === 'known');
+  const insertAt = splitAt === -1 ? deck.length : splitAt;
+  deck.splice(insertAt, 0, card);
+
+  activeDeckCount = originalDeck.filter(candidate => marks[candidate.id] !== 'known').length;
+  if (currentCardId) {
+    const restoredIdx = deck.findIndex(candidate => candidate.id === currentCardId);
+    if (restoredIdx >= 0) currentIdx = restoredIdx;
+  }
+  unspacedPendingRecycle = false;
+  return true;
+}
+
+function reshuffleUpcomingCards() {
+  const start = currentIdx + 1;
+  if (start >= deck.length) return;
+  const upcoming = [];
+  const pinned = [];
+  for (let i = start; i < deck.length; i++) {
+    const id = deck[i].id;
+    if (marks[id] === 'known' || unspacedDeferredIds.has(id)) pinned.push(deck[i]);
+    else upcoming.push(deck[i]);
+  }
+  if (upcoming.length < 2) return;
+  deck = [...deck.slice(0, start), ...shuffleArray(upcoming), ...pinned];
+}
+
+function maybeReturnKnownCardToActivePile() {
+  if (spacedRepetition || isMorphologyMode() || KNOWN_CARD_RANDOM_RETURN_FLIP_ODDS <= 0) return false;
+  if (!originalDeck.length || currentIdx >= deck.length) return false;
+
+  const currentCardId = deck[currentIdx]?.id || null;
+  const knownCards = originalDeck.filter(card => card.id !== currentCardId && marks[card.id] === 'known');
+  if (!knownCards.length) return false;
+
+  const returnChance = 1 / KNOWN_CARD_RANDOM_RETURN_FLIP_ODDS;
+  if (Math.random() >= returnChance) return false;
+
+  const card = knownCards[Math.floor(Math.random() * knownCards.length)];
+  return moveCardToBackOfActivePile(card);
+}
+
 
 function buildPersistedStatePayload() {
   saveCurrentDeckStateToBank();
@@ -876,7 +985,7 @@ function sanitizeImportedState(candidate) {
   state.deckStates = isPlainObject(candidate.deckStates) ? candidate.deckStates : {};
   state.globalWordMarks = isPlainObject(candidate.globalWordMarks) ? candidate.globalWordMarks : {};
   state.globalWordProgress = isPlainObject(candidate.globalWordProgress) ? candidate.globalWordProgress : {};
-  state.studyMode = candidate.studyMode === 'morph' ? 'morph' : 'vocab';
+  state.studyMode = normalizeStudyMode(candidate.studyMode);
   state.appProfile = 'vocab_grammar';
   state.gamification = sanitizeGamificationState(candidate.gamification);
   state.shuffled = candidate.shuffled !== false;
@@ -1361,7 +1470,7 @@ function restoreState() {
     appProfile = 'vocab_grammar';
     const hadSavedAchievementSnapshot = Array.isArray(saved?.gamification?.lastEarnedAchievementIds);
     appGamification = sanitizeGamificationState(saved.gamification);
-    studyMode = saved.studyMode === 'morph' ? 'morph' : 'vocab';
+    studyMode = normalizeStudyMode(saved.studyMode);
     morphSelfCheck = !!saved.morphSelfCheck;
     shuffled = saved.shuffled !== false;
     deckStates = saved.deckStates && typeof saved.deckStates === 'object' ? saved.deckStates : {};
@@ -1395,7 +1504,13 @@ function restoreState() {
     const savedDeckState = deckStates[getDeckStateKey(selectedKeys, requiredOnly)] || null;
     marks = getDirectionalMarksStore();
     const restoredDeck = savedDeckState ? reorderDeckFromIds(originalDeck, savedDeckState.deckIds) : null;
-    deck = restoredDeck || buildStudyDeck(originalDeck);
+    if (spacedRepetition && restoredDeck) {
+      deck = restoredDeck;
+      activeDeckCount = restoredDeck.length;
+      deck = buildStudyDeck(originalDeck);
+    } else {
+      deck = restoredDeck || buildStudyDeck(originalDeck);
+    }
     resetUnspacedCycleState();
     activeDeckCount = spacedRepetition ? getDueCount(originalDeck) : originalDeck.filter(card => marks[card.id] !== 'known').length;
     currentIdx = savedDeckState && Number.isInteger(savedDeckState.currentIdx)
@@ -1419,6 +1534,8 @@ function restoreState() {
 }
 
 function startNextCycle(mode = 'remaining') {
+  unspacedDeferredIds = new Set();
+  unspacedFlipCount = 0;
   if (mode === 'full') {
     const directionalMarks = getDirectionalMarksStore();
     (originalDeck || []).forEach(card => {
@@ -1547,7 +1664,13 @@ function loadDeckFromKeys(keys, sessionId = null) {
   marks = getDirectionalMarksStore();
   if (savedDeckState) {
     const restoredDeck = reorderDeckFromIds(originalDeck, savedDeckState.deckIds);
-    deck = restoredDeck || buildStudyDeck(originalDeck);
+    if (spacedRepetition && restoredDeck) {
+      deck = restoredDeck;
+      activeDeckCount = restoredDeck.length;
+      deck = buildStudyDeck(originalDeck);
+    } else {
+      deck = restoredDeck || buildStudyDeck(originalDeck);
+    }
     activeDeckCount = spacedRepetition ? getDueCount(originalDeck) : originalDeck.filter(card => marks[card.id] !== 'known').length;
     currentIdx = Number.isInteger(savedDeckState.currentIdx)
       ? Math.min(Math.max(savedDeckState.currentIdx, 0), spacedRepetition ? activeDeckCount : deck.length)
@@ -1607,7 +1730,6 @@ function toggleSession(session) {
   }
 
   loadDeckFromKeys(nextKeys, null);
-  closeStudySelector();
 }
 
 function toggleSet(key) {
@@ -1636,7 +1758,29 @@ function toggleSet(key) {
   }
 
   loadDeckFromKeys(selectedKeys, null);
-  closeStudySelector();
+}
+
+
+function renderReaderModule() {
+  const area = document.getElementById('cardArea');
+  if (!area) return;
+  const chapters = Array.isArray(window.READER_CHAPTERS) ? window.READER_CHAPTERS : [];
+  if (!chapters.length) {
+    area.innerHTML = '<div class="empty-state"><div class="big">βίβλος</div>Reader data not available.</div>';
+    return;
+  }
+  let html = '<div class="reader-wrap"><div class="reader-intro">Verses from the New Testament readable after completing each chapter of Duff\'s <em>Elements of New Testament Greek</em>. Greek text: SBL GNT.</div>';
+  for (const ch of chapters) {
+    const count = ch.verses.length;
+    const label = count === 1 ? '1 verse' : `${count} verses`;
+    html += `<details class="reader-chapter"><summary class="reader-chapter-header"><span class="reader-ch-label">After Chapter ${ch.chapter}</span><span class="reader-ch-count">${label}</span><span class="reader-ch-arrow" aria-hidden="true">▶</span></summary><div class="reader-verse-list">`;
+    for (const v of ch.verses) {
+      html += `<div class="reader-verse"><span class="reader-verse-greek">${escapeHtml(v.g)}</span><span class="reader-verse-ref">${escapeHtml(v.r)}</span></div>`;
+    }
+    html += '</div></details>';
+  }
+  html += '</div>';
+  area.innerHTML = html;
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1818,6 +1962,12 @@ function flipCard() {
   noteStudyInteraction();
   isFlipped = !isFlipped;
   wrapper.classList.toggle('flipped', isFlipped);
+
+  if (isFlipped && maybeReturnKnownCardToActivePile()) {
+    renderProgress();
+    renderReview();
+    saveState();
+  }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1913,14 +2063,21 @@ function navigate(dir, options = {}) {
   }
 
   for (let i = currentIdx + 1; i < deck.length; i++) {
-    if (marks[deck[i].id] !== 'known') {
+    if (marks[deck[i].id] !== 'known' && !unspacedDeferredIds.has(deck[i].id)) {
       currentIdx = i;
+      if (shuffled) {
+        unspacedFlipCount++;
+        if (unspacedFlipCount >= 10) {
+          unspacedFlipCount = 0;
+          reshuffleUpcomingCards();
+        }
+      }
       renderCard();
       return;
     }
   }
 
-  if (getKnownCount() === originalDeck.length) {
+  if (getKnownCount() === originalDeck.length && unspacedDeferredIds.size === 0) {
     currentIdx = deck.length;
     unspacedPendingRecycle = false;
   } else {
@@ -1951,12 +2108,10 @@ function markCard(outcome) {
     }
   } else {
     // Non-SRS cards still write to the same shared schedule used by spaced review.
-    // Intent:
-    // - Hard / wrong            → reset timer to 5 minutes.
-    // - Easy, first-pass right  → floor timer at 20 hours.
-    // - Uncertain, or right-after-a-miss → floor timer at 60 minutes.
-    // This updates the shared spaced timer without changing the way the
-    // unspaced deck itself repeats cards.
+    // Deck behaviour:
+    // - 'again' (wrong)    → immediately moved to back of active pile for same-pass retry.
+    // - 'pass' (uncertain) → deferred until the end of the pile; reappears next cycle.
+    // - 'easy' (known)     → pushed out of active pile as usual.
     const mark = outcome === 'easy' ? 'known' : 'unsure';
     const recordedOutcome = outcome === 'easy' ? 'known' : outcome === 'pass' ? 'pass' : 'review';
     const reviewedAt = Date.now();
@@ -1964,7 +2119,24 @@ function markCard(outcome) {
     applyUnspacedSharedSchedule(currentCard, outcome, reviewedAt);
     getDirectionalMarksStore()[currentCard.id] = mark;
     marks = getDirectionalMarksStore();
-    navigate(1);
+
+    if (outcome === 'again') {
+      // Remove from current position; remaining cards shift down by 1,
+      // so currentIdx now points to what was the next card.
+      const cardToReturn = currentCard;
+      deck.splice(currentIdx, 1);
+      // Find the last non-known, non-deferred card that comes after currentIdx.
+      let lastActiveIdx = -1;
+      for (let i = currentIdx; i < deck.length; i++) {
+        if (marks[deck[i].id] !== 'known' && !unspacedDeferredIds.has(deck[i].id)) lastActiveIdx = i;
+      }
+      deck.splice(lastActiveIdx >= 0 ? lastActiveIdx + 1 : deck.length, 0, cardToReturn);
+      // currentIdx already points to the correct next card (or loops if it was the last).
+      renderCard();
+    } else {
+      if (outcome === 'pass') unspacedDeferredIds.add(currentCard.id);
+      navigate(1);
+    }
   }
   renderReview();
   renderProgress();
@@ -1973,7 +2145,7 @@ function markCard(outcome) {
 
 
 function setStudyMode(mode) {
-  const nextMode = mode === 'morph' && canAccessGrammarUi() ? 'morph' : 'vocab';
+  const nextMode = normalizeStudyMode(mode);
   if (studyMode === nextMode) return;
 
   saveCurrentDeckStateToBank();
@@ -1983,6 +2155,13 @@ function setStudyMode(mode) {
   ensureDirectionalStores();
   marks = getDirectionalMarksStore();
   syncToggleButtons();
+
+  if (isReaderMode()) {
+    renderReaderModule();
+    renderProgress();
+    saveState();
+    return;
+  }
 
   if (!selectedKeys.length) {
     saveState();
@@ -2032,12 +2211,12 @@ function toggleMorphSelfCheck() {
 }
 
 function toggleShuffle() {
-
   shuffled = !shuffled;
+  unspacedFlipCount = 0;
   syncToggleButtons();
 
   if (spacedRepetition) {
-    deck = buildStudyDeck(originalDeck);
+    deck = buildStudyDeck(originalDeck, { forceShuffle: shuffled });
     currentIdx = Math.min(currentIdx, activeDeckCount);
   } else {
     const activeCards = getRemainingCards();
@@ -2243,11 +2422,13 @@ function renderProgress() {
   if (spacedRepetition) {
     const dueCount = getDueCount(originalDeck);
     const nextCard = dueCount && currentIdx < dueCount ? currentIdx + 1 : dueCount;
-    document.getElementById('progressText').textContent = total
+    const progressTextEl = document.getElementById('progressText');
+    if (progressTextEl) progressTextEl.textContent = total
       ? `${nextCard} / ${dueCount} due · Confirmed ${confirmed} · Scheduled ${Math.max(total - dueCount, 0)}`
       : '0 / 0';
     const pct = total ? Math.round(((total - dueCount) / total) * 100) : 0;
-    document.getElementById('progressFill').style.width = pct + '%';
+    const progressFillEl = document.getElementById('progressFill');
+    if (progressFillEl) progressFillEl.style.width = pct + '%';
     if (progressPercentEl) progressPercentEl.textContent = `${pct}%`;
     if (isAnalyticsModalOpen()) renderAnalyticsOverlay();
     return;
@@ -2255,11 +2436,13 @@ function renderProgress() {
 
   const cycleSize = isMorphologyMode() ? total : (getRemainingCards().length || total);
   const nextCard = total && currentIdx < deck.length ? Math.min(currentIdx + 1, cycleSize) : total;
-  document.getElementById('progressText').textContent = total
+  const progressTextEl2 = document.getElementById('progressText');
+  if (progressTextEl2) progressTextEl2.textContent = total
     ? `${nextCard} / ${cycleSize} · Confirmed ${confirmed} · Remaining ${remaining}${isMorphologyMode() ? ' · Grammar' : ''}`
     : '0 / 0';
   const pct = total ? Math.round((confirmed / total) * 100) : 0;
-  document.getElementById('progressFill').style.width = pct + '%';
+  const progressFillEl2 = document.getElementById('progressFill');
+  if (progressFillEl2) progressFillEl2.style.width = pct + '%';
   if (progressPercentEl) progressPercentEl.textContent = `${pct}%`;
   if (isAnalyticsModalOpen()) renderAnalyticsOverlay();
 }
@@ -2329,9 +2512,7 @@ function returnSeenCardToDeck(encodedId) {
   const card = originalDeck.find(c => c.id === cardId);
   if (!card) return;
 
-  const directionalMarks = getDirectionalMarksStore();
-  directionalMarks[cardId] = 'unsure';
-  marks = directionalMarks;
+  moveCardToBackOfActivePile(card);
 
   const progress = getWordProgress(cardId);
   progress.dueAt = Date.now();
@@ -2350,11 +2531,8 @@ function returnSeenCardToDeck(encodedId) {
       currentIdx = Math.min(currentIdx, activeDeckCount - 1);
     }
   } else {
-    deck = deck.filter(c => c.id !== cardId);
-    const splitAt = deck.findIndex(c => marks[c.id] === 'known');
-    const insertAt = splitAt === -1 ? deck.length : splitAt;
-    deck.splice(insertAt, 0, card);
-    currentIdx = Math.min(insertAt, Math.max(deck.length - 1, 0));
+    const returnedIdx = deck.findIndex(c => c.id === cardId);
+    currentIdx = returnedIdx >= 0 ? returnedIdx : Math.min(currentIdx, Math.max(deck.length - 1, 0));
     isFlipped = false;
   }
 
@@ -2747,7 +2925,12 @@ function buildCumulativeConfirmationSeries(cards, marksStore) {
   if (!total) return { total: 0, currentConfirmed: 0, weeklyPct: 0, series: [] };
   backfillConfirmedMilestones(cards, marksStore);
   const confirmedTimes = cards.map(card => getWordProgress(card.id).firstConfirmedAt || 0).filter(Boolean).sort((a, b) => a - b);
-  const currentConfirmed = (cards || []).filter(card => marksStore?.[card.id] === 'known').length;
+  const currentConfirmed = (cards || []).filter(card => {
+    if (marksStore?.[card.id] === 'known') return true;
+    const p = getWordProgress(card.id);
+    const pct = getConfidencePct(p);
+    return pct !== null && pct >= 70;
+  }).length;
   if (!confirmedTimes.length) return { total, currentConfirmed, weeklyPct: 0, series: [] };
   const dailyAdds = {};
   confirmedTimes.forEach(ts => { const key = getUsageDayKey(ts); dailyAdds[key] = (dailyAdds[key] || 0) + 1; });
@@ -2797,7 +2980,7 @@ function getCertaintyBucketForCard(card, marksStore) {
   if ((!progress.seenCount && confidence === null) && marksStore?.[card.id] !== 'known') return 'unseen';
   if (marksStore?.[card.id] === 'known') return '100';
   if (confidence === null) return progress.seenCount ? '0' : 'unseen';
-  if (confidence >= 75) return '100';
+  if (confidence >= 80) return '100';
   if (confidence >= 25) return '50';
   return '0';
 }
@@ -2806,6 +2989,77 @@ function buildCertaintyBuckets(cards, marksStore) {
   const buckets = { unseen: 0, '0': 0, '50': 0, '100': 0 };
   (cards || []).forEach(card => { buckets[getCertaintyBucketForCard(card, marksStore)] += 1; });
   return buckets;
+}
+
+// Returns array of 11 counts: [unseen, 0-9%, 10-19%, ..., 90-100%]
+function buildConfirmationHistogram(cards) {
+  const counts = new Array(11).fill(0);
+  (cards || []).forEach(card => {
+    const progress = getWordProgress(card.id);
+    const pct = getConfidencePct(progress);
+    if (pct === null && !progress.seenCount) {
+      counts[0]++;
+    } else {
+      const p = pct === null ? 0 : pct;
+      counts[Math.min(10, Math.floor(p / 10) + 1)]++;
+    }
+  });
+  return counts;
+}
+
+function buildHistogramSvg(counts, options = {}) {
+  const width = options.width || 860;
+  const height = options.height || 180;
+  const padLeft = 36, padRight = 14, padTop = 16, padBottom = 28;
+  const n = 11;
+  const totalW = width - padLeft - padRight;
+  const barW = totalW / n;
+  const gap = 3;
+  const maxCount = Math.max(...counts, 1);
+  const usableH = height - padTop - padBottom;
+
+  const bars = counts.map((count, i) => {
+    const barH = Math.max(0, (count / maxCount) * usableH);
+    const x = padLeft + i * barW + gap / 2;
+    const y = height - padBottom - barH;
+    const w = Math.max(0, barW - gap);
+    const minPct = (i - 1) * 10;
+    let fill;
+    if (i === 0) fill = 'rgba(138,143,168,0.4)';
+    else if (minPct >= 70) fill = 'rgba(102,164,120,0.85)';
+    else if (minPct >= 60) fill = 'rgba(201,168,76,0.85)';
+    else fill = 'rgba(166,88,88,0.7)';
+    const label = i === 0 ? '?' : `${minPct}–${minPct + 9}%`;
+    return barH > 0 ? `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${barH.toFixed(1)}" fill="${fill}" rx="2"><title>${label}: ${count}</title></rect>` : '';
+  });
+
+  // Dashed 70% threshold line between bar 7 (60-69%) and bar 8 (70-79%)
+  const threshX = (padLeft + 8 * barW).toFixed(1);
+  const threshLine = `<line x1="${threshX}" y1="${padTop}" x2="${threshX}" y2="${height - padBottom}" stroke="rgba(102,164,120,0.5)" stroke-width="1.5" stroke-dasharray="4,3"/>
+    <text x="${threshX}" y="${padTop + 10}" text-anchor="middle" class="analytics-axis-text" fill="rgba(102,164,120,0.8)">70%+</text>`;
+
+  const xLabels = counts.map((_, i) => {
+    const x = padLeft + i * barW + barW / 2;
+    const label = i === 0 ? '?' : `${(i - 1) * 10}%`;
+    return `<text x="${x.toFixed(1)}" y="${height - 6}" text-anchor="middle" class="analytics-axis-text">${label}</text>`;
+  }).join('');
+
+  const yLabels = [0, Math.ceil(maxCount / 2), maxCount].map(v => {
+    const y = (height - padBottom - (v / maxCount) * usableH).toFixed(1);
+    return `<line x1="${padLeft}" y1="${y}" x2="${width - padRight}" y2="${y}" class="analytics-grid-line"></line>
+      <text x="${padLeft - 5}" y="${(parseFloat(y) + 4).toFixed(1)}" text-anchor="end" class="analytics-axis-text">${v}</text>`;
+  }).join('');
+
+  return `
+    <svg class="analytics-chart-svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${escapeHtml(options.title || 'Confirmation histogram')}">
+      ${yLabels}
+      <line x1="${padLeft}" y1="${padTop}" x2="${padLeft}" y2="${height - padBottom}" class="analytics-axis-line"></line>
+      <line x1="${padLeft}" y1="${height - padBottom}" x2="${width - padRight}" y2="${height - padBottom}" class="analytics-axis-line"></line>
+      ${threshLine}
+      ${bars.join('')}
+      ${xLabels}
+    </svg>
+  `;
 }
 
 function buildLineChartSvg(series, options = {}) {
@@ -3254,9 +3508,14 @@ function computeCourseWideData() {
   const g2eMarks = globalWordMarks.g2e || {};
   const morphMarks = globalWordMarks.morph || {};
 
-  const allVocabConfirmed = allVocab.filter(c => g2eMarks[c.id] === 'known').length;
-  const reqVocabConfirmed = reqVocab.filter(c => g2eMarks[c.id] === 'known').length;
-  const allGrammarConfirmed = allGrammar.filter(c => morphMarks[c.id] === 'known').length;
+  const isEffectivelyConfirmed = (card, marks) => {
+    if (marks[card.id] === 'known') return true;
+    const pct = getConfidencePct(getWordProgress(card.id));
+    return pct !== null && pct >= 70;
+  };
+  const allVocabConfirmed = allVocab.filter(c => isEffectivelyConfirmed(c, g2eMarks)).length;
+  const reqVocabConfirmed = reqVocab.filter(c => isEffectivelyConfirmed(c, g2eMarks)).length;
+  const allGrammarConfirmed = allGrammar.filter(c => isEffectivelyConfirmed(c, morphMarks)).length;
 
   return {
     allVocabTotal: allVocab.length,
@@ -3419,13 +3678,13 @@ function renderAnalyticsOverlay() {
   const vocabMarks = directionToGreek ? globalWordMarks.e2g : globalWordMarks.g2e;
   const vocabProgress = buildCumulativeConfirmationSeries(vocabCards, vocabMarks);
   const vocabProjection = getRegressionProjection(vocabProgress.series, vocabProgress.currentConfirmed, vocabProgress.total);
-  const vocabBuckets = buildCertaintyBuckets(vocabCards, vocabMarks);
+  const vocabBuckets = buildConfirmationHistogram(vocabCards);
   const activePerConfirmed = vocabProgress.currentConfirmed ? usage.activeStudyMs / vocabProgress.currentConfirmed : 0;
   const grammarCards = canAccessGrammarUi() && selectedKeys.length ? getSelectedGrammarCards(selectedKeys) : [];
   const grammarMarks = globalWordMarks.morph;
   const grammarProgress = buildCumulativeConfirmationSeries(grammarCards, grammarMarks);
   const grammarProjection = getRegressionProjection(grammarProgress.series, grammarProgress.currentConfirmed, grammarProgress.total);
-  const grammarBuckets = buildCertaintyBuckets(grammarCards, grammarMarks);
+  const grammarBuckets = buildConfirmationHistogram(grammarCards);
 
   // ── Course-wide data (selection-independent, represents full course) ──
   const courseData = computeCourseWideData();
@@ -3500,21 +3759,21 @@ function renderAnalyticsOverlay() {
   if (courseEl) {
     const g2eMarks = globalWordMarks.g2e || {};
     const morphMarksAll = globalWordMarks.morph || {};
-    const courseVocabBuckets = buildCertaintyBuckets(courseData.allVocabCards, g2eMarks);
+    const courseVocabBuckets = buildConfirmationHistogram(courseData.allVocabCards);
     const showGrammar = canAccessGrammarUi();
     let courseGrammarHtml = '';
     if (showGrammar) {
-      const courseGrammarBuckets = buildCertaintyBuckets(courseData.allGrammarCards, morphMarksAll);
+      const courseGrammarBuckets = buildConfirmationHistogram(courseData.allGrammarCards);
       courseGrammarHtml = `
         <div class="analytics-chart-card" style="margin-top:10px">
           <div class="analytics-chart-title">Grammar \u2014 ${courseData.allGrammarConfirmed} / ${courseData.allGrammarTotal} confirmed</div>
-          ${buildBarChartSvg(courseGrammarBuckets, { title: 'Course grammar certainty' })}
+          ${buildHistogramSvg(courseGrammarBuckets, { title: 'Course grammar confirmation %' })}
         </div>`;
     }
     courseEl.innerHTML = `
       <div class="analytics-chart-card">
         <div class="analytics-chart-title">Vocabulary \u2014 ${courseData.allVocabConfirmed} / ${courseData.allVocabTotal} confirmed (${courseData.reqVocabConfirmed} / ${courseData.reqVocabTotal} required)</div>
-        ${buildBarChartSvg(courseVocabBuckets, { title: 'Course vocabulary certainty' })}
+        ${buildHistogramSvg(courseVocabBuckets, { title: 'Course vocabulary confirmation %' })}
       </div>
       ${courseGrammarHtml}
     `;
@@ -3591,10 +3850,10 @@ function renderAnalyticsOverlay() {
   if (sessionEl) sessionEl.textContent = latestSession ? `Latest session: ${formatAnalyticsDateTime(latestSession.startedAt)} \u2192 ${formatAnalyticsDateTime(latestSession.endedAt)} \u00B7 ${formatUsageDuration(latestSession.durationMs)} \u00B7 ${latestSession.interactionCount || 0} study actions` : 'No study session history yet.';
 
   // ── Vocab section (untouched logic) ──
-  renderAnalyticsSection('analyticsVocabSection', { title: 'Vocabulary progress', subtitle: selectedKeys.length ? `${requiredOnly ? 'Required-only' : 'All selected'} vocabulary for the current selection` : 'Choose one or more vocabulary sets to populate this view.', total: vocabProgress.total, metrics: [ { label: 'Confirmed now', value: `${vocabProgress.currentConfirmed} / ${vocabProgress.total || 0}`, note: 'Current selected vocabulary' }, { label: 'Weekly progress', value: `${vocabProgress.weeklyPct.toFixed(1)}%`, note: 'Share of selected vocabulary first confirmed in the last 7 days' }, { label: 'Avg active time / confirmed word', value: vocabProgress.currentConfirmed ? formatUsageDuration(activePerConfirmed) : '\u2014', note: 'Based on total active study time' }, { label: 'Projected completion', value: vocabProgress.currentConfirmed >= vocabProgress.total && vocabProgress.total ? 'Complete' : (vocabProjection ? formatAnalyticsDate(vocabProjection.projectedTs) : '\u2014'), note: vocabProjection ? `${vocabProjection.cardsPerDay.toFixed(2)} words/day regression` : 'Needs more recent progress data' } ], lineTitle: 'Cumulative confirmed vocabulary fraction', lineSvg: vocabProgress.series.length ? buildLineChartSvg(vocabProgress.series, { title: 'Vocabulary progress', percent: true, maxValue: 1 }) : `<div class="analytics-empty">No confirmed vocabulary history yet for this selection.</div>`, barTitle: 'Current vocabulary certainty buckets', barSvg: buildBarChartSvg(vocabBuckets, { title: 'Vocabulary certainty buckets' }) });
+  renderAnalyticsSection('analyticsVocabSection', { title: 'Vocabulary progress', subtitle: selectedKeys.length ? `${requiredOnly ? 'Required-only' : 'All selected'} vocabulary for the current selection` : 'Choose one or more vocabulary sets to populate this view.', total: vocabProgress.total, metrics: [ { label: 'Confirmed now', value: `${vocabProgress.currentConfirmed} / ${vocabProgress.total || 0}`, note: 'Marked known or ≥70% recent accuracy' }, { label: 'Weekly progress', value: `${vocabProgress.weeklyPct.toFixed(1)}%`, note: 'Share of selected vocabulary first confirmed in the last 7 days' }, { label: 'Avg active time / confirmed word', value: vocabProgress.currentConfirmed ? formatUsageDuration(activePerConfirmed) : '\u2014', note: 'Based on total active study time' }, { label: 'Projected completion', value: vocabProgress.currentConfirmed >= vocabProgress.total && vocabProgress.total ? 'Complete' : (vocabProjection ? formatAnalyticsDate(vocabProjection.projectedTs) : '\u2014'), note: vocabProjection ? `${vocabProjection.cardsPerDay.toFixed(2)} words/day regression` : 'Needs more recent progress data' } ], lineTitle: 'Cumulative confirmed vocabulary fraction', lineSvg: vocabProgress.series.length ? buildLineChartSvg(vocabProgress.series, { title: 'Vocabulary progress', percent: true, maxValue: 1 }) : `<div class="analytics-empty">No confirmed vocabulary history yet for this selection.</div>`, barTitle: 'Vocabulary confirmation % (last 10 flips)', barSvg: buildHistogramSvg(vocabBuckets, { title: 'Vocabulary confirmation %' }) });
 
   // ── Grammar section (untouched logic) ──
-  renderAnalyticsSection('analyticsGrammarSection', { title: 'Grammar progress', subtitle: canAccessGrammarUi() ? 'Morphology and grammar items in the current selection' : 'Switch to the full vocabulary + grammar layout to track grammar progress here.', total: grammarProgress.total, metrics: [ { label: 'Confirmed now', value: `${grammarProgress.currentConfirmed} / ${grammarProgress.total || 0}`, note: 'Current selected grammar items' }, { label: 'Weekly progress', value: `${grammarProgress.weeklyPct.toFixed(1)}%`, note: 'Share first confirmed in the last 7 days' }, { label: 'Projected completion', value: grammarProgress.currentConfirmed >= grammarProgress.total && grammarProgress.total ? 'Complete' : (grammarProjection ? formatAnalyticsDate(grammarProjection.projectedTs) : '\u2014'), note: grammarProjection ? `${grammarProjection.cardsPerDay.toFixed(2)} items/day regression` : 'Needs more recent progress data' }, { label: 'Required toggle', value: requiredOnly ? 'Vocabulary only' : 'All vocabulary', note: 'Grammar totals are not filtered by required-only' } ], lineTitle: 'Cumulative confirmed grammar fraction', lineSvg: grammarProgress.series.length ? buildLineChartSvg(grammarProgress.series, { title: 'Grammar progress', percent: true, maxValue: 1 }) : `<div class="analytics-empty">No confirmed grammar history yet for this selection.</div>`, barTitle: 'Current grammar certainty buckets', barSvg: buildBarChartSvg(grammarBuckets, { title: 'Grammar certainty buckets' }) });
+  renderAnalyticsSection('analyticsGrammarSection', { title: 'Grammar progress', subtitle: canAccessGrammarUi() ? 'Morphology and grammar items in the current selection' : 'Switch to the full vocabulary + grammar layout to track grammar progress here.', total: grammarProgress.total, metrics: [ { label: 'Confirmed now', value: `${grammarProgress.currentConfirmed} / ${grammarProgress.total || 0}`, note: 'Marked known or ≥70% recent accuracy' }, { label: 'Weekly progress', value: `${grammarProgress.weeklyPct.toFixed(1)}%`, note: 'Share first confirmed in the last 7 days' }, { label: 'Projected completion', value: grammarProgress.currentConfirmed >= grammarProgress.total && grammarProgress.total ? 'Complete' : (grammarProjection ? formatAnalyticsDate(grammarProjection.projectedTs) : '\u2014'), note: grammarProjection ? `${grammarProjection.cardsPerDay.toFixed(2)} items/day regression` : 'Needs more recent progress data' }, { label: 'Required toggle', value: requiredOnly ? 'Vocabulary only' : 'All vocabulary', note: 'Grammar totals are not filtered by required-only' } ], lineTitle: 'Cumulative confirmed grammar fraction', lineSvg: grammarProgress.series.length ? buildLineChartSvg(grammarProgress.series, { title: 'Grammar progress', percent: true, maxValue: 1 }) : `<div class="analytics-empty">No confirmed grammar history yet for this selection.</div>`, barTitle: 'Grammar confirmation % (last 10 flips)', barSvg: buildHistogramSvg(grammarBuckets, { title: 'Grammar confirmation %' }) });
 }
 
 document.addEventListener('keydown', e => {
@@ -3602,7 +3861,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && isStudySelectorOpen()) { closeStudySelector(); return; }
   if (e.key === 'Escape' && isShortcutsModalOpen()) { closeShortcutsModal(); return; }
   if (isDisclaimerModalOpen() || isTransferModalOpen() || isAnalyticsModalOpen() || isStudySelectorOpen() || isShortcutsModalOpen()) return;
-  if (!selectedKeys.length) return;
+  if (!isReviewDeckMode() || !selectedKeys.length) return;
 
   if (isMorphologyMode()) {
     if (e.key === 'ArrowRight' || e.key === 'ArrowDown') navigate(1);
@@ -3625,6 +3884,13 @@ document.addEventListener('keydown', e => {
 });
 
 // ═══════════════════════════════════════════════════════
+//  READER TAB
+// ═══════════════════════════════════════════════════════
+function openReaderTab() {
+  setStudyMode('reader');
+}
+
+// ═══════════════════════════════════════════════════════
 //  GLOBAL EXPORTS — needed for HTML onclick handlers
 //  Export these BEFORE startup runs, so one later init error does not
 //  leave the page rendered-but-unclickable.
@@ -3639,7 +3905,8 @@ const GLOBAL_CLICK_HANDLERS = {
   openAnalyticsOverlay, resetAllStats, resetCurrentDeck, reshuffleEligible,
   restoreSpacedUndo, setAppProfile, setStudyMode, setThemeMode,
   showDisclaimerModal, startStudying, toggleDirection, toggleMorphSelfCheck,
-  toggleRequiredOnly, toggleShuffle, toggleSpacedRepetition, triggerImportProgress
+  toggleRequiredOnly, toggleShuffle, toggleSpacedRepetition, triggerImportProgress,
+  openReaderTab
 };
 if (typeof globalThis !== 'undefined') Object.assign(globalThis, GLOBAL_CLICK_HANDLERS);
 if (typeof window !== 'undefined' && window !== globalThis) Object.assign(window, GLOBAL_CLICK_HANDLERS);
@@ -3655,6 +3922,7 @@ if (!restoreState()) {
 buildSessions();
 buildChapterSelector();
 initializeConsentGate();
+if (isReaderMode()) renderReaderModule();
 
 const cardArea = document.getElementById('cardArea');
 if (cardArea) {
@@ -3680,7 +3948,7 @@ function preventDoubleTapZoom(el) {
   }, false);
 }
 
-['shuffleToggle','requiredToggle','directionToggle','spacedToggle','selfCheckToggle','modeVocabBtn','modeMorphBtn','modeShortcutVocabBtn','modeShortcutMorphBtn','themeSystemBtn','themeDarkBtn','themeLightBtn'].forEach(id => {
+['shuffleToggle','requiredToggle','directionToggle','spacedToggle','selfCheckToggle','modeVocabBtn','modeMorphBtn','modeReaderBtn','modeShortcutVocabBtn','modeShortcutMorphBtn','modeShortcutReaderBtn','themeSystemBtn','themeDarkBtn','themeLightBtn'].forEach(id => {
   const el = document.getElementById(id);
   if (el) preventDoubleTapZoom(el);
 });
