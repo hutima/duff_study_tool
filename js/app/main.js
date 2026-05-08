@@ -141,9 +141,9 @@ let unspacedPendingRecycle = false;
 let unspacedCycleState = {};
 let spacedUndoSnapshot = null;
 
-// Each known card has a 1-in-6000 chance per reveal to drift back
-// into the unspaced active pile for occasional long-tail review.
-const KNOWN_CARD_RANDOM_RETURN_FLIP_ODDS = 6000;
+// Fixed 1-in-N chance per flip (not scaled by pool size) to return one
+// random known card to the active pile. 100 → ~1 return per 100 flips.
+const KNOWN_CARD_RANDOM_RETURN_FLIP_ODDS = 100;
 
 let marks = {};
 
@@ -911,7 +911,7 @@ function maybeReturnKnownCardToActivePile() {
   const knownCards = originalDeck.filter(card => card.id !== currentCardId && marks[card.id] === 'known');
   if (!knownCards.length) return false;
 
-  const returnChance = Math.min(1, knownCards.length / KNOWN_CARD_RANDOM_RETURN_FLIP_ODDS);
+  const returnChance = 1 / KNOWN_CARD_RANDOM_RETURN_FLIP_ODDS;
   if (Math.random() >= returnChance) return false;
 
   const card = knownCards[Math.floor(Math.random() * knownCards.length)];
