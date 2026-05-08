@@ -3129,23 +3129,6 @@ const SETS = {
       }
     ]
   },
-  "W1O": {
-    "label": "Week 1 - Other",
-    "type": "other",
-    "week": 1,
-    "cards": [
-      {
-        "g": "ἄλλος, -η, -ο",
-        "e": "another, different",
-        "required": true
-      },
-      {
-        "g": "ὅσος, -η, -ον",
-        "e": "as/how great/much",
-        "required": true
-      }
-    ]
-  },
   "W3O": {
     "label": "Week 3 - Other",
     "type": "other",
@@ -3215,7 +3198,11 @@ const SESSIONS = [
       "1",
       "2",
       "3",
-      "W1O"
+      "W1O",
+      "W1_LUO_PHILEO",
+      "W1_NOUN_PATTERNS",
+      "W1_AUTOS",
+      "W1_EIMI"
     ],
     "special": false,
     "summary": "Ch. 1, Ch. 2, Ch. 3"
@@ -3227,7 +3214,11 @@ const SESSIONS = [
     "sets": [
       "4",
       "5",
-      "W1O"
+      "W1O",
+      "W1_LUO_PHILEO",
+      "W1_NOUN_PATTERNS",
+      "W1_AUTOS",
+      "W1_EIMI"
     ],
     "special": false,
     "summary": "Ch. 4, Ch. 5"
@@ -3418,6 +3409,10 @@ const SESSIONS = [
       "19",
       "20",
       "W1O",
+      "W1_LUO_PHILEO",
+      "W1_NOUN_PATTERNS",
+      "W1_AUTOS",
+      "W1_EIMI",
       "W3O",
       "W6O",
       "W7O",
@@ -3468,8 +3463,8 @@ window.SESSIONS = SESSIONS;
   });
 
   const sessionUpdates = {
-    wk1t: { summary: 'Alphabet · λύω / φιλέω · article / noun patterns' },
-    wk1f: { summary: 'Cases / adjectives · αὐτός · εἰμί' },
+    wk1t: { summary: 'Alphabet · focused Week 1 supplemental paradigms' },
+    wk1f: { summary: 'Cases / adjectives · focused Week 1 supplemental paradigms' },
     wk2t: { summary: 'Indicative paradigms · contract indicative' },
     wk2f: { summary: 'Moods · imperative · active participles' },
     wk3t: { summary: 'Middle voice · εἰμί infinitive / participle' },
@@ -3484,7 +3479,7 @@ window.SESSIONS = SESSIONS;
     wk7f: { summary: 'Indefinite constructions · 3rd person imperative' },
     wk8t: { summary: '-μι present active verbs' },
     wk8f: { summary: '-μι other tenses · middle voice' },
-    all:  { summary: 'Ch. 1–20 + weekly supplements' }
+    all:  { summary: 'Ch. 1–20 + independent supplementals' }
   };
 
   window.SESSIONS.forEach(session => {

@@ -160,6 +160,7 @@
             required: true,
             sourceKey: String(key),
             sourceLabel: set.label,
+            supplemental: !!set.supplemental,
             chapter: Number(key),
             family: item.family,
             lemma: item.lemma,
@@ -195,53 +196,6 @@
 // ──────────────────────────────────────────────────────
 (function () {
   const supplementalSets = {
-    W1O: {
-      label: 'Week 1 Morphology Supplement',
-      notes: 'Contract-verb present forms, αὐτός, and εἰμί',
-      items: [
-        {
-          family: 'Contract verb present active indicative',
-          lemma: 'φιλέω',
-          gloss: 'I love, like',
-          questions: [
-            { form: 'φιλῶ', context: 'ἐγὼ τὸν φίλον φιλῶ.', answer: 'present active indicative, 1st singular', note: 'In isolation, φιλῶ can also be present active subjunctive, 1st singular. The short context points to the indicative.' },
-            { form: 'φιλεῖς', answer: 'present active indicative, 2nd singular' },
-            { form: 'φιλεῖ', answer: 'present active indicative, 3rd singular' },
-            { form: 'φιλοῦμεν', answer: 'present active indicative, 1st plural' },
-            { form: 'φιλεῖτε', answer: 'present active indicative, 2nd plural' },
-            { form: 'φιλοῦσι(ν)', answer: 'present active indicative, 3rd plural' }
-          ]
-        },
-        {
-          family: 'Pronoun paradigm',
-          lemma: 'αὐτός, αὐτή, αὐτό',
-          gloss: 'self / same / he, she, it',
-          questions: [
-            { form: 'αὐτός', answer: 'nominative singular masculine' },
-            { form: 'αὐτοῦ', answer: 'genitive singular masculine/neuter' },
-            { form: 'αὐτῷ', answer: 'dative singular masculine/neuter' },
-            { form: 'αὐτή', answer: 'nominative singular feminine' },
-            { form: 'αὐτό', answer: 'nominative/accusative singular neuter' },
-            { form: 'αὐτοί', answer: 'nominative plural masculine' },
-            { form: 'αὐταί', answer: 'nominative plural feminine' },
-            { form: 'αὐτά', answer: 'nominative/accusative plural neuter' }
-          ]
-        },
-        {
-          family: 'Present indicative of εἰμί',
-          lemma: 'εἰμί',
-          gloss: 'I am',
-          questions: [
-            { form: 'εἰμί', answer: 'present active indicative, 1st singular' },
-            { form: 'εἶ', answer: 'present active indicative, 2nd singular' },
-            { form: 'ἐστί(ν)', answer: 'present active indicative, 3rd singular' },
-            { form: 'ἐσμέν', answer: 'present active indicative, 1st plural' },
-            { form: 'ἐστέ', answer: 'present active indicative, 2nd plural' },
-            { form: 'εἰσί(ν)', answer: 'present active indicative, 3rd plural' }
-          ]
-        }
-      ]
-    },
     W2O: {
       label: 'Week 2 Morphology Supplement',
       notes: 'Indicative paradigms, active imperative, and active masculine participles',
@@ -505,13 +459,19 @@
   };
 
   const target = window.MORPHOLOGY_SETS || {};
-  Object.entries(supplementalSets).forEach(([key, set]) => {
+  const mergeSupplementalMorphologySet = (key, set) => {
     if (!target[key]) {
       target[key] = set;
     } else {
       target[key].label = set.label;
       target[key].notes = set.notes;
+      target[key].supplemental = !!(target[key].supplemental || set.supplemental);
       target[key].items = [...(target[key].items || []), ...(set.items || [])];
     }
-  });
+  };
+
+  Object.entries(supplementalSets).forEach(([key, set]) => mergeSupplementalMorphologySet(key, set));
+  if (window.SUPPLEMENTAL_MORPHOLOGY_SETS && typeof window.SUPPLEMENTAL_MORPHOLOGY_SETS === 'object') {
+    Object.entries(window.SUPPLEMENTAL_MORPHOLOGY_SETS).forEach(([key, set]) => mergeSupplementalMorphologySet(key, set));
+  }
 })();
