@@ -1,6 +1,7 @@
 // SRS scheduling logic — pure functions, no state access
 import { SRS_DAY_MS, SRS_AGAIN_MS, SRS_UNCERTAIN_MIN_MS, SRS_UNCERTAIN_MAX_MS, SRS_UNSPACED_RECOVERY_MS, SRS_GUIDE_STEPS_DAYS, SRS_MAX_INTERVAL_DAYS } from './constants.js';
 import { clamp } from '../../utils/helpers.js';
+import { getConfidencePct } from './confidence.js';
 
 export function msFromDays(days) {
   return Math.round(days * SRS_DAY_MS);
@@ -89,8 +90,13 @@ export function getEasyDelayMs(progress) {
 }
 
 export function getUncertainDelayMs(progress) {
-  // Scale with the card's current interval: ~half the previous gap,
-  // bounded to [1h, 3d].  New cards (interval 0) get the 1h minimum.
+  // Confident cards (≥70% recent accuracy) scale with their current interval
+  // up to the 24h ceiling, so they're not over-reviewed.
+  // Shaky cards (<70%) stay at the 1h minimum to keep review pressure up
+  // and ensure they're seen again well within a weekly quiz cycle.
+  const pct = getConfidencePct(progress);
+  const isConfident = pct !== null && pct >= 70;
+  if (!isConfident) return SRS_UNCERTAIN_MIN_MS;
   const prevIntervalDays = Number(progress?.intervalDays) || 0;
   if (prevIntervalDays > 0) {
     const halfMs = msFromDays(prevIntervalDays * 0.5);

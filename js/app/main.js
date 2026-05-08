@@ -139,6 +139,8 @@ let spacedRepetition = true;
 let activeDeckCount = 0;
 let unspacedPendingRecycle = false;
 let unspacedCycleState = {};
+let unspacedDeferredIds = new Set(); // 'pass' cards excluded from current pass
+let unspacedFlipCount = 0;           // forward navigations since last periodic reshuffle
 let spacedUndoSnapshot = null;
 
 // Fixed 1-in-N chance per flip (not scaled by pool size) to return one
@@ -443,6 +445,8 @@ function startUsageTracking() {
 
 function resetUnspacedCycleState() {
   unspacedCycleState = {};
+  unspacedDeferredIds = new Set();
+  unspacedFlipCount = 0;
 }
 
 function getUnspacedCycleEntry(cardId) {
@@ -905,6 +909,20 @@ function moveCardToBackOfActivePile(card) {
   }
   unspacedPendingRecycle = false;
   return true;
+}
+
+function reshuffleUpcomingCards() {
+  const start = currentIdx + 1;
+  if (start >= deck.length) return;
+  const upcoming = [];
+  const pinned = [];
+  for (let i = start; i < deck.length; i++) {
+    const id = deck[i].id;
+    if (marks[id] === 'known' || unspacedDeferredIds.has(id)) pinned.push(deck[i]);
+    else upcoming.push(deck[i]);
+  }
+  if (upcoming.length < 2) return;
+  deck = [...deck.slice(0, start), ...shuffleArray(upcoming), ...pinned];
 }
 
 function maybeReturnKnownCardToActivePile() {
@@ -1516,6 +1534,8 @@ function restoreState() {
 }
 
 function startNextCycle(mode = 'remaining') {
+  unspacedDeferredIds = new Set();
+  unspacedFlipCount = 0;
   if (mode === 'full') {
     const directionalMarks = getDirectionalMarksStore();
     (originalDeck || []).forEach(card => {
@@ -2043,14 +2063,21 @@ function navigate(dir, options = {}) {
   }
 
   for (let i = currentIdx + 1; i < deck.length; i++) {
-    if (marks[deck[i].id] !== 'known') {
+    if (marks[deck[i].id] !== 'known' && !unspacedDeferredIds.has(deck[i].id)) {
       currentIdx = i;
+      if (shuffled) {
+        unspacedFlipCount++;
+        if (unspacedFlipCount >= 10) {
+          unspacedFlipCount = 0;
+          reshuffleUpcomingCards();
+        }
+      }
       renderCard();
       return;
     }
   }
 
-  if (getKnownCount() === originalDeck.length) {
+  if (getKnownCount() === originalDeck.length && unspacedDeferredIds.size === 0) {
     currentIdx = deck.length;
     unspacedPendingRecycle = false;
   } else {
@@ -2081,12 +2108,10 @@ function markCard(outcome) {
     }
   } else {
     // Non-SRS cards still write to the same shared schedule used by spaced review.
-    // Intent:
-    // - Hard / wrong            → reset timer to 5 minutes.
-    // - Easy, first-pass right  → floor timer at 20 hours.
-    // - Uncertain, or right-after-a-miss → floor timer at 60 minutes.
-    // This updates the shared spaced timer without changing the way the
-    // unspaced deck itself repeats cards.
+    // Deck behaviour:
+    // - 'again' (wrong)    → immediately moved to back of active pile for same-pass retry.
+    // - 'pass' (uncertain) → deferred until the end of the pile; reappears next cycle.
+    // - 'easy' (known)     → pushed out of active pile as usual.
     const mark = outcome === 'easy' ? 'known' : 'unsure';
     const recordedOutcome = outcome === 'easy' ? 'known' : outcome === 'pass' ? 'pass' : 'review';
     const reviewedAt = Date.now();
@@ -2094,7 +2119,24 @@ function markCard(outcome) {
     applyUnspacedSharedSchedule(currentCard, outcome, reviewedAt);
     getDirectionalMarksStore()[currentCard.id] = mark;
     marks = getDirectionalMarksStore();
-    navigate(1);
+
+    if (outcome === 'again') {
+      // Remove from current position; remaining cards shift down by 1,
+      // so currentIdx now points to what was the next card.
+      const cardToReturn = currentCard;
+      deck.splice(currentIdx, 1);
+      // Find the last non-known, non-deferred card that comes after currentIdx.
+      let lastActiveIdx = -1;
+      for (let i = currentIdx; i < deck.length; i++) {
+        if (marks[deck[i].id] !== 'known' && !unspacedDeferredIds.has(deck[i].id)) lastActiveIdx = i;
+      }
+      deck.splice(lastActiveIdx >= 0 ? lastActiveIdx + 1 : deck.length, 0, cardToReturn);
+      // currentIdx already points to the correct next card (or loops if it was the last).
+      renderCard();
+    } else {
+      if (outcome === 'pass') unspacedDeferredIds.add(currentCard.id);
+      navigate(1);
+    }
   }
   renderReview();
   renderProgress();
@@ -2169,8 +2211,8 @@ function toggleMorphSelfCheck() {
 }
 
 function toggleShuffle() {
-
   shuffled = !shuffled;
+  unspacedFlipCount = 0;
   syncToggleButtons();
 
   if (spacedRepetition) {
