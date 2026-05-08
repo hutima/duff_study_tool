@@ -37,6 +37,7 @@ export function getSelectedVocabCards(keys, requiredFlag = false) {
         sourceLabel: sourceHint(rawKey),
         chapter: getChapterForKey(rawKey),
         week: getWeekForKey(rawKey),
+        supplemental: !!(set.supplemental || set.type === 'supplemental'),
         id: `${rawKey}-${idx}-${stableKey(card.g)}`
       });
     });

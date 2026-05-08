@@ -15,6 +15,8 @@ export function sortSetKeys(keys) {
     if (/^\d+$/.test(raw)) return Number(raw);
     const m = raw.match(/^W(\d+)O$/);
     if (m) return 100 + Number(m[1]);
+    const supplemental = raw.match(/^W(\d+)_/);
+    if (supplemental) return 200 + Number(supplemental[1]);
     return 999;
   }
   return [...keys].sort((a, b) => {
@@ -54,7 +56,7 @@ export function getOtherKeysForWeeks(weeks) {
   const sets = getSets();
   return Object.keys(sets).filter(key => {
     const set = sets[key];
-    return set && set.type === 'other' && weekSet.has(Number(set.week));
+    return set && (set.type === 'other' || set.type === 'supplemental' || set.supplemental) && weekSet.has(Number(set.week));
   });
 }
 

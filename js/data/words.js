@@ -3819,7 +3819,11 @@ const SESSIONS = [
       "1",
       "2",
       "3",
-      "W1O"
+      "W1O",
+      "W1_LUO_PHILEO",
+      "W1_NOUN_PATTERNS",
+      "W1_AUTOS",
+      "W1_EIMI"
     ],
     "special": false,
     "summary": "Alphabet · λύω / φιλέω · article / noun patterns"
@@ -3831,7 +3835,11 @@ const SESSIONS = [
     "sets": [
       "4",
       "5",
-      "W1O"
+      "W1O",
+      "W1_LUO_PHILEO",
+      "W1_NOUN_PATTERNS",
+      "W1_AUTOS",
+      "W1_EIMI"
     ],
     "special": false,
     "summary": "Cases / adjectives · αὐτός · εἰμί"
@@ -4022,6 +4030,10 @@ const SESSIONS = [
       "19",
       "20",
       "W1O",
+      "W1_LUO_PHILEO",
+      "W1_NOUN_PATTERNS",
+      "W1_AUTOS",
+      "W1_EIMI",
       "W3O",
       "W6O",
       "W7O",

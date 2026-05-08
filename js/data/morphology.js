@@ -160,6 +160,7 @@
             required: true,
             sourceKey: String(key),
             sourceLabel: set.label,
+            supplemental: !!set.supplemental,
             chapter: Number(key),
             family: item.family,
             lemma: item.lemma,
@@ -553,13 +554,19 @@
   };
 
   const target = window.MORPHOLOGY_SETS || {};
-  Object.entries(supplementalSets).forEach(([key, set]) => {
+  const mergeSupplementalMorphologySet = (key, set) => {
     if (!target[key]) {
       target[key] = set;
     } else {
       target[key].label = set.label;
       target[key].notes = set.notes;
+      target[key].supplemental = !!(target[key].supplemental || set.supplemental);
       target[key].items = [...(target[key].items || []), ...(set.items || [])];
     }
-  });
+  };
+
+  Object.entries(supplementalSets).forEach(([key, set]) => mergeSupplementalMorphologySet(key, set));
+  if (window.SUPPLEMENTAL_MORPHOLOGY_SETS && typeof window.SUPPLEMENTAL_MORPHOLOGY_SETS === 'object') {
+    Object.entries(window.SUPPLEMENTAL_MORPHOLOGY_SETS).forEach(([key, set]) => mergeSupplementalMorphologySet(key, set));
+  }
 })();

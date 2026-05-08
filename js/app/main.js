@@ -488,6 +488,20 @@ function getSelectedCards(keys) {
   return getSelectedVocabCards(keys, false);
 }
 
+
+function isSupplementalCard(card) {
+  const key = String((card && card.sourceKey) || '');
+  const set = key && window.SETS && typeof window.SETS === 'object' ? window.SETS[key] : null;
+  return !!(
+    card && (
+      card.supplemental ||
+      (set && (set.supplemental || set.type === 'supplemental')) ||
+      /^W\d+O$/.test(key) ||
+      /^W\d+_/.test(key)
+    )
+  );
+}
+
 function advanceScheduledCards(cards = originalDeck, advanceMs = SRS_CYCLE_ADVANCE_MS) {
   const now = Date.now();
   (cards || []).forEach(card => {
@@ -2493,7 +2507,9 @@ function renderReview() {
         : (progress.seenCount || progress.passCount || progress.failCount)
           ? `<span style="display:block;color:var(--muted);font-size:12px">seen ×${progress.seenCount || 0} · ${confidenceMeta}</span>`
           : '';
-      const returnBtn = `<button class="return-btn" title="Return this card to circulation now" onclick="returnSeenCardToDeck('${encodeURIComponent(card.id)}')">✕</button>`;
+      const returnBtn = isSupplementalCard(card)
+        ? ''
+        : `<button class="return-btn" title="Return this card to circulation now" onclick="returnSeenCardToDeck('${encodeURIComponent(card.id)}')">✕</button>`;
       listHtml += `<div class="review-item">
         <span class="rg">${getCardReviewLeft(card)}${srsMeta}</span>
         <span class="re">${getCardReviewRight(card)}<span style="display:block;color:var(--muted);font-size:12px">${getCardMetaLine(card)}</span></span>
@@ -2510,7 +2526,7 @@ function renderReview() {
 function returnSeenCardToDeck(encodedId) {
   const cardId = decodeURIComponent(encodedId);
   const card = originalDeck.find(c => c.id === cardId);
-  if (!card) return;
+  if (!card || isSupplementalCard(card)) return;
 
   moveCardToBackOfActivePile(card);
 
