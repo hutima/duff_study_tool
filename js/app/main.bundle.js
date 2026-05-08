@@ -1064,6 +1064,11 @@
       english: "flesh",
       why: "Velar stem: \u03BA/\u03B3/\u03C7 + \u03C3 \u2192 \u03BE in the nominative."
     },
+    "\u03BA\u03C4-stem": {
+      greek: "\u03BD\u03CD\u03BE, \u03BD\u03C5\u03BA\u03C4\u03CC\u03C2",
+      english: "night",
+      why: "\u03BA\u03C4-stem: the genitive shows \u03BD\u03C5\u03BA\u03C4-; in the nominative singular \u03C4 drops before \u03C2, then \u03BA + \u03C2 \u2192 \u03BE."
+    },
     "\u03BD-stem": {
       greek: "\u03C0\u03BF\u03B9\u03BC\u03AE\u03BD, \u03C0\u03BF\u03B9\u03BC\u03AD\u03BD\u03BF\u03C2",
       english: "shepherd",
