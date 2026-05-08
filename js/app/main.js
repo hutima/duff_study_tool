@@ -2376,11 +2376,13 @@ function renderProgress() {
   if (spacedRepetition) {
     const dueCount = getDueCount(originalDeck);
     const nextCard = dueCount && currentIdx < dueCount ? currentIdx + 1 : dueCount;
-    document.getElementById('progressText').textContent = total
+    const progressTextEl = document.getElementById('progressText');
+    if (progressTextEl) progressTextEl.textContent = total
       ? `${nextCard} / ${dueCount} due · Confirmed ${confirmed} · Scheduled ${Math.max(total - dueCount, 0)}`
       : '0 / 0';
     const pct = total ? Math.round(((total - dueCount) / total) * 100) : 0;
-    document.getElementById('progressFill').style.width = pct + '%';
+    const progressFillEl = document.getElementById('progressFill');
+    if (progressFillEl) progressFillEl.style.width = pct + '%';
     if (progressPercentEl) progressPercentEl.textContent = `${pct}%`;
     if (isAnalyticsModalOpen()) renderAnalyticsOverlay();
     return;
@@ -2388,11 +2390,13 @@ function renderProgress() {
 
   const cycleSize = isMorphologyMode() ? total : (getRemainingCards().length || total);
   const nextCard = total && currentIdx < deck.length ? Math.min(currentIdx + 1, cycleSize) : total;
-  document.getElementById('progressText').textContent = total
+  const progressTextEl2 = document.getElementById('progressText');
+  if (progressTextEl2) progressTextEl2.textContent = total
     ? `${nextCard} / ${cycleSize} · Confirmed ${confirmed} · Remaining ${remaining}${isMorphologyMode() ? ' · Grammar' : ''}`
     : '0 / 0';
   const pct = total ? Math.round((confirmed / total) * 100) : 0;
-  document.getElementById('progressFill').style.width = pct + '%';
+  const progressFillEl2 = document.getElementById('progressFill');
+  if (progressFillEl2) progressFillEl2.style.width = pct + '%';
   if (progressPercentEl) progressPercentEl.textContent = `${pct}%`;
   if (isAnalyticsModalOpen()) renderAnalyticsOverlay();
 }
