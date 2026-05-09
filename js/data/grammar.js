@@ -1650,84 +1650,6 @@
   // ───────────────────────────────────────────────────────────────────
   const WEEK_GRAMMAR = {
 
-    "W1O": {
-      label: "Week 1 — Course Supplement Grammar",
-      notes: "Alphabet · λύω / φιλέω · article and noun patterns · αὐτός · εἰμί",
-      items: [
-        {
-          family: "Present indicative recognition",
-          lemma: "λύω vs φιλέω",
-          gloss: "uncontracted vs ε-contract",
-          questions: [
-            { form: "λύομεν vs φιλοῦμεν",
-              prompt: "Why does φιλέω contract to φιλοῦμεν while λύω stays λύομεν?",
-              answer: "φιλέω has stem-final ε that contracts with the connecting vowel: ε + ο → ου",
-              choices: [
-                "φιλέω has stem-final ε that contracts with the connecting vowel: ε + ο → ου",
-                "φιλέω uses different personal endings",
-                "λύω is irregular",
-                "φιλέω is in a different mood"
-              ] },
-            { form: "φιλεῖ",
-              prompt: "Parse this form.",
-              answer: "present active indicative, 3rd sg. of φιλέω ('he/she/it loves')",
-              choices: [
-                "present active indicative, 3rd sg. of φιλέω ('he/she/it loves')",
-                "present active indicative, 2nd sg. of φιλέω",
-                "present active indicative, 3rd sg. of φιλέω + augment",
-                "aorist active indicative, 3rd sg. of φιλέω"
-              ],
-              note: "Underlying φιλέ-ει: ε + ει → ει." }
-          ]
-        },
-        {
-          family: "Article and noun-pattern recognition",
-          lemma: "λόγος / ἀρχή / ἔργον",
-          gloss: "the three textbook paradigms",
-          questions: [
-            { form: "λόγος",
-              prompt: "What declension and gender?",
-              answer: "second declension, masculine",
-              choices: ["second declension, masculine", "first declension, feminine", "second declension, neuter", "third declension, masculine"] },
-            { form: "ἀρχή",
-              prompt: "What declension and gender?",
-              answer: "first declension, feminine (η-pattern)",
-              choices: ["first declension, feminine (η-pattern)", "first declension, feminine (α-pattern)", "second declension, feminine", "third declension, feminine"] },
-            { form: "ἔργον",
-              prompt: "What declension and gender?",
-              answer: "second declension, neuter",
-              choices: ["second declension, neuter", "second declension, masculine", "first declension, neuter", "third declension, neuter"] }
-          ]
-        },
-        {
-          family: "αὐτός recognition",
-          lemma: "αὐτός, αὐτή, αὐτό",
-          gloss: "intensive / 3rd pers. pronoun / identifier",
-          questions: [
-            { form: "αὐτός",
-              prompt: "Which use is this likely to be in the predicate position (e.g. ὁ ἀπόστολος αὐτός)?",
-              answer: "intensive — 'the apostle himself'",
-              choices: [
-                "intensive — 'the apostle himself'",
-                "identifier — 'the same apostle'",
-                "personal — 'he, the apostle'",
-                "demonstrative — 'this apostle'"
-              ],
-              note: "αὐτός in attributive position = 'same'; in predicate position = 'self'." },
-            { form: "ὁ αὐτὸς ἀπόστολος",
-              prompt: "Which use is this (attributive position)?",
-              answer: "identifier — 'the same apostle'",
-              choices: [
-                "identifier — 'the same apostle'",
-                "intensive — 'the apostle himself'",
-                "personal — 'he, the apostle'",
-                "predicate — 'the apostle is the same'"
-              ] }
-          ]
-        }
-      ]
-    },
-
     "W2O": {
       label: "Week 2 — Course Supplement Grammar",
       notes: "Master indicative paradigm · moods · imperative · active masc. participles",
@@ -1966,8 +1888,9 @@
               choices: ["ματ-stem (neuter)", "ν-stem", "κ-stem", "σ-stem"] },
             { form: "νύξ, νυκτός",
               prompt: "What stem class is this?",
-              answer: "κ-stem (the κτ surfaces as ξ before σ)",
-              choices: ["κ-stem (the κτ surfaces as ξ before σ)", "ν-stem", "σ-stem (neuter)", "ντ-stem"] },
+              answer: "κτ-stem",
+              choices: ["κτ-stem", "ν-stem", "σ-stem (neuter)", "ντ-stem"],
+              note: "The genitive νυκτός shows the stem νυκτ-. In the nominative singular, τ drops before ς, then κ + ς → ξ." },
             { form: "αἰών, αἰῶνος",
               prompt: "What stem class is this?",
               answer: "ν-stem",
@@ -2314,6 +2237,7 @@
             required: true,
             sourceKey: String(selection.baseKey),
             sourceLabel: set.label,
+            supplemental: !!set.supplemental,
             chapter: chapterNum,
             family: item.family,
             lemma: item.lemma,
