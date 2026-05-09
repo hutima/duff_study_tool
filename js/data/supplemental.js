@@ -1,328 +1,101 @@
 // ═══════════════════════════════════════════════════════════════════════
-//  SUPPLEMENTAL SET REGISTRATION API
+//  SUPPLEMENTAL REGISTRY — registration API for all supplemental sets
 // ═══════════════════════════════════════════════════════════════════════
-//  Use these helpers from files in js/data/supplementals/ to add weekly
-//  vocab, grammar, or morphology supplements without editing words.js,
-//  grammar.js, or morphology.js directly.
+//  Exposes registerSupplementalVocabSet, registerSupplementalGrammarSet,
+//  and registerSupplementalMorphologySet for use by supplemental sub-files.
 
 (function () {
-  function ensureSet(key, meta = {}) {
-    if (!key) return null;
-    if (!window.SETS || typeof window.SETS !== 'object') window.SETS = {};
-    if (!window.SETS[key]) {
-      window.SETS[key] = {
-        label: meta.label || key,
-        type: meta.type || 'other',
-        week: Number.isFinite(meta.week) ? meta.week : null,
-        cards: []
-      };
-    }
-    const set = window.SETS[key];
-    if (meta.label) set.label = meta.label;
-    if (meta.type) set.type = meta.type;
-    if (Number.isFinite(meta.week)) set.week = meta.week;
-    if (!Array.isArray(set.cards)) set.cards = [];
-    return set;
+  function normalizeKey(key) {
+    return String(key || '').trim();
   }
 
-  function cardSignature(card) {
-    return `${card?.g || ''}|${card?.e || ''}`;
-  }
-
-  window.registerSupplementalVocabSet = function registerSupplementalVocabSet(key, config = {}) {
-    const set = ensureSet(key, { label: config.label, type: 'other', week: config.week });
-    if (!set) return;
-
-    const seen = new Set(set.cards.map(cardSignature));
-    (config.cards || []).forEach(card => {
-      if (!card || !card.g || !card.e) return;
-      const normalized = { ...card, required: card.required !== false };
-      const signature = cardSignature(normalized);
-      if (seen.has(signature)) return;
-      seen.add(signature);
-      set.cards.push(normalized);
-    });
-  };
-
-  window.registerSupplementalGrammarSet = function registerSupplementalGrammarSet(key, config = {}) {
-    ensureSet(key, { label: config.label, type: 'other', week: config.week });
-    if (!window.SUPPLEMENTAL_GRAMMAR_SETS || typeof window.SUPPLEMENTAL_GRAMMAR_SETS !== 'object') {
-      window.SUPPLEMENTAL_GRAMMAR_SETS = {};
-    }
-    window.SUPPLEMENTAL_GRAMMAR_SETS[key] = config;
-    if (window.GRAMMAR_SETS && typeof window.GRAMMAR_SETS === 'object') {
-      window.GRAMMAR_SETS[key] = config;
-    }
-  };
-
-  window.registerSupplementalMorphologySet = function registerSupplementalMorphologySet(key, config = {}) {
-    ensureSet(key, { label: config.label, type: 'other', week: config.week });
-    if (!window.MORPHOLOGY_SETS || typeof window.MORPHOLOGY_SETS !== 'object') {
-      window.MORPHOLOGY_SETS = {};
-    }
-    window.MORPHOLOGY_SETS[key] = config;
-  };
-})();
-
-// ═══════════════════════════════════════════════════════════════════════
-//  CUSTOM GRAMMAR PRACTICE SET — SUPPLEMENT
-// ═══════════════════════════════════════════════════════════════════════
-//  Swap this file when you want a different custom practice set.
-//
-//  UI behavior:
-//  - The set appears as “Supplement” in the custom deck selector.
-//  - It is grammar-only: 0 vocabulary cards, grammar cards only.
-//  - The card shape mirrors grammar.js so the main grammar logic can stay
-//    unchanged.
-
-(function () {
-  const SET_KEY = 'SUPPLEMENT';
-
-  const PERSON_CHOICES = [
-    'I / 1st singular',
-    'you singular / 2nd singular',
-    'he, she, or it / 3rd singular',
-    'we / 1st plural',
-    'you plural / 2nd plural',
-    'they / 3rd plural'
-  ];
-
-  const ACTIVE_INDICATIVE_CHOICES = [
-    'present active indicative, 1st singular',
-    'present active indicative, 2nd singular',
-    'present active indicative, 3rd singular',
-    'present active indicative, 1st plural',
-    'present active indicative, 2nd plural',
-    'present active indicative, 3rd plural'
-  ];
-
-  const CASE_NUMBER_CHOICES = [
-    'nominative singular masculine',
-    'accusative singular masculine',
-    'nominative plural masculine',
-    'accusative plural masculine'
-  ];
-
-  const SUPPLEMENTAL_GRAMMAR_SETS = {
-    [SET_KEY]: {
-      label: 'Supplement',
-      notes: 'Custom grammar practice: simple present active endings, λύω examples, and nominative/accusative masculine noun endings.',
-      items: [
-        {
-          family: 'Present active indicative endings',
-          lemma: 'λύω',
-          gloss: 'I untie',
-          questions: [
-            {
-              form: '-ω',
-              prompt: 'This present active ending means:',
-              answer: 'I / 1st singular',
-              choices: PERSON_CHOICES,
-              note: 'As in λύω: I untie.'
-            },
-            {
-              form: '-εις',
-              prompt: 'This present active ending means:',
-              answer: 'you singular / 2nd singular',
-              choices: PERSON_CHOICES,
-              note: 'As in λύεις: you singular untie.'
-            },
-            {
-              form: '-ει',
-              prompt: 'This present active ending means:',
-              answer: 'he, she, or it / 3rd singular',
-              choices: PERSON_CHOICES,
-              note: 'As in λύει: he, she, or it unties.'
-            },
-            {
-              form: '-ομεν',
-              prompt: 'This present active ending means:',
-              answer: 'we / 1st plural',
-              choices: PERSON_CHOICES,
-              note: 'As in λύομεν: we untie.'
-            },
-            {
-              form: '-ετε',
-              prompt: 'This present active ending means:',
-              answer: 'you plural / 2nd plural',
-              choices: PERSON_CHOICES,
-              note: 'As in λύετε: you plural untie.'
-            },
-            {
-              form: '-ουσιν',
-              prompt: 'This present active ending means:',
-              answer: 'they / 3rd plural',
-              choices: PERSON_CHOICES,
-              note: 'As in λύουσιν: they untie. The final ν is movable nu.'
-            }
-          ]
-        },
-        {
-          family: 'λύω present active indicative examples',
-          lemma: 'λύω',
-          gloss: 'I untie',
-          questions: [
-            {
-              form: 'λύω',
-              prompt: 'Parse this λύω form.',
-              answer: 'present active indicative, 1st singular',
-              choices: ACTIVE_INDICATIVE_CHOICES,
-              note: 'λύω = I untie.'
-            },
-            {
-              form: 'λύεις',
-              prompt: 'Parse this λύω form.',
-              answer: 'present active indicative, 2nd singular',
-              choices: ACTIVE_INDICATIVE_CHOICES,
-              note: 'λύεις = you singular untie.'
-            },
-            {
-              form: 'λύει',
-              prompt: 'Parse this λύω form.',
-              answer: 'present active indicative, 3rd singular',
-              choices: ACTIVE_INDICATIVE_CHOICES,
-              note: 'λύει = he, she, or it unties.'
-            },
-            {
-              form: 'λύομεν',
-              prompt: 'Parse this λύω form.',
-              answer: 'present active indicative, 1st plural',
-              choices: ACTIVE_INDICATIVE_CHOICES,
-              note: 'λύομεν = we untie.'
-            },
-            {
-              form: 'λύετε',
-              prompt: 'Parse this λύω form.',
-              answer: 'present active indicative, 2nd plural',
-              choices: ACTIVE_INDICATIVE_CHOICES,
-              note: 'λύετε = you plural untie.'
-            },
-            {
-              form: 'λύουσιν',
-              prompt: 'Parse this λύω form.',
-              answer: 'present active indicative, 3rd plural',
-              choices: ACTIVE_INDICATIVE_CHOICES,
-              note: 'λύουσιν = they untie.'
-            }
-          ]
-        },
-        {
-          family: 'Second-declension masculine endings',
-          lemma: '-ος / -ον / -οι / -ους',
-          gloss: 'nominative and accusative masculine endings',
-          questions: [
-            {
-              form: '-ος',
-              prompt: 'This noun ending usually marks:',
-              answer: 'nominative singular masculine',
-              choices: CASE_NUMBER_CHOICES,
-              note: 'Example: ἀδελφός / κύριος.'
-            },
-            {
-              form: '-ον',
-              prompt: 'This noun ending usually marks:',
-              answer: 'accusative singular masculine',
-              choices: CASE_NUMBER_CHOICES,
-              note: 'Example: ἀδελφόν / κύριον.'
-            },
-            {
-              form: '-οι',
-              prompt: 'This noun ending usually marks:',
-              answer: 'nominative plural masculine',
-              choices: CASE_NUMBER_CHOICES,
-              note: 'Example: ἀδελφοί / κύριοι.'
-            },
-            {
-              form: '-ους',
-              prompt: 'This noun ending usually marks:',
-              answer: 'accusative plural masculine',
-              choices: CASE_NUMBER_CHOICES,
-              note: 'Example: ἀδελφούς / κυρίους.'
-            }
-          ]
-        },
-        {
-          family: 'ἀδελφός — nominative and accusative',
-          lemma: 'ἀδελφός',
-          gloss: 'brother',
-          questions: [
-            {
-              form: 'ἀδελφός',
-              prompt: 'Identify the case and number.',
-              answer: 'nominative singular masculine',
-              choices: CASE_NUMBER_CHOICES,
-              note: 'ἀδελφός = brother as the subject.'
-            },
-            {
-              form: 'ἀδελφόν',
-              prompt: 'Identify the case and number.',
-              answer: 'accusative singular masculine',
-              choices: CASE_NUMBER_CHOICES,
-              note: 'ἀδελφόν = brother as the direct object.'
-            },
-            {
-              form: 'ἀδελφοί',
-              prompt: 'Identify the case and number.',
-              answer: 'nominative plural masculine',
-              choices: CASE_NUMBER_CHOICES,
-              note: 'ἀδελφοί = brothers as the subject.'
-            },
-            {
-              form: 'ἀδελφούς',
-              prompt: 'Identify the case and number.',
-              answer: 'accusative plural masculine',
-              choices: CASE_NUMBER_CHOICES,
-              note: 'ἀδελφούς = brothers as the direct object.'
-            }
-          ]
-        },
-        {
-          family: 'κύριος — nominative and accusative',
-          lemma: 'κύριος',
-          gloss: 'lord',
-          questions: [
-            {
-              form: 'κύριος',
-              prompt: 'Identify the case and number.',
-              answer: 'nominative singular masculine',
-              choices: CASE_NUMBER_CHOICES,
-              note: 'κύριος = lord as the subject.'
-            },
-            {
-              form: 'κύριον',
-              prompt: 'Identify the case and number.',
-              answer: 'accusative singular masculine',
-              choices: CASE_NUMBER_CHOICES,
-              note: 'κύριον = lord as the direct object.'
-            },
-            {
-              form: 'κύριοι',
-              prompt: 'Identify the case and number.',
-              answer: 'nominative plural masculine',
-              choices: CASE_NUMBER_CHOICES,
-              note: 'κύριοι = lords as the subject.'
-            },
-            {
-              form: 'κυρίους',
-              prompt: 'Identify the case and number.',
-              answer: 'accusative plural masculine',
-              choices: CASE_NUMBER_CHOICES,
-              note: 'κυρίους = lords as the direct object.'
-            }
-          ]
-        }
-      ]
-    }
-  };
-
-  if (window.SETS && typeof window.SETS === 'object') {
-    window.SETS[SET_KEY] = {
-      label: 'Supplement',
-      type: 'other',
-      week: null,
-      cards: []
+  function cloneSet(set) {
+    return {
+      ...set,
+      cards: Array.isArray(set.cards) ? [...set.cards] : set.cards,
+      items: Array.isArray(set.items) ? [...set.items] : set.items
     };
   }
 
-  window.SUPPLEMENTAL_GRAMMAR_SETS = SUPPLEMENTAL_GRAMMAR_SETS;
+  function ensureObject(name) {
+    if (!window[name] || typeof window[name] !== 'object') {
+      window[name] = {};
+    }
+    return window[name];
+  }
+
+  function ensureSupplementalSetEntry(key, set) {
+    if (!window.SETS || typeof window.SETS !== 'object') return;
+    if (!window.SETS[key]) {
+      window.SETS[key] = {
+        label: set.label || key,
+        type: 'supplemental',
+        supplemental: true,
+        week: set.week ?? null,
+        cards: []
+      };
+    } else {
+      window.SETS[key].label = set.label || window.SETS[key].label || key;
+      window.SETS[key].type = window.SETS[key].type || 'supplemental';
+      window.SETS[key].supplemental = true;
+      if (set.week != null) window.SETS[key].week = set.week;
+      if (!Array.isArray(window.SETS[key].cards)) window.SETS[key].cards = [];
+    }
+  }
+
+  function registerSupplementalVocabSet(key, set) {
+    const safeKey = normalizeKey(key);
+    if (!safeKey || !set || typeof set !== 'object') return;
+    ensureSupplementalSetEntry(safeKey, set);
+    if (window.SETS && Array.isArray(window.SETS[safeKey]?.cards) && Array.isArray(set.cards)) {
+      window.SETS[safeKey].cards.push(...set.cards);
+    }
+    const registry = ensureObject('SUPPLEMENTAL_VOCAB_SETS');
+    registry[safeKey] = { supplemental: true, ...cloneSet(set) };
+  }
+
+  function registerSupplementalGrammarSet(key, set) {
+    const safeKey = normalizeKey(key);
+    if (!safeKey || !set || typeof set !== 'object') return;
+    const registry = ensureObject('SUPPLEMENTAL_GRAMMAR_SETS');
+    registry[safeKey] = {
+      supplemental: true,
+      ...cloneSet(set),
+      items: Array.isArray(set.items) ? set.items : []
+    };
+    ensureSupplementalSetEntry(safeKey, set);
+    if (typeof window.registerSupplementalGrammarSets === 'function') {
+      window.registerSupplementalGrammarSets({ [safeKey]: registry[safeKey] });
+    }
+  }
+
+  function registerSupplementalMorphologySet(key, set) {
+    const safeKey = normalizeKey(key);
+    if (!safeKey || !set || typeof set !== 'object') return;
+    const registry = ensureObject('SUPPLEMENTAL_MORPHOLOGY_SETS');
+    registry[safeKey] = {
+      supplemental: true,
+      ...cloneSet(set),
+      items: Array.isArray(set.items) ? set.items : []
+    };
+    ensureSupplementalSetEntry(safeKey, set);
+    const morphSets = window.MORPHOLOGY_SETS;
+    if (morphSets && typeof morphSets === 'object') {
+      if (!morphSets[safeKey]) {
+        morphSets[safeKey] = registry[safeKey];
+      } else {
+        morphSets[safeKey].label = set.label || morphSets[safeKey].label;
+        morphSets[safeKey].notes = set.notes || morphSets[safeKey].notes;
+        morphSets[safeKey].supplemental = true;
+        morphSets[safeKey].items = [...(morphSets[safeKey].items || []), ...(set.items || [])];
+      }
+    }
+  }
+
+  window.SUPPLEMENTAL_VOCAB_SETS = ensureObject('SUPPLEMENTAL_VOCAB_SETS');
+  window.SUPPLEMENTAL_GRAMMAR_SETS = ensureObject('SUPPLEMENTAL_GRAMMAR_SETS');
+  window.SUPPLEMENTAL_MORPHOLOGY_SETS = ensureObject('SUPPLEMENTAL_MORPHOLOGY_SETS');
+  window.registerSupplementalVocabSet = registerSupplementalVocabSet;
+  window.registerSupplementalGrammarSet = registerSupplementalGrammarSet;
+  window.registerSupplementalMorphologySet = registerSupplementalMorphologySet;
 })();
