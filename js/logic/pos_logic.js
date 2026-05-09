@@ -227,7 +227,14 @@ function detectPartOfSpeech(card) {
   // 1. Per-card explicit override (escape hatch — set `pos` on a card to force a label).
   if (card.pos) return card.pos;
 
-  // 2. Hard-coded overrides for entries the heuristics can't classify safely.
+  // 2. Supplemental paradigm breakdowns hold inflected forms rather than
+  // lexical headwords. The heuristics below only recognize lemmas, so the
+  // result is almost always "[undetermined]" — and even when a guess lands,
+  // a single form (e.g. "αὐτή") can validly be more than one part of speech.
+  // Suppress the label for these cards so it isn't misleading.
+  if (/^W\d+_/.test(String(card.sourceKey || ''))) return '';
+
+  // 3. Hard-coded overrides for entries the heuristics can't classify safely.
   if (POS_OVERRIDES[greek]) return POS_OVERRIDES[greek];
 
   // 3. Exact-match tables (unchanged content).
