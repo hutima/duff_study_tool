@@ -4,7 +4,25 @@
   window.registerSupplementalVocabSet(KEY, {
     label: 'αὐτός-paradigm',
     week: 1,
-    cards: []
+    cards: [
+      { g: 'αὐτός, -ός', e: 'he, himself, same (nom. sg. masc.)', required: true },
+      { g: 'αὐτοῦ, -οῦ', e: 'of, from him/it (gen. sg. masc.-neut.)', required: true },
+      { g: 'αὐτῷ, -ῷ', e: 'to, for him/it (dat. sg. masc.-neut.)', required: true },
+      { g: 'αὐτόν, -όν', e: 'him, himself, same (acc. sg. masc.)', required: true },
+      { g: 'αὐτοί, -οί', e: 'they, themselves, same ones (nom. pl. masc.)', required: true },
+      { g: 'αὐτῶν, -ῶν', e: 'of, from them (gen. pl. masc.-fem.-neut.)', required: true },
+      { g: 'αὐτοῖς, -οῖς', e: 'to, for them (dat. pl. masc.-neut.)', required: true },
+      { g: 'αὐτούς, -ούς', e: 'them, themselves, same ones (acc. pl. masc.)', required: true },
+      { g: 'αὐτή, -ή', e: 'she, herself, same (nom. sg. fem.)', required: true },
+      { g: 'αὐτῆς, -ῆς', e: 'of, from her (gen. sg. fem.)', required: true },
+      { g: 'αὐτῇ, -ῇ', e: 'to, for her (dat. sg. fem.)', required: true },
+      { g: 'αὐτήν, -ήν', e: 'her, herself, same (acc. sg. fem.)', required: true },
+      { g: 'αὐταί, -αί', e: 'they, themselves, same ones (nom. pl. fem.)', required: true },
+      { g: 'αὐταῖς, -αῖς', e: 'to, for them (dat. pl. fem.)', required: true },
+      { g: 'αὐτάς, -άς', e: 'them, themselves, same ones (acc. pl. fem.)', required: true },
+      { g: 'αὐτό, -ό', e: 'it, itself, same (nom.-acc. sg. neut.)', required: true },
+      { g: 'αὐτά, -ά', e: 'they/them, themselves, same things (nom.-acc. pl. neut.)', required: true }
+    ]
   });
 
   window.registerSupplementalGrammarSet(KEY, {

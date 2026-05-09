@@ -5,8 +5,6 @@
 //  and registerSupplementalMorphologySet for use by supplemental sub-files.
 
 (function () {
-  const SET_KEY = 'W1O';
-
   function normalizeKey(key) {
     return String(key || '').trim();
   }
@@ -44,8 +42,6 @@
       if (!Array.isArray(window.SETS[key].cards)) window.SETS[key].cards = [];
     }
   }
-
-  const SUPPLEMENTAL_VOCAB_CARDS = [];
 
   function registerSupplementalVocabSet(key, set) {
     const safeKey = normalizeKey(key);
@@ -94,19 +90,6 @@
         morphSets[safeKey].items = [...(morphSets[safeKey].items || []), ...(set.items || [])];
       }
     }
-  }
-
-  if (window.SETS && typeof window.SETS === 'object') {
-    const base = window.SETS[SET_KEY] || { label: 'Week 1 - Supplement', type: 'other', week: 1, cards: [] };
-    const existingCards = Array.isArray(base.cards) ? base.cards : [];
-    window.SETS[SET_KEY] = {
-      ...base,
-      label: 'Week 1 - Supplement',
-      type: 'other',
-      week: 1,
-      cards: [...existingCards, ...SUPPLEMENTAL_VOCAB_CARDS]
-    };
-    ensureSupplementalSetEntry(SET_KEY, window.SETS[SET_KEY]);
   }
 
   window.SUPPLEMENTAL_VOCAB_SETS = ensureObject('SUPPLEMENTAL_VOCAB_SETS');
