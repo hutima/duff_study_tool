@@ -10,7 +10,7 @@ export function getConfidenceSample(outcome) {
 export function recordConfidenceSample(progress, outcome) {
   const history = Array.isArray(progress.confidenceHistory) ? [...progress.confidenceHistory] : [];
   history.push(getConfidenceSample(outcome));
-  progress.confidenceHistory = history.slice(-4);
+  progress.confidenceHistory = history.slice(-10);
   const avg = progress.confidenceHistory.length
     ? progress.confidenceHistory.reduce((sum, value) => sum + value, 0) / progress.confidenceHistory.length
     : 0;

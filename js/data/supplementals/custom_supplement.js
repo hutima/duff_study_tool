@@ -1,55 +1,46 @@
 // ═══════════════════════════════════════════════════════════════════════
-//  WEEK 1 SUPPLEMENT PARADIGM PATCH
+//  CUSTOM GRAMMAR PRACTICE SET — INDEPENDENT SUPPLEMENT
 // ═══════════════════════════════════════════════════════════════════════
 //  Swap this file when you want a different custom practice set.
 //
 //  UI behavior:
-//  - The cards are merged into the Week 1 Supplement deck (W1O).
-//  - It includes quick-flip vocabulary-style paradigm cards plus grammar drills.
+//  - The set appears as “Supplement” in the custom deck selector.
+//  - It is grammar-only: 0 vocabulary cards, grammar cards only.
 //  - The card shape mirrors grammar.js so the main grammar logic can stay
 //    unchanged.
 
 (function () {
-  const SET_KEY = 'W1O';
+  const SET_KEY = 'SUPPLEMENT';
 
-  function normalizeKey(key) {
-    return String(key || '').trim();
-  }
+  const PERSON_CHOICES = [
+    'I / 1st singular',
+    'you singular / 2nd singular',
+    'he, she, or it / 3rd singular',
+    'we / 1st plural',
+    'you plural / 2nd plural',
+    'they / 3rd plural'
+  ];
 
-  function cloneSet(set) {
-    return {
-      ...set,
-      cards: Array.isArray(set.cards) ? [...set.cards] : set.cards,
-      items: Array.isArray(set.items) ? [...set.items] : set.items
-    };
-  }
+  const ACTIVE_INDICATIVE_CHOICES = [
+    'present active indicative, 1st singular',
+    'present active indicative, 2nd singular',
+    'present active indicative, 3rd singular',
+    'present active indicative, 1st plural',
+    'present active indicative, 2nd plural',
+    'present active indicative, 3rd plural'
+  ];
 
-  function ensureSupplementalSetEntry(key, set) {
-    if (!window.SETS || typeof window.SETS !== 'object') return;
-    if (!window.SETS[key]) {
-      window.SETS[key] = {
-        label: set.label || key,
-        type: 'supplemental',
-        supplemental: true,
-        week: set.week ?? null,
-        cards: []
-      };
-    } else {
-      window.SETS[key].label = set.label || window.SETS[key].label || key;
-      window.SETS[key].type = window.SETS[key].type || 'supplemental';
-      window.SETS[key].supplemental = true;
-      if (set.week != null) window.SETS[key].week = set.week;
-      if (!Array.isArray(window.SETS[key].cards)) window.SETS[key].cards = [];
-    }
-  }
-
-
-  const SUPPLEMENTAL_VOCAB_CARDS = [];
+  const CASE_NUMBER_CHOICES = [
+    'nominative singular masculine',
+    'accusative singular masculine',
+    'nominative plural masculine',
+    'accusative plural masculine'
+  ];
 
   const SUPPLEMENTAL_GRAMMAR_SETS = {
     [SET_KEY]: {
-      label: 'Week 1 - Supplement',
-      notes: 'Custom grammar + paradigm drill set: λύω, article patterns, and declensions with full singular/plural case coverage.',
+      label: 'Supplement',
+      notes: 'Custom grammar practice: simple present active endings, λύω examples, and nominative/accusative masculine noun endings.',
       items: [
         {
           family: 'Present active indicative endings',
@@ -256,37 +247,18 @@
         }
       ]
     }
-  }
-
-  function registerSupplementalGrammarSet(key, set) {
-    const safeKey = normalizeKey(key);
-    if (!safeKey || !set || typeof set !== 'object') return;
-    const registry = ensureObject('SUPPLEMENTAL_GRAMMAR_SETS');
-    registry[safeKey] = {
-      supplemental: true,
-      ...cloneSet(set),
-      items: Array.isArray(set.items) ? set.items : []
-    };
-    ensureSupplementalSetEntry(safeKey, set);
-  }
+  };
 
   if (window.SETS && typeof window.SETS === 'object') {
-    const base = window.SETS[SET_KEY] || { label: 'Week 1 - Supplement', type: 'other', week: 1, cards: [] };
-    const existingCards = Array.isArray(base.cards) ? base.cards : [];
     window.SETS[SET_KEY] = {
-      ...base,
-      label: 'Week 1 - Supplement',
+      label: 'Supplement',
       type: 'other',
-      week: 1,
-      cards: [...existingCards, ...SUPPLEMENTAL_VOCAB_CARDS]
+      week: null,
+      cards: []
     };
-    ensureSupplementalSetEntry(safeKey, set);
   }
 
-  window.SUPPLEMENTAL_VOCAB_SETS = ensureObject('SUPPLEMENTAL_VOCAB_SETS');
-  window.SUPPLEMENTAL_GRAMMAR_SETS = ensureObject('SUPPLEMENTAL_GRAMMAR_SETS');
-  window.SUPPLEMENTAL_MORPHOLOGY_SETS = ensureObject('SUPPLEMENTAL_MORPHOLOGY_SETS');
-  window.registerSupplementalVocabSet = registerSupplementalVocabSet;
-  window.registerSupplementalGrammarSet = registerSupplementalGrammarSet;
-  window.registerSupplementalMorphologySet = registerSupplementalMorphologySet;
+  Object.entries(SUPPLEMENTAL_GRAMMAR_SETS).forEach(([key, set]) => {
+    window.registerSupplementalGrammarSet(key, set);
+  });
 })();
