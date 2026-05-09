@@ -1799,14 +1799,17 @@ function buildSupplementalSelector() {
       controls.appendChild(allBtn);
 
       if (canAccessGrammarUi()) {
-        getSupplementalParadigmsForKey(key).forEach(paradigm => {
-          const btn = document.createElement('button');
-          btn.className = 'chapter-btn supplemental-paradigm-btn';
-          btn.dataset.key = paradigm.key;
-          btn.innerHTML = `${paradigm.label}<span class="chapter-count">${paradigm.type} · ${paradigm.count} card${paradigm.count === 1 ? '' : 's'}</span>`;
-          btn.onclick = () => toggleSet(paradigm.key);
-          controls.appendChild(btn);
-        });
+        const paradigmList = getSupplementalParadigmsForKey(key);
+        if (paradigmList.length > 1) {
+          paradigmList.forEach(paradigm => {
+            const btn = document.createElement('button');
+            btn.className = 'chapter-btn supplemental-paradigm-btn';
+            btn.dataset.key = paradigm.key;
+            btn.innerHTML = `${paradigm.label}<span class="chapter-count">${paradigm.type} · ${paradigm.count} card${paradigm.count === 1 ? '' : 's'}</span>`;
+            btn.onclick = () => toggleSet(paradigm.key);
+            controls.appendChild(btn);
+          });
+        }
       }
 
       details.appendChild(controls);
