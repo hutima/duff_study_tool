@@ -1635,9 +1635,8 @@ function buildChapterSelector() {
 
   const sets = window.SETS && typeof window.SETS === 'object' ? window.SETS : {};
   const chapterKeys = Object.keys(sets).filter(isChapterKey).sort((a, b) => Number(a) - Number(b));
-  const otherKeys = sortSetKeys(Object.keys(sets).filter(k => !isChapterKey(k)));
 
-  [...chapterKeys, ...otherKeys].forEach(key => {
+  chapterKeys.forEach(key => {
     const set = sets[key];
     if (!set) return;
     const morphCount = window.getMorphologyCountForKey ? window.getMorphologyCountForKey(key) : 0;
@@ -1656,6 +1655,94 @@ function buildChapterSelector() {
     btn.innerHTML = `${set.label}<span class="chapter-count">${countLabel}</span>`;
     btn.onclick = () => toggleSet(key);
     grid.appendChild(btn);
+  });
+
+  setActiveSetButtons();
+}
+
+function getSupplementalParadigmsForKey(key) {
+  const raw = String(key);
+  const paradigms = [];
+  const morphSet = window.MORPHOLOGY_SETS?.[raw];
+  if (morphSet && Array.isArray(morphSet.items)) {
+    morphSet.items.forEach((item, idx) => {
+      paradigms.push({
+        key: `${raw}::morph::${idx}`,
+        type: 'Morphology',
+        label: item.family || item.lemma || `Morphology ${idx + 1}`,
+        count: Array.isArray(item.questions) ? item.questions.length : 0
+      });
+    });
+  }
+
+  const grammarSet = window.GRAMMAR_SETS?.[raw];
+  if (grammarSet && Array.isArray(grammarSet.items)) {
+    grammarSet.items.forEach((item, idx) => {
+      paradigms.push({
+        key: `${raw}::grammar::${idx}`,
+        type: 'Grammar',
+        label: item.family || item.lemma || `Grammar ${idx + 1}`,
+        count: Array.isArray(item.questions) ? item.questions.length : 0
+      });
+    });
+  }
+
+  return paradigms.filter(paradigm => paradigm.count > 0);
+}
+
+function buildSupplementalSelector() {
+  const list = document.getElementById('supplementalGrid');
+  if (!list) return;
+  list.innerHTML = '';
+
+  const sets = window.SETS && typeof window.SETS === 'object' ? window.SETS : {};
+  const supplementalKeys = sortSetKeys(Object.keys(sets).filter(k => !isChapterKey(k)));
+
+  supplementalKeys.forEach(key => {
+    const set = sets[key];
+    if (!set) return;
+    const vocabCount = Array.isArray(set.cards) ? set.cards.length : 0;
+    const morphCount = window.getMorphologyCountForKey ? window.getMorphologyCountForKey(key) : 0;
+    const grammarCount = window.getGrammarCountForKey ? window.getGrammarCountForKey(key) : 0;
+    const studyCount = morphCount + grammarCount;
+    if (!vocabCount && !studyCount) return;
+    if (!canAccessGrammarUi() && !vocabCount) return;
+
+    const details = document.createElement('details');
+    details.className = 'supplemental-set';
+    details.open = selectedKeys.includes(String(key)) || getSupplementalParadigmsForKey(key).some(paradigm => selectedKeys.includes(paradigm.key));
+
+    const summary = document.createElement('summary');
+    summary.className = 'supplemental-summary';
+    const countLabel = canAccessGrammarUi()
+      ? `${vocabCount} vocab${studyCount ? ` · ${studyCount} grammar` : ''}`
+      : `${vocabCount} vocab`;
+    summary.innerHTML = `<span>${set.label}</span><span class="chapter-count">${countLabel}</span>`;
+    details.appendChild(summary);
+
+    const controls = document.createElement('div');
+    controls.className = 'supplemental-paradigm-list';
+
+    const allBtn = document.createElement('button');
+    allBtn.className = 'chapter-btn supplemental-all-btn';
+    allBtn.dataset.key = key;
+    allBtn.innerHTML = `All ${set.label}<span class="chapter-count">${countLabel}</span>`;
+    allBtn.onclick = () => toggleSet(key);
+    controls.appendChild(allBtn);
+
+    if (canAccessGrammarUi()) {
+      getSupplementalParadigmsForKey(key).forEach(paradigm => {
+        const btn = document.createElement('button');
+        btn.className = 'chapter-btn supplemental-paradigm-btn';
+        btn.dataset.key = paradigm.key;
+        btn.innerHTML = `${paradigm.label}<span class="chapter-count">${paradigm.type} · ${paradigm.count} card${paradigm.count === 1 ? '' : 's'}</span>`;
+        btn.onclick = () => toggleSet(paradigm.key);
+        controls.appendChild(btn);
+      });
+    }
+
+    details.appendChild(controls);
+    list.appendChild(details);
   });
 
   setActiveSetButtons();
@@ -1746,14 +1833,22 @@ function toggleSession(session) {
   loadDeckFromKeys(nextKeys, null);
 }
 
+function getParadigmBaseKey(key) {
+  const match = String(key).match(/^(.+)::(grammar|morph)::\d+$/);
+  return match ? match[1] : null;
+}
+
 function toggleSet(key) {
   saveCurrentDeckStateToBank();
   currentSession = null;
   const raw = String(key);
+  const baseKey = getParadigmBaseKey(raw);
   if (selectedKeys.includes(raw)) {
     selectedKeys = selectedKeys.filter(k => k !== raw);
+  } else if (baseKey) {
+    selectedKeys = [...selectedKeys.filter(k => k !== baseKey), raw];
   } else {
-    selectedKeys = [...selectedKeys, raw];
+    selectedKeys = [...selectedKeys.filter(k => getParadigmBaseKey(k) !== raw), raw];
   }
 
   if (!selectedKeys.length) {
@@ -2201,6 +2296,7 @@ function setAppProfile(profile) {
   marks = getDirectionalMarksStore();
   buildSessions();
   buildChapterSelector();
+  buildSupplementalSelector();
   syncToggleButtons();
 
   if (!selectedKeys.length) {
@@ -3931,12 +4027,14 @@ initializeThemeMode();
 // Initial build with default state (needed so restoreState can find DOM elements)
 buildSessions();
 buildChapterSelector();
+buildSupplementalSelector();
 if (!restoreState()) {
   syncToggleButtons(); // reflect default controls on load
 }
 // Rebuild after restore: appProfile may have changed, affecting grammar summary text
 buildSessions();
 buildChapterSelector();
+buildSupplementalSelector();
 initializeConsentGate();
 if (isReaderMode()) renderReaderModule();
 
