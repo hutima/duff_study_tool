@@ -4,7 +4,20 @@
   window.registerSupplementalVocabSet(KEY, {
     label: 'λύω / φιλέω-paradigm',
     week: 1,
-    cards: []
+    cards: [
+      { g: 'λύω, -ω', e: 'I loose, untie (1st sg.)', required: true },
+      { g: 'λύεις, -εις', e: 'you loose, untie (2nd sg.)', required: true },
+      { g: 'λύει, -ει', e: 'he/she/it looses, unties (3rd sg.)', required: true },
+      { g: 'λύομεν, -ομεν', e: 'we loose, untie (1st pl.)', required: true },
+      { g: 'λύετε, -ετε', e: 'you all loose, untie (2nd pl.)', required: true },
+      { g: 'λύουσι(ν), -ουσι(ν)', e: 'they loose, untie (3rd pl.)', required: true },
+      { g: 'φιλῶ, -ῶ', e: 'I love (1st sg.)', required: true },
+      { g: 'φιλεῖς, -εῖς', e: 'you love (2nd sg.)', required: true },
+      { g: 'φιλεῖ, -εῖ', e: 'he/she/it loves (3rd sg.)', required: true },
+      { g: 'φιλοῦμεν, -οῦμεν', e: 'we love (1st pl.)', required: true },
+      { g: 'φιλεῖτε, -εῖτε', e: 'you all love (2nd pl.)', required: true },
+      { g: 'φιλοῦσι(ν), -οῦσι(ν)', e: 'they love (3rd pl.)', required: true }
+    ]
   });
 
   window.registerSupplementalGrammarSet(KEY, {

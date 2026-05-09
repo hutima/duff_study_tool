@@ -2,9 +2,16 @@
   const KEY = 'W1_EIMI';
 
   window.registerSupplementalVocabSet(KEY, {
-    label: 'ειμι-paradigm',
+    label: 'εἰμί-paradigm',
     week: 1,
-    cards: []
+    cards: [
+      { g: 'εἰμί, -μί', e: 'I am (1st sg.)', required: false },
+      { g: 'εἶ, -εἶ', e: 'you are (2nd sg.)', required: false },
+      { g: 'ἐστί(ν), -στί(ν)', e: 'he/she/it is (3rd sg.)', required: false },
+      { g: 'ἐσμέν, -μέν', e: 'we are (1st pl.)', required: false },
+      { g: 'ἐστέ, -τέ', e: 'you all are (2nd pl.)', required: false },
+      { g: 'εἰσί(ν), -σί(ν)', e: 'they are (3rd pl.)', required: false }
+    ]
   });
 
   window.registerSupplementalMorphologySet(KEY, {
