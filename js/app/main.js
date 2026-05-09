@@ -1698,6 +1698,7 @@ function buildSupplementalSelector() {
   const sets = window.SETS && typeof window.SETS === 'object' ? window.SETS : {};
   const supplementalKeys = sortSetKeys(Object.keys(sets).filter(k => !isChapterKey(k)));
 
+  const weekGroups = new Map();
   supplementalKeys.forEach(key => {
     const set = sets[key];
     if (!set) return;
@@ -1708,41 +1709,82 @@ function buildSupplementalSelector() {
     if (!vocabCount && !studyCount) return;
     if (!canAccessGrammarUi() && !vocabCount) return;
 
-    const details = document.createElement('details');
-    details.className = 'supplemental-set';
-    details.open = selectedKeys.includes(String(key)) || getSupplementalParadigmsForKey(key).some(paradigm => selectedKeys.includes(paradigm.key));
+    const weekNum = Number.isFinite(Number(set.week)) ? Number(set.week) : null;
+    if (!weekGroups.has(weekNum)) weekGroups.set(weekNum, []);
+    weekGroups.get(weekNum).push({ key, set, vocabCount, studyCount });
+  });
 
-    const summary = document.createElement('summary');
-    summary.className = 'supplemental-summary';
-    const countLabel = canAccessGrammarUi()
-      ? `${vocabCount} vocab${studyCount ? ` · ${studyCount} grammar` : ''}`
-      : `${vocabCount} vocab`;
-    summary.innerHTML = `<span>${set.label}</span><span class="chapter-count">${countLabel}</span>`;
-    details.appendChild(summary);
+  const orderedWeeks = [...weekGroups.keys()].sort((a, b) => {
+    if (a === null && b === null) return 0;
+    if (a === null) return 1;
+    if (b === null) return -1;
+    return a - b;
+  });
 
-    const controls = document.createElement('div');
-    controls.className = 'supplemental-paradigm-list';
+  orderedWeeks.forEach(weekNum => {
+    const entries = weekGroups.get(weekNum);
+    if (!entries || !entries.length) return;
+    const weekDetails = document.createElement('details');
+    weekDetails.className = 'supplemental-week';
+    const weekKeys = entries.map(e => String(e.key));
+    weekDetails.open = entries.some(({ key }) =>
+      selectedKeys.includes(String(key)) ||
+      getSupplementalParadigmsForKey(key).some(p => selectedKeys.includes(p.key))
+    );
+    const weekSummary = document.createElement('summary');
+    weekSummary.className = 'supplemental-week-summary';
+    const totalVocab = entries.reduce((s, e) => s + e.vocabCount, 0);
+    const totalStudy = entries.reduce((s, e) => s + e.studyCount, 0);
+    const weekLabel = weekNum == null ? 'Other supplements' : `Week ${weekNum}`;
+    const weekCount = canAccessGrammarUi()
+      ? `${entries.length} paradigm${entries.length === 1 ? '' : 's'} · ${totalVocab} vocab${totalStudy ? ` · ${totalStudy} grammar` : ''}`
+      : `${entries.length} paradigm${entries.length === 1 ? '' : 's'} · ${totalVocab} vocab`;
+    weekSummary.innerHTML = `<span>${weekLabel}</span><span class="chapter-count">${weekCount}</span>`;
+    weekDetails.appendChild(weekSummary);
 
-    const allBtn = document.createElement('button');
-    allBtn.className = 'chapter-btn supplemental-all-btn';
-    allBtn.dataset.key = key;
-    allBtn.innerHTML = `All ${set.label}<span class="chapter-count">${countLabel}</span>`;
-    allBtn.onclick = () => toggleSet(key);
-    controls.appendChild(allBtn);
+    const weekBody = document.createElement('div');
+    weekBody.className = 'supplemental-week-body';
 
-    if (canAccessGrammarUi()) {
-      getSupplementalParadigmsForKey(key).forEach(paradigm => {
-        const btn = document.createElement('button');
-        btn.className = 'chapter-btn supplemental-paradigm-btn';
-        btn.dataset.key = paradigm.key;
-        btn.innerHTML = `${paradigm.label}<span class="chapter-count">${paradigm.type} · ${paradigm.count} card${paradigm.count === 1 ? '' : 's'}</span>`;
-        btn.onclick = () => toggleSet(paradigm.key);
-        controls.appendChild(btn);
-      });
-    }
+    entries.forEach(({ key, set, vocabCount, studyCount }) => {
+      const details = document.createElement('details');
+      details.className = 'supplemental-set';
+      details.open = selectedKeys.includes(String(key)) || getSupplementalParadigmsForKey(key).some(paradigm => selectedKeys.includes(paradigm.key));
 
-    details.appendChild(controls);
-    list.appendChild(details);
+      const summary = document.createElement('summary');
+      summary.className = 'supplemental-summary';
+      const countLabel = canAccessGrammarUi()
+        ? `${vocabCount} vocab${studyCount ? ` · ${studyCount} grammar` : ''}`
+        : `${vocabCount} vocab`;
+      summary.innerHTML = `<span>${set.label}</span><span class="chapter-count">${countLabel}</span>`;
+      details.appendChild(summary);
+
+      const controls = document.createElement('div');
+      controls.className = 'supplemental-paradigm-list';
+
+      const allBtn = document.createElement('button');
+      allBtn.className = 'chapter-btn supplemental-all-btn';
+      allBtn.dataset.key = key;
+      allBtn.innerHTML = `All ${set.label}<span class="chapter-count">${countLabel}</span>`;
+      allBtn.onclick = () => toggleSet(key);
+      controls.appendChild(allBtn);
+
+      if (canAccessGrammarUi()) {
+        getSupplementalParadigmsForKey(key).forEach(paradigm => {
+          const btn = document.createElement('button');
+          btn.className = 'chapter-btn supplemental-paradigm-btn';
+          btn.dataset.key = paradigm.key;
+          btn.innerHTML = `${paradigm.label}<span class="chapter-count">${paradigm.type} · ${paradigm.count} card${paradigm.count === 1 ? '' : 's'}</span>`;
+          btn.onclick = () => toggleSet(paradigm.key);
+          controls.appendChild(btn);
+        });
+      }
+
+      details.appendChild(controls);
+      weekBody.appendChild(details);
+    });
+
+    weekDetails.appendChild(weekBody);
+    list.appendChild(weekDetails);
   });
 
   setActiveSetButtons();

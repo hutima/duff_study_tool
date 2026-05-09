@@ -3141,10 +3141,15 @@ const SESSIONS = [
       "2",
       "3",
       "W1O",
-      "W1_LUO_PHILEO",
-      "W1_NOUN_PATTERNS",
-      "W1_AUTOS",
-      "W1_EIMI",
+      "W1_LUO_PRESENT_ACTIVE",
+      "W1_PHILEO_PRESENT_ACTIVE",
+      "W1_LOGOS_DECLENSION",
+      "W1_ARCHE_DECLENSION",
+      "W1_ERGON_DECLENSION",
+      "W1_HEMERA_DECLENSION",
+      "W1_DOXA_DECLENSION",
+      "W1_AUTOS_PARADIGM",
+      "W1_EIMI_PRESENT",
       "W1_ADJ_PARADIGMS"
     ],
     "special": false,
@@ -3158,10 +3163,15 @@ const SESSIONS = [
       "4",
       "5",
       "W1O",
-      "W1_LUO_PHILEO",
-      "W1_NOUN_PATTERNS",
-      "W1_AUTOS",
-      "W1_EIMI",
+      "W1_LUO_PRESENT_ACTIVE",
+      "W1_PHILEO_PRESENT_ACTIVE",
+      "W1_LOGOS_DECLENSION",
+      "W1_ARCHE_DECLENSION",
+      "W1_ERGON_DECLENSION",
+      "W1_HEMERA_DECLENSION",
+      "W1_DOXA_DECLENSION",
+      "W1_AUTOS_PARADIGM",
+      "W1_EIMI_PRESENT",
       "W1_ADJ_PARADIGMS"
     ],
     "special": false,
@@ -3173,7 +3183,12 @@ const SESSIONS = [
     "label": "Chapter 6",
     "sets": [
       "6",
-      "W2_MEMORIZATION_PARADIGMS"
+      "W2_LUO_INDICATIVE",
+      "W2_PHILEO_INDICATIVE",
+      "W2_LUO_ACTIVE_IMPERATIVE",
+      "W2_LUO_ACTIVE_INFINITIVE",
+      "W2_LUO_ACTIVE_PARTICIPLE",
+      "W2_PHILEO_ACTIVE_PARTICIPLE"
     ],
     "special": false,
     "summary": "Indicative paradigms · contract indicative"
@@ -3184,7 +3199,12 @@ const SESSIONS = [
     "label": "Chapter 7",
     "sets": [
       "7",
-      "W2_MEMORIZATION_PARADIGMS"
+      "W2_LUO_INDICATIVE",
+      "W2_PHILEO_INDICATIVE",
+      "W2_LUO_ACTIVE_IMPERATIVE",
+      "W2_LUO_ACTIVE_INFINITIVE",
+      "W2_LUO_ACTIVE_PARTICIPLE",
+      "W2_PHILEO_ACTIVE_PARTICIPLE"
     ],
     "special": false,
     "summary": "Moods · imperative · active participles"
@@ -3196,7 +3216,13 @@ const SESSIONS = [
     "sets": [
       "8",
       "W3O",
-      "W3_MEMORIZATION_PARADIGMS"
+      "W3_RHUOMAI_INDICATIVE",
+      "W3_RHUOMAI_OTHER_MOODS",
+      "W3_EIMI_COMPLETE",
+      "W3_EIMI_INFINITIVE_PARTICIPLE",
+      "W3_EKEINOS",
+      "W3_HOUTOS",
+      "W3_PERSONAL_PRONOUNS"
     ],
     "special": false,
     "summary": "Middle voice · εἰμί infinitive / participle"
@@ -3208,7 +3234,13 @@ const SESSIONS = [
     "sets": [
       "9",
       "W3O",
-      "W3_MEMORIZATION_PARADIGMS"
+      "W3_RHUOMAI_INDICATIVE",
+      "W3_RHUOMAI_OTHER_MOODS",
+      "W3_EIMI_COMPLETE",
+      "W3_EIMI_INFINITIVE_PARTICIPLE",
+      "W3_EKEINOS",
+      "W3_HOUTOS",
+      "W3_PERSONAL_PRONOUNS"
     ],
     "special": false,
     "summary": "Demonstratives · personal pronouns"
@@ -3220,7 +3252,10 @@ const SESSIONS = [
     "sets": [
       "10",
       "11",
-      "W4_MEMORIZATION_PARADIGMS"
+      "W4_RELATIVE_PRONOUN",
+      "W4_SECOND_AORIST_STEMS",
+      "W4_BALLO_SECOND_AORIST",
+      "W4_FUTURE_LIQUID_STEMS"
     ],
     "special": false,
     "summary": "Relative pronouns · second aorist · liquid futures"
@@ -3242,10 +3277,24 @@ const SESSIONS = [
       "10",
       "11",
       "W1O",
-      "W2_MEMORIZATION_PARADIGMS",
+      "W2_LUO_INDICATIVE",
+      "W2_PHILEO_INDICATIVE",
+      "W2_LUO_ACTIVE_IMPERATIVE",
+      "W2_LUO_ACTIVE_INFINITIVE",
+      "W2_LUO_ACTIVE_PARTICIPLE",
+      "W2_PHILEO_ACTIVE_PARTICIPLE",
       "W3O",
-      "W3_MEMORIZATION_PARADIGMS",
-      "W4_MEMORIZATION_PARADIGMS"
+      "W3_RHUOMAI_INDICATIVE",
+      "W3_RHUOMAI_OTHER_MOODS",
+      "W3_EIMI_COMPLETE",
+      "W3_EIMI_INFINITIVE_PARTICIPLE",
+      "W3_EKEINOS",
+      "W3_HOUTOS",
+      "W3_PERSONAL_PRONOUNS",
+      "W4_RELATIVE_PRONOUN",
+      "W4_SECOND_AORIST_STEMS",
+      "W4_BALLO_SECOND_AORIST",
+      "W4_FUTURE_LIQUID_STEMS"
     ],
     "special": true,
     "summary": "Weeks 1–4 chapters + supplements"
@@ -3257,7 +3306,13 @@ const SESSIONS = [
     "sets": [
       "12",
       "13",
-      "W5_MEMORIZATION_PARADIGMS"
+      "W5_SARX",
+      "W5_ONOMA",
+      "W5_TIS",
+      "W5_PLEION",
+      "W5_ASTER",
+      "W5_POLIS_BASILEUS",
+      "W5_PAS"
     ],
     "special": false,
     "summary": "Third declension stems · second / third declension"
@@ -3268,7 +3323,10 @@ const SESSIONS = [
     "label": "Chapter 14",
     "sets": [
       "14",
-      "W5_MEMORIZATION_PARADIGMS"
+      "W5_LUO_PRESENT_ACTIVE_PARTICIPLE",
+      "W5_LUO_AORIST_ACTIVE_PARTICIPLE",
+      "W5_RHUOMAI_PRESENT_MIDDLE_PARTICIPLE",
+      "W5_RHUOMAI_AORIST_MIDDLE_PARTICIPLE"
     ],
     "special": false,
     "summary": "Participial paradigms"
@@ -3280,7 +3338,9 @@ const SESSIONS = [
     "sets": [
       "15",
       "W6O",
-      "W6_MEMORIZATION_PARADIGMS"
+      "W6_LUO_PASSIVE_INDICATIVE",
+      "W6_LUO_PASSIVE_OTHER_MOODS",
+      "W6_LUTHEIS_PARTICIPLE"
     ],
     "special": false,
     "summary": "Passive endings · passive moods / participles"
@@ -3292,7 +3352,8 @@ const SESSIONS = [
     "sets": [
       "16",
       "W6O",
-      "W6_MEMORIZATION_PARADIGMS"
+      "W6_LUO_PERFECT",
+      "W6_LUO_PLUPERFECT"
     ],
     "special": false,
     "summary": "Perfect · pluperfect · irregular passive forms"
@@ -3304,7 +3365,7 @@ const SESSIONS = [
     "sets": [
       "17",
       "W7O",
-      "W7_MEMORIZATION_PARADIGMS"
+      "W7_SUBJUNCTIVE_MOOD"
     ],
     "special": false,
     "summary": "Subjunctive mood · aspect"
@@ -3316,7 +3377,8 @@ const SESSIONS = [
     "sets": [
       "18",
       "W7O",
-      "W7_MEMORIZATION_PARADIGMS"
+      "W7_INDEFINITE_CONSTRUCTIONS",
+      "W7_THIRD_PERSON_IMPERATIVE"
     ],
     "special": false,
     "summary": "Indefinite constructions · 3rd person imperative"
@@ -3328,7 +3390,13 @@ const SESSIONS = [
     "sets": [
       "19",
       "W8O",
-      "W8_MEMORIZATION_PARADIGMS"
+      "W8_TITHEMI_PRESENT_INDICATIVE",
+      "W8_HISTEMI_PRESENT_INDICATIVE",
+      "W8_DIDOMI_PRESENT_INDICATIVE",
+      "W8_TITHEMI_PRESENT_SUBJUNCTIVE",
+      "W8_HISTEMI_PRESENT_SUBJUNCTIVE",
+      "W8_DIDOMI_PRESENT_SUBJUNCTIVE",
+      "W8_MI_OTHER_ACTIVE_FORMS"
     ],
     "special": false,
     "summary": "-μι present active verbs"
@@ -3340,7 +3408,8 @@ const SESSIONS = [
     "sets": [
       "20",
       "W8O",
-      "W8_MEMORIZATION_PARADIGMS"
+      "W8_DIDOMI_TENSES",
+      "W8_DIDOMAI_PRESENT"
     ],
     "special": false,
     "summary": "-μι other tenses · middle voice"
@@ -3371,21 +3440,65 @@ const SESSIONS = [
       "19",
       "20",
       "W1O",
-      "W1_LUO_PHILEO",
-      "W1_NOUN_PATTERNS",
-      "W1_AUTOS",
-      "W1_EIMI",
+      "W1_LUO_PRESENT_ACTIVE",
+      "W1_PHILEO_PRESENT_ACTIVE",
+      "W1_LOGOS_DECLENSION",
+      "W1_ARCHE_DECLENSION",
+      "W1_ERGON_DECLENSION",
+      "W1_HEMERA_DECLENSION",
+      "W1_DOXA_DECLENSION",
+      "W1_AUTOS_PARADIGM",
+      "W1_EIMI_PRESENT",
       "W1_ADJ_PARADIGMS",
+      "W2_LUO_INDICATIVE",
+      "W2_PHILEO_INDICATIVE",
+      "W2_LUO_ACTIVE_IMPERATIVE",
+      "W2_LUO_ACTIVE_INFINITIVE",
+      "W2_LUO_ACTIVE_PARTICIPLE",
+      "W2_PHILEO_ACTIVE_PARTICIPLE",
       "W3O",
-      "W3_MEMORIZATION_PARADIGMS",
-      "W4_MEMORIZATION_PARADIGMS",
-      "W5_MEMORIZATION_PARADIGMS",
+      "W3_RHUOMAI_INDICATIVE",
+      "W3_RHUOMAI_OTHER_MOODS",
+      "W3_EIMI_COMPLETE",
+      "W3_EIMI_INFINITIVE_PARTICIPLE",
+      "W3_EKEINOS",
+      "W3_HOUTOS",
+      "W3_PERSONAL_PRONOUNS",
+      "W4_RELATIVE_PRONOUN",
+      "W4_SECOND_AORIST_STEMS",
+      "W4_BALLO_SECOND_AORIST",
+      "W4_FUTURE_LIQUID_STEMS",
+      "W5_SARX",
+      "W5_ONOMA",
+      "W5_TIS",
+      "W5_PLEION",
+      "W5_ASTER",
+      "W5_POLIS_BASILEUS",
+      "W5_PAS",
+      "W5_LUO_PRESENT_ACTIVE_PARTICIPLE",
+      "W5_LUO_AORIST_ACTIVE_PARTICIPLE",
+      "W5_RHUOMAI_PRESENT_MIDDLE_PARTICIPLE",
+      "W5_RHUOMAI_AORIST_MIDDLE_PARTICIPLE",
       "W6O",
-      "W6_MEMORIZATION_PARADIGMS",
+      "W6_LUO_PASSIVE_INDICATIVE",
+      "W6_LUO_PASSIVE_OTHER_MOODS",
+      "W6_LUTHEIS_PARTICIPLE",
+      "W6_LUO_PERFECT",
+      "W6_LUO_PLUPERFECT",
       "W7O",
-      "W7_MEMORIZATION_PARADIGMS",
+      "W7_SUBJUNCTIVE_MOOD",
+      "W7_INDEFINITE_CONSTRUCTIONS",
+      "W7_THIRD_PERSON_IMPERATIVE",
       "W8O",
-      "W8_MEMORIZATION_PARADIGMS"
+      "W8_TITHEMI_PRESENT_INDICATIVE",
+      "W8_HISTEMI_PRESENT_INDICATIVE",
+      "W8_DIDOMI_PRESENT_INDICATIVE",
+      "W8_TITHEMI_PRESENT_SUBJUNCTIVE",
+      "W8_HISTEMI_PRESENT_SUBJUNCTIVE",
+      "W8_DIDOMI_PRESENT_SUBJUNCTIVE",
+      "W8_MI_OTHER_ACTIVE_FORMS",
+      "W8_DIDOMI_TENSES",
+      "W8_DIDOMAI_PRESENT"
     ],
     "special": true,
     "summary": "Ch. 1–20 + weekly supplements"
