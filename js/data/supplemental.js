@@ -249,14 +249,34 @@
     }
   };
 
-  if (window.SETS && typeof window.SETS === 'object') {
+  function notifySupplementalDataChanged(kind) {
+    if (typeof window.dispatchEvent !== 'function' || typeof window.CustomEvent !== 'function') return;
+    window.dispatchEvent(new window.CustomEvent('greekSupplementalDataChanged', {
+      detail: { kind }
+    }));
+  }
+
+  function ensureSupplementalSetMeta() {
+    if (!window.SETS || typeof window.SETS !== 'object') return;
     window.SETS[SET_KEY] = {
+      ...(window.SETS[SET_KEY] || {}),
       label: 'Supplement',
       type: 'other',
       week: null,
-      cards: []
+      cards: Array.isArray(window.SETS[SET_KEY]?.cards) ? window.SETS[SET_KEY].cards : []
     };
   }
 
-  window.SUPPLEMENTAL_GRAMMAR_SETS = SUPPLEMENTAL_GRAMMAR_SETS;
+  ensureSupplementalSetMeta();
+
+  window.SUPPLEMENTAL_GRAMMAR_SETS = {
+    ...(window.SUPPLEMENTAL_GRAMMAR_SETS || {}),
+    ...SUPPLEMENTAL_GRAMMAR_SETS
+  };
+
+  if (typeof window.registerSupplementalGrammarSets === 'function') {
+    window.registerSupplementalGrammarSets(SUPPLEMENTAL_GRAMMAR_SETS);
+  } else {
+    notifySupplementalDataChanged('set-meta');
+  }
 })();

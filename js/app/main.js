@@ -2476,6 +2476,9 @@ function closeAnalyticsOverlay() {
 }
 
 function openStudySelector() {
+  buildSessions();
+  buildChapterSelector();
+
   const overlay = document.getElementById('studySelectorOverlay');
   if (!overlay) return;
   overlay.classList.add('show');
@@ -3655,6 +3658,15 @@ if (!restoreState()) {
 buildSessions();
 buildChapterSelector();
 initializeConsentGate();
+
+window.addEventListener('greekSupplementalDataChanged', () => {
+  buildSessions();
+  buildChapterSelector();
+  if (selectedKeys.length && selectedKeys.some(key => window.SETS?.[key]?.type === 'other')) {
+    const keysToLoad = currentSession ? expandSessionSets(currentSession) : selectedKeys;
+    loadDeckFromKeys(keysToLoad, currentSession ? currentSession.id : null);
+  }
+});
 
 const cardArea = document.getElementById('cardArea');
 if (cardArea) {

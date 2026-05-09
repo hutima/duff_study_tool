@@ -2255,8 +2255,38 @@
   const GRAMMAR_SETS = {};
   Object.entries(CHAPTER_GRAMMAR).forEach(([key, set]) => { GRAMMAR_SETS[key] = set; });
   Object.entries(WEEK_GRAMMAR).forEach(([key, set]) => { GRAMMAR_SETS[key] = set; });
+
+  function notifyGrammarDataChanged() {
+    if (typeof window.dispatchEvent !== 'function' || typeof window.CustomEvent !== 'function') return;
+    window.dispatchEvent(new window.CustomEvent('greekSupplementalDataChanged', {
+      detail: { kind: 'grammar' }
+    }));
+  }
+
+  function registerSupplementalGrammarSets(sets, options = {}) {
+    if (!sets || typeof sets !== 'object') return;
+
+    Object.entries(sets).forEach(([key, set]) => {
+      if (!key || !set) return;
+      const rawKey = String(key);
+      GRAMMAR_SETS[rawKey] = set;
+
+      if (window.SETS && typeof window.SETS === 'object') {
+        window.SETS[rawKey] = {
+          ...(window.SETS[rawKey] || {}),
+          label: set.label || window.SETS[rawKey]?.label || rawKey,
+          type: window.SETS[rawKey]?.type || 'other',
+          week: window.SETS[rawKey]?.week ?? null,
+          cards: Array.isArray(window.SETS[rawKey]?.cards) ? window.SETS[rawKey].cards : []
+        };
+      }
+    });
+
+    if (!options.silent) notifyGrammarDataChanged();
+  }
+
   if (window.SUPPLEMENTAL_GRAMMAR_SETS && typeof window.SUPPLEMENTAL_GRAMMAR_SETS === 'object') {
-    Object.entries(window.SUPPLEMENTAL_GRAMMAR_SETS).forEach(([key, set]) => { GRAMMAR_SETS[key] = set; });
+    registerSupplementalGrammarSets(window.SUPPLEMENTAL_GRAMMAR_SETS, { silent: true });
   }
 
   // ───────────────────────────────────────────────────────────────────
@@ -2338,6 +2368,7 @@
   //  updated to call only the consolidated names.
   // ───────────────────────────────────────────────────────────────────
   window.GRAMMAR_SETS = GRAMMAR_SETS;
+  window.registerSupplementalGrammarSets = registerSupplementalGrammarSets;
   window.buildGrammarCardsForKeys = buildGrammarCardsForKeys;
   window.getGrammarCountForKey = getGrammarCountForKey;
 
