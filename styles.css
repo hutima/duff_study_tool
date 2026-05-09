@@ -167,6 +167,23 @@
   .supplemental-all-btn { border-color: var(--gold-dim); }
   .supplemental-paradigm-btn { text-align: left; }
 
+  .supplemental-set-flat {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    text-align: left;
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    line-height: 1.25;
+  }
+  .supplemental-set-flat .chapter-count {
+    display: inline;
+    margin-top: 0;
+    font-family: 'EB Garamond', serif;
+  }
+
   .session-btn {
     background: var(--surface);
     border: 1px solid var(--border);
