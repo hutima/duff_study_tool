@@ -514,4 +514,56 @@
       target[key].items = [...(target[key].items || []), ...(set.items || [])];
     }
   });
+
+  function ensureWeeklyVocabSet(key) {
+    const match = String(key).match(/^W(\d+)O$/);
+    const week = match ? Number(match[1]) : null;
+    if (!window.SETS || typeof window.SETS !== 'object') window.SETS = {};
+    if (!window.SETS[key]) {
+      window.SETS[key] = {
+        label: week ? `Week ${week} - Supplement` : `${key} Supplement`,
+        type: 'other',
+        week,
+        cards: []
+      };
+    }
+    window.SETS[key].type = 'other';
+    if (week && !window.SETS[key].week) window.SETS[key].week = week;
+    if (!Array.isArray(window.SETS[key].cards)) window.SETS[key].cards = [];
+    return window.SETS[key];
+  }
+
+  function buildMorphologyVocabCards(key, set) {
+    return (set.items || []).flatMap((item) => {
+      return (item.questions || []).map((q) => ({
+        g: q.form,
+        e: `${item.family}: ${q.answer}`,
+        required: true,
+        paradigm: item.family,
+        lemma: item.lemma,
+        gloss: item.gloss,
+        context: q.context || '',
+        note: q.note || '',
+        source: 'morphology-vocab',
+        sourceKey: String(key)
+      }));
+    });
+  }
+
+  Object.entries(supplementalSets).forEach(([key, set]) => {
+    const vocabSet = ensureWeeklyVocabSet(key);
+    const existingMorphologyVocab = new Set(
+      vocabSet.cards
+        .filter((card) => card.source === 'morphology-vocab')
+        .map((card) => `${card.sourceKey}|${card.paradigm}|${card.g}|${card.e}`)
+    );
+
+    buildMorphologyVocabCards(key, set).forEach((card) => {
+      const cardKey = `${card.sourceKey}|${card.paradigm}|${card.g}|${card.e}`;
+      if (!existingMorphologyVocab.has(cardKey)) {
+        vocabSet.cards.push(card);
+        existingMorphologyVocab.add(cardKey);
+      }
+    });
+  });
 })();
