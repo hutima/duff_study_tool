@@ -27,8 +27,9 @@ export function getSelectedVocabCards(keys, requiredFlag = false) {
   (keys || []).forEach(key => {
     const rawKey = String(key);
     const set = getSets()[rawKey];
-    if (!set) return;
-    set.cards.forEach((card, idx) => {
+    const setCards = Array.isArray(set?.cards) ? set.cards : [];
+    if (!setCards.length) return;
+    setCards.forEach((card, idx) => {
       if (requiredFlag && !card.required) return;
       cards.push({
         ...card,
