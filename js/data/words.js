@@ -3237,7 +3237,8 @@ const SESSIONS = [
     "tag": "Week 2",
     "label": "Chapter 6",
     "sets": [
-      "6"
+      "6",
+      "W2O"
     ],
     "special": false,
     "summary": "Ch. 6"
@@ -3247,7 +3248,8 @@ const SESSIONS = [
     "tag": "Week 2",
     "label": "Chapter 7",
     "sets": [
-      "7"
+      "7",
+      "W2O"
     ],
     "special": false,
     "summary": "Ch. 7"
@@ -3280,7 +3282,8 @@ const SESSIONS = [
     "label": "Chapters 10-11",
     "sets": [
       "10",
-      "11"
+      "11",
+      "W4O"
     ],
     "special": false,
     "summary": "Ch. 10, Ch. 11"
@@ -3300,7 +3303,11 @@ const SESSIONS = [
       "8",
       "9",
       "10",
-      "11"
+      "11",
+      "W1O",
+      "W2O",
+      "W3O",
+      "W4O"
     ],
     "special": true,
     "summary": "Ch. 1, Ch. 2, Ch. 3, Ch. 4, Ch. 5, Ch. 6, Ch. 7, Ch. 8, Ch. 9, Ch. 10, Ch. 11"
@@ -3311,7 +3318,8 @@ const SESSIONS = [
     "label": "Chapters 12-13",
     "sets": [
       "12",
-      "13"
+      "13",
+      "W5O"
     ],
     "special": false,
     "summary": "Ch. 12, Ch. 13"
@@ -3321,7 +3329,8 @@ const SESSIONS = [
     "tag": "Week 5",
     "label": "Chapter 14",
     "sets": [
-      "14"
+      "14",
+      "W5O"
     ],
     "special": false,
     "summary": "Ch. 14"
@@ -3418,7 +3427,10 @@ const SESSIONS = [
       "19",
       "20",
       "W1O",
+      "W2O",
       "W3O",
+      "W4O",
+      "W5O",
       "W6O",
       "W7O",
       "W8O"

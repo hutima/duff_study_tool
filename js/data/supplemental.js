@@ -1,4 +1,70 @@
 // ═══════════════════════════════════════════════════════════════════════
+//  SUPPLEMENTAL SET REGISTRATION API
+// ═══════════════════════════════════════════════════════════════════════
+//  Use these helpers from files in js/data/supplementals/ to add weekly
+//  vocab, grammar, or morphology supplements without editing words.js,
+//  grammar.js, or morphology.js directly.
+
+(function () {
+  function ensureSet(key, meta = {}) {
+    if (!key) return null;
+    if (!window.SETS || typeof window.SETS !== 'object') window.SETS = {};
+    if (!window.SETS[key]) {
+      window.SETS[key] = {
+        label: meta.label || key,
+        type: meta.type || 'other',
+        week: Number.isFinite(meta.week) ? meta.week : null,
+        cards: []
+      };
+    }
+    const set = window.SETS[key];
+    if (meta.label) set.label = meta.label;
+    if (meta.type) set.type = meta.type;
+    if (Number.isFinite(meta.week)) set.week = meta.week;
+    if (!Array.isArray(set.cards)) set.cards = [];
+    return set;
+  }
+
+  function cardSignature(card) {
+    return `${card?.g || ''}|${card?.e || ''}`;
+  }
+
+  window.registerSupplementalVocabSet = function registerSupplementalVocabSet(key, config = {}) {
+    const set = ensureSet(key, { label: config.label, type: 'other', week: config.week });
+    if (!set) return;
+
+    const seen = new Set(set.cards.map(cardSignature));
+    (config.cards || []).forEach(card => {
+      if (!card || !card.g || !card.e) return;
+      const normalized = { ...card, required: card.required !== false };
+      const signature = cardSignature(normalized);
+      if (seen.has(signature)) return;
+      seen.add(signature);
+      set.cards.push(normalized);
+    });
+  };
+
+  window.registerSupplementalGrammarSet = function registerSupplementalGrammarSet(key, config = {}) {
+    ensureSet(key, { label: config.label, type: 'other', week: config.week });
+    if (!window.SUPPLEMENTAL_GRAMMAR_SETS || typeof window.SUPPLEMENTAL_GRAMMAR_SETS !== 'object') {
+      window.SUPPLEMENTAL_GRAMMAR_SETS = {};
+    }
+    window.SUPPLEMENTAL_GRAMMAR_SETS[key] = config;
+    if (window.GRAMMAR_SETS && typeof window.GRAMMAR_SETS === 'object') {
+      window.GRAMMAR_SETS[key] = config;
+    }
+  };
+
+  window.registerSupplementalMorphologySet = function registerSupplementalMorphologySet(key, config = {}) {
+    ensureSet(key, { label: config.label, type: 'other', week: config.week });
+    if (!window.MORPHOLOGY_SETS || typeof window.MORPHOLOGY_SETS !== 'object') {
+      window.MORPHOLOGY_SETS = {};
+    }
+    window.MORPHOLOGY_SETS[key] = config;
+  };
+})();
+
+// ═══════════════════════════════════════════════════════════════════════
 //  CUSTOM GRAMMAR PRACTICE SET — SUPPLEMENT
 // ═══════════════════════════════════════════════════════════════════════
 //  Swap this file when you want a different custom practice set.
