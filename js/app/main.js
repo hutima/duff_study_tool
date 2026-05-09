@@ -2768,6 +2768,7 @@ function closeAnalyticsOverlay() {
 function openStudySelector() {
   buildSessions();
   buildChapterSelector();
+  buildSupplementalSelector();
 
   const overlay = document.getElementById('studySelectorOverlay');
   if (!overlay) return;
@@ -4044,6 +4045,7 @@ if (isReaderMode()) renderReaderModule();
 window.addEventListener('greekSupplementalDataChanged', () => {
   buildSessions();
   buildChapterSelector();
+  buildSupplementalSelector();
   if (selectedKeys.length && selectedKeys.some(key => window.SETS?.[key]?.type === 'other')) {
     const keysToLoad = currentSession ? expandSessionSets(currentSession) : selectedKeys;
     loadDeckFromKeys(keysToLoad, currentSession ? currentSession.id : null);
