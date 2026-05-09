@@ -133,34 +133,46 @@
     return distractors.slice(0, 3);
   }
 
+  function parseParadigmKey(key) {
+    const match = String(key).match(/^(.+)::(grammar|morph)::(\d+)$/);
+    if (!match) return { baseKey: String(key), type: null, itemIdx: null };
+    return { baseKey: match[1], type: match[2], itemIdx: Number(match[3]) };
+  }
+
+  function resolveMorphologySelection(key) {
+    const selection = parseParadigmKey(key);
+    if (selection.type && selection.type !== 'morph') return null;
+    const set = MORPHOLOGY_SETS[selection.baseKey];
+    if (!set) return null;
+    const items = Number.isInteger(selection.itemIdx) ? [set.items[selection.itemIdx]] : set.items;
+    return { ...selection, set, items: items.filter(Boolean) };
+  }
+
   function buildMorphologyCardsForKeys(keys) {
     const selected = (keys || []).map(String);
+    const selections = selected.map(resolveMorphologySelection).filter(Boolean);
     const allAnswers = [];
-    selected.forEach((key) => {
-      const set = MORPHOLOGY_SETS[key];
-      if (!set) return;
-      set.items.forEach((item) => {
+    selections.forEach((selection) => {
+      selection.items.forEach((item) => {
         item.questions.forEach((q) => allAnswers.push(q.answer));
       });
     });
 
     const cards = [];
-    selected.forEach((key) => {
-      const set = MORPHOLOGY_SETS[key];
-      if (!set) return;
-
-      set.items.forEach((item, itemIdx) => {
+    selections.forEach((selection) => {
+      selection.items.forEach((item, relativeItemIdx) => {
+        const itemIdx = Number.isInteger(selection.itemIdx) ? selection.itemIdx : relativeItemIdx;
         const itemAnswers = item.questions.map((q) => q.answer);
         item.questions.forEach((q, qIdx) => {
           const distractors = pickDistractors(q.answer, itemAnswers, allAnswers);
           const choices = localShuffle([q.answer, ...distractors]);
           cards.push({
-            id: `morph-${key}-${itemIdx}-${qIdx}-${stableMorphKey(item.lemma)}-${stableMorphKey(q.form)}-${stableMorphKey(q.answer)}`,
+            id: `morph-${selection.baseKey}-${itemIdx}-${qIdx}-${stableMorphKey(item.lemma)}-${stableMorphKey(q.form)}-${stableMorphKey(q.answer)}`,
             kind: 'morph',
             required: true,
-            sourceKey: String(key),
-            sourceLabel: set.label,
-            chapter: Number(key),
+            sourceKey: String(selection.baseKey),
+            sourceLabel: selection.set.label,
+            chapter: /^\d+$/.test(selection.baseKey) ? Number(selection.baseKey) : 0,
             family: item.family,
             lemma: item.lemma,
             gloss: item.gloss,

@@ -2283,25 +2283,36 @@
   // ───────────────────────────────────────────────────────────────────
   //  PUBLIC BUILDERS
   // ───────────────────────────────────────────────────────────────────
+  function parseParadigmKey(key) {
+    const match = String(key).match(/^(.+)::(grammar|morph)::(\d+)$/);
+    if (!match) return { baseKey: String(key), type: null, itemIdx: null };
+    return { baseKey: match[1], type: match[2], itemIdx: Number(match[3]) };
+  }
+
   function buildGrammarCardsForKeys(keys) {
     const selected = (keys || []).map(String);
     const cards = [];
 
     selected.forEach((key) => {
-      const set = GRAMMAR_SETS[key];
+      const selection = parseParadigmKey(key);
+      if (selection.type && selection.type !== 'grammar') return;
+      const set = GRAMMAR_SETS[selection.baseKey];
       if (!set) return;
 
-      const chapterNum = /^\d+$/.test(key) ? Number(key) : 0;
+      const chapterNum = /^\d+$/.test(selection.baseKey) ? Number(selection.baseKey) : 0;
+      const items = Number.isInteger(selection.itemIdx) ? [set.items[selection.itemIdx]] : set.items;
 
-      set.items.forEach((item, itemIdx) => {
+      items.forEach((item, relativeItemIdx) => {
+        if (!item) return;
+        const itemIdx = Number.isInteger(selection.itemIdx) ? selection.itemIdx : relativeItemIdx;
         item.questions.forEach((q, qIdx) => {
           const rawChoices = Array.isArray(q.choices) ? q.choices : [];
           const choices = localShuffle(Array.from(new Set([q.answer, ...rawChoices])));
           cards.push({
-            id: `grammar-${key}-${itemIdx}-${qIdx}-${stableGrammarKey(item.lemma)}-${stableGrammarKey(q.form)}-${stableGrammarKey(q.prompt || 'parse')}-${stableGrammarKey(q.answer)}`,
+            id: `grammar-${selection.baseKey}-${itemIdx}-${qIdx}-${stableGrammarKey(item.lemma)}-${stableGrammarKey(q.form)}-${stableGrammarKey(q.prompt || 'parse')}-${stableGrammarKey(q.answer)}`,
             kind: 'morph',
             required: true,
-            sourceKey: String(key),
+            sourceKey: String(selection.baseKey),
             sourceLabel: set.label,
             chapter: chapterNum,
             family: item.family,

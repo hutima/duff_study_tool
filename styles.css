@@ -100,6 +100,44 @@
     gap: 8px;
   }
 
+  .supplemental-list {
+    display: grid;
+    gap: 10px;
+  }
+
+  .supplemental-set {
+    background: rgba(17, 19, 29, 0.55);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .supplemental-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    color: var(--cream);
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    line-height: 1.25;
+  }
+
+  .supplemental-summary:hover { background: rgba(201,168,76,0.06); }
+  .supplemental-summary .chapter-count { color: var(--muted); font-family: 'EB Garamond', serif; font-size: 12px; }
+
+  .supplemental-paradigm-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 8px;
+    padding: 0 10px 10px;
+  }
+
+  .supplemental-all-btn { border-color: var(--gold-dim); }
+  .supplemental-paradigm-btn { text-align: left; }
+
   .session-btn {
     background: var(--surface);
     border: 1px solid var(--border);
