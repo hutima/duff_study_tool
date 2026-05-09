@@ -3172,7 +3172,8 @@ const SESSIONS = [
     "tag": "Week 2",
     "label": "Chapter 6",
     "sets": [
-      "6"
+      "6",
+      "W2_MEMORIZATION_PARADIGMS"
     ],
     "special": false,
     "summary": "Indicative paradigms · contract indicative"
@@ -3182,7 +3183,8 @@ const SESSIONS = [
     "tag": "Week 2",
     "label": "Chapter 7",
     "sets": [
-      "7"
+      "7",
+      "W2_MEMORIZATION_PARADIGMS"
     ],
     "special": false,
     "summary": "Moods · imperative · active participles"
@@ -3193,7 +3195,8 @@ const SESSIONS = [
     "label": "Chapter 8",
     "sets": [
       "8",
-      "W3O"
+      "W3O",
+      "W3_MEMORIZATION_PARADIGMS"
     ],
     "special": false,
     "summary": "Middle voice · εἰμί infinitive / participle"
@@ -3204,7 +3207,8 @@ const SESSIONS = [
     "label": "Chapter 9",
     "sets": [
       "9",
-      "W3O"
+      "W3O",
+      "W3_MEMORIZATION_PARADIGMS"
     ],
     "special": false,
     "summary": "Demonstratives · personal pronouns"
@@ -3215,7 +3219,8 @@ const SESSIONS = [
     "label": "Chapters 10-11",
     "sets": [
       "10",
-      "11"
+      "11",
+      "W4_MEMORIZATION_PARADIGMS"
     ],
     "special": false,
     "summary": "Relative pronouns · second aorist · liquid futures"
@@ -3235,7 +3240,12 @@ const SESSIONS = [
       "8",
       "9",
       "10",
-      "11"
+      "11",
+      "W1O",
+      "W2_MEMORIZATION_PARADIGMS",
+      "W3O",
+      "W3_MEMORIZATION_PARADIGMS",
+      "W4_MEMORIZATION_PARADIGMS"
     ],
     "special": true,
     "summary": "Weeks 1–4 chapters + supplements"
@@ -3246,7 +3256,8 @@ const SESSIONS = [
     "label": "Chapters 12-13",
     "sets": [
       "12",
-      "13"
+      "13",
+      "W5_MEMORIZATION_PARADIGMS"
     ],
     "special": false,
     "summary": "Third declension stems · second / third declension"
@@ -3256,7 +3267,8 @@ const SESSIONS = [
     "tag": "Week 5",
     "label": "Chapter 14",
     "sets": [
-      "14"
+      "14",
+      "W5_MEMORIZATION_PARADIGMS"
     ],
     "special": false,
     "summary": "Participial paradigms"
@@ -3267,7 +3279,8 @@ const SESSIONS = [
     "label": "Chapter 15",
     "sets": [
       "15",
-      "W6O"
+      "W6O",
+      "W6_MEMORIZATION_PARADIGMS"
     ],
     "special": false,
     "summary": "Passive endings · passive moods / participles"
@@ -3278,7 +3291,8 @@ const SESSIONS = [
     "label": "Chapter 16",
     "sets": [
       "16",
-      "W6O"
+      "W6O",
+      "W6_MEMORIZATION_PARADIGMS"
     ],
     "special": false,
     "summary": "Perfect · pluperfect · irregular passive forms"
@@ -3289,7 +3303,8 @@ const SESSIONS = [
     "label": "Chapter 17",
     "sets": [
       "17",
-      "W7O"
+      "W7O",
+      "W7_MEMORIZATION_PARADIGMS"
     ],
     "special": false,
     "summary": "Subjunctive mood · aspect"
@@ -3300,7 +3315,8 @@ const SESSIONS = [
     "label": "Chapter 18",
     "sets": [
       "18",
-      "W7O"
+      "W7O",
+      "W7_MEMORIZATION_PARADIGMS"
     ],
     "special": false,
     "summary": "Indefinite constructions · 3rd person imperative"
@@ -3311,7 +3327,8 @@ const SESSIONS = [
     "label": "Chapter 19",
     "sets": [
       "19",
-      "W8O"
+      "W8O",
+      "W8_MEMORIZATION_PARADIGMS"
     ],
     "special": false,
     "summary": "-μι present active verbs"
@@ -3322,7 +3339,8 @@ const SESSIONS = [
     "label": "Chapter 20",
     "sets": [
       "20",
-      "W8O"
+      "W8O",
+      "W8_MEMORIZATION_PARADIGMS"
     ],
     "special": false,
     "summary": "-μι other tenses · middle voice"
@@ -3359,9 +3377,15 @@ const SESSIONS = [
       "W1_EIMI",
       "W1_ADJ_PARADIGMS",
       "W3O",
+      "W3_MEMORIZATION_PARADIGMS",
+      "W4_MEMORIZATION_PARADIGMS",
+      "W5_MEMORIZATION_PARADIGMS",
       "W6O",
+      "W6_MEMORIZATION_PARADIGMS",
       "W7O",
-      "W8O"
+      "W7_MEMORIZATION_PARADIGMS",
+      "W8O",
+      "W8_MEMORIZATION_PARADIGMS"
     ],
     "special": true,
     "summary": "Ch. 1–20 + weekly supplements"
