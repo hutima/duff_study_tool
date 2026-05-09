@@ -258,5 +258,56 @@
     };
   }
 
+
+  function makeMorphologyFlipCard(question, item, set) {
+    const detailLines = [
+      question.answer,
+      item.family,
+      item.lemma ? `Lemma: ${item.lemma}` : '',
+      item.gloss ? `Gloss: ${item.gloss}` : '',
+      question.context ? `Context: ${question.context}` : '',
+      question.note || ''
+    ].filter(Boolean);
+
+    return {
+      g: question.form,
+      e: detailLines.join(' · '),
+      required: true,
+      morphFlip: true,
+      morphFamily: item.family,
+      morphSet: set.label
+    };
+  }
+
+  function addWeeklyMorphologyFlipCards() {
+    if (!window.SETS || !window.MORPHOLOGY_SETS) return;
+
+    const weekKeys = ['W2O', 'W3O', 'W4O', 'W5O', 'W6O', 'W7O', 'W8O'];
+    weekKeys.forEach((key) => {
+      const set = window.MORPHOLOGY_SETS[key];
+      const target = window.SETS[key];
+      if (!set || !target) return;
+      if (!Array.isArray(target.cards)) target.cards = [];
+
+      const existingMorphFlipKeys = new Set(
+        target.cards
+          .filter((card) => card && card.morphFlip)
+          .map((card) => `${card.g || ''}|${card.e || ''}`)
+      );
+
+      set.items.forEach((item) => {
+        item.questions.forEach((question) => {
+          const card = makeMorphologyFlipCard(question, item, set);
+          const cardKey = `${card.g}|${card.e}`;
+          if (existingMorphFlipKeys.has(cardKey)) return;
+          existingMorphFlipKeys.add(cardKey);
+          target.cards.push(card);
+        });
+      });
+    });
+  }
+
+  addWeeklyMorphologyFlipCards();
+
   window.SUPPLEMENTAL_GRAMMAR_SETS = SUPPLEMENTAL_GRAMMAR_SETS;
 })();
