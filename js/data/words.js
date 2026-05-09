@@ -3297,7 +3297,7 @@ const SESSIONS = [
       "W4_FUTURE_LIQUID_STEMS"
     ],
     "special": true,
-    "summary": "Weeks 1–4 chapters + supplements"
+    "summary": "Weeks 1–4 chapters"
   },
   {
     "id": "wk5t",
@@ -3501,7 +3501,7 @@ const SESSIONS = [
       "W8_DIDOMAI_PRESENT"
     ],
     "special": true,
-    "summary": "Ch. 1–20 + weekly supplements"
+    "summary": "Ch. 1–20"
   }
 ];
 

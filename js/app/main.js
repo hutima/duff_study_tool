@@ -1690,6 +1690,29 @@ function getSupplementalParadigmsForKey(key) {
   return paradigms.filter(paradigm => paradigm.count > 0);
 }
 
+function deselectAllSupplementals() {
+  const remaining = selectedKeys.filter(k => isChapterKey(getParadigmBaseKey(k) || k));
+  if (remaining.length === selectedKeys.length) return;
+  saveCurrentDeckStateToBank();
+  currentSession = null;
+  selectedKeys = remaining;
+  if (!selectedKeys.length) {
+    setActiveSessionButton();
+    setActiveSetButtons();
+    deck = [];
+    originalDeck = [];
+    marks = {};
+    currentIdx = 0;
+    document.getElementById('cardArea').innerHTML = '<div class="empty-state"><div class="big">αβγ</div>Tap to choose a session and start studying.</div>';
+    clearSpacedUndoSnapshot();
+    syncToggleButtons();
+    renderReview();
+    saveState();
+    return;
+  }
+  loadDeckFromKeys(selectedKeys, null);
+}
+
 function buildSupplementalSelector() {
   const list = document.getElementById('supplementalGrid');
   if (!list) return;
@@ -1697,6 +1720,13 @@ function buildSupplementalSelector() {
 
   const sets = window.SETS && typeof window.SETS === 'object' ? window.SETS : {};
   const supplementalKeys = sortSetKeys(Object.keys(sets).filter(k => !isChapterKey(k)));
+
+  const deselectBtn = document.createElement('button');
+  deselectBtn.type = 'button';
+  deselectBtn.className = 'chapter-btn supplemental-deselect-all';
+  deselectBtn.textContent = 'Deselect all supplementals';
+  deselectBtn.onclick = () => deselectAllSupplementals();
+  list.appendChild(deselectBtn);
 
   const weekGroups = new Map();
   supplementalKeys.forEach(key => {
