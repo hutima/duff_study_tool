@@ -16,12 +16,12 @@
     label: 'φιλέω — present active indicative',
     week: 1,
     cards: [
-      { g: 'φιλῶ', e: 'I am loving (φιλ ε + ω → φιλῶ)', required: true },
-      { g: 'φιλεῖς', e: 'You are loving (φιλ ε + εις → φιλεῖς)', required: true },
-      { g: 'φιλεῖ', e: 'He, she, or it is loving (φιλ ε + ει → φιλεῖ)', required: true },
-      { g: 'φιλοῦμεν', e: 'We are loving (φιλ ε + ομεν → φιλοῦμεν)', required: true },
-      { g: 'φιλεῖτε', e: 'You are loving (φιλ ε + ετε → φιλεῖτε)', required: true },
-      { g: 'φιλοῦσιν / φιλοῦσι', e: 'They are loving (φιλ ε + ουσιν → φιλοῦσιν)', required: true }
+      { g: 'φιλῶ', e: 'I am loving (1st person singular; φιλ ε + ω → φιλῶ)', required: true },
+      { g: 'φιλεῖς', e: 'You are loving (2nd person singular; φιλ ε + εις → φιλεῖς)', required: true },
+      { g: 'φιλεῖ', e: 'He, she, or it is loving (3rd person singular; φιλ ε + ει → φιλεῖ)', required: true },
+      { g: 'φιλοῦμεν', e: 'We are loving (1st person plural; φιλ ε + ομεν → φιλοῦμεν)', required: true },
+      { g: 'φιλεῖτε', e: 'You are loving (2nd person plural; φιλ ε + ετε → φιλεῖτε)', required: true },
+      { g: 'φιλοῦσιν / φιλοῦσι', e: 'They are loving (3rd person plural; φιλ ε + ουσιν → φιλοῦσιν)', required: true }
     ]
   });
 

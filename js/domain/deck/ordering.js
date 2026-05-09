@@ -60,7 +60,18 @@ export function getOtherKeysForWeeks(weeks) {
   });
 }
 
+function isOddSupplementalKey(key) {
+  return /^W\d+O$/.test(String(key));
+}
+
 export function expandSessionSets(session) {
-  const baseSets = (session?.sets || []).map(String).filter(isChapterKey);
-  return sortSetKeys([...new Set(baseSets)]);
+  const rawSets = (session?.sets || []).map(String);
+  const chapters = rawSets.filter(isChapterKey);
+  // Special sessions (Mid-Term, Final Exam Prep) also pull in the per-week
+  // odd supplemental vocab listed in the session, but never the paradigm
+  // breakdown sets — those are opt-in via the supplemental selector.
+  const oddSupplementals = session?.special
+    ? rawSets.filter(isOddSupplementalKey)
+    : [];
+  return sortSetKeys([...new Set([...chapters, ...oddSupplementals])]);
 }
