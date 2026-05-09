@@ -1,6 +1,7 @@
 // SRS scheduling logic — pure functions, no state access
-import { SRS_DAY_MS, SRS_AGAIN_MS, SRS_UNCERTAIN_MIN_MS, SRS_UNSPACED_RECOVERY_MS, SRS_GUIDE_STEPS_DAYS } from './constants.js';
+import { SRS_DAY_MS, SRS_AGAIN_MS, SRS_UNCERTAIN_MIN_MS, SRS_UNCERTAIN_MAX_MS, SRS_UNSPACED_RECOVERY_MS, SRS_GUIDE_STEPS_DAYS, SRS_MAX_INTERVAL_DAYS } from './constants.js';
 import { clamp } from '../../utils/helpers.js';
+import { getConfidencePct } from './confidence.js';
 
 export function msFromDays(days) {
   return Math.round(days * SRS_DAY_MS);
@@ -48,27 +49,40 @@ export function getLastEasyIntervalDays(progress) {
 }
 
 export function getNextEasyIntervalDays(progress) {
-  const confidenceHistory = Array.isArray(progress?.confidenceHistory)
-    ? progress.confidenceHistory.filter(value => Number.isFinite(value)).slice(-4)
-    : [];
-  if (confidenceHistory.length) {
-    const confidenceAvg = confidenceHistory.reduce((sum, value) => sum + value, 0) / confidenceHistory.length;
-    if (confidenceAvg < 1) {
-      return Math.max(confidenceAvg, 1 / 24);
-    }
-  }
-
   const stage = getSrsStage(progress);
   const guideDays = SRS_GUIDE_STEPS_DAYS;
+
+  // Guide phase: fixed ramp regardless of confidence
   if (stage < guideDays.length) return guideDays[stage];
+
+  // Post-guide: derive multiplier from the last-10-flip confidence window.
+  // Confidence pct → multiplier:
+  //   90–100% → 2.5  (fast track to 30-day cap, ~2 more reviews to cap from 14d)
+  //   70–89%  → 1.5–2.0  (steady confirmed growth)
+  //   50–69%  → 1.2–1.4  (shaky, grow slowly)
+  //   <50%    → 1.1  (got "easy" this flip but history is rough — don't over-reward)
+  // Falls back to the stored ease factor when fewer than 5 flips are recorded.
+  const history = Array.isArray(progress?.confidenceHistory)
+    ? progress.confidenceHistory.filter(Number.isFinite)
+    : [];
+  let multiplier;
+  if (history.length >= 5) {
+    const pct = (history.reduce((s, v) => s + v, 0) / history.length) * 100;
+    if (pct >= 90)      multiplier = 2.5;
+    else if (pct >= 70) multiplier = 1.5 + (pct - 70) / 40;  // 1.5→2.0 across 70–90%
+    else if (pct >= 50) multiplier = 1.2 + (pct - 50) / 100; // 1.2→1.4 across 50–70%
+    else                multiplier = 1.1;
+  } else {
+    multiplier = getSrsEase(progress);
+  }
 
   const previousDays = Math.max(
     guideDays[guideDays.length - 1],
     getLastEasyIntervalDays(progress),
     Number.isFinite(Number(progress?.intervalDays)) ? Math.max(0, Number(progress.intervalDays)) : 0
   );
-  const proposedDays = previousDays * getSrsEase(progress);
-  return Math.max(Math.round(proposedDays), Math.ceil(previousDays + 1));
+  const proposedDays = previousDays * multiplier;
+  return Math.min(SRS_MAX_INTERVAL_DAYS, Math.max(Math.round(proposedDays), Math.ceil(previousDays + 1)));
 }
 
 export function getEasyDelayMs(progress) {
@@ -76,7 +90,19 @@ export function getEasyDelayMs(progress) {
 }
 
 export function getUncertainDelayMs(progress) {
-  return SRS_UNCERTAIN_MIN_MS;
+  // Delay for an 'uncertain/pass' outcome, tiered by recent confidence:
+  //   <70%  → 1h floor (keep review pressure up before weekly quizzes)
+  //   70–89% → ½ previous interval, capped at 1 week
+  //   ≥90%  → ½ previous interval, capped at 30 days (normal easy-interval ceiling)
+  const pct = getConfidencePct(progress);
+  if (pct === null || pct < 70) return SRS_UNCERTAIN_MIN_MS;
+  const prevIntervalDays = Number(progress?.intervalDays) || 0;
+  if (prevIntervalDays <= 0) return SRS_UNCERTAIN_MIN_MS;
+  const halfMs = msFromDays(prevIntervalDays * 0.5);
+  const ceiling = pct >= 90
+    ? msFromDays(SRS_MAX_INTERVAL_DAYS)
+    : SRS_UNCERTAIN_MAX_MS;
+  return clamp(halfMs, SRS_UNCERTAIN_MIN_MS, ceiling);
 }
 
 export function formatRemainingForTable(dueAt) {
