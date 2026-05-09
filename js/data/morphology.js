@@ -504,6 +504,19 @@
     }
   };
 
+  function buildParadigmVocabCards(set) {
+    return (set.items || []).flatMap(item => {
+      return (item.questions || []).map(q => ({
+        g: q.form,
+        e: q.context ? `${q.answer} — ${q.context}` : q.answer,
+        required: true,
+        family: item.family,
+        lemma: item.lemma,
+        gloss: item.gloss
+      }));
+    });
+  }
+
   const target = window.MORPHOLOGY_SETS || {};
   Object.entries(supplementalSets).forEach(([key, set]) => {
     if (!target[key]) {
@@ -512,6 +525,10 @@
       target[key].label = set.label;
       target[key].notes = set.notes;
       target[key].items = [...(target[key].items || []), ...(set.items || [])];
+    }
+
+    if (/^W[2-8]O$/.test(key) && window.SETS && window.SETS[key]) {
+      window.SETS[key].cards = buildParadigmVocabCards(target[key]);
     }
   });
 })();
