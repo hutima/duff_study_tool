@@ -258,5 +258,52 @@
     };
   }
 
+
+  function ensureSupplementalSet(key, meta) {
+    if (!key) return null;
+    if (window.SETS && typeof window.SETS === 'object') {
+      if (!window.SETS[key]) {
+        window.SETS[key] = {
+          label: (meta && meta.label) || key,
+          type: 'other',
+          week: meta && Object.prototype.hasOwnProperty.call(meta, 'week') ? meta.week : null,
+          cards: []
+        };
+      } else {
+        if (meta && meta.label) window.SETS[key].label = meta.label;
+        if (meta && Object.prototype.hasOwnProperty.call(meta, 'week')) window.SETS[key].week = meta.week;
+        if (!Array.isArray(window.SETS[key].cards)) window.SETS[key].cards = [];
+      }
+      return window.SETS[key];
+    }
+    return null;
+  }
+
+  window.registerSupplementalVocabSet = function registerSupplementalVocabSet(key, set) {
+    const target = ensureSupplementalSet(key, set || {});
+    if (target && set) {
+      target.label = set.label || target.label;
+      target.type = 'other';
+      target.week = Object.prototype.hasOwnProperty.call(set, 'week') ? set.week : target.week;
+      target.cards = [...(target.cards || []), ...((set.cards || []).map(card => ({ ...card })))];
+    }
+  };
+
+  window.registerSupplementalGrammarSet = function registerSupplementalGrammarSet(key, set) {
+    ensureSupplementalSet(key, set || {});
+    window.SUPPLEMENTAL_GRAMMAR_SETS = window.SUPPLEMENTAL_GRAMMAR_SETS || {};
+    window.SUPPLEMENTAL_GRAMMAR_SETS[key] = set;
+    if (window.GRAMMAR_SETS && typeof window.GRAMMAR_SETS === 'object') {
+      window.GRAMMAR_SETS[key] = set;
+    }
+  };
+
+  window.registerSupplementalMorphologySet = function registerSupplementalMorphologySet(key, set) {
+    ensureSupplementalSet(key, set || {});
+    if (window.MORPHOLOGY_SETS && typeof window.MORPHOLOGY_SETS === 'object') {
+      window.MORPHOLOGY_SETS[key] = set;
+    }
+  };
+
   window.SUPPLEMENTAL_GRAMMAR_SETS = SUPPLEMENTAL_GRAMMAR_SETS;
 })();

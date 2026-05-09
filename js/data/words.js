@@ -3237,7 +3237,8 @@ const SESSIONS = [
     "tag": "Week 2",
     "label": "Chapter 6",
     "sets": [
-      "6"
+      "6",
+      "W2_MEMORIZATION_PARADIGMS"
     ],
     "special": false,
     "summary": "Ch. 6"
@@ -3247,7 +3248,8 @@ const SESSIONS = [
     "tag": "Week 2",
     "label": "Chapter 7",
     "sets": [
-      "7"
+      "7",
+      "W2_MEMORIZATION_PARADIGMS"
     ],
     "special": false,
     "summary": "Ch. 7"
@@ -3258,7 +3260,8 @@ const SESSIONS = [
     "label": "Chapter 8",
     "sets": [
       "8",
-      "W3O"
+      "W3O",
+      "W3_MEMORIZATION_PARADIGMS"
     ],
     "special": false,
     "summary": "Ch. 8"
@@ -3269,7 +3272,8 @@ const SESSIONS = [
     "label": "Chapter 9",
     "sets": [
       "9",
-      "W3O"
+      "W3O",
+      "W3_MEMORIZATION_PARADIGMS"
     ],
     "special": false,
     "summary": "Ch. 9"
@@ -3280,7 +3284,8 @@ const SESSIONS = [
     "label": "Chapters 10-11",
     "sets": [
       "10",
-      "11"
+      "11",
+      "W4_MEMORIZATION_PARADIGMS"
     ],
     "special": false,
     "summary": "Ch. 10, Ch. 11"
@@ -3300,10 +3305,15 @@ const SESSIONS = [
       "8",
       "9",
       "10",
-      "11"
+      "11",
+      "W1O",
+      "W2_MEMORIZATION_PARADIGMS",
+      "W3O",
+      "W3_MEMORIZATION_PARADIGMS",
+      "W4_MEMORIZATION_PARADIGMS"
     ],
     "special": true,
-    "summary": "Ch. 1, Ch. 2, Ch. 3, Ch. 4, Ch. 5, Ch. 6, Ch. 7, Ch. 8, Ch. 9, Ch. 10, Ch. 11"
+    "summary": "Ch. 1, Ch. 2, Ch. 3, Ch. 4, Ch. 5, Ch. 6, Ch. 7, Ch. 8, Ch. 9, Ch. 10, Ch. 11 + Supplements"
   },
   {
     "id": "wk5t",
@@ -3311,7 +3321,8 @@ const SESSIONS = [
     "label": "Chapters 12-13",
     "sets": [
       "12",
-      "13"
+      "13",
+      "W5_MEMORIZATION_PARADIGMS"
     ],
     "special": false,
     "summary": "Ch. 12, Ch. 13"
@@ -3321,7 +3332,8 @@ const SESSIONS = [
     "tag": "Week 5",
     "label": "Chapter 14",
     "sets": [
-      "14"
+      "14",
+      "W5_MEMORIZATION_PARADIGMS"
     ],
     "special": false,
     "summary": "Ch. 14"
@@ -3332,7 +3344,8 @@ const SESSIONS = [
     "label": "Chapter 15",
     "sets": [
       "15",
-      "W6O"
+      "W6O",
+      "W6_MEMORIZATION_PARADIGMS"
     ],
     "special": false,
     "summary": "Ch. 15"
@@ -3343,7 +3356,8 @@ const SESSIONS = [
     "label": "Chapter 16",
     "sets": [
       "16",
-      "W6O"
+      "W6O",
+      "W6_MEMORIZATION_PARADIGMS"
     ],
     "special": false,
     "summary": "Ch. 16"
@@ -3354,7 +3368,8 @@ const SESSIONS = [
     "label": "Chapter 17",
     "sets": [
       "17",
-      "W7O"
+      "W7O",
+      "W7_MEMORIZATION_PARADIGMS"
     ],
     "special": false,
     "summary": "Ch. 17"
@@ -3365,7 +3380,8 @@ const SESSIONS = [
     "label": "Chapter 18",
     "sets": [
       "18",
-      "W7O"
+      "W7O",
+      "W7_MEMORIZATION_PARADIGMS"
     ],
     "special": false,
     "summary": "Ch. 18"
@@ -3376,7 +3392,8 @@ const SESSIONS = [
     "label": "Chapter 19",
     "sets": [
       "19",
-      "W8O"
+      "W8O",
+      "W8_MEMORIZATION_PARADIGMS"
     ],
     "special": false,
     "summary": "Ch. 19"
@@ -3387,7 +3404,8 @@ const SESSIONS = [
     "label": "Chapter 20",
     "sets": [
       "20",
-      "W8O"
+      "W8O",
+      "W8_MEMORIZATION_PARADIGMS"
     ],
     "special": false,
     "summary": "Ch. 20"
@@ -3418,10 +3436,17 @@ const SESSIONS = [
       "19",
       "20",
       "W1O",
+      "W2_MEMORIZATION_PARADIGMS",
       "W3O",
+      "W3_MEMORIZATION_PARADIGMS",
+      "W4_MEMORIZATION_PARADIGMS",
+      "W5_MEMORIZATION_PARADIGMS",
       "W6O",
+      "W6_MEMORIZATION_PARADIGMS",
       "W7O",
-      "W8O"
+      "W7_MEMORIZATION_PARADIGMS",
+      "W8O",
+      "W8_MEMORIZATION_PARADIGMS"
     ],
     "special": true,
     "summary": "Ch. 1-20 + Others"
