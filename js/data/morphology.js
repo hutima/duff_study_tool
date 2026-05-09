@@ -565,6 +565,19 @@
     }
   };
 
+  function buildParadigmVocabCards(set) {
+    return (set.items || []).flatMap(item => {
+      return (item.questions || []).map(q => ({
+        g: q.form,
+        e: q.context ? `${q.answer} — ${q.context}` : q.answer,
+        required: true,
+        family: item.family,
+        lemma: item.lemma,
+        gloss: item.gloss
+      }));
+    });
+  }
+
   const target = window.MORPHOLOGY_SETS || {};
   const mergeSupplementalMorphologySet = (key, set) => {
     if (!target[key]) {
