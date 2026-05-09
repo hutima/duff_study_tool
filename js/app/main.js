@@ -1776,15 +1776,28 @@ function buildSupplementalSelector() {
     weekBody.className = 'supplemental-week-body';
 
     entries.forEach(({ key, set, vocabCount, studyCount }) => {
-      const details = document.createElement('details');
-      details.className = 'supplemental-set';
-      details.open = selectedKeys.includes(String(key)) || getSupplementalParadigmsForKey(key).some(paradigm => selectedKeys.includes(paradigm.key));
-
-      const summary = document.createElement('summary');
-      summary.className = 'supplemental-summary';
       const countLabel = canAccessGrammarUi()
         ? `${vocabCount} vocab${studyCount ? ` · ${studyCount} grammar` : ''}`
         : `${vocabCount} vocab`;
+      const paradigmList = canAccessGrammarUi() ? getSupplementalParadigmsForKey(key) : [];
+
+      if (paradigmList.length <= 1) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'chapter-btn supplemental-set-flat';
+        btn.dataset.key = key;
+        btn.innerHTML = `<span>${set.label}</span><span class="chapter-count">${countLabel}</span>`;
+        btn.onclick = () => toggleSet(key);
+        weekBody.appendChild(btn);
+        return;
+      }
+
+      const details = document.createElement('details');
+      details.className = 'supplemental-set';
+      details.open = selectedKeys.includes(String(key)) || paradigmList.some(paradigm => selectedKeys.includes(paradigm.key));
+
+      const summary = document.createElement('summary');
+      summary.className = 'supplemental-summary';
       summary.innerHTML = `<span>${set.label}</span><span class="chapter-count">${countLabel}</span>`;
       details.appendChild(summary);
 
@@ -1798,19 +1811,14 @@ function buildSupplementalSelector() {
       allBtn.onclick = () => toggleSet(key);
       controls.appendChild(allBtn);
 
-      if (canAccessGrammarUi()) {
-        const paradigmList = getSupplementalParadigmsForKey(key);
-        if (paradigmList.length > 1) {
-          paradigmList.forEach(paradigm => {
-            const btn = document.createElement('button');
-            btn.className = 'chapter-btn supplemental-paradigm-btn';
-            btn.dataset.key = paradigm.key;
-            btn.innerHTML = `${paradigm.label}<span class="chapter-count">${paradigm.type} · ${paradigm.count} card${paradigm.count === 1 ? '' : 's'}</span>`;
-            btn.onclick = () => toggleSet(paradigm.key);
-            controls.appendChild(btn);
-          });
-        }
-      }
+      paradigmList.forEach(paradigm => {
+        const btn = document.createElement('button');
+        btn.className = 'chapter-btn supplemental-paradigm-btn';
+        btn.dataset.key = paradigm.key;
+        btn.innerHTML = `${paradigm.label}<span class="chapter-count">${paradigm.type} · ${paradigm.count} card${paradigm.count === 1 ? '' : 's'}</span>`;
+        btn.onclick = () => toggleSet(paradigm.key);
+        controls.appendChild(btn);
+      });
 
       details.appendChild(controls);
       weekBody.appendChild(details);
