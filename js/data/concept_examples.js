@@ -114,6 +114,11 @@ export const CONCEPT_EXAMPLES = {
     english: "flesh",
     why: "Velar stem: κ/γ/χ + σ → ξ in the nominative."
   },
+  "κτ-stem": {
+    greek: "νύξ, νυκτός",
+    english: "night",
+    why: "κτ-stem: the genitive shows νυκτ-; in the nominative singular τ drops before ς, then κ + ς → ξ."
+  },
   "ν-stem": {
     greek: "ποιμήν, ποιμένος",
     english: "shepherd",

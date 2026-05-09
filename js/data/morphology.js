@@ -133,34 +133,47 @@
     return distractors.slice(0, 3);
   }
 
+  function parseParadigmKey(key) {
+    const match = String(key).match(/^(.+)::(grammar|morph)::(\d+)$/);
+    if (!match) return { baseKey: String(key), type: null, itemIdx: null };
+    return { baseKey: match[1], type: match[2], itemIdx: Number(match[3]) };
+  }
+
+  function resolveMorphologySelection(key) {
+    const selection = parseParadigmKey(key);
+    if (selection.type && selection.type !== 'morph') return null;
+    const set = MORPHOLOGY_SETS[selection.baseKey];
+    if (!set) return null;
+    const items = Number.isInteger(selection.itemIdx) ? [set.items[selection.itemIdx]] : set.items;
+    return { ...selection, set, items: items.filter(Boolean) };
+  }
+
   function buildMorphologyCardsForKeys(keys) {
     const selected = (keys || []).map(String);
+    const selections = selected.map(resolveMorphologySelection).filter(Boolean);
     const allAnswers = [];
-    selected.forEach((key) => {
-      const set = MORPHOLOGY_SETS[key];
-      if (!set) return;
-      set.items.forEach((item) => {
+    selections.forEach((selection) => {
+      selection.items.forEach((item) => {
         item.questions.forEach((q) => allAnswers.push(q.answer));
       });
     });
 
     const cards = [];
-    selected.forEach((key) => {
-      const set = MORPHOLOGY_SETS[key];
-      if (!set) return;
-
-      set.items.forEach((item, itemIdx) => {
+    selections.forEach((selection) => {
+      selection.items.forEach((item, relativeItemIdx) => {
+        const itemIdx = Number.isInteger(selection.itemIdx) ? selection.itemIdx : relativeItemIdx;
         const itemAnswers = item.questions.map((q) => q.answer);
         item.questions.forEach((q, qIdx) => {
           const distractors = pickDistractors(q.answer, itemAnswers, allAnswers);
           const choices = localShuffle([q.answer, ...distractors]);
           cards.push({
-            id: `morph-${key}-${itemIdx}-${qIdx}-${stableMorphKey(item.lemma)}-${stableMorphKey(q.form)}-${stableMorphKey(q.answer)}`,
+            id: `morph-${selection.baseKey}-${itemIdx}-${qIdx}-${stableMorphKey(item.lemma)}-${stableMorphKey(q.form)}-${stableMorphKey(q.answer)}`,
             kind: 'morph',
             required: true,
-            sourceKey: String(key),
-            sourceLabel: set.label,
-            chapter: Number(key),
+            sourceKey: String(selection.baseKey),
+            sourceLabel: selection.set.label,
+            supplemental: !!selection.set.supplemental,
+            chapter: Number(selection.baseKey),
             family: item.family,
             lemma: item.lemma,
             gloss: item.gloss,
@@ -210,6 +223,54 @@
             { form: 'φιλοῦμεν', answer: 'present active indicative, 1st plural' },
             { form: 'φιλεῖτε', answer: 'present active indicative, 2nd plural' },
             { form: 'φιλοῦσι(ν)', answer: 'present active indicative, 3rd plural' }
+          ]
+        },
+
+        {
+          family: 'Contract verb present active indicative (vocab-style)',
+          lemma: 'φιλέω',
+          gloss: 'I love, like',
+          questions: [
+            { form: 'φιλῶ', answer: '1st person sing.', note: 'I love / like' },
+            { form: 'φιλεῖς', answer: '2nd person sing.', note: 'you (sing.) love / like' },
+            { form: 'φιλεῖ', answer: '3rd person sing.', note: 'he/she/it loves / likes' },
+            { form: 'φιλοῦμεν', answer: '1st person pl.', note: 'we love / like' },
+            { form: 'φιλεῖτε', answer: '2nd person pl.', note: 'you (pl.) love / like' },
+            { form: 'φιλοῦσι(ν)', answer: '3rd person pl.', note: 'they love / like' }
+          ]
+        },
+        {
+          family: 'Variant feminine 1st-declension endings',
+          lemma: 'ἡμέρα / δόξα / ἀρχή',
+          gloss: 'day / glory / beginning',
+          questions: [
+            { form: 'ἡμέρα', answer: 'nom. sing. fem.', note: 'day (subject)' },
+            { form: 'ἡμέραν', answer: 'acc. sing. fem.', note: 'day (object)' },
+            { form: 'ἡμέρᾳ', answer: 'dat. sing. fem.', note: 'to/for day' },
+            { form: 'ἡμέρας', answer: 'gen. sing. fem.', note: 'of day' },
+            { form: 'δόξα', answer: 'nom. sing. fem.', note: 'glory (subject)' },
+            { form: 'δόξαν', answer: 'acc. sing. fem.', note: 'glory (object)' },
+            { form: 'δόξῃ', answer: 'dat. sing. fem.', note: 'to/for glory' },
+            { form: 'δόξης', answer: 'gen. sing. fem.', note: 'of glory' },
+            { form: 'ἀρχή', answer: 'nom. sing. fem.', note: 'beginning (subject)' },
+            { form: 'ἀρχήν', answer: 'acc. sing. fem.', note: 'beginning (object)' },
+            { form: 'ἀρχῇ', answer: 'dat. sing. fem.', note: 'to/for beginning' },
+            { form: 'ἀρχῆς', answer: 'gen. sing. fem.', note: 'of beginning' }
+          ]
+        },
+        {
+          family: 'πολύς and μέγας core forms',
+          lemma: 'πολύς / μέγας',
+          gloss: 'much/many / great',
+          questions: [
+            { form: 'πολύς', answer: 'nom. sing. masc.', note: 'much/many (masc. subject)' },
+            { form: 'πολλοῦ', answer: 'gen. sing. masc./neut.', note: 'of much/many' },
+            { form: 'πολλῷ', answer: 'dat. sing. masc./neut.', note: 'to/for much/many' },
+            { form: 'πολύν', answer: 'acc. sing. masc.', note: 'much/many (masc. object)' },
+            { form: 'μέγας', answer: 'nom. sing. masc.', note: 'great (masc. subject)' },
+            { form: 'μεγάλου', answer: 'gen. sing. masc./neut.', note: 'of great' },
+            { form: 'μεγάλῳ', answer: 'dat. sing. masc./neut.', note: 'to/for great' },
+            { form: 'μέγαν', answer: 'acc. sing. masc.', note: 'great (masc. object)' }
           ]
         },
         {
@@ -518,17 +579,19 @@
   }
 
   const target = window.MORPHOLOGY_SETS || {};
-  Object.entries(supplementalSets).forEach(([key, set]) => {
+  const mergeSupplementalMorphologySet = (key, set) => {
     if (!target[key]) {
       target[key] = set;
     } else {
       target[key].label = set.label;
       target[key].notes = set.notes;
+      target[key].supplemental = !!(target[key].supplemental || set.supplemental);
       target[key].items = [...(target[key].items || []), ...(set.items || [])];
     }
+  };
 
-    if (/^W[2-8]O$/.test(key) && window.SETS && window.SETS[key]) {
-      window.SETS[key].cards = buildParadigmVocabCards(target[key]);
-    }
-  });
+  Object.entries(supplementalSets).forEach(([key, set]) => mergeSupplementalMorphologySet(key, set));
+  if (window.SUPPLEMENTAL_MORPHOLOGY_SETS && typeof window.SUPPLEMENTAL_MORPHOLOGY_SETS === 'object') {
+    Object.entries(window.SUPPLEMENTAL_MORPHOLOGY_SETS).forEach(([key, set]) => mergeSupplementalMorphologySet(key, set));
+  }
 })();
