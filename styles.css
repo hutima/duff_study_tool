@@ -1245,6 +1245,42 @@
     border-color: var(--border);
   }
 
+  .user-guide-overlay {
+    align-items: flex-start;
+    overflow-y: auto;
+  }
+
+  .user-guide-modal {
+    max-width: 720px;
+    margin: 24px auto;
+  }
+
+  .user-guide-copy {
+    font-size: 15px;
+  }
+
+  .user-guide-heading {
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin: 22px 0 8px;
+  }
+
+  .user-guide-copy > p:first-of-type {
+    margin-top: 0;
+  }
+
+  .user-guide-list {
+    margin: 8px 0 0;
+    padding-left: 20px;
+  }
+
+  .user-guide-list li + li {
+    margin-top: 6px;
+  }
+
   .transfer-modal {
     max-width: 700px;
   }
