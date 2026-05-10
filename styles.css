@@ -2325,6 +2325,97 @@
   .reader-verse-drill .reader-choices {
     margin-top: 8px;
   }
+
+  /* ── Tap-to-reveal literal translation under SBL verses ── */
+  .reader-verse-reveal {
+    margin-top: 4px;
+    padding-bottom: 6px;
+  }
+
+  .reader-verse-reveal-summary {
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    padding: 4px 0;
+    list-style: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .reader-verse-reveal-summary::-webkit-details-marker { display: none; }
+  .reader-verse-reveal-summary::marker { display: none; }
+  .reader-verse-reveal[open] > .reader-verse-reveal-summary { color: var(--gold); }
+  .reader-verse-reveal-summary::before {
+    content: '▸ ';
+    transition: transform 0.15s;
+    display: inline-block;
+  }
+  .reader-verse-reveal[open] > .reader-verse-reveal-summary::before {
+    content: '▾ ';
+  }
+
+  .reader-verse-literal-text {
+    margin-top: 6px;
+    padding: 8px 10px;
+    background: rgba(201,168,76,0.04);
+    border-left: 2px solid var(--gold-dim);
+    color: var(--cream);
+    font-family: 'EB Garamond', serif;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  /* ── Drill section header and navigation (one-at-a-time UI) ── */
+  .reader-drill-section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .reader-drill-progress {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+  }
+
+  .reader-drill-nav {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .reader-drill-nav-btn {
+    flex: 1;
+    background: rgba(255,255,255,0.02);
+    color: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .reader-drill-nav-btn:hover:not(:disabled) {
+    border-color: var(--gold-dim);
+    background: rgba(201,168,76,0.05);
+    color: var(--gold);
+  }
+
+  .reader-drill-nav-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
 }
 
 
