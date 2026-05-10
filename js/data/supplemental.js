@@ -43,6 +43,31 @@
     }
   }
 
+  function ensureAdvancedSetEntry(key, set) {
+    if (!window.SETS || typeof window.SETS !== 'object') return;
+    if (!window.SETS[key]) {
+      window.SETS[key] = {
+        label: set.label || key,
+        type: 'advanced',
+        advanced: true,
+        bucket: set.bucket ?? null,
+        rankStart: set.rankStart ?? null,
+        rankEnd: set.rankEnd ?? null,
+        notes: set.notes || '',
+        cards: []
+      };
+    } else {
+      window.SETS[key].label = set.label || window.SETS[key].label || key;
+      window.SETS[key].type = 'advanced';
+      window.SETS[key].advanced = true;
+      if (set.bucket != null) window.SETS[key].bucket = set.bucket;
+      if (set.rankStart != null) window.SETS[key].rankStart = set.rankStart;
+      if (set.rankEnd != null) window.SETS[key].rankEnd = set.rankEnd;
+      if (set.notes) window.SETS[key].notes = set.notes;
+      if (!Array.isArray(window.SETS[key].cards)) window.SETS[key].cards = [];
+    }
+  }
+
   function registerSupplementalVocabSet(key, set) {
     const safeKey = normalizeKey(key);
     if (!safeKey || !set || typeof set !== 'object') return;
@@ -92,10 +117,29 @@
     }
   }
 
+  function registerAdvancedVocabSet(key, set) {
+    const safeKey = normalizeKey(key);
+    if (!safeKey || !set || typeof set !== 'object') return;
+    ensureAdvancedSetEntry(safeKey, set);
+    if (window.SETS && Array.isArray(window.SETS[safeKey]?.cards) && Array.isArray(set.cards)) {
+      const tagged = set.cards.map(card => ({ ...card, advanced: true }));
+      window.SETS[safeKey].cards.push(...tagged);
+    }
+    const registry = ensureObject('ADVANCED_VOCAB_SETS');
+    registry[safeKey] = { advanced: true, ...cloneSet(set) };
+  }
+
+  function isAdvancedKey(key) {
+    return /^ADV\d+$/i.test(String(key || ''));
+  }
+
   window.SUPPLEMENTAL_VOCAB_SETS = ensureObject('SUPPLEMENTAL_VOCAB_SETS');
   window.SUPPLEMENTAL_GRAMMAR_SETS = ensureObject('SUPPLEMENTAL_GRAMMAR_SETS');
   window.SUPPLEMENTAL_MORPHOLOGY_SETS = ensureObject('SUPPLEMENTAL_MORPHOLOGY_SETS');
+  window.ADVANCED_VOCAB_SETS = ensureObject('ADVANCED_VOCAB_SETS');
   window.registerSupplementalVocabSet = registerSupplementalVocabSet;
   window.registerSupplementalGrammarSet = registerSupplementalGrammarSet;
   window.registerSupplementalMorphologySet = registerSupplementalMorphologySet;
+  window.registerAdvancedVocabSet = registerAdvancedVocabSet;
+  window.isAdvancedVocabKey = isAdvancedKey;
 })();

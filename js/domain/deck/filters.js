@@ -22,24 +22,34 @@ function transliterate(text) {
   return typeof window.transliterateGreek === 'function' ? window.transliterateGreek(text) : String(text || '');
 }
 
+function parseSubKey(rawKey) {
+  const match = rawKey.match(/^(.+)::sub::(.+)$/);
+  return match ? { baseKey: match[1], sub: match[2] } : null;
+}
+
 export function getSelectedVocabCards(keys, requiredFlag = false) {
   const cards = [];
   (keys || []).forEach(key => {
     const rawKey = String(key);
-    const set = getSets()[rawKey];
+    const sub = parseSubKey(rawKey);
+    const lookupKey = sub ? sub.baseKey : rawKey;
+    const set = getSets()[lookupKey];
     const setCards = Array.isArray(set?.cards) ? set.cards : [];
     if (!setCards.length) return;
+    const setIsAdvanced = !!(set.advanced || set.type === 'advanced');
     setCards.forEach((card, idx) => {
       if (requiredFlag && !card.required) return;
+      if (sub && String(card?.sub || '') !== sub.sub) return;
       cards.push({
         ...card,
         kind: 'vocab',
-        sourceKey: rawKey,
-        sourceLabel: sourceHint(rawKey),
-        chapter: getChapterForKey(rawKey),
-        week: getWeekForKey(rawKey),
+        sourceKey: lookupKey,
+        sourceLabel: sourceHint(lookupKey),
+        chapter: getChapterForKey(lookupKey),
+        week: getWeekForKey(lookupKey),
         supplemental: !!(set.supplemental || set.type === 'supplemental'),
-        id: `${rawKey}-${idx}-${stableKey(card.g)}`
+        advanced: setIsAdvanced || !!card.advanced,
+        id: `${lookupKey}-${idx}-${stableKey(card.g)}`
       });
     });
   });
@@ -52,8 +62,16 @@ export function getSelectedGrammarCards(keys) {
   return [...morphCards, ...grammarCards];
 }
 
+function isAdvancedSet(set) {
+  return !!(set && (set.advanced || set.type === 'advanced'));
+}
+
 export function getAllVocabKeys() {
-  return Object.keys(getSets());
+  // Course-wide keys exclude the Advanced bonus vocab so it never inflates
+  // course completion analytics. Selecting an advanced bucket still loads
+  // those cards via getSelectedVocabCards.
+  const sets = getSets();
+  return Object.keys(sets).filter(key => !isAdvancedSet(sets[key]));
 }
 
 export function getAllChapterKeys() {
