@@ -153,7 +153,7 @@ let activeDeckCount = 0;
 let unspacedPendingRecycle = false;
 let unspacedCycleState = {};
 let unspacedDeferredIds = new Set(); // 'pass' cards excluded from current pass
-let unspacedFlipCount = 0;           // forward navigations since last periodic reshuffle
+let flipsSinceReshuffle = 0;         // forward navigations since last periodic reshuffle
 let spacedUndoSnapshot = null;
 
 // Fixed 1-in-N chance per flip (not scaled by pool size) to return one
@@ -468,7 +468,7 @@ function startUsageTracking() {
 function resetUnspacedCycleState() {
   unspacedCycleState = {};
   unspacedDeferredIds = new Set();
-  unspacedFlipCount = 0;
+  flipsSinceReshuffle = 0;
 }
 
 function getUnspacedCycleEntry(cardId) {
@@ -956,18 +956,33 @@ function moveCardToBackOfActivePile(card) {
   return true;
 }
 
+function maybePeriodicReshuffle() {
+  if (!shuffled) return;
+  flipsSinceReshuffle++;
+  if (flipsSinceReshuffle >= 10) {
+    flipsSinceReshuffle = 0;
+    reshuffleUpcomingCards();
+  }
+}
+
 function reshuffleUpcomingCards() {
   const start = currentIdx + 1;
-  if (start >= deck.length) return;
+  // In spaced mode keep deferred (not-yet-due) cards in their dueAt order at
+  // the tail; only reshuffle the active (due) portion ahead of currentIdx.
+  const end = spacedRepetition
+    ? Math.min(activeDeckCount, deck.length)
+    : deck.length;
+  if (start >= end) return;
   const upcoming = [];
   const pinned = [];
-  for (let i = start; i < deck.length; i++) {
+  for (let i = start; i < end; i++) {
     const id = deck[i].id;
     if (marks[id] === 'known' || unspacedDeferredIds.has(id)) pinned.push(deck[i]);
     else upcoming.push(deck[i]);
   }
   if (upcoming.length < 2) return;
-  deck = [...deck.slice(0, start), ...shuffleArray(upcoming), ...pinned];
+  const tail = deck.slice(end);
+  deck = [...deck.slice(0, start), ...shuffleArray(upcoming), ...pinned, ...tail];
 }
 
 function maybeReturnKnownCardToActivePile() {
@@ -1552,9 +1567,11 @@ function restoreState() {
     if (spacedRepetition && restoredDeck) {
       deck = restoredDeck;
       activeDeckCount = restoredDeck.length;
-      deck = buildStudyDeck(originalDeck);
+      deck = buildStudyDeck(originalDeck, { forceShuffle: shuffled });
+    } else if (restoredDeck) {
+      deck = shuffled ? shuffleArray([...restoredDeck]) : restoredDeck;
     } else {
-      deck = restoredDeck || buildStudyDeck(originalDeck);
+      deck = buildStudyDeck(originalDeck);
     }
     resetUnspacedCycleState();
     activeDeckCount = spacedRepetition ? getDueCount(originalDeck) : originalDeck.filter(card => marks[card.id] !== 'known').length;
@@ -1580,7 +1597,7 @@ function restoreState() {
 
 function startNextCycle(mode = 'remaining') {
   unspacedDeferredIds = new Set();
-  unspacedFlipCount = 0;
+  flipsSinceReshuffle = 0;
   if (mode === 'full') {
     const directionalMarks = getDirectionalMarksStore();
     (originalDeck || []).forEach(card => {
@@ -1882,9 +1899,11 @@ function loadDeckFromKeys(keys, sessionId = null) {
     if (spacedRepetition && restoredDeck) {
       deck = restoredDeck;
       activeDeckCount = restoredDeck.length;
-      deck = buildStudyDeck(originalDeck);
+      deck = buildStudyDeck(originalDeck, { forceShuffle: shuffled });
+    } else if (restoredDeck) {
+      deck = shuffled ? shuffleArray([...restoredDeck]) : restoredDeck;
     } else {
-      deck = restoredDeck || buildStudyDeck(originalDeck);
+      deck = buildStudyDeck(originalDeck);
     }
     activeDeckCount = spacedRepetition ? getDueCount(originalDeck) : originalDeck.filter(card => marks[card.id] !== 'known').length;
     currentIdx = Number.isInteger(savedDeckState.currentIdx)
@@ -2486,6 +2505,7 @@ function navigate(dir, options = {}) {
       }
     } else {
       currentIdx = Math.min(currentIdx, activeDeckCount);
+      maybePeriodicReshuffle();
     }
     resetMorphAnswerState();
     renderCard();
@@ -2520,13 +2540,7 @@ function navigate(dir, options = {}) {
   for (let i = currentIdx + 1; i < deck.length; i++) {
     if (marks[deck[i].id] !== 'known' && !unspacedDeferredIds.has(deck[i].id)) {
       currentIdx = i;
-      if (shuffled) {
-        unspacedFlipCount++;
-        if (unspacedFlipCount >= 10) {
-          unspacedFlipCount = 0;
-          reshuffleUpcomingCards();
-        }
-      }
+      maybePeriodicReshuffle();
       renderCard();
       return;
     }
@@ -2668,7 +2682,7 @@ function toggleMorphSelfCheck() {
 
 function toggleShuffle() {
   shuffled = !shuffled;
-  unspacedFlipCount = 0;
+  flipsSinceReshuffle = 0;
   syncToggleButtons();
 
   if (spacedRepetition) {
