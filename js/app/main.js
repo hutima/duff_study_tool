@@ -90,7 +90,18 @@ function getDirectionKey() {
 }
 
 function getStudyStoreKey() {
-  return studyMode === 'morph' ? 'morph' : getDirectionKey();
+  if (studyMode === 'morph') {
+    return directionToGreek ? 'morph_e2g' : 'morph';
+  }
+  return getDirectionKey();
+}
+
+function isReverseGrammarActive() {
+  return studyMode === 'morph' && directionToGreek;
+}
+
+function reverseDisplayActive(card) {
+  return isReverseGrammarActive() && !!card && card.reversible === true;
 }
 
 function ensureDirectionalStores() {
@@ -111,9 +122,11 @@ function ensureDirectionalStores() {
   if (!globalWordMarks.g2e || typeof globalWordMarks.g2e !== 'object') globalWordMarks.g2e = {};
   if (!globalWordMarks.e2g || typeof globalWordMarks.e2g !== 'object') globalWordMarks.e2g = {};
   if (!globalWordMarks.morph || typeof globalWordMarks.morph !== 'object') globalWordMarks.morph = {};
+  if (!globalWordMarks.morph_e2g || typeof globalWordMarks.morph_e2g !== 'object') globalWordMarks.morph_e2g = {};
   if (!globalWordProgress.g2e || typeof globalWordProgress.g2e !== 'object') globalWordProgress.g2e = {};
   if (!globalWordProgress.e2g || typeof globalWordProgress.e2g !== 'object') globalWordProgress.e2g = {};
   if (!globalWordProgress.morph || typeof globalWordProgress.morph !== 'object') globalWordProgress.morph = {};
+  if (!globalWordProgress.morph_e2g || typeof globalWordProgress.morph_e2g !== 'object') globalWordProgress.morph_e2g = {};
 }
 
 function getDirectionalMarksStore() {
@@ -271,14 +284,23 @@ function syncToggleButtons() {
 
   if (shuffleSwitch)   shuffleSwitch.classList.toggle('on',   !!shuffled);
   if (requiredSwitch)  requiredSwitch.classList.toggle('on',  !!requiredOnly);
-  if (directionSwitch) directionSwitch.classList.toggle('on', !!directionToGreek && !isMorphologyMode());
+  if (directionSwitch) directionSwitch.classList.toggle('on', !!directionToGreek);
   if (spacedSwitch)    spacedSwitch.classList.toggle('on',    !!spacedRepetition);
   if (selfCheckBtn)    selfCheckBtn.classList.toggle('on',    !!morphSelfCheck && isMorphologyMode());
   if (shuffleToggle)   shuffleToggle.setAttribute('aria-checked',   shuffled ? 'true' : 'false');
   if (requiredToggle)  requiredToggle.setAttribute('aria-checked',  requiredOnly ? 'true' : 'false');
-  if (directionToggle) directionToggle.setAttribute('aria-checked', (directionToGreek && !isMorphologyMode()) ? 'true' : 'false');
+  if (directionToggle) directionToggle.setAttribute('aria-checked', directionToGreek ? 'true' : 'false');
   if (spacedToggle)    spacedToggle.setAttribute('aria-checked',    spacedRepetition ? 'true' : 'false');
   if (selfCheckToggle) selfCheckToggle.setAttribute('aria-checked', (morphSelfCheck && isMorphologyMode()) ? 'true' : 'false');
+
+  if (directionToggle) {
+    const directionLabel = directionToggle.querySelector('.toggle-text');
+    if (directionLabel) {
+      directionLabel.textContent = isMorphologyMode()
+        ? 'English → Greek'
+        : 'Eng → Gk';
+    }
+  }
   if (modeVocabBtn)    modeVocabBtn.classList.toggle('active', studyMode === 'vocab');
   if (modeMorphBtn)    modeMorphBtn.classList.toggle('active', studyMode === 'morph');
   if (modeReaderBtn)   modeReaderBtn.classList.toggle('active', studyMode === 'reader');
@@ -320,7 +342,7 @@ function syncLayoutVisibility() {
   if (reviewShell) reviewShell.style.display = reviewDeckMode ? '' : 'none';
   if (navRow) navRow.style.display = reviewDeckMode && selectedKeys.length ? 'flex' : 'none';
   if (markRow) markRow.style.display = reviewDeckMode && selectedKeys.length && !isMorphologyMode() ? 'flex' : 'none';
-  if (directionToggle) directionToggle.style.display = studyMode === 'vocab' ? 'flex' : 'none';
+  if (directionToggle) directionToggle.style.display = (studyMode === 'vocab' || studyMode === 'morph') ? 'flex' : 'none';
   if (requiredToggle) requiredToggle.style.display = studyMode === 'vocab' ? 'flex' : 'none';
   if (selfCheckToggle) selfCheckToggle.style.display = isMorphologyMode() && canAccessGrammarUi() ? 'flex' : 'none';
   if (modeGroup) modeGroup.style.display = canAccessGrammarUi() ? 'inline-flex' : 'none';
@@ -483,7 +505,11 @@ function applyUnspacedSharedSchedule(card, outcome, reviewedAt = Date.now()) {
 
 function getSelectedCards(keys) {
   if (isMorphologyMode()) {
-    return getSelectedGrammarCards(keys);
+    const cards = getSelectedGrammarCards(keys);
+    if (isReverseGrammarActive()) {
+      return cards.filter(card => card && card.reversible === true);
+    }
+    return cards;
   }
   return getSelectedVocabCards(keys, false);
 }
@@ -816,10 +842,15 @@ function answerMorphologyChoice(choiceIndex) {
   if (!isMorphologyMode()) return;
   noteStudyInteraction();
   const card = deck[currentIdx];
-  if (!card || !Array.isArray(card.choices) || morphAnswerState.answered) return;
+  if (!card || morphAnswerState.answered) return;
 
-  const selected = card.choices[choiceIndex];
-  const isCorrect = selected === card.answer;
+  const reversed = reverseDisplayActive(card);
+  const choices = reversed ? card.reverseChoices : card.choices;
+  if (!Array.isArray(choices)) return;
+
+  const selected = choices[choiceIndex];
+  const correctAnswer = reversed ? card.form : card.answer;
+  const isCorrect = selected === correctAnswer;
   morphAnswerState = {
     answered: true,
     revealed: true,
@@ -1957,22 +1988,161 @@ function renderReaderModule() {
   const area = document.getElementById('cardArea');
   if (!area) return;
   const chapters = Array.isArray(window.READER_CHAPTERS) ? window.READER_CHAPTERS : [];
-  if (!chapters.length) {
+  const drillSets = (window.READER_TRANSLATION_SETS && typeof window.READER_TRANSLATION_SETS === 'object')
+    ? window.READER_TRANSLATION_SETS
+    : {};
+
+  const drillChapters = Object.keys(drillSets)
+    .map(k => Number(k))
+    .filter(n => Number.isFinite(n));
+  const verseChapters = chapters.map(ch => ch.chapter);
+  const allChapterNums = Array.from(new Set([...drillChapters, ...verseChapters])).sort((a, b) => a - b);
+
+  if (!allChapterNums.length) {
     area.innerHTML = '<div class="empty-state"><div class="big">βίβλος</div>Reader data not available.</div>';
     return;
   }
-  let html = '<div class="reader-wrap"><div class="reader-intro">Verses from the New Testament readable after completing each chapter of Duff\'s <em>Elements of New Testament Greek</em>. Greek text: SBL GNT.</div>';
-  for (const ch of chapters) {
-    const count = ch.verses.length;
-    const label = count === 1 ? '1 verse' : `${count} verses`;
-    html += `<details class="reader-chapter"><summary class="reader-chapter-header"><span class="reader-ch-label">After Chapter ${ch.chapter}</span><span class="reader-ch-count">${label}</span><span class="reader-ch-arrow" aria-hidden="true">▶</span></summary><div class="reader-verse-list">`;
-    for (const v of ch.verses) {
-      html += `<div class="reader-verse"><span class="reader-verse-greek">${escapeHtml(v.g)}</span><span class="reader-verse-ref">${escapeHtml(v.r)}</span></div>`;
+
+  const verseByChapter = new Map(chapters.map(ch => [ch.chapter, ch.verses || []]));
+
+  let html = '<div class="reader-wrap"><div class="reader-intro">Translate short Greek sentences (Greek → English) for each Duff chapter, then read the SBL GNT verses unlocked by that chapter. Drills use only vocabulary and grammar introduced through the chapter; literal translations are provided for selected verses.</div>';
+
+  for (const chapterNum of allChapterNums) {
+    const drills = drillSets[chapterNum] && Array.isArray(drillSets[chapterNum].sentences)
+      ? drillSets[chapterNum].sentences
+      : [];
+    const verses = verseByChapter.get(chapterNum) || [];
+
+    if (!drills.length && !verses.length) continue;
+
+    const summaryBits = [];
+    if (drills.length) summaryBits.push(`${drills.length} drill${drills.length === 1 ? '' : 's'}`);
+    if (verses.length) summaryBits.push(`${verses.length} verse${verses.length === 1 ? '' : 's'}`);
+
+    html += `<details class="reader-chapter"${drills.length ? ' open' : ''}><summary class="reader-chapter-header"><span class="reader-ch-label">After Chapter ${chapterNum}</span><span class="reader-ch-count">${summaryBits.join(' · ')}</span><span class="reader-ch-arrow" aria-hidden="true">▶</span></summary>`;
+
+    if (drills.length) {
+      html += '<div class="reader-drill-section"><div class="reader-section-label">Translation drills</div>';
+      drills.forEach((drill, idx) => {
+        html += renderReaderDrillHtml(chapterNum, idx, drill);
+      });
+      html += '</div>';
     }
-    html += '</div></details>';
+
+    if (verses.length) {
+      const versesWithTranslations = verses.filter(v => v && v.literal).length;
+      const verseLabel = versesWithTranslations
+        ? `SBL verses (${verses.length}, ${versesWithTranslations} with translation)`
+        : `SBL verses (${verses.length})`;
+      html += `<details class="reader-verses-block"${drills.length ? '' : ' open'}><summary class="reader-verses-header">${verseLabel}</summary><div class="reader-verse-list">`;
+      verses.forEach((verse, vIdx) => {
+        html += renderReaderVerseHtml(chapterNum, vIdx, verse);
+      });
+      html += '</div></details>';
+    }
+
+    html += '</details>';
   }
   html += '</div>';
   area.innerHTML = html;
+}
+
+function readerDrillId(chapterNum, idx) {
+  return `reader-drill-ch${chapterNum}-${idx}`;
+}
+
+function readerVerseDrillId(chapterNum, vIdx) {
+  return `reader-verse-drill-ch${chapterNum}-${vIdx}`;
+}
+
+function renderReaderDrillHtml(chapterNum, idx, drill) {
+  const id = readerDrillId(chapterNum, idx);
+  const choices = Array.isArray(drill.choices) ? drill.choices : [];
+  const level = Number.isFinite(drill.level) ? drill.level : null;
+  const levelLabel = level === 1 ? 'Easy'
+    : level === 2 ? 'Mixed order'
+    : level === 3 ? 'Greek-style order'
+    : '';
+  const levelClass = level === 1 ? 'level-1'
+    : level === 2 ? 'level-2'
+    : level === 3 ? 'level-3'
+    : '';
+  const choiceButtons = choices.map((choice, cIdx) => {
+    const safeChoice = escapeHtml(choice);
+    return `<button class="reader-choice-btn" type="button" data-drill="${id}" data-idx="${cIdx}" onclick="selectReaderDrillChoice('${id}', ${cIdx})">${safeChoice}</button>`;
+  }).join('');
+  const noteHtml = drill.note ? `<div class="reader-drill-note" id="${id}-note" style="display:none">${escapeHtml(drill.note)}</div>` : '';
+  return `
+    <div class="reader-drill" id="${id}" data-answer="${escapeHtml(drill.en || '')}">
+      <div class="reader-drill-head">
+        ${levelLabel ? `<span class="reader-difficulty ${levelClass}">${levelLabel}</span>` : ''}
+        <span class="reader-drill-prompt">Translate</span>
+      </div>
+      <div class="reader-drill-greek">${escapeHtml(drill.g)}</div>
+      <div class="reader-choices">${choiceButtons}</div>
+      <div class="reader-drill-result" id="${id}-result"></div>
+      ${noteHtml}
+    </div>`;
+}
+
+function renderReaderVerseHtml(chapterNum, vIdx, verse) {
+  if (!verse) return '';
+  const greek = escapeHtml(verse.g || '');
+  const ref = escapeHtml(verse.r || '');
+  if (!verse.literal || !Array.isArray(verse.literal.choices) || !verse.literal.choices.length) {
+    return `<div class="reader-verse"><span class="reader-verse-greek">${greek}</span><span class="reader-verse-ref">${ref}</span></div>`;
+  }
+
+  const id = readerVerseDrillId(chapterNum, vIdx);
+  const literal = verse.literal;
+  const choiceButtons = literal.choices.map((choice, cIdx) =>
+    `<button class="reader-choice-btn" type="button" onclick="selectReaderDrillChoice('${id}', ${cIdx})">${escapeHtml(choice)}</button>`
+  ).join('');
+  const noteHtml = literal.note ? `<div class="reader-drill-note" id="${id}-note" style="display:none">${escapeHtml(literal.note)}</div>` : '';
+  return `
+    <div class="reader-verse reader-verse-with-drill">
+      <div class="reader-verse-row">
+        <span class="reader-verse-greek">${greek}</span>
+        <span class="reader-verse-ref">${ref}</span>
+      </div>
+      <details class="reader-verse-drill" id="${id}" data-answer="${escapeHtml(literal.en || '')}">
+        <summary class="reader-verse-drill-summary">Try a literal translation</summary>
+        <div class="reader-choices">${choiceButtons}</div>
+        <div class="reader-drill-result" id="${id}-result"></div>
+        ${noteHtml}
+      </details>
+    </div>`;
+}
+
+function selectReaderDrillChoice(drillId, choiceIdx) {
+  const root = document.getElementById(drillId);
+  if (!root) return;
+  noteStudyInteraction();
+  const buttons = Array.from(root.querySelectorAll('.reader-choice-btn'));
+  if (!buttons.length) return;
+  const expected = root.getAttribute('data-answer') || '';
+  const chosen = buttons[choiceIdx];
+  if (!chosen || chosen.disabled) return;
+  const chosenText = chosen.textContent || '';
+  const isCorrect = chosenText === expected;
+
+  buttons.forEach((btn) => {
+    btn.disabled = true;
+    btn.classList.remove('correct', 'incorrect');
+    if ((btn.textContent || '') === expected) btn.classList.add('correct');
+  });
+  if (!isCorrect) chosen.classList.add('incorrect');
+
+  const resultEl = document.getElementById(`${drillId}-result`);
+  if (resultEl) {
+    resultEl.textContent = isCorrect
+      ? 'Correct.'
+      : `Not quite. Answer: ${expected}`;
+    resultEl.className = `reader-drill-result ${isCorrect ? 'correct' : 'incorrect'}`;
+  }
+
+  const noteEl = document.getElementById(`${drillId}-note`);
+  if (noteEl) noteEl.style.display = '';
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1984,9 +2154,14 @@ function renderCard() {
   syncLayoutVisibility();
 
   if (!deck.length) {
-    const emptyMessage = isMorphologyMode()
-      ? 'No grammar quiz material is available yet for this selection.'
-      : (requiredOnly ? 'No required-vocabulary cards match this selection.' : 'No cards in this deck.');
+    let emptyMessage;
+    if (isMorphologyMode()) {
+      emptyMessage = isReverseGrammarActive()
+        ? 'No reversible grammar items in this selection. Toggle “English → Greek” off to see all questions.'
+        : 'No grammar quiz material is available yet for this selection.';
+    } else {
+      emptyMessage = requiredOnly ? 'No required-vocabulary cards match this selection.' : 'No cards in this deck.';
+    }
     area.innerHTML = `<div class="empty-state"><div class="big">—</div>${emptyMessage}</div>`;
     return;
   }
@@ -2024,18 +2199,34 @@ function renderCard() {
   const card = deck[currentIdx];
 
   if (isMorphCard(card)) {
+    const reversed = reverseDisplayActive(card);
+    const displayPrompt = reversed
+      ? (card.reversePrompt || 'Choose the correct Greek form.')
+      : (card.prompt || 'Parse this form.');
+    const displayForm = reversed ? card.answer : card.form;
+    const displayChoices = reversed ? (card.reverseChoices || []) : (card.choices || []);
+    const correctAnswer = reversed ? card.form : card.answer;
+    const formClass = reversed ? 'morph-form morph-form-english' : 'morph-form';
+
     const noteHtml = card.note ? `<div class="morph-note">${card.note}</div>` : '';
     const contextHtml = card.context
       ? `<div class="morph-context"><span class="morph-context-label">Context:</span> ${card.context}</div>`
       : '';
+
+    const resultBody = reversed
+      ? `${card.answer} = ${card.form}`
+      : `${card.form} = ${card.answer}`;
 
     let interactionHtml = '';
     let resultHtml = '';
 
     if (morphSelfCheck) {
       if (!morphAnswerState.revealed) {
+        const placeholder = reversed
+          ? 'Recall the Greek form yourself first, then reveal the answer.'
+          : 'Parse it yourself first, then reveal the answer.';
         interactionHtml = `<div class="morph-selfcheck-actions"><button class="ctrl-btn morph-reveal-btn" type="button" onclick="revealMorphologyAnswer()">Reveal answer</button></div>`;
-        resultHtml = `<div class="morph-result pending">Parse it yourself first, then reveal the answer.</div>`;
+        resultHtml = `<div class="morph-result pending">${placeholder}</div>`;
       } else {
         const resultClass = morphAnswerState.answered
           ? (morphAnswerState.isCorrect ? 'correct' : 'incorrect')
@@ -2052,18 +2243,19 @@ function renderCard() {
 
         resultHtml = `<div class="morph-result ${resultClass}">
             <div class="morph-result-title">${resultTitle}</div>
-            <div class="morph-result-body">${card.form} = ${card.answer}</div>
+            <div class="morph-result-body">${resultBody}</div>
             <div class="morph-result-meta">${card.lemma}${card.gloss ? ` · “${card.gloss}”` : ''}${card.family ? ` · ${card.family}` : ''}</div>
-            ${buildGrammarSupportHtml(card)}
+            ${buildGrammarSupportHtml(card, null, { reversed })}
             ${noteHtml}
           </div>${ratingHtml}`;
       }
     } else {
-      const choiceButtons = (card.choices || []).map((choice, idx) => {
+      const choiceButtons = displayChoices.map((choice, idx) => {
         const classes = ['choice-btn'];
+        if (reversed) classes.push('choice-btn-greek');
         if (morphAnswerState.answered) {
-          if (choice === card.answer) classes.push('correct');
-          if (idx === morphAnswerState.selectedIndex && choice !== card.answer) classes.push('incorrect');
+          if (choice === correctAnswer) classes.push('correct');
+          if (idx === morphAnswerState.selectedIndex && choice !== correctAnswer) classes.push('incorrect');
         }
         return `<button class="${classes.join(' ')}" type="button" ${morphAnswerState.answered ? 'disabled' : ''} onclick="answerMorphologyChoice(${idx})">${choice}</button>`;
       }).join('');
@@ -2072,25 +2264,28 @@ function renderCard() {
       const wrongChoice = morphAnswerState.answered
         && !morphAnswerState.isCorrect
         && morphAnswerState.selectedIndex >= 0
-        ? card.choices[morphAnswerState.selectedIndex]
+        ? displayChoices[morphAnswerState.selectedIndex]
         : null;
+      const pendingLabel = reversed
+        ? 'Choose the correct Greek form.'
+        : 'Choose the best parsing option.';
       resultHtml = morphAnswerState.answered
         ? `<div class="morph-result ${morphAnswerState.isCorrect ? 'correct' : 'incorrect'}">
             <div class="morph-result-title">${morphAnswerState.isCorrect ? 'Correct' : 'Not quite'}</div>
-            <div class="morph-result-body">${card.form} = ${card.answer}</div>
+            <div class="morph-result-body">${resultBody}</div>
             <div class="morph-result-meta">${card.lemma}${card.gloss ? ` · “${card.gloss}”` : ''}${card.family ? ` · ${card.family}` : ''}</div>
-            ${buildGrammarSupportHtml(card, wrongChoice)}
+            ${buildGrammarSupportHtml(card, wrongChoice, { reversed })}
             ${noteHtml}
           </div>`
-        : `<div class="morph-result pending">Choose the best parsing option.</div>`;
+        : `<div class="morph-result pending">${pendingLabel}</div>`;
     }
 
     area.innerHTML = `
       <div class="morph-card">
-        <div class="morph-label">Grammar</div>
-        <div class="morph-prompt">${card.prompt || 'Parse this form.'}</div>
+        <div class="morph-label">Grammar${reversed ? ' · English → Greek' : ''}</div>
+        <div class="morph-prompt">${displayPrompt}</div>
         ${card.gloss ? `<div class="morph-gloss">Gloss: “${card.gloss}”</div>` : ''}
-        <div class="morph-form">${card.form}</div>
+        <div class="${formClass}">${displayForm}</div>
         ${contextHtml}
         <div class="morph-hint">${card.lemma}</div>
         <div class="morph-source">${card.sourceLabel}${card.family ? ` · ${card.family}` : ''}${morphSelfCheck ? ' · Self-check' : ''}</div>
@@ -2440,11 +2635,11 @@ function toggleRequiredOnly() {
 }
 
 function toggleDirection() {
-  if (isMorphologyMode()) return;
   directionToGreek = !directionToGreek;
   clearSpacedUndoSnapshot();
   ensureDirectionalStores();
   marks = getDirectionalMarksStore();
+  resetMorphAnswerState();
   syncToggleButtons();
   if (selectedKeys.length) {
     const keysToLoad = currentSession ? expandSessionSets(currentSession) : selectedKeys;
@@ -4105,7 +4300,7 @@ const GLOBAL_CLICK_HANDLERS = {
   restoreSpacedUndo, setAppProfile, setStudyMode, setThemeMode,
   showDisclaimerModal, startStudying, toggleDirection, toggleMorphSelfCheck,
   toggleRequiredOnly, toggleShuffle, toggleSpacedRepetition, triggerImportProgress,
-  openReaderTab
+  openReaderTab, selectReaderDrillChoice
 };
 if (typeof globalThis !== 'undefined') Object.assign(globalThis, GLOBAL_CLICK_HANDLERS);
 if (typeof window !== 'undefined' && window !== globalThis) Object.assign(window, GLOBAL_CLICK_HANDLERS);

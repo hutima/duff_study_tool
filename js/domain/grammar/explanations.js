@@ -124,7 +124,23 @@ export function buildWrongAnswerExplanation(card, selectedChoice) {
   return '';
 }
 
-export function buildGrammarSupportHtml(card, wrongChoice) {
+function buildReverseWrongExplanation(card, selectedGreekForm) {
+  if (!card || !selectedGreekForm || selectedGreekForm === card.form) return '';
+  const lookupParse = card.formToAnswer && card.formToAnswer[selectedGreekForm];
+  const parseLabel = lookupParse || '';
+  const whyParts = [];
+  if (parseLabel) whyParts.push(`${selectedGreekForm} is parsed as ${parseLabel}.`);
+  whyParts.push(`The form you wanted is ${card.form} (${card.answer}).`);
+  return `
+    <div class="morph-wrong-explanation">
+      <div class="morph-wrong-label">If you picked “${selectedGreekForm}”:</div>
+      <div class="morph-wrong-greek">${selectedGreekForm}</div>
+      <div class="morph-wrong-why">${whyParts.join(' ')}</div>
+    </div>`;
+}
+
+export function buildGrammarSupportHtml(card, wrongChoice, options = {}) {
+  const reversed = !!(options && options.reversed);
   const explanation = getGrammarExplanation(card);
   const example = getGrammarExample(card);
   const rationaleHtml = card.rationale
@@ -138,6 +154,11 @@ export function buildGrammarSupportHtml(card, wrongChoice) {
          <div class="morph-example-english">${example.english || ''}</div>
        </div>`
     : '';
-  const wrongHtml = wrongChoice ? buildWrongAnswerExplanation(card, wrongChoice) : '';
+  let wrongHtml = '';
+  if (wrongChoice) {
+    wrongHtml = reversed
+      ? buildReverseWrongExplanation(card, wrongChoice)
+      : buildWrongAnswerExplanation(card, wrongChoice);
+  }
   return explanationHtml + rationaleHtml + exampleHtml + wrongHtml;
 }

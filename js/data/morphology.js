@@ -152,9 +152,13 @@
     const selected = (keys || []).map(String);
     const selections = selected.map(resolveMorphologySelection).filter(Boolean);
     const allAnswers = [];
+    const allForms = [];
     selections.forEach((selection) => {
       selection.items.forEach((item) => {
-        item.questions.forEach((q) => allAnswers.push(q.answer));
+        item.questions.forEach((q) => {
+          allAnswers.push(q.answer);
+          allForms.push(q.form);
+        });
       });
     });
 
@@ -163,9 +167,14 @@
       selection.items.forEach((item, relativeItemIdx) => {
         const itemIdx = Number.isInteger(selection.itemIdx) ? selection.itemIdx : relativeItemIdx;
         const itemAnswers = item.questions.map((q) => q.answer);
+        const itemForms = item.questions.map((q) => q.form);
+        const formToAnswer = {};
+        item.questions.forEach((q) => { if (q && q.form) formToAnswer[q.form] = q.answer; });
         item.questions.forEach((q, qIdx) => {
           const distractors = pickDistractors(q.answer, itemAnswers, allAnswers);
           const choices = localShuffle([q.answer, ...distractors]);
+          const reverseDistractors = pickDistractors(q.form, itemForms, allForms);
+          const reverseChoices = localShuffle([q.form, ...reverseDistractors]);
           cards.push({
             id: `morph-${selection.baseKey}-${itemIdx}-${qIdx}-${stableMorphKey(item.lemma)}-${stableMorphKey(q.form)}-${stableMorphKey(q.answer)}`,
             kind: 'morph',
@@ -182,7 +191,11 @@
             context: q.context || '',
             note: q.note || '',
             answer: q.answer,
-            choices
+            choices,
+            reversible: true,
+            reversePrompt: 'Choose the correct Greek form.',
+            reverseChoices,
+            formToAnswer
           });
         });
       });

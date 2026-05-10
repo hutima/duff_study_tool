@@ -2242,9 +2242,46 @@
     return { baseKey: match[1], type: match[2], itemIdx: Number(match[3]) };
   }
 
+  // Reversibility heuristics — a question can be flipped into "pick the
+  // Greek form for this English description" when the displayed form is
+  // a Greek string, every choice is non-Greek (parse-style English), and
+  // the prompt is a recognition / parsing question (not a meta question
+  // like "which case does ἐν take?", which has many correct Greek answers).
+  const GREEK_RANGE = /[Ͱ-Ͽἀ-῿]/;
+  const RECOGNITION_PROMPT = /^\s*(parse|identify|which letter|which letter-form|what tense|what mood|what case|what voice|what (kind of )?form|what is this form|name (this|the))/i;
+  function containsGreek(text) {
+    return GREEK_RANGE.test(String(text || ''));
+  }
+  function isReversibleQuestion(q) {
+    if (!q || !q.form || !q.answer) return false;
+    if (!containsGreek(q.form)) return false;
+    if (containsGreek(q.answer)) return false;
+    const choices = Array.isArray(q.choices) ? q.choices : [];
+    if (choices.some(containsGreek)) return false;
+    return RECOGNITION_PROMPT.test(String(q.prompt || ''));
+  }
+
   function buildGrammarCardsForKeys(keys) {
     const selected = (keys || []).map(String);
     const cards = [];
+
+    // Build a global pool of Greek forms from reversible questions
+    // across the selection, used as a fallback when an item is too
+    // small to supply three same-paradigm distractors.
+    const allReversibleForms = [];
+    selected.forEach((key) => {
+      const selection = parseParadigmKey(key);
+      if (selection.type && selection.type !== 'grammar') return;
+      const set = GRAMMAR_SETS[selection.baseKey];
+      if (!set) return;
+      const items = Number.isInteger(selection.itemIdx) ? [set.items[selection.itemIdx]] : set.items;
+      items.forEach((item) => {
+        if (!item || !Array.isArray(item.questions)) return;
+        item.questions.forEach((q) => {
+          if (isReversibleQuestion(q)) allReversibleForms.push(q.form);
+        });
+      });
+    });
 
     selected.forEach((key) => {
       const selection = parseParadigmKey(key);
@@ -2258,9 +2295,24 @@
       items.forEach((item, relativeItemIdx) => {
         if (!item) return;
         const itemIdx = Number.isInteger(selection.itemIdx) ? selection.itemIdx : relativeItemIdx;
+        const itemReversibleForms = item.questions
+          .filter(isReversibleQuestion)
+          .map((q) => q.form);
+        const formToAnswer = {};
+        item.questions.forEach((q) => {
+          if (q && q.form && q.answer) formToAnswer[q.form] = q.answer;
+        });
         item.questions.forEach((q, qIdx) => {
           const rawChoices = Array.isArray(q.choices) ? q.choices : [];
           const choices = localShuffle(Array.from(new Set([q.answer, ...rawChoices])));
+
+          const reversible = isReversibleQuestion(q);
+          let reverseChoices = null;
+          if (reversible) {
+            const distractors = pickReverseDistractors(q.form, itemReversibleForms, allReversibleForms);
+            reverseChoices = localShuffle([q.form, ...distractors]);
+          }
+
           cards.push({
             id: `grammar-${selection.baseKey}-${itemIdx}-${qIdx}-${stableGrammarKey(item.lemma)}-${stableGrammarKey(q.form)}-${stableGrammarKey(q.prompt || 'parse')}-${stableGrammarKey(q.answer)}`,
             kind: 'morph',
@@ -2279,13 +2331,33 @@
             rationale: q.rationale || '',
             explanations: q.explanations || null,
             answer: q.answer,
-            choices
+            choices,
+            reversible,
+            reversePrompt: reversible ? 'Choose the correct Greek form.' : '',
+            reverseChoices,
+            formToAnswer
           });
         });
       });
     });
 
     return cards;
+  }
+
+  function pickReverseDistractors(correctForm, preferredPool, fallbackPool) {
+    const distractors = [];
+    const seen = new Set([correctForm]);
+    const pushFrom = (pool) => {
+      for (const item of localShuffle(pool)) {
+        if (!item || seen.has(item)) continue;
+        seen.add(item);
+        distractors.push(item);
+        if (distractors.length >= 3) break;
+      }
+    };
+    pushFrom(preferredPool);
+    if (distractors.length < 3) pushFrom(fallbackPool);
+    return distractors.slice(0, 3);
   }
 
   function getGrammarCountForKey(key) {
