@@ -28,7 +28,7 @@ import {
 } from '../domain/gamification/usageStats.js';
 
 // Domain — Deck
-import { isChapterKey, sortSetKeys, sourceHint, expandSessionSets } from '../domain/deck/ordering.js';
+import { isChapterKey, isAdvancedKey, sortSetKeys, sourceHint, expandSessionSets } from '../domain/deck/ordering.js';
 import { getSelectedVocabCards, getSelectedGrammarCards, getAllVocabKeys, getAllChapterKeys,
          getAllVocabCards, getAllGrammarCards, getChapterVocabCards,
          getCardReviewLeft, getCardReviewRight, getCardMetaLine, getCardAuxLine } from '../domain/deck/filters.js';
@@ -524,6 +524,18 @@ function isSupplementalCard(card) {
       (set && (set.supplemental || set.type === 'supplemental')) ||
       /^W\d+O$/.test(key) ||
       /^W\d+_/.test(key)
+    )
+  );
+}
+
+function isAdvancedCard(card) {
+  const key = String((card && card.sourceKey) || '');
+  const set = key && window.SETS && typeof window.SETS === 'object' ? window.SETS[key] : null;
+  return !!(
+    card && (
+      card.advanced ||
+      (set && (set.advanced || set.type === 'advanced')) ||
+      isAdvancedKey(key)
     )
   );
 }
@@ -1739,7 +1751,10 @@ function getSupplementalParadigmsForKey(key) {
 }
 
 function deselectAllSupplementals() {
-  const remaining = selectedKeys.filter(k => isChapterKey(getParadigmBaseKey(k) || k));
+  const remaining = selectedKeys.filter(k => {
+    const base = getParadigmBaseKey(k) || k;
+    return isChapterKey(base) || isAdvancedKey(base);
+  });
   if (remaining.length === selectedKeys.length) return;
   saveCurrentDeckStateToBank();
   currentSession = null;
@@ -1767,7 +1782,7 @@ function buildSupplementalSelector() {
   list.innerHTML = '';
 
   const sets = window.SETS && typeof window.SETS === 'object' ? window.SETS : {};
-  const supplementalKeys = sortSetKeys(Object.keys(sets).filter(k => !isChapterKey(k)));
+  const supplementalKeys = sortSetKeys(Object.keys(sets).filter(k => !isChapterKey(k) && !isAdvancedKey(k)));
 
   const deselectBtn = document.createElement('button');
   deselectBtn.type = 'button';
@@ -1879,6 +1894,138 @@ function buildSupplementalSelector() {
   setActiveSetButtons();
 }
 
+function getAdvancedSubGroups(set) {
+  const cards = Array.isArray(set?.cards) ? set.cards : [];
+  if (!cards.length) return [];
+  const groups = new Map();
+  cards.forEach((card, index) => {
+    const sub = card && card.sub ? String(card.sub) : 'group';
+    if (!groups.has(sub)) groups.set(sub, { sub, count: 0, firstIndex: index });
+    groups.get(sub).count += 1;
+  });
+  return [...groups.values()].sort((a, b) => a.firstIndex - b.firstIndex);
+}
+
+function buildAdvancedSelector() {
+  const list = document.getElementById('advancedGrid');
+  if (!list) return;
+  list.innerHTML = '';
+
+  const sets = window.SETS && typeof window.SETS === 'object' ? window.SETS : {};
+  const advancedKeys = sortSetKeys(Object.keys(sets).filter(isAdvancedKey));
+
+  const meta = document.getElementById('advancedSectionMeta');
+  if (meta) {
+    if (!advancedKeys.length) {
+      meta.textContent = '';
+    } else {
+      const totalCards = advancedKeys.reduce((sum, key) => sum + (Array.isArray(sets[key]?.cards) ? sets[key].cards.length : 0), 0);
+      meta.textContent = `${advancedKeys.length} buckets · ${totalCards.toLocaleString()} lemmas`;
+    }
+  }
+
+  if (!advancedKeys.length) {
+    const empty = document.createElement('div');
+    empty.className = 'advanced-empty';
+    empty.textContent = 'Advanced vocabulary data has not loaded yet.';
+    list.appendChild(empty);
+    return;
+  }
+
+  const deselectBtn = document.createElement('button');
+  deselectBtn.type = 'button';
+  deselectBtn.className = 'chapter-btn supplemental-deselect-all';
+  deselectBtn.textContent = 'Deselect all advanced';
+  deselectBtn.onclick = () => deselectAllAdvanced();
+  list.appendChild(deselectBtn);
+
+  const body = document.createElement('div');
+  body.className = 'advanced-week-body';
+
+  advancedKeys.forEach(key => {
+    const set = sets[key];
+    if (!set) return;
+    const cardCount = Array.isArray(set.cards) ? set.cards.length : 0;
+    if (!cardCount) return;
+    const subGroups = getAdvancedSubGroups(set);
+    const countLabel = `${cardCount} lemmas${set.notes ? '' : ''}`;
+
+    const details = document.createElement('details');
+    details.className = 'supplemental-set advanced-set';
+    details.open = selectedKeys.includes(String(key));
+
+    const summary = document.createElement('summary');
+    summary.className = 'supplemental-summary advanced-summary';
+    summary.innerHTML = `<span>${set.label || key}</span><span class="chapter-count">${countLabel}</span>`;
+    details.appendChild(summary);
+
+    if (set.notes) {
+      const notes = document.createElement('div');
+      notes.className = 'advanced-notes';
+      notes.textContent = set.notes;
+      details.appendChild(notes);
+    }
+
+    const controls = document.createElement('div');
+    controls.className = 'supplemental-paradigm-list advanced-sub-list';
+
+    const allBtn = document.createElement('button');
+    allBtn.className = 'chapter-btn supplemental-all-btn';
+    allBtn.dataset.key = key;
+    allBtn.innerHTML = `All of ${set.label || key}<span class="chapter-count">${cardCount} lemmas</span>`;
+    allBtn.onclick = () => toggleSet(key);
+    controls.appendChild(allBtn);
+
+    subGroups.forEach(group => {
+      const btn = document.createElement('button');
+      btn.className = 'chapter-btn supplemental-paradigm-btn advanced-sub-btn';
+      btn.dataset.key = `${key}::sub::${group.sub}`;
+      btn.innerHTML = `Sub ${group.sub}<span class="chapter-count">${group.count} lemmas</span>`;
+      btn.onclick = () => toggleAdvancedSubGroup(key, group.sub);
+      controls.appendChild(btn);
+    });
+
+    details.appendChild(controls);
+    body.appendChild(details);
+  });
+
+  list.appendChild(body);
+  setActiveSetButtons();
+}
+
+function deselectAllAdvanced() {
+  const remaining = selectedKeys.filter(k => {
+    const base = getParadigmBaseKey(k) || k;
+    return !isAdvancedKey(base);
+  });
+  if (remaining.length === selectedKeys.length) return;
+  saveCurrentDeckStateToBank();
+  currentSession = null;
+  selectedKeys = remaining;
+  if (!selectedKeys.length) {
+    setActiveSessionButton();
+    setActiveSetButtons();
+    deck = [];
+    originalDeck = [];
+    marks = {};
+    currentIdx = 0;
+    document.getElementById('cardArea').innerHTML = '<div class="empty-state"><div class="big">αβγ</div>Tap to choose a session and start studying.</div>';
+    clearSpacedUndoSnapshot();
+    syncToggleButtons();
+    renderReview();
+    saveState();
+    return;
+  }
+  loadDeckFromKeys(selectedKeys, null);
+}
+
+function toggleAdvancedSubGroup(setKey, subKey) {
+  // Sub-groups load only the cards in that sub-bucket. We model this as a
+  // pseudo-key that getAdvancedSubKeyCards expands at deck-build time.
+  const pseudoKey = `${setKey}::sub::${subKey}`;
+  toggleSet(pseudoKey);
+}
+
 function loadDeckFromKeys(keys, sessionId = null) {
   saveCurrentDeckStateToBank();
   clearSpacedUndoSnapshot();
@@ -1968,7 +2115,9 @@ function toggleSession(session) {
 
 function getParadigmBaseKey(key) {
   const match = String(key).match(/^(.+)::(grammar|morph)::\d+$/);
-  return match ? match[1] : null;
+  if (match) return match[1];
+  const subMatch = String(key).match(/^(.+)::sub::.+$/);
+  return subMatch ? subMatch[1] : null;
 }
 
 function toggleSet(key) {
@@ -2657,6 +2806,7 @@ function setAppProfile(profile) {
   buildSessions();
   buildChapterSelector();
   buildSupplementalSelector();
+  buildAdvancedSelector();
   syncToggleButtons();
 
   if (!selectedKeys.length) {
@@ -2963,7 +3113,7 @@ function renderReview() {
         : (progress.seenCount || progress.passCount || progress.failCount)
           ? `<span style="display:block;color:var(--muted);font-size:12px">seen ×${progress.seenCount || 0} · ${confidenceMeta}</span>`
           : '';
-      const returnBtn = isSupplementalCard(card)
+      const returnBtn = (isSupplementalCard(card) || isAdvancedCard(card))
         ? ''
         : `<button class="return-btn" title="Return this card to circulation now" onclick="returnSeenCardToDeck('${encodeURIComponent(card.id)}')">✕</button>`;
       listHtml += `<div class="review-item">
@@ -2982,7 +3132,7 @@ function renderReview() {
 function returnSeenCardToDeck(encodedId) {
   const cardId = decodeURIComponent(encodedId);
   const card = originalDeck.find(c => c.id === cardId);
-  if (!card || isSupplementalCard(card)) return;
+  if (!card || isSupplementalCard(card) || isAdvancedCard(card)) return;
 
   moveCardToBackOfActivePile(card);
 
@@ -3129,6 +3279,7 @@ function openStudySelector() {
   buildSessions();
   buildChapterSelector();
   buildSupplementalSelector();
+  buildAdvancedSelector();
 
   const overlay = document.getElementById('studySelectorOverlay');
   if (!overlay) return;
@@ -4392,6 +4543,7 @@ initializeThemeMode();
 buildSessions();
 buildChapterSelector();
 buildSupplementalSelector();
+buildAdvancedSelector();
 if (!restoreState()) {
   syncToggleButtons(); // reflect default controls on load
 }
@@ -4399,6 +4551,7 @@ if (!restoreState()) {
 buildSessions();
 buildChapterSelector();
 buildSupplementalSelector();
+buildAdvancedSelector();
 initializeConsentGate();
 if (isReaderMode()) renderReaderModule();
 
@@ -4406,6 +4559,7 @@ window.addEventListener('greekSupplementalDataChanged', () => {
   buildSessions();
   buildChapterSelector();
   buildSupplementalSelector();
+  buildAdvancedSelector();
   if (selectedKeys.length && selectedKeys.some(key => window.SETS?.[key]?.type === 'other')) {
     const keysToLoad = currentSession ? expandSessionSets(currentSession) : selectedKeys;
     loadDeckFromKeys(keysToLoad, currentSession ? currentSession.id : null);

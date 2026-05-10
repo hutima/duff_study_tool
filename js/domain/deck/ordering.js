@@ -9,6 +9,10 @@ export function isChapterKey(key) {
   return /^\d+$/.test(String(key));
 }
 
+export function isAdvancedKey(key) {
+  return /^ADV\d+$/i.test(String(key || ''));
+}
+
 export function sortSetKeys(keys) {
   function score(key) {
     const raw = String(key);
@@ -17,6 +21,8 @@ export function sortSetKeys(keys) {
     if (m) return 100 + Number(m[1]);
     const supplemental = raw.match(/^W(\d+)_/);
     if (supplemental) return 200 + Number(supplemental[1]);
+    const adv = raw.match(/^ADV(\d+)$/i);
+    if (adv) return 1000 + Number(adv[1]);
     return 999;
   }
   return [...keys].sort((a, b) => {

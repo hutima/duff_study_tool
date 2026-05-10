@@ -184,6 +184,70 @@
     font-family: 'EB Garamond', serif;
   }
 
+  /* ── Advanced vocabulary ── */
+  .advanced-section-shell {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: rgba(17, 19, 29, 0.4);
+    padding: 0;
+    overflow: hidden;
+  }
+  .advanced-section-shell[open] { background: rgba(17, 19, 29, 0.55); }
+  .advanced-section-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    cursor: pointer;
+    list-style: none;
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+  }
+  .advanced-section-summary::-webkit-details-marker { display: none; }
+  .advanced-section-summary:hover { background: rgba(201,168,76,0.06); }
+  .advanced-section-meta {
+    color: var(--muted);
+    font-family: 'EB Garamond', serif;
+    font-size: 12px;
+    font-weight: normal;
+    letter-spacing: 0;
+  }
+  .advanced-section-blurb {
+    margin: 0 16px 14px;
+    color: var(--muted);
+    font-family: 'EB Garamond', serif;
+    font-size: 13px;
+    font-style: italic;
+    line-height: 1.45;
+  }
+  .advanced-week-body {
+    display: grid;
+    gap: 8px;
+    padding: 0 10px 12px;
+  }
+  .advanced-set { background: rgba(17, 19, 29, 0.65); }
+  .advanced-summary { font-size: 13.5px; }
+  .advanced-notes {
+    padding: 0 14px 8px;
+    color: var(--muted);
+    font-family: 'EB Garamond', serif;
+    font-size: 12px;
+    font-style: italic;
+  }
+  .advanced-sub-list {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+  .advanced-empty {
+    padding: 12px 16px;
+    color: var(--muted);
+    font-family: 'EB Garamond', serif;
+    font-size: 13px;
+    font-style: italic;
+  }
+
   .session-btn {
     background: var(--surface);
     border: 1px solid var(--border);
