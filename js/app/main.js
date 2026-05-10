@@ -707,23 +707,7 @@ function buildStudyDeck(cards, options = {}) {
     }
   }
 
-  let deferredCards = cards.filter(card => !isCardDue(card));
-
-  // ~1/100 chance per rebuild (≈ per flip) to bring one high-confidence
-  // (>75%) deferred card back into the active pile. Lower-confidence cards
-  // stay scheduled ahead until the pile clears.
-  if (KNOWN_CARD_RANDOM_RETURN_FLIP_ODDS > 0 && Math.random() < 1 / KNOWN_CARD_RANDOM_RETURN_FLIP_ODDS) {
-    const eligible = deferredCards.filter(card => {
-      const pct = getConfidencePct(getWordProgress(card.id));
-      return pct !== null && pct > 75;
-    });
-    if (eligible.length) {
-      const pick = eligible[Math.floor(Math.random() * eligible.length)];
-      getWordProgress(pick.id).dueAt = Date.now();
-      dueCards = cards.filter(isCardDue);
-      deferredCards = cards.filter(card => !isCardDue(card));
-    }
-  }
+  const deferredCards = cards.filter(card => !isCardDue(card));
 
   // Preserve existing order of due cards already in the current deck;
   // append newly-eligible cards (including "(x) return to deck" and
@@ -978,6 +962,26 @@ function maybePeriodicReshuffle() {
     flipsSinceReshuffle = 0;
     reshuffleUpcomingCards();
   }
+}
+
+// Per-flip ~1/100 chance to bring one high-confidence (>75%) deferred card
+// back into the active pile. Skipped when shuffle is off or in morphology mode.
+function maybeReturnConfirmedDeferredCard() {
+  if (!spacedRepetition || !shuffled || isMorphologyMode()) return false;
+  if (KNOWN_CARD_RANDOM_RETURN_FLIP_ODDS <= 0) return false;
+  if (Math.random() >= 1 / KNOWN_CARD_RANDOM_RETURN_FLIP_ODDS) return false;
+
+  const eligible = (originalDeck || []).filter(card => {
+    if (isCardDue(card)) return false;
+    const pct = getConfidencePct(getWordProgress(card.id));
+    return pct !== null && pct > 75;
+  });
+  if (!eligible.length) return false;
+
+  const pick = eligible[Math.floor(Math.random() * eligible.length)];
+  getWordProgress(pick.id).dueAt = Date.now();
+  deck = buildStudyDeck(originalDeck);
+  return true;
 }
 
 function reshuffleUpcomingCards() {
@@ -2705,6 +2709,7 @@ function navigate(dir, options = {}) {
       }
     } else {
       currentIdx = Math.min(currentIdx, activeDeckCount);
+      maybeReturnConfirmedDeferredCard();
       maybePeriodicReshuffle();
     }
     resetMorphAnswerState();
