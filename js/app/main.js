@@ -146,7 +146,7 @@ let originalDeck = [];
 let currentIdx = 0;
 let isFlipped = false;
 let shuffled = true;          // shuffle on by default
-let requiredOnly = false;
+let requiredOnly = true;
 let directionToGreek = false; // false = Greek→English, true = English→Greek
 let spacedRepetition = true;
 let activeDeckCount = 0;
@@ -1061,7 +1061,7 @@ function sanitizeImportedState(candidate) {
   state.appProfile = 'vocab_grammar';
   state.gamification = sanitizeGamificationState(candidate.gamification);
   state.shuffled = candidate.shuffled !== false;
-  state.requiredOnly = !!candidate.requiredOnly;
+  state.requiredOnly = candidate.requiredOnly !== false;
   state.directionToGreek = !!candidate.directionToGreek;
   state.spacedRepetition = candidate.spacedRepetition !== false;
   state.morphSelfCheck = !!candidate.morphSelfCheck;
@@ -1536,7 +1536,7 @@ function restoreState() {
     }
 
     selectedKeys = Array.isArray(saved.selectedKeys) ? sortSetKeys(saved.selectedKeys.map(String)) : [];
-    requiredOnly = !!saved.requiredOnly;
+    requiredOnly = saved.requiredOnly !== false;
     directionToGreek = !!saved.directionToGreek;
     spacedRepetition = saved.spacedRepetition !== false;
     appProfile = 'vocab_grammar';
