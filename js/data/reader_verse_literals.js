@@ -7,10 +7,7 @@
 //
 // The reader UI shows these via tap-to-reveal under each verse.
 //
-// Verses with substantive TR-vs-SBL divergence have been rewritten
-// against TR; for many remaining verses the TR differs from SBL only
-// in spelling, accenting, or word order, in which case the existing
-// gloss still applies.
+// All verses are now keyed against the Textus Receptus.
 
 (function () {
   const LITERALS = {

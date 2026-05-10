@@ -16,7 +16,7 @@ Study modes
   with inline wrong-answer explanations and an optional "self-check"
   mode that reveals the answer without grading.
 - Reader — NT verses sequenced so each chapter is readable after
-  finishing the corresponding Duff chapter (SBL GNT text).
+  finishing the corresponding Duff chapter (Textus Receptus text).
 - Memorization — separate page (`pages/memorization.html`) for guided
   paradigm memorization aligned to the lecture weeks.
 
