@@ -146,7 +146,7 @@ let originalDeck = [];
 let currentIdx = 0;
 let isFlipped = false;
 let shuffled = true;          // shuffle on by default
-let requiredOnly = false;
+let requiredOnly = true;
 let directionToGreek = false; // false = Greek→English, true = English→Greek
 let spacedRepetition = true;
 let activeDeckCount = 0;
@@ -1021,6 +1021,7 @@ function buildPersistedStatePayload() {
     selectedKeys: [...selectedKeys],
     shuffled,
     requiredOnly,
+    requiredOnlyDefaultedV1: true,
     directionToGreek,
     spacedRepetition,
     studyMode,
@@ -1061,7 +1062,7 @@ function sanitizeImportedState(candidate) {
   state.appProfile = 'vocab_grammar';
   state.gamification = sanitizeGamificationState(candidate.gamification);
   state.shuffled = candidate.shuffled !== false;
-  state.requiredOnly = !!candidate.requiredOnly;
+  state.requiredOnly = candidate.requiredOnly !== false;
   state.directionToGreek = !!candidate.directionToGreek;
   state.spacedRepetition = candidate.spacedRepetition !== false;
   state.morphSelfCheck = !!candidate.morphSelfCheck;
@@ -1536,7 +1537,7 @@ function restoreState() {
     }
 
     selectedKeys = Array.isArray(saved.selectedKeys) ? sortSetKeys(saved.selectedKeys.map(String)) : [];
-    requiredOnly = !!saved.requiredOnly;
+    requiredOnly = saved.requiredOnly !== false;
     directionToGreek = !!saved.directionToGreek;
     spacedRepetition = saved.spacedRepetition !== false;
     appProfile = 'vocab_grammar';
@@ -3160,9 +3161,7 @@ function renderReview() {
         : (progress.seenCount || progress.passCount || progress.failCount)
           ? `<span style="display:block;color:var(--muted);font-size:12px">seen ×${progress.seenCount || 0} · ${confidenceMeta}</span>`
           : '';
-      const returnBtn = (isSupplementalCard(card) || isAdvancedCard(card))
-        ? ''
-        : `<button class="return-btn" title="Return this card to circulation now" onclick="returnSeenCardToDeck('${encodeURIComponent(card.id)}')">✕</button>`;
+      const returnBtn = `<button class="return-btn" title="Return this card to circulation now" onclick="returnSeenCardToDeck('${encodeURIComponent(card.id)}')">✕</button>`;
       listHtml += `<div class="review-item">
         <span class="rg">${getCardReviewLeft(card)}${srsMeta}</span>
         <span class="re">${getCardReviewRight(card)}<span style="display:block;color:var(--muted);font-size:12px">${getCardMetaLine(card)}</span></span>
@@ -3179,7 +3178,7 @@ function renderReview() {
 function returnSeenCardToDeck(encodedId) {
   const cardId = decodeURIComponent(encodedId);
   const card = originalDeck.find(c => c.id === cardId);
-  if (!card || isSupplementalCard(card) || isAdvancedCard(card)) return;
+  if (!card) return;
 
   moveCardToBackOfActivePile(card);
 

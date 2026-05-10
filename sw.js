@@ -3,7 +3,7 @@
 // GitHub Pages note: all app-shell URLs are resolved relative to the
 // service worker registration scope so this works both at a domain root
 // and at a project path such as https://user.github.io/repository/.
-const CACHE_NAME = 'greek-flashcards-pwa-v48-github-pages';
+const CACHE_NAME = 'greek-flashcards-pwa-v51-github-pages';
 const BASE_URL = new URL('./', self.registration.scope);
 
 const APP_SHELL_PATHS = [
@@ -13,7 +13,7 @@ const APP_SHELL_PATHS = [
   'styles.css?v=40',
   'manifest.json?v=25',
   'favicon.svg?v=25',
-  'js/data/words.js?v=32',
+  'js/data/words.js?v=33',
   'js/data/morphology.js?v=34',
   'js/data/supplemental.js?v=31',
   'js/data/grammar.js?v=32',
@@ -26,7 +26,7 @@ const APP_SHELL_PATHS = [
   'js/data/reader.js?v=33',
   'js/data/reader_verse_literals.js?v=3',
   'js/data/reader_translations.js?v=4',
-  'js/app/main.js?v=45',
+  'js/app/main.js?v=48',
   'js/data/supplementals/week_1_paradigms.js?v=2',
   'js/data/supplementals/week_2_paradigms.js?v=2',
   'js/data/supplementals/week_3_paradigms.js?v=2',

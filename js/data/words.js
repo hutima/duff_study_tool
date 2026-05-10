@@ -41,7 +41,7 @@ const SETS = {
       {
         "g": "καί",
         "e": "and",
-        "required": false
+        "required": true
       }
     ]
   },

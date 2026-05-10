@@ -170,5 +170,17 @@ export const STATE_MIGRATIONS = [
       saved.deckStates = {};
       return saved;
     }
+  },
+
+  {
+    name: 'required-only-default-on',
+    match(saved) {
+      return !saved.requiredOnlyDefaultedV1;
+    },
+    migrate(saved) {
+      saved.requiredOnly = true;
+      saved.requiredOnlyDefaultedV1 = true;
+      return saved;
+    }
   }
 ];
