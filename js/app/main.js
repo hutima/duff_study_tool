@@ -2292,7 +2292,7 @@ function advanceReaderDrill(chapterNum, delta) {
 
 function renderReaderDrillHtml(chapterNum, idx, drill) {
   const id = readerDrillId(chapterNum, idx);
-  const choices = Array.isArray(drill.choices) ? drill.choices : [];
+  const choices = Array.isArray(drill.choices) ? shuffleArray([...drill.choices]) : [];
   const level = Number.isFinite(drill.level) ? drill.level : null;
   const levelLabel = level === 1 ? 'Easy'
     : level === 2 ? 'Mixed order'
