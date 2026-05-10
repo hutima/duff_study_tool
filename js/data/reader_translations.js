@@ -1,6 +1,6 @@
 // Reader translation drills — short Greek -> English MCQs per chapter,
-// plus literal translations for selected SBL verses already shown in
-// the reader. Greek -> English only, since the course emphasises
+// plus literal translations for selected Textus Receptus verses already
+// shown in the reader. Greek -> English only, since the course emphasises
 // reading rather than active production.
 //
 // Difficulty levels:
@@ -2163,7 +2163,7 @@
     }
   };
 
-  // ── Literal English translations for selected SBL verses ──────────
+  // ── Literal English translations for selected Textus Receptus verses ──
   // Keyed by the same `r` field used in READER_CHAPTERS. Only a subset
   // of verses get a translation MCQ — the iconic, short, or
   // high-instructional-value ones.

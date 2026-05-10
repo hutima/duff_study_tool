@@ -234,6 +234,11 @@ function detectPartOfSpeech(card) {
   // Suppress the label for these cards so it isn't misleading.
   if (/^W\d+_/.test(String(card.sourceKey || ''))) return '';
 
+  // 2a. Advanced bonus vocab covers ~5k rare lemmas; the heuristics above are
+  // tuned for the course wordlist and misclassify too often on this set.
+  // Suppress the POS label entirely for advanced cards.
+  if (card.advanced || /^ADV\d+$/i.test(String(card.sourceKey || ''))) return '';
+
   // 3. Hard-coded overrides for entries the heuristics can't classify safely.
   if (POS_OVERRIDES[greek]) return POS_OVERRIDES[greek];
 

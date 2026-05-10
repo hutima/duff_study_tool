@@ -1684,6 +1684,14 @@ function buildSessions() {
     btn.onclick = () => toggleSession(s);
     grid.appendChild(btn);
   });
+
+  const deselectBtn = document.createElement('button');
+  deselectBtn.type = 'button';
+  deselectBtn.className = 'chapter-btn supplemental-deselect-all';
+  deselectBtn.textContent = 'Deselect all sessions';
+  deselectBtn.onclick = () => deselectAllChapters();
+  grid.appendChild(deselectBtn);
+
   setActiveSessionButton();
 }
 
@@ -1695,6 +1703,13 @@ function buildChapterSelector() {
 
   const sets = window.SETS && typeof window.SETS === 'object' ? window.SETS : {};
   const chapterKeys = Object.keys(sets).filter(isChapterKey).sort((a, b) => Number(a) - Number(b));
+
+  const deselectBtn = document.createElement('button');
+  deselectBtn.type = 'button';
+  deselectBtn.className = 'chapter-btn supplemental-deselect-all';
+  deselectBtn.textContent = 'Deselect all chapters';
+  deselectBtn.onclick = () => deselectAllChapters();
+  grid.appendChild(deselectBtn);
 
   chapterKeys.forEach(key => {
     const set = sets[key];
@@ -2019,6 +2034,33 @@ function deselectAllAdvanced() {
   loadDeckFromKeys(selectedKeys, null);
 }
 
+function deselectAllChapters() {
+  const remaining = selectedKeys.filter(k => {
+    const base = getParadigmBaseKey(k) || k;
+    return !isChapterKey(base);
+  });
+  const sessionWasActive = !!currentSession;
+  if (remaining.length === selectedKeys.length && !sessionWasActive) return;
+  saveCurrentDeckStateToBank();
+  currentSession = null;
+  selectedKeys = remaining;
+  if (!selectedKeys.length) {
+    setActiveSessionButton();
+    setActiveSetButtons();
+    deck = [];
+    originalDeck = [];
+    marks = {};
+    currentIdx = 0;
+    document.getElementById('cardArea').innerHTML = '<div class="empty-state"><div class="big">αβγ</div>Tap to choose a session and start studying.</div>';
+    clearSpacedUndoSnapshot();
+    syncToggleButtons();
+    renderReview();
+    saveState();
+    return;
+  }
+  loadDeckFromKeys(selectedKeys, null);
+}
+
 function toggleAdvancedSubGroup(setKey, subKey) {
   // Sub-groups load only the cards in that sub-bucket. We model this as a
   // pseudo-key that getAdvancedSubKeyCards expands at deck-build time.
@@ -2193,7 +2235,7 @@ function renderReaderModule() {
 
   const verseByChapter = new Map(chapters.map(ch => [ch.chapter, ch.verses || []]));
 
-  let html = '<div class="reader-wrap"><div class="reader-intro">Work through translation drills (one at a time, in increasing difficulty) for each Duff chapter, then read the SBL GNT verses unlocked by that chapter. Drills use only vocabulary and grammar introduced through the chapter; tap any verse to reveal a literal translation.</div>';
+  let html = '<div class="reader-wrap"><div class="reader-intro">Work through translation drills (one at a time, in increasing difficulty) for each Duff chapter, then read the Textus Receptus verses unlocked by that chapter. Drills use only vocabulary and grammar introduced through the chapter; tap any verse to reveal a literal translation.</div>';
 
   for (const chapterNum of allChapterNums) {
     const drillsRaw = drillSets[chapterNum] && Array.isArray(drillSets[chapterNum].sentences)
@@ -2292,7 +2334,7 @@ function advanceReaderDrill(chapterNum, delta) {
 
 function renderReaderDrillHtml(chapterNum, idx, drill) {
   const id = readerDrillId(chapterNum, idx);
-  const choices = Array.isArray(drill.choices) ? drill.choices : [];
+  const choices = Array.isArray(drill.choices) ? shuffleArray([...drill.choices]) : [];
   const level = Number.isFinite(drill.level) ? drill.level : null;
   const levelLabel = level === 1 ? 'Easy'
     : level === 2 ? 'Mixed order'
@@ -2533,13 +2575,18 @@ function renderCard() {
     return;
   }
 
+  const advancedCountSuffix = (card.advanced && Number.isFinite(Number(card.count)))
+    ? ` [${Number(card.count)}× in NT]`
+    : '';
+  const sourceLabelDisplay = `${card.sourceLabel}${advancedCountSuffix}`;
+
   let frontHTML, backHTML;
   if (!directionToGreek) {
     frontHTML = `
         <div class="card-face card-front">
           <span class="card-label">Greek</span>
           <div class="card-greek">${formatGreekHeadword(card.g)}</div>
-          <div class="card-hint">${card.sourceLabel}</div>
+          <div class="card-hint">${sourceLabelDisplay}</div>
           <div class="flip-hint">click to reveal →</div>
         </div>`;
     backHTML = `
@@ -2547,7 +2594,7 @@ function renderCard() {
           <span class="card-label">English</span>
           <div class="card-english">${card.e || '—'}</div>
           <div class="card-greek-small">${formatGreekHeadword(card.g)}</div>
-          <div class="card-hint">${transliterateGreek(formatGreekHeadword(card.g))}</div>
+          <div class="card-hint">${transliterateGreek(formatGreekHeadword(card.g))}${advancedCountSuffix}</div>
           <div class="card-pos">${detectPartOfSpeech(card)}</div>
         </div>`;
   } else {
@@ -2555,14 +2602,14 @@ function renderCard() {
         <div class="card-face card-front">
           <span class="card-label">English</span>
           <div class="card-english">${card.e || '—'}</div>
-          <div class="card-hint">${card.sourceLabel}</div>
+          <div class="card-hint">${sourceLabelDisplay}</div>
           <div class="flip-hint">click to reveal →</div>
         </div>`;
     backHTML = `
         <div class="card-face card-back">
           <span class="card-label">Greek</span>
           <div class="card-greek">${formatGreekHeadword(card.g)}</div>
-          <div class="card-hint">${transliterateGreek(formatGreekHeadword(card.g))}</div>
+          <div class="card-hint">${transliterateGreek(formatGreekHeadword(card.g))}${advancedCountSuffix}</div>
           <div class="card-pos">${detectPartOfSpeech(card)}</div>
         </div>`;
   }
