@@ -707,21 +707,7 @@ function buildStudyDeck(cards, options = {}) {
     }
   }
 
-  let deferredCards = cards.filter(card => !isCardDue(card));
-
-  // 1/600 chance for each seen deferred card to be randomly promoted back to due
-  let hadRandomPromotion = false;
-  deferredCards.forEach(card => {
-    const progress = getWordProgress(card.id);
-    if (progress.seenCount > 0 && Math.random() < 1 / 600) {
-      progress.dueAt = Date.now();
-      hadRandomPromotion = true;
-    }
-  });
-  if (hadRandomPromotion) {
-    dueCards = cards.filter(isCardDue);
-    deferredCards = cards.filter(card => !isCardDue(card));
-  }
+  const deferredCards = cards.filter(card => !isCardDue(card));
 
   // Preserve existing order of due cards already in the current deck;
   // append newly-eligible cards (including "(x) return to deck" and
