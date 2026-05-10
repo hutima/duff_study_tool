@@ -42,6 +42,7 @@ import {
   sanitizeGamificationState,
   STORAGE_KEY,
   CONSENT_STORAGE_KEY,
+  WHATS_NEW_V1_1_STORAGE_KEY,
   THEME_STORAGE_KEY,
   PROGRESS_EXPORT_FORMAT,
   PROGRESS_EXPORT_VERSION,
@@ -3257,7 +3258,12 @@ function handleConsentAction() {
 
   hasAcceptedDisclaimer = true;
   const storage = getStorage();
-  if (storage) storage.setItem(CONSENT_STORAGE_KEY, 'accepted');
+  if (storage) {
+    storage.setItem(CONSENT_STORAGE_KEY, 'accepted');
+    // First-time accepters already see the new features as part of the base
+    // experience, so suppress the v1.1 announcement for them.
+    storage.setItem(WHATS_NEW_V1_1_STORAGE_KEY, 'seen');
+  }
   closeDisclaimerModal();
   openStudySelector();
 }
@@ -3273,7 +3279,40 @@ function initializeConsentGate() {
     openDisclaimerModal(true);
   } else {
     updateConsentButtonState();
+    maybeShowWhatsNewV1_1Modal();
   }
+}
+
+function maybeShowWhatsNewV1_1Modal() {
+  if (!hasAcceptedDisclaimer) return;
+  const storage = getStorage();
+  if (!storage) return;
+  if (storage.getItem(WHATS_NEW_V1_1_STORAGE_KEY) === 'seen') return;
+  openWhatsNewV1_1Modal();
+}
+
+function openWhatsNewV1_1Modal() {
+  const overlay = document.getElementById('whatsNewV1_1Overlay');
+  if (!overlay) return;
+  overlay.classList.add('show');
+  overlay.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('modal-open');
+}
+
+function closeWhatsNewV1_1Modal() {
+  const overlay = document.getElementById('whatsNewV1_1Overlay');
+  if (!overlay) return;
+  overlay.classList.remove('show');
+  overlay.setAttribute('aria-hidden', 'true');
+  const storage = getStorage();
+  if (storage) storage.setItem(WHATS_NEW_V1_1_STORAGE_KEY, 'seen');
+  if (!isDisclaimerModalOpen() && !isTransferModalOpen() && !isAnalyticsModalOpen() && !isStudySelectorOpen() && !isShortcutsModalOpen()) {
+    document.body.classList.remove('modal-open');
+  }
+}
+
+function isWhatsNewV1_1ModalOpen() {
+  return !!document.getElementById('whatsNewV1_1Overlay')?.classList.contains('show');
 }
 
 function showDisclaimerModal() {
@@ -4533,7 +4572,8 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && isAnalyticsModalOpen()) { closeAnalyticsOverlay(); return; }
   if (e.key === 'Escape' && isStudySelectorOpen()) { closeStudySelector(); return; }
   if (e.key === 'Escape' && isShortcutsModalOpen()) { closeShortcutsModal(); return; }
-  if (isDisclaimerModalOpen() || isTransferModalOpen() || isAnalyticsModalOpen() || isStudySelectorOpen() || isShortcutsModalOpen()) return;
+  if (e.key === 'Escape' && isWhatsNewV1_1ModalOpen()) { closeWhatsNewV1_1Modal(); return; }
+  if (isDisclaimerModalOpen() || isTransferModalOpen() || isAnalyticsModalOpen() || isStudySelectorOpen() || isShortcutsModalOpen() || isWhatsNewV1_1ModalOpen()) return;
   if (!isReviewDeckMode() || !selectedKeys.length) return;
 
   if (isMorphologyMode()) {
@@ -4579,7 +4619,8 @@ const GLOBAL_CLICK_HANDLERS = {
   restoreSpacedUndo, setAppProfile, setStudyMode, setThemeMode,
   showDisclaimerModal, startStudying, toggleDirection, toggleMorphSelfCheck,
   toggleRequiredOnly, toggleShuffle, toggleSpacedRepetition, triggerImportProgress,
-  openReaderTab, selectReaderDrillChoice, advanceReaderDrill
+  openReaderTab, selectReaderDrillChoice, advanceReaderDrill,
+  closeWhatsNewV1_1Modal
 };
 if (typeof globalThis !== 'undefined') Object.assign(globalThis, GLOBAL_CLICK_HANDLERS);
 if (typeof window !== 'undefined' && window !== globalThis) Object.assign(window, GLOBAL_CLICK_HANDLERS);
