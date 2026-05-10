@@ -2040,7 +2040,7 @@ function renderReaderModule() {
     if (drills.length) summaryBits.push(`${drills.length} drill${drills.length === 1 ? '' : 's'}`);
     if (verses.length) summaryBits.push(`${verses.length} verse${verses.length === 1 ? '' : 's'}`);
 
-    html += `<details class="reader-chapter"${drills.length ? ' open' : ''}><summary class="reader-chapter-header"><span class="reader-ch-label">After Chapter ${chapterNum}</span><span class="reader-ch-count">${summaryBits.join(' · ')}</span><span class="reader-ch-arrow" aria-hidden="true">▶</span></summary>`;
+    html += `<details class="reader-chapter"><summary class="reader-chapter-header"><span class="reader-ch-label">After Chapter ${chapterNum}</span><span class="reader-ch-count">${summaryBits.join(' · ')}</span><span class="reader-ch-arrow" aria-hidden="true">▶</span></summary>`;
 
     if (drills.length) {
       html += renderReaderDrillSectionHtml(chapterNum, drills);
@@ -2049,9 +2049,9 @@ function renderReaderModule() {
     if (verses.length) {
       const versesWithTranslations = verses.filter(v => v && v.literal).length;
       const verseLabel = versesWithTranslations
-        ? `SBL verses (${verses.length}, ${versesWithTranslations} with translation)`
-        : `SBL verses (${verses.length})`;
-      html += `<details class="reader-verses-block"${drills.length ? '' : ' open'}><summary class="reader-verses-header">${verseLabel}</summary><div class="reader-verse-list">`;
+        ? `Verses (${verses.length}, ${versesWithTranslations} with translation)`
+        : `Verses (${verses.length})`;
+      html += `<details class="reader-verses-block" open><summary class="reader-verses-header">${verseLabel}</summary><div class="reader-verse-list">`;
       verses.forEach((verse, vIdx) => {
         html += renderReaderVerseHtml(chapterNum, vIdx, verse);
       });
