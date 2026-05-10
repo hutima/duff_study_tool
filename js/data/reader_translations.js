@@ -124,6 +124,78 @@
             'God\'s word keeps the slaves.'
           ],
           note: 'Object phrase + genitive modifier fronted (τὸν λόγον τοῦ θεοῦ); verb (τηροῦσι = τηρέ-ουσι contracted) + subject (οἱ δοῦλοι) at the end.'
+        },
+        {
+          g: 'ὁ ἄγγελος βάλλει τὸν ἄρτον.',
+          level: 1,
+          en: 'The angel throws the bread.',
+          choices: [
+            'The angel throws the bread.',
+            'The bread throws the angel.',
+            'The angels throw the bread.',
+            'The angel throws the loaves.'
+          ],
+          note: 'SVO. ὁ ἄγγελος (nom.) + 3rd-sg PAI + τὸν ἄρτον (acc.). Singular endings (-ος / -ον) distinguish subject and object.'
+        },
+        {
+          g: 'ὁ υἱὸς ζητεῖ τὸν ἀδελφόν.',
+          level: 1,
+          en: 'The son seeks the brother.',
+          choices: [
+            'The son seeks the brother.',
+            'The brother seeks the son.',
+            'The son sees the brother.',
+            'The sons seek the brother.'
+          ],
+          note: 'ζητεῖ = ζητέ-ει contracted (ε + ει → ει). Subject ὁ υἱός, object τὸν ἀδελφόν.'
+        },
+        {
+          g: 'φιλεῖ ὁ θεὸς τὸν κόσμον.',
+          level: 2,
+          en: 'God loves the world.',
+          choices: [
+            'God loves the world.',
+            'The world loves God.',
+            'A god loves a world.',
+            'God loves the people.'
+          ],
+          note: 'V-S-O order. φιλεῖ (3rd-sg PAI of φιλέω, ε + ει → ει contraction). Endings — not position — fix the subject (ὁ θεός, nom.) and object (τὸν κόσμον, acc.).'
+        },
+        {
+          g: 'διδάσκει ὁ Χριστὸς τὸν λαόν.',
+          level: 2,
+          en: 'Christ teaches the people.',
+          choices: [
+            'Christ teaches the people.',
+            'The people teach Christ.',
+            'Christ teaches a people.',
+            'Christ taught the people.'
+          ],
+          note: 'Verb-first VSO. ὁ Χριστός (nom.) + τὸν λαόν (acc.). λαός is masc. 2nd-decl. like λόγος.'
+        },
+        {
+          g: 'τὸν ἄρτον τοῦ κυρίου λαμβάνει ὁ δοῦλος.',
+          level: 3,
+          en: 'The slave takes the master\'s bread.',
+          choices: [
+            'The slave takes the master\'s bread.',
+            'The master takes the slave\'s bread.',
+            'The slave gives bread to the master.',
+            'The slave\'s master takes bread.'
+          ],
+          note: 'Object phrase with genitive modifier (τὸν ἄρτον τοῦ κυρίου) is fronted; verb + subject (ὁ δοῦλος) follow. Endings carry the case roles regardless of position.'
+        },
+        {
+          g: 'οὐ φιλεῖ ὁ κόσμος τὸν Χριστόν.',
+          level: 3,
+          en: 'The world does not love Christ.',
+          choices: [
+            'The world does not love Christ.',
+            'Christ does not love the world.',
+            'The world loves Christ.',
+            'Christ is not loved by the world.'
+          ],
+          note: 'οὐ before consonant negates the indicative. Word order V-S-O; cases (-ος / -όν) — not position — fix who loves whom.'
         }
       ]
     },
@@ -237,6 +309,78 @@
             'God\'s word teaches Paul.'
           ],
           note: 'Object phrase + genitive modifier fronted (τὸν λόγον τοῦ θεοῦ). αὐτούς is acc. pl. masc. ("them"). Subject (ὁ Παῦλος) at the end.'
+        },
+        {
+          g: 'ἡ καρδία αὐτοῦ ἀκούει τὸν λόγον.',
+          level: 1,
+          en: 'His heart hears the word.',
+          choices: [
+            'His heart hears the word.',
+            'He hears the word with his heart.',
+            'The word hears his heart.',
+            'His heart speaks the word.'
+          ],
+          note: 'ἡ καρδία (1st-decl. fem. -ια). αὐτοῦ (gen. sg. masc.) attaches to καρδία as a possessive ("his").'
+        },
+        {
+          g: 'τὸ τέκνον φιλεῖ τὴν ἀδελφήν.',
+          level: 1,
+          en: 'The child loves the sister.',
+          choices: [
+            'The child loves the sister.',
+            'The sister loves the child.',
+            'The children love the sister.',
+            'The child calls the sister.'
+          ],
+          note: 'Neut. 2nd-decl. subject τὸ τέκνον (nom./acc. same form; here nom. since it is the subject). τὴν ἀδελφήν is acc. fem. (1st-decl. -η).'
+        },
+        {
+          g: 'τῷ Παύλῳ λέγει ὁ Πέτρος.',
+          level: 2,
+          en: 'Peter speaks to Paul.',
+          choices: [
+            'Peter speaks to Paul.',
+            'Paul speaks to Peter.',
+            'Peter calls Paul.',
+            'Paul listens to Peter.'
+          ],
+          note: 'Dative of indirect object fronted (τῷ Παύλῳ). λέγω + dat. of person addressed = "speak to X". Subject (ὁ Πέτρος) at the end.'
+        },
+        {
+          g: 'ἔχει ὁ ἄγγελος τὴν δόξαν τοῦ θεοῦ.',
+          level: 2,
+          en: 'The angel has the glory of God.',
+          choices: [
+            'The angel has the glory of God.',
+            'God has the angel\'s glory.',
+            'The angel\'s glory has God.',
+            'The angel of glory has God.'
+          ],
+          note: 'V-S-O with embedded genitive. δόξα is 1st-decl. fem. (-α impure → gen. sg. -ης). τοῦ θεοῦ modifies τὴν δόξαν.'
+        },
+        {
+          g: 'τὰ ἔργα τοῦ θεοῦ βλέπει ὁ λαός.',
+          level: 3,
+          en: 'The people see the works of God.',
+          choices: [
+            'The people see the works of God.',
+            'God\'s people see the work.',
+            'The works of God see the people.',
+            'God sees the works of the people.'
+          ],
+          note: 'Object phrase + gen. modifier fronted (τὰ ἔργα τοῦ θεοῦ, neut. acc. pl.). Subject ὁ λαός (nom. sg.) at the end. Verb is sg.'
+        },
+        {
+          g: 'τὴν φωνὴν τοῦ Ἰησοῦ ἀκούει τὰ τέκνα.',
+          level: 3,
+          en: 'The children hear the voice of Jesus.',
+          choices: [
+            'The children hear the voice of Jesus.',
+            'Jesus hears the children\'s voice.',
+            'The voice of the children hears Jesus.',
+            'The child hears Jesus speak.'
+          ],
+          note: 'Neuter-plural subject τὰ τέκνα regularly takes a singular verb (ἀκούει) in Greek. Object phrase + gen. modifier fronted.'
         }
       ]
     },
@@ -350,6 +494,78 @@
             'After the children Paul goes into the house.'
           ],
           note: 'Two-case prepositions on display: μετά + gen. = "with"; κατά + acc. = "throughout / along". Compare μετά + acc. = "after" and κατά + gen. = "down from / against".'
+        },
+        {
+          g: 'ὁ Ἰησοῦς περιπατεῖ ἐν τῷ ἱερῷ.',
+          level: 1,
+          en: 'Jesus walks in the temple.',
+          choices: [
+            'Jesus walks in the temple.',
+            'Jesus walks to the temple.',
+            'Jesus walks out of the temple.',
+            'Jesus enters the temple.'
+          ],
+          note: 'ἐν + dative for static location. περιπατεῖ contracted from περιπατέ-ει.'
+        },
+        {
+          g: 'λαμβάνει τὸν ἄρτον ἀπὸ τοῦ ἀδελφοῦ.',
+          level: 1,
+          en: 'He takes the bread from the brother.',
+          choices: [
+            'He takes the bread from the brother.',
+            'The brother takes the bread from him.',
+            'He gives the bread to the brother.',
+            'He takes a brother\'s bread.'
+          ],
+          note: 'ἀπό + gen. = "(away) from". Subject is implicit in the 3rd-sg verb ending.'
+        },
+        {
+          g: 'εἰς τὸν οἶκον ὑπάγει ὁ Πέτρος.',
+          level: 2,
+          en: 'Peter goes into the house.',
+          choices: [
+            'Peter goes into the house.',
+            'Peter leaves the house.',
+            'The house goes to Peter.',
+            'Peter is in the house.'
+          ],
+          note: 'Prepositional phrase fronted (εἰς + acc. = "into"). Verb-final-ish word order: V + S after the fronted phrase.'
+        },
+        {
+          g: 'συνάγει ὁ Χριστὸς τὸν λαὸν πρὸς τὸ ἱερόν.',
+          level: 2,
+          en: 'Christ gathers the people to the temple.',
+          choices: [
+            'Christ gathers the people to the temple.',
+            'The people gather Christ to the temple.',
+            'Christ leads the people from the temple.',
+            'The temple gathers Christ\'s people.'
+          ],
+          note: 'πρός + acc. = "to / toward". συνάγει is a compound verb (σύν + ἄγω) — the prefix is fixed and does not require a separate σύν phrase.'
+        },
+        {
+          g: 'διὰ τὸν λόγον τοῦ θεοῦ προσκυνοῦσιν αὐτῷ.',
+          level: 3,
+          en: 'Because of the word of God they worship him.',
+          choices: [
+            'Because of the word of God they worship him.',
+            'Through the word of God he worships them.',
+            'They worship God\'s word.',
+            'They worship him about the word of God.'
+          ],
+          note: 'διά + acc. = causal ("because of"); contrast διά + gen. = "through". προσκυνέω + dative of person worshipped (αὐτῷ).'
+        },
+        {
+          g: 'ἐκ τοῦ οἴκου ἐκβάλλει τὰ τέκνα ὁ ἄνθρωπος.',
+          level: 3,
+          en: 'The man casts the children out of the house.',
+          choices: [
+            'The man casts the children out of the house.',
+            'The children cast the man out of the house.',
+            'The man cast the children into the house.',
+            'The man\'s children leave the house.'
+          ],
+          note: 'ἐκ + gen. = "out of". Object phrase precedes the subject. ἐκβάλλω is a compound (ἐκ + βάλλω); the prefix already carries the "out" sense.'
         }
       ]
     },
@@ -463,6 +679,78 @@
             'The angel is his son.'
           ],
           note: 'ὡς + nominative ("like") in a comparative construction. ἄγγελος is anarthrous predicate ("an angel").'
+        },
+        {
+          g: 'μακάριος ὁ ἄνθρωπος.',
+          level: 1,
+          en: 'The man is blessed.',
+          choices: [
+            'The man is blessed.',
+            'The blessed man.',
+            'Blessing for the man.',
+            'The man blesses.'
+          ],
+          note: 'Predicate position: anarthrous adjective μακάριος stands outside the article-noun bracket (ὁ ἄνθρωπος). εἰμί is implied.'
+        },
+        {
+          g: 'ὁ ἀδελφὸς ὁ ἀγαθὸς ἀκούει τὴν φωνήν.',
+          level: 1,
+          en: 'The good brother hears the voice.',
+          choices: [
+            'The good brother hears the voice.',
+            'The brother hears the good voice.',
+            'The brother is good and hears.',
+            'The brother of the good [one] hears.'
+          ],
+          note: 'Second attributive position: article-noun-article-adjective (ὁ ἀδελφὸς ὁ ἀγαθός). The adjective sits inside its own article-bracket.'
+        },
+        {
+          g: 'μέγας ὁ θεὸς καὶ ἅγιος.',
+          level: 2,
+          en: 'God is great and holy.',
+          choices: [
+            'God is great and holy.',
+            'The great and holy God.',
+            'God is greater than the holy [one].',
+            'God is the great holy [one].'
+          ],
+          note: 'Two predicate adjectives (μέγας, ἅγιος) joined by καί, with εἰμί implied. μέγας is the irregular adj. that uses 3rd-decl. patterns in some forms.'
+        },
+        {
+          g: 'τυφλοὶ οἱ ὄχλοι, ἀλλὰ ὁ Χριστὸς βλέπει αὐτούς.',
+          level: 2,
+          en: 'The crowds are blind, but Christ sees them.',
+          choices: [
+            'The crowds are blind, but Christ sees them.',
+            'The blind crowds see Christ.',
+            'Christ is blind, but the crowds see him.',
+            'Although Christ sees them, the crowds are blind.'
+          ],
+          note: 'Predicate adj. fronted (τυφλοί, masc. nom. pl.) with εἰμί implied. ἀλλά introduces a strong contrast. αὐτούς (acc. pl. masc.) refers back to οἱ ὄχλοι.'
+        },
+        {
+          g: 'τὸν λόγον τὸν ἅγιον ἀκούει ὁ λαός.',
+          level: 3,
+          en: 'The people hear the holy word.',
+          choices: [
+            'The people hear the holy word.',
+            'The holy people hear the word.',
+            'The word, holy, hears the people.',
+            'The word hears the holy people.'
+          ],
+          note: 'Object phrase fronted with second attributive adj. (τὸν λόγον τὸν ἅγιον). Subject (ὁ λαός) at the end.'
+        },
+        {
+          g: 'ὡς ἄγγελοι οἱ υἱοὶ τοῦ θεοῦ.',
+          level: 3,
+          en: 'The sons of God are like angels.',
+          choices: [
+            'The sons of God are like angels.',
+            'God\'s angels are like sons.',
+            'The sons of God\'s angels.',
+            'The angels are sons of God.'
+          ],
+          note: 'ὡς + nom. ("like / as") in a comparative construction; εἰμί is implied. Predicate noun (ἄγγελοι) is anarthrous.'
         }
       ]
     },
@@ -576,6 +864,78 @@
             'Paul does not write, for he already proclaimed the gospel.'
           ],
           note: 'Imperfect ἔ-γραφ-εν (augment + present stem + secondary -ε(ν)) + 1st-aor. ἐκήρυξεν. γάρ ("for") postpositive.'
+        },
+        {
+          g: 'ὁ ἄγγελος ἤκουσε τὴν φωνήν.',
+          level: 1,
+          en: 'The angel heard the voice.',
+          choices: [
+            'The angel heard the voice.',
+            'The angel hears the voice.',
+            'The angel will hear the voice.',
+            'The angels heard the voice.'
+          ],
+          note: '1st-aor. of ἀκούω: initial α augmented to η; σα marker visible (ἤ-κου-σ-ε). 3rd-sg ending -ε.'
+        },
+        {
+          g: 'γράψει ὁ Παῦλος τὸν λόγον.',
+          level: 1,
+          en: 'Paul will write the word.',
+          choices: [
+            'Paul will write the word.',
+            'Paul wrote the word.',
+            'Paul writes the word.',
+            'The word writes Paul.'
+          ],
+          note: 'Future of γράφω: γράφ-σ-ει → γράψει (φ + σ → ψ). σ before primary endings is the future marker.'
+        },
+        {
+          g: 'ἐκήρυσσε ὁ Χριστὸς τὸ εὐαγγέλιον τῷ λαῷ.',
+          level: 2,
+          en: 'Christ was proclaiming the gospel to the people.',
+          choices: [
+            'Christ was proclaiming the gospel to the people.',
+            'Christ proclaimed the gospel to the people.',
+            'Christ will proclaim the gospel to the people.',
+            'The people were proclaiming the gospel of Christ.'
+          ],
+          note: 'Imperfect ἐ-κήρυσσ-ε: augment + present stem κηρυσσ- + secondary -ε. Imperfect = ongoing/repeated past action.'
+        },
+        {
+          g: 'τότε ἔπεμψεν ὁ θεὸς τὸν υἱὸν αὐτοῦ.',
+          level: 2,
+          en: 'Then God sent his son.',
+          choices: [
+            'Then God sent his son.',
+            'Now God sends his son.',
+            'Then God\'s son sent [him].',
+            'God will then send his son.'
+          ],
+          note: '1st-aor. ἔ-πεμψ-ε(ν) (π + σ → ψ). Time adverb τότε pairs naturally with past tense.'
+        },
+        {
+          g: 'ἔτι κράξει ὁ τυφλὸς πρὸς τὸν Ἰησοῦν.',
+          level: 3,
+          en: 'The blind man will still cry out to Jesus.',
+          choices: [
+            'The blind man will still cry out to Jesus.',
+            'The blind man still cries out to Jesus.',
+            'The blind man cried out to Jesus.',
+            'Jesus will still cry out to the blind man.'
+          ],
+          note: 'Future of κράζω: κράξει (κ + σ → ξ). ἔτι ("still, yet") modifies the future verb. πρός + acc. = "to / toward".'
+        },
+        {
+          g: 'ὅτε ἔπεμπεν ὁ θεὸς τοὺς ἀγγέλους, ἐδόξαζον αὐτὸν οἱ ἄνθρωποι.',
+          level: 3,
+          en: 'When God was sending the angels, the people were glorifying him.',
+          choices: [
+            'When God was sending the angels, the people were glorifying him.',
+            'When God sent the angels, the people glorified him.',
+            'When God sends his angels, the people glorify him.',
+            'The angels of God sent the people who glorified him.'
+          ],
+          note: 'Two imperfects in parallel (ἔπεμπεν, ἐδόξαζον): both ongoing past actions. ὅτε ("when") + indicative for a definite past time.'
         }
       ]
     },
@@ -689,6 +1049,78 @@
             'Death was not yet seen by the people, who will hear it.'
           ],
           note: 'οὔπω = "not yet". 2nd-aor. εἶδον (suppletive root for "see"). ἀλλά + μέλλω + inf.'
+        },
+        {
+          g: 'θέλει ὁ ἀπόστολος μαρτυρεῖν περὶ τοῦ Ἰησοῦ.',
+          level: 1,
+          en: 'The apostle wants to bear witness about Jesus.',
+          choices: [
+            'The apostle wants to bear witness about Jesus.',
+            'The apostle bears witness about Jesus.',
+            'The apostle will bear witness about Jesus.',
+            'Jesus wants to bear witness about the apostle.'
+          ],
+          note: 'θέλει + complementary infinitive (μαρτυρεῖν, contracted from μαρτυρέ-ειν) = "wants to V". περί + gen. = "concerning, about".'
+        },
+        {
+          g: 'ὁ Φαρισαῖος θεωρεῖ τὰ πρόβατα.',
+          level: 1,
+          en: 'The Pharisee looks at the sheep.',
+          choices: [
+            'The Pharisee looks at the sheep.',
+            'The sheep look at the Pharisee.',
+            'The Pharisees look at the sheep.',
+            'The Pharisee teaches the sheep.'
+          ],
+          note: 'θεωρεῖ contracts from θεωρέ-ει. πρόβατον (neut. 2nd-decl., ch 7 vocab); plural form τὰ πρόβατα.'
+        },
+        {
+          g: 'δεῖ ἡμᾶς μετανοεῖν.',
+          level: 2,
+          en: 'It is necessary for us to repent.',
+          choices: [
+            'It is necessary for us to repent.',
+            'We are necessary in order to repent.',
+            'We repent because it is necessary.',
+            'It is necessary to repent for them.'
+          ],
+          note: 'Impersonal δεῖ + acc. (ἡμᾶς) + inf. (μετανοεῖν) = "it is necessary for X to V". Standard infinitive-with-accusative-subject pattern.'
+        },
+        {
+          g: 'μὴ ἀκολουθεῖτε τοῖς πονηροῖς.',
+          level: 2,
+          en: 'Do not follow the evil [people].',
+          choices: [
+            'Do not follow the evil [people].',
+            'You do not follow the evil [people].',
+            'The evil [people] do not follow you.',
+            'You will not follow the evil [people].'
+          ],
+          note: 'μή + present imperative 2nd-pl = prohibition ("stop / don\'t keep V-ing"). ἀκολουθέω + dative complement (τοῖς πονηροῖς, substantival adj. "the evil [ones]").'
+        },
+        {
+          g: 'οἱ ὀφθαλμοὶ τοῦ τυφλοῦ οὔπω βλέπουσιν τὸν θάνατον.',
+          level: 3,
+          en: 'The eyes of the blind man do not yet see death.',
+          choices: [
+            'The eyes of the blind man do not yet see death.',
+            'The blind man\'s eyes have already seen death.',
+            'Death does not yet see the blind man\'s eyes.',
+            'The blind man does not see his eyes in death.'
+          ],
+          note: 'Subject phrase with embedded genitive (οἱ ὀφθαλμοὶ τοῦ τυφλοῦ). οὔπω = "not yet". τὸν θάνατον (acc. sg. masc.) is the direct object.'
+        },
+        {
+          g: 'μέλλει ὁ ἀπόστολος καλεῖν τὸν λαὸν εἰς τὴν δικαιοσύνην.',
+          level: 3,
+          en: 'The apostle is about to call the people to righteousness.',
+          choices: [
+            'The apostle is about to call the people to righteousness.',
+            'The apostle calls the people away from righteousness.',
+            'The people are about to call the apostle to righteousness.',
+            'The righteous apostle called the people.'
+          ],
+          note: 'μέλλω + inf. (καλεῖν) = "be about to V". εἰς + acc. with abstract noun (δικαιοσύνη) = "into / toward [a state of]".'
         }
       ]
     },
@@ -802,6 +1234,78 @@
             'Jesus and his disciples enter into the synagogue.'
           ],
           note: 'Compound deponent εἰσέρχομαι (εἰς + ἔρχομαι) + parallel active διδάσκει. αὐτοῦ ("his", gen. sg. masc.) attaches to τοὺς μαθητάς.'
+        },
+        {
+          g: 'ὁ μαθητὴς ἄρχεται λαλεῖν.',
+          level: 1,
+          en: 'The disciple begins to speak.',
+          choices: [
+            'The disciple begins to speak.',
+            'The disciple is speaking.',
+            'The disciple ceases to speak.',
+            'The disciples begin to speak.'
+          ],
+          note: 'ἄρχομαι (deponent, mid./pass. form, active sense "begin") + complementary infinitive (λαλεῖν, contracted).'
+        },
+        {
+          g: 'ὁ προφήτης ἀρνεῖται τὸν θάνατον.',
+          level: 1,
+          en: 'The prophet denies death.',
+          choices: [
+            'The prophet denies death.',
+            'The prophet does not deny death.',
+            'Death denies the prophet.',
+            'The prophet renounces life.'
+          ],
+          note: 'ἀρνέομαι (deponent + acc. object) = "deny". 1st-decl. masc. προφήτης (gen. sg. -ου).'
+        },
+        {
+          g: 'ὁ Ἰωάννης βαπτίζει ἐν τῇ ἐρήμῳ.',
+          level: 2,
+          en: 'John baptizes in the wilderness.',
+          choices: [
+            'John baptizes in the wilderness.',
+            'John was baptizing in the wilderness.',
+            'The wilderness baptizes John.',
+            'John baptizes the wilderness.'
+          ],
+          note: 'Ἰωάννης: 1st-decl. masc. (gen. sg. -ου). ἔρημος is fem. 2nd-decl. (so dat. sg. τῇ ἐρήμῳ).'
+        },
+        {
+          g: 'δέχεται ὁ Παῦλος τοὺς μαθητὰς εἰς τὸν οἶκον.',
+          level: 2,
+          en: 'Paul welcomes the disciples into the house.',
+          choices: [
+            'Paul welcomes the disciples into the house.',
+            'The disciples welcome Paul into the house.',
+            'Paul sends the disciples out of the house.',
+            'Paul\'s disciples welcome him in the house.'
+          ],
+          note: 'δέχομαι (deponent) + acc. of person received. εἰς + acc. for motion. 1st-decl. masc. acc. pl. -άς (μαθητάς).'
+        },
+        {
+          g: 'οἱ προφῆται προσέρχονται τῷ Ἰησοῦ καὶ προσεύχονται περὶ τοῦ λαοῦ.',
+          level: 3,
+          en: 'The prophets come to Jesus and pray concerning the people.',
+          choices: [
+            'The prophets come to Jesus and pray concerning the people.',
+            'Jesus comes to the prophets, who pray for the people.',
+            'The prophets come to the people and pray for Jesus.',
+            'The prophets approach the people in prayer with Jesus.'
+          ],
+          note: 'Two coordinated deponents: προσέρχομαι (+ dat.) and προσεύχομαι. περί + gen. = "concerning". Note 1st-decl. masc. forms throughout.'
+        },
+        {
+          g: 'ὅτε εἰσέρχεται ὁ Χριστὸς εἰς τὴν συναγωγήν, ἐργάζεται σημεῖα μεγάλα.',
+          level: 3,
+          en: 'When Christ enters into the synagogue, he works great signs.',
+          choices: [
+            'When Christ enters into the synagogue, he works great signs.',
+            'When Christ goes out of the synagogue, he works great signs.',
+            'When Christ works great signs, he enters the synagogue.',
+            'Christ\'s great signs work in the synagogue.'
+          ],
+          note: 'Compound deponent εἰσέρχομαι (εἰς + ἔρχομαι). ἐργάζομαι + acc. of result. μεγάλα is neut. acc. pl. of μέγας (irregular adj.).'
         }
       ]
     },
@@ -915,6 +1419,78 @@
             'The day of God\'s peace pays attention to these and those.'
           ],
           note: 'ἐκείνη (fem.) and οὗτοι/ἐκεῖνοι (masc. pl. demonstratives). εἴτε … εἴτε ("whether … or"). προσέχω + dative.'
+        },
+        {
+          g: 'οὗτος γάρ ἐστιν ὁ ἀπόστολος ἡμῶν.',
+          level: 1,
+          en: 'For this [man] is our apostle.',
+          choices: [
+            'For this [man] is our apostle.',
+            'This is our apostle\'s reason.',
+            'He is the apostle for us.',
+            'This apostle is ours.'
+          ],
+          note: 'γάρ ("for") is postpositive — never first. οὗτος (near demonstrative) and the predicate noun ὁ ἀπόστολος are both nominative across the linking ἐστίν.'
+        },
+        {
+          g: 'ἐκείνη ἡ ἡμέρα ἀγαθή ἐστιν.',
+          level: 1,
+          en: 'That day is good.',
+          choices: [
+            'That day is good.',
+            'This day is good.',
+            'The day is that good [thing].',
+            'The good day is that [day].'
+          ],
+          note: 'ἐκεῖνος in attributive position with article (ἐκείνη ἡ ἡμέρα). Predicate adj. ἀγαθή agrees with ἡμέρα.'
+        },
+        {
+          g: 'ἐγὼ μὲν βαπτίζω τὸν λαόν, αὐτὸς δὲ διδάσκει τοὺς ἀδελφούς.',
+          level: 2,
+          en: 'I, on the one hand, baptize the people, but he, on the other, teaches the brothers.',
+          choices: [
+            'I, on the one hand, baptize the people, but he, on the other, teaches the brothers.',
+            'I baptize the brothers, but the people teach him.',
+            'He baptizes me, and I teach the people.',
+            'I and he baptize and teach the brothers.'
+          ],
+          note: 'μέν … δέ pair ("on the one hand … on the other"); both are postpositive. Explicit ἐγώ / αὐτός marks contrast — the verb already encoded the person.'
+        },
+        {
+          g: 'διὸ καλοῦμεν ἑαυτοὺς δούλους τοῦ θεοῦ.',
+          level: 2,
+          en: 'Therefore we call ourselves servants of God.',
+          choices: [
+            'Therefore we call ourselves servants of God.',
+            'Therefore the servants of God call us.',
+            'We call ourselves God\'s reason for the servants.',
+            'We are called by God\'s servants.'
+          ],
+          note: 'διό = "therefore" (begins its clause, unlike οὖν). καλέω + double accusative ("call X Y"). ἑαυτούς is the 3rd-pers. reflexive pronoun used here for 1st-pl, common in Koine.'
+        },
+        {
+          g: 'ὁ ἄνθρωπος ὅλον τὸν κόσμον φιλεῖ, αὐτὸς δὲ τὸν θεὸν οὐ φιλεῖ.',
+          level: 3,
+          en: 'The man loves the whole world, but he himself does not love God.',
+          choices: [
+            'The man loves the whole world, but he himself does not love God.',
+            'The whole world loves the man, but God himself does not love him.',
+            'The man loves the world, although he loves himself and God.',
+            'Although he loves God, the man does not love himself.'
+          ],
+          note: 'ὅλον τὸν κόσμον = predicate-position ὅλος ("the whole world"). αὐτός in nom. is the intensive ("he himself"); δέ postpositive marks the contrast.'
+        },
+        {
+          g: 'οὐ μόνον τοῦτο λέγομεν, ἀλλὰ καὶ ἐκεῖνο πιστεύομεν.',
+          level: 3,
+          en: 'Not only do we say this, but we also believe that.',
+          choices: [
+            'Not only do we say this, but we also believe that.',
+            'We say neither this nor that, and we do not believe.',
+            'We say this only because we believe that.',
+            'Believing that, we say this.'
+          ],
+          note: 'οὐ μόνον … ἀλλὰ καί = "not only … but also". τοῦτο (neut. acc. sg. of οὗτος) and ἐκεῖνο (neut. acc. sg. of ἐκεῖνος) — paired demonstratives.'
         }
       ]
     },
@@ -1028,6 +1604,78 @@
             'Jesus healed the blind in the way that the disciples marveled.'
           ],
           note: 'οὕτως … ὥστε ("in such a way … that") = result clause. ὥστε + indicative shows actual result. τοὺς τυφλούς is substantival adj. ("the blind [people]").'
+        },
+        {
+          g: 'ὧδέ ἐστιν ὁ τόπος ὅπου ἦν ὁ Ἰησοῦς.',
+          level: 1,
+          en: 'Here is the place where Jesus was.',
+          choices: [
+            'Here is the place where Jesus was.',
+            'Here Jesus is in the place.',
+            'Where Jesus was is here.',
+            'The place was here, where Jesus is.'
+          ],
+          note: 'ὧδε ("here") + ὅπου ("where") — local adverbs forming a deictic + relative pair. ἦν is the 3rd-sg imperfect of εἰμί.'
+        },
+        {
+          g: 'οὕτως ἐδίδαξεν ὁ θεὸς τὸν λαόν.',
+          level: 1,
+          en: 'Thus God taught the people.',
+          choices: [
+            'Thus God taught the people.',
+            'God did not teach the people thus.',
+            'God teaches the people in this way.',
+            'The people thus taught God.'
+          ],
+          note: 'οὕτως ("thus, in this manner") fronted. 1st-aor. ἐ-δίδαξ-εν (augment + stem διδακ- + σ → ξ + 3rd-sg secondary -ε(ν)).'
+        },
+        {
+          g: 'ὅτι πιστεύεις, σώσει σε ὁ κύριος.',
+          level: 2,
+          en: 'Because you believe, the Lord will save you.',
+          choices: [
+            'Because you believe, the Lord will save you.',
+            'The Lord will save you that you may believe.',
+            'Because the Lord believes, you will be saved.',
+            'If the Lord saves you, you believe.'
+          ],
+          note: 'ὅτι in causal sense ("because"). σε (acc. sg., enclitic — the unaccented form of σύ in oblique cases). σώσει = future of σῴζω.'
+        },
+        {
+          g: 'ἐκεῖ συνάγονται οἱ μαθηταὶ καθὼς ἐλάλησεν αὐτοῖς ὁ Ἰησοῦς.',
+          level: 2,
+          en: 'There the disciples gather, just as Jesus spoke to them.',
+          choices: [
+            'There the disciples gather, just as Jesus spoke to them.',
+            'There Jesus gathers them just as the disciples spoke.',
+            'The disciples gather there, although Jesus did not speak to them.',
+            'Jesus speaks to the disciples to gather there.'
+          ],
+          note: 'ἐκεῖ ("there") fronted; συνάγονται is mid./pass. (passive sense "are gathered" or middle "gather themselves"). καθώς ("just as") introduces a comparison clause.'
+        },
+        {
+          g: 'οὐχὶ οὗτός ἐστιν ὁ ἄνθρωπος ὃν ἐζητοῦμεν;',
+          level: 3,
+          en: 'Is not this the man whom we were seeking?',
+          choices: [
+            'Is not this the man whom we were seeking?',
+            'This is not the man for whom we were seeking.',
+            'Is this man not seeking us?',
+            'We were seeking a man who is not this [one].'
+          ],
+          note: 'οὐχί is the strong / interrogative form of οὐ; the question expects "yes". Relative ὅν (acc. sg. masc.) — agrees in gender/number with antecedent ὁ ἄνθρωπος, case from being object inside the rel. clause.'
+        },
+        {
+          g: 'οὔτε ἐζήτησαν αὐτὸν οἱ Ἰουδαῖοι, οὔτε ἐπίστευσαν εἰς τὸν Χριστόν.',
+          level: 3,
+          en: 'Neither did the Jews seek him, nor did they believe in Christ.',
+          choices: [
+            'Neither did the Jews seek him, nor did they believe in Christ.',
+            'The Jews sought him and believed in Christ.',
+            'The Jews neither saw him nor knew Christ.',
+            'Whether or not the Jews sought him, they believed in Christ.'
+          ],
+          note: 'οὔτε … οὔτε ("neither … nor") for paired negation. Two 1st-aor. ind. verbs in parallel: ἐζήτησαν, ἐπίστευσαν. πιστεύω + εἰς + acc. = "believe in".'
         }
       ]
     },
@@ -1141,6 +1789,78 @@
             'Jesus said: the Jews went away because they believed.'
           ],
           note: 'Three aorists in sequence (εἶπεν, ἀπῆλθον, ἐπίστευσαν). γάρ postpositive ("for"). πιστεύω + dative.'
+        },
+        {
+          g: 'ἔγνω ὁ Ἰησοῦς τὰς καρδίας αὐτῶν.',
+          level: 1,
+          en: 'Jesus knew their hearts.',
+          choices: [
+            'Jesus knew their hearts.',
+            'Jesus knows their hearts.',
+            'Their hearts knew Jesus.',
+            'Jesus will know their hearts.'
+          ],
+          note: 'ἔγνω: athematic 2nd-aor. of γινώσκω (root γνω-). αὐτῶν (gen. pl.) = "their".'
+        },
+        {
+          g: 'οἱ μαθηταὶ ἤνεγκαν τὸν ἄρτον.',
+          level: 1,
+          en: 'The disciples brought the bread.',
+          choices: [
+            'The disciples brought the bread.',
+            'The disciples bring the bread.',
+            'The bread brought the disciples.',
+            'The disciples were bringing the bread.'
+          ],
+          note: 'ἤνεγκαν: aor. of φέρω (suppletive root ἐνεγκ-). 3rd-pl 1st-aor. ending -αν.'
+        },
+        {
+          g: 'ἔπεσον ἐπὶ τὴν γῆν, ὅτε ἤκουσαν τὴν φωνήν.',
+          level: 2,
+          en: 'They fell on the ground when they heard the voice.',
+          choices: [
+            'They fell on the ground when they heard the voice.',
+            'They heard the voice falling on the ground.',
+            'When they fell, they heard a voice on the ground.',
+            'On the ground a voice fell, which they heard.'
+          ],
+          note: 'ἔπεσον: 2nd-aor. of πίπτω (root πεσ-, no σα). ὅτε ("when") + indicative for definite past time.'
+        },
+        {
+          g: 'ὁ Πέτρος ἐγείρει τὸ τέκνον ἀπὸ τοῦ θανάτου.',
+          level: 2,
+          en: 'Peter raises the child from death.',
+          choices: [
+            'Peter raises the child from death.',
+            'Peter rises from the child\'s death.',
+            'The child raises Peter from death.',
+            'Peter awakens at the child\'s death.'
+          ],
+          note: 'ἐγείρω = "raise up, wake up". Liquid stem (-ρ-) with present-style ending. ἀπό + gen. = "(away) from".'
+        },
+        {
+          g: 'ἀπέκτειναν τοὺς προφήτας οἱ Ἰουδαῖοι, καὶ ὁ ὄχλος ἔφυγεν εἰς τὴν ἔρημον.',
+          level: 3,
+          en: 'The Jews killed the prophets, and the crowd fled into the wilderness.',
+          choices: [
+            'The Jews killed the prophets, and the crowd fled into the wilderness.',
+            'The prophets killed the Jews, and the crowd fled into the wilderness.',
+            'The Jews killed the crowd, and the prophets fled into the wilderness.',
+            'The Jews and the crowd killed the prophets in the wilderness.'
+          ],
+          note: 'ἀπέκτειναν: liquid aor. of ἀποκτείνω (no σ; stem-vowel change). ἔφυγεν: 2nd-aor. 3rd-sg of φεύγω, with neuter-style sg. agreement on the collective subject ὁ ὄχλος.'
+        },
+        {
+          g: 'ὁ Ἰησοῦς κατέβη πρὸς τὴν θάλασσαν καὶ εὗρεν τοὺς ἀδελφοὺς αὐτοῦ ἐκεῖ.',
+          level: 3,
+          en: 'Jesus went down to the sea and found his brothers there.',
+          choices: [
+            'Jesus went down to the sea and found his brothers there.',
+            'Jesus came up from the sea to his brothers there.',
+            'Jesus\' brothers found him at the sea there.',
+            'Jesus went down and his brothers found him there.'
+          ],
+          note: 'Two 2nd aorists: κατέβη (καταβαίνω, athematic root βη-) and εὗρεν (εὑρίσκω, root εὑρ-). πρός + acc. = "to / toward".'
         }
       ]
     },
@@ -1254,6 +1974,78 @@
             'By the grace of God Jesus works for the Spirit\'s people.'
           ],
           note: 'Two 3rd-decl. -ματ- nouns (πνεῦμα, χάρις). διά + gen. = "through, by means of". Coordinated finite verbs (ἐργάζεται, φέρει).'
+        },
+        {
+          g: 'ὁ πατὴρ ἔδωκεν τὸν ἄρτον τῷ υἱῷ αὐτοῦ.',
+          level: 1,
+          en: 'The father gave the bread to his son.',
+          choices: [
+            'The father gave the bread to his son.',
+            'The son gave the bread to his father.',
+            'The father gives bread to his son.',
+            'The son\'s bread was given to his father.'
+          ],
+          note: 'πατήρ: 3rd-decl. (gen. sg. πατρός). ἔδωκεν: aor. of δίδωμι (recognizable; full -μι system in ch 19).'
+        },
+        {
+          g: 'βλέπω τὸ φῶς ἐν τῇ νυκτί.',
+          level: 1,
+          en: 'I see the light in the night.',
+          choices: [
+            'I see the light in the night.',
+            'The light sees me at night.',
+            'I see the night light.',
+            'The light is in the night.'
+          ],
+          note: 'φῶς: 3rd-decl. neut. (gen. φωτός). νύξ / νυκτός: 3rd-decl. fem. stop-stem (κ + σ → ξ in nom.).'
+        },
+        {
+          g: 'ἡ ἐλπὶς ἡμῶν ἐστιν ὁ Χριστός.',
+          level: 2,
+          en: 'Our hope is Christ.',
+          choices: [
+            'Our hope is Christ.',
+            'Christ is for our hope.',
+            'Christ has our hope.',
+            'Hope is Christ for us.'
+          ],
+          note: 'ἐλπίς / ἐλπίδος: 3rd-decl. fem. stop-stem (δ + σ → drops, leaving -ς). Predicate noun ὁ Χριστός is nominative.'
+        },
+        {
+          g: 'ἡ μήτηρ ἤγαγεν τὸ τέκνον τῷ πατρί.',
+          level: 2,
+          en: 'The mother brought the child to the father.',
+          choices: [
+            'The mother brought the child to the father.',
+            'The father brought the child to the mother.',
+            'The child brought the mother to the father.',
+            'The mother brings the child to the father.'
+          ],
+          note: 'μήτηρ / μητρός and πατήρ / πατρός: "family" 3rd-decl. irregulars. ἤγαγεν: 2nd-aor. of ἄγω (reduplicated). Dat. of indirect object: τῷ πατρί.'
+        },
+        {
+          g: 'διὰ τοῦ αἵματος αὐτοῦ ἔχομεν χάριν.',
+          level: 3,
+          en: 'Through his blood we have grace.',
+          choices: [
+            'Through his blood we have grace.',
+            'His grace has our blood.',
+            'We have his blood through grace.',
+            'By means of grace his blood is ours.'
+          ],
+          note: 'αἷμα / αἵματος: 3rd-decl. neut. -ματ- type. χάρις / χάριτος: 3rd-decl. fem. -ιτ- type (acc. sg. χάριν, with the ν re-attached). διά + gen. = "through, by means of".'
+        },
+        {
+          g: 'τὸ πνεῦμα τοῦ θεοῦ φέρει χάριν τῇ καρδίᾳ τοῦ ἀνθρώπου.',
+          level: 3,
+          en: 'The Spirit of God brings grace to the heart of the man.',
+          choices: [
+            'The Spirit of God brings grace to the heart of the man.',
+            'The man\'s heart brings grace to God\'s spirit.',
+            'By the Spirit of God grace is brought from the heart of man.',
+            'The grace of God\'s spirit brings the man\'s heart.'
+          ],
+          note: 'πνεῦμα (-ματ- 3rd-decl. neut.) and χάρις / χάριτος (3rd-decl. fem., dental-stem). Stacked genitives: τοῦ πνεύματος → τοῦ θεοῦ → τοῦ ἀνθρώπου.'
         }
       ]
     },
@@ -1367,6 +2159,78 @@
             'The Lord\'s powerful work caused all the nations to marvel.'
           ],
           note: 'ἔθνος: 3rd-decl. neut. -ος / -ους. πᾶν agrees in gender. δύναμις: -ι / -εως. Stacked genitives drill: τῶν ἔργων → τῆς δυνάμεως → τοῦ κυρίου.'
+        },
+        {
+          g: 'πᾶσα ἡ πόλις ἤκουσεν τὸ εὐαγγέλιον.',
+          level: 1,
+          en: 'The whole city heard the gospel.',
+          choices: [
+            'The whole city heard the gospel.',
+            'Every city heard the gospel.',
+            'The city\'s gospel heard everything.',
+            'All the cities heard the gospel.'
+          ],
+          note: 'πᾶς + article + noun = "the whole" (predicate position with article); πᾶς without article = "every". πόλις: 3rd-decl. -ι type fem.'
+        },
+        {
+          g: 'ὁ βασιλεὺς ἀκούει τὴν φωνὴν τοῦ ἀρχιερέως.',
+          level: 1,
+          en: 'The king hears the voice of the high priest.',
+          choices: [
+            'The king hears the voice of the high priest.',
+            'The high priest hears the voice of the king.',
+            'The king\'s voice is heard by the high priest.',
+            'The voice of the king hears the high priest.'
+          ],
+          note: 'βασιλεύς / βασιλέως and ἀρχιερεύς / ἀρχιερέως: 3rd-decl. -εύς type. Vowel-stem genitive in -εως.'
+        },
+        {
+          g: 'οὐδεὶς εἶδεν τὸν θεόν.',
+          level: 2,
+          en: 'No one has seen God.',
+          choices: [
+            'No one has seen God.',
+            'Anyone has seen God.',
+            'No one was seen by God.',
+            'He has not seen God\'s no-one.'
+          ],
+          note: 'οὐδείς (compound of οὐδέ + εἷς) declines like εἷς: gen. οὐδενός, dat. οὐδενί. εἶδεν: 2nd-aor. (suppletive) of ὁράω.'
+        },
+        {
+          g: 'πᾶν ἔθνος ἐλήλυθεν εἰς τὴν πόλιν.',
+          level: 2,
+          en: 'Every nation has come into the city.',
+          choices: [
+            'Every nation has come into the city.',
+            'The whole nation came into the city.',
+            'The nation came to every city.',
+            'All nations will come into the city.'
+          ],
+          note: 'πᾶς without article = "every" (here πᾶν, neut. nom. sg., agrees with ἔθνος). ἔθνος: 3rd-decl. neut. -ος / -ους type. ἐλήλυθεν: perfect of ἔρχομαι (formally ch 16; recognizable).'
+        },
+        {
+          g: 'ἓν σῶμα ἔχομεν, καὶ τὸ αὐτὸ πνεῦμα δίδωσιν ἡμῖν τὴν δύναμιν.',
+          level: 3,
+          en: 'We have one body, and the same Spirit gives us the power.',
+          choices: [
+            'We have one body, and the same Spirit gives us the power.',
+            'We have one Spirit, and the body gives us the same power.',
+            'The same body has one power, and the Spirit gives us [it].',
+            'One body and one spirit give us the same power.'
+          ],
+          note: 'ἕν: neut. nom./acc. sg. of εἷς ("one"). τὸ αὐτό in attributive position = "the same". δύναμις: 3rd-decl. -ι type, acc. sg. δύναμιν.'
+        },
+        {
+          g: 'πάντες οἱ βασιλεῖς ἤκουσαν τοῦ ῥήματος τοῦ προφήτου, καὶ τρεῖς ἐπίστευσαν εἰς τὸν θεόν.',
+          level: 3,
+          en: 'All the kings heard the saying of the prophet, and three believed in God.',
+          choices: [
+            'All the kings heard the saying of the prophet, and three believed in God.',
+            'Three of the kings spoke to God in faith.',
+            'All the kings spoke to the prophet about God.',
+            'The prophet heard the saying of all three kings and believed.'
+          ],
+          note: 'πάντες (masc. nom. pl. of πᾶς, irregular 3rd-decl.). βασιλεύς: 3rd-decl. -εύς. ἀκούω here takes the genitive (τοῦ ῥήματος) — the more classical pattern for hearing a person/voice. τρεῖς is m./f. nom.'
         }
       ]
     },
@@ -1480,6 +2344,78 @@
             'The disciples in the boat made a great voice at sea.'
           ],
           note: 'Genitive absolute with the participle of εἰμί: ὄντων τῶν μαθητῶν = "while the disciples were". ἐγένετο = 2nd-aor. middle of γίνομαι.'
+        },
+        {
+          g: 'ἡ γυνὴ ἡ πιστεύουσα σώζεται.',
+          level: 1,
+          en: 'The woman who believes is saved.',
+          choices: [
+            'The woman who believes is saved.',
+            'The woman, believing, will save [him].',
+            'The believing woman saves [her].',
+            'The woman who saves is believing.'
+          ],
+          note: 'Attributive participle (ἡ πιστεύουσα, fem. nom. sg.) in second attributive position with article-noun-article-ptcp. σώζεται is pres. mid./pass. (passive sense).'
+        },
+        {
+          g: 'ὁ μένων ἐν τῷ φωτὶ βλέπει.',
+          level: 1,
+          en: 'The one remaining in the light sees.',
+          choices: [
+            'The one remaining in the light sees.',
+            'Whoever sees the light remains.',
+            'The light remains seeing him.',
+            'He sees the one who remains in the light.'
+          ],
+          note: 'ὁ μένων: substantival pres. act. ptcp., masc. nom. sg. ("the one who remains"). φωτί is dat. sg. of φῶς (3rd-decl. neut.).'
+        },
+        {
+          g: 'ἐλθόντες εἰς τὸν οἶκον εὗρον τὸν Ἰησοῦν.',
+          level: 2,
+          en: 'Having come into the house, they found Jesus.',
+          choices: [
+            'Having come into the house, they found Jesus.',
+            'Coming into the house, Jesus found them.',
+            'While they came into the house, Jesus was found.',
+            'Jesus came into the house and found them.'
+          ],
+          note: 'ἐλθόντες: 2nd-aor. ptcp. (masc. nom. pl., suppletive root ἐλθ-) — antecedent action: "having come". Main verb εὗρον is 2nd-aor. of εὑρίσκω.'
+        },
+        {
+          g: 'ὁ Πέτρος ἀκούσας τὴν φωνὴν τοῦ κυρίου ἐθαύμασεν.',
+          level: 2,
+          en: 'Peter, having heard the voice of the Lord, marveled.',
+          choices: [
+            'Peter, having heard the voice of the Lord, marveled.',
+            'Peter heard the marvelous voice of the Lord.',
+            'Peter, while hearing the voice, marveled at the Lord.',
+            'The Lord marveled at Peter who heard his voice.'
+          ],
+          note: 'Adverbial aor. ptcp. (ἀκούσας, masc. nom. sg.) modifying the subject. Aorist ⇒ prior action: "having heard, [then] marveled".'
+        },
+        {
+          g: 'διδάσκοντος τοῦ Ἰησοῦ ἐν τῷ ἱερῷ, οἱ Φαρισαῖοι προσῆλθον αὐτῷ.',
+          level: 3,
+          en: 'While Jesus was teaching in the temple, the Pharisees came to him.',
+          choices: [
+            'While Jesus was teaching in the temple, the Pharisees came to him.',
+            'While the Pharisees were teaching, Jesus came to the temple.',
+            'After Jesus taught in the temple, the Pharisees came to him.',
+            'Jesus, teaching the Pharisees, came into the temple.'
+          ],
+          note: 'Genitive absolute: a participle (διδάσκοντος, gen. sg. masc.) plus its own subject (τοῦ Ἰησοῦ), both gen., syntactically detached from the main clause.'
+        },
+        {
+          g: 'οἱ ἀκούσαντες τὸν λόγον καὶ τηρήσαντες αὐτὸν εἰσελεύσονται εἰς τὴν βασιλείαν.',
+          level: 3,
+          en: 'Those who have heard the word and have kept it will enter into the kingdom.',
+          choices: [
+            'Those who have heard the word and have kept it will enter into the kingdom.',
+            'Those who hear and keep the word are entering the kingdom.',
+            'Those who hear the word will enter the kingdom and keep it.',
+            'The kingdom hears and keeps those who enter it.'
+          ],
+          note: 'Two coordinated substantival aor. participles (οἱ ἀκούσαντες … τηρήσαντες). Aspect: aorist = perfective; the main verb is future indicative.'
         }
       ]
     },
@@ -1593,6 +2529,78 @@
             'The world\'s apostle was sent by God, who received him not.'
           ],
           note: 'ἐπέμφθη: aor. pass. of πέμπω (-π + θ → -φθ). ὑπό + gen. = personal agent. Contrast with active aor. ἐδέξατο in the second clause.'
+        },
+        {
+          g: 'ὁ ἄρτος πέμπεται τοῖς ἀσθενέσιν.',
+          level: 1,
+          en: 'The bread is sent to the sick.',
+          choices: [
+            'The bread is sent to the sick.',
+            'The sick send the bread.',
+            'The bread will be sent to the sick.',
+            'The bread sends [itself] to the sick.'
+          ],
+          note: 'πέμπεται: pres. mid./pass. 3rd-sg of πέμπω (passive sense here). τοῖς ἀσθενέσιν is dat. pl. of substantival adj. ἀσθενής (3rd-decl. -ης / -ες).'
+        },
+        {
+          g: 'ἐσώθημεν ὑπὸ τοῦ θεοῦ.',
+          level: 1,
+          en: 'We were saved by God.',
+          choices: [
+            'We were saved by God.',
+            'God was saved by us.',
+            'We will be saved by God.',
+            'We are being saved by God.'
+          ],
+          note: 'Aor. pass. 1st-pl: ἐ-σώ-θη-μεν (augment + stem σω- + θη + secondary -μεν). ὑπό + gen. = personal agent.'
+        },
+        {
+          g: 'ὁ θάνατος καταργηθήσεται διὰ τοῦ Χριστοῦ.',
+          level: 2,
+          en: 'Death will be abolished through Christ.',
+          choices: [
+            'Death will be abolished through Christ.',
+            'Christ abolished death.',
+            'Death abolishes Christ.',
+            'Through Christ death abolishes [itself].'
+          ],
+          note: 'Future passive 3rd-sg: stem + θη + future-mid. endings (καταργ-η-θή-σεται). διά + gen. = "through".'
+        },
+        {
+          g: 'οἱ ἀδελφοὶ ἐκλήθησαν ὑπὸ τοῦ θεοῦ εἰς τὴν εἰρήνην.',
+          level: 2,
+          en: 'The brothers were called by God into peace.',
+          choices: [
+            'The brothers were called by God into peace.',
+            'God called the brothers from peace.',
+            'The brothers called God into peace.',
+            'The brothers were calling on God for peace.'
+          ],
+          note: 'ἐκλήθησαν: aor. pass. 3rd-pl of καλέω (ε + θ → η, then θη + secondary -σαν). ὑπό + gen. = personal agent.'
+        },
+        {
+          g: 'διὰ τῆς πίστεως ἁγιαζόμεθα, καὶ ἐν τῇ ἀγάπῃ τηρούμεθα.',
+          level: 3,
+          en: 'Through faith we are made holy, and in love we are kept.',
+          choices: [
+            'Through faith we are made holy, and in love we are kept.',
+            'Through faith we make others holy, and we keep love.',
+            'Faith makes us holy and love keeps itself in us.',
+            'By faith we are kept holy through love.'
+          ],
+          note: 'Two pres. mid./pass. 1st-pl forms (passive sense): ἁγιαζόμεθα (ch 15 vocab), τηρούμεθα (contracted from τηρεό-μεθα). διά + gen. = "through"; ἐν + dat. = "in".'
+        },
+        {
+          g: 'ἀπεκρίθη ὁ Ἰησοῦς, καὶ ἐπορεύθη πρὸς τὸν πατέρα τὸν πέμψαντα αὐτόν.',
+          level: 3,
+          en: 'Jesus answered, and went to the Father who sent him.',
+          choices: [
+            'Jesus answered, and went to the Father who sent him.',
+            'Jesus answered the Father who sent him to go.',
+            'The Father sent Jesus, who answered and went.',
+            'Jesus went to answer the Father, who sent him.'
+          ],
+          note: 'Two θη-form deponents: ἀπεκρίθη ("answered") and ἐπορεύθη ("went") — passive in form, active in meaning. Substantival aor. ptcp. τὸν πέμψαντα ("the one who sent").'
         }
       ]
     },
@@ -1706,6 +2714,78 @@
             'Believing and knowing, we received grace from the Son of God.'
           ],
           note: 'Four perfects: πεπιστεύκαμεν, ἐγνώκαμεν (γινώσκω, irregular), ἐλήλυθεν (ἔρχομαι), δέδωκεν (δίδωμι). Each emphasizes the abiding result.'
+        },
+        {
+          g: 'δεδόξακα τὸν θεὸν ἐν τῷ ἱερῷ.',
+          level: 1,
+          en: 'I have glorified God in the temple.',
+          choices: [
+            'I have glorified God in the temple.',
+            'I am glorifying God in the temple.',
+            'I will glorify God in the temple.',
+            'I glorified God in the temple.'
+          ],
+          note: 'δεδόξακα: perfect act. 1st-sg of δοξάζω. Reduplication δε- + κ-suffix + α-class endings (δε-δόξα-κ-α). The perfect signals an abiding result of the act of glorifying.'
+        },
+        {
+          g: 'ὁ διδάσκαλος μεμένηκεν ἐν τῇ συναγωγῇ.',
+          level: 1,
+          en: 'The teacher has remained in the synagogue.',
+          choices: [
+            'The teacher has remained in the synagogue.',
+            'The teacher remained in the synagogue.',
+            'The teacher remains in the synagogue.',
+            'The teacher will remain in the synagogue.'
+          ],
+          note: 'μεμένηκεν: perfect act. 3rd-sg of μένω (consonant-initial → reduplication με-; lengthened stem μενη-; κ + α-class).'
+        },
+        {
+          g: 'πεφίλημαι ὑπὸ τοῦ πατρός.',
+          level: 2,
+          en: 'I have been loved by the Father.',
+          choices: [
+            'I have been loved by the Father.',
+            'I love the Father.',
+            'The Father will be loved by me.',
+            'I am loved by the Father.'
+          ],
+          note: 'πεφίλημαι: perfect mid./pass. 1st-sg of φιλέω (passive sense). Reduplication πε- (smooth-breathing on the consonant: φ → π) + lengthened stem + primary mid. ending. ὑπό + gen. = personal agent.'
+        },
+        {
+          g: 'ἑώρακας τὸν πατέρα μου.',
+          level: 2,
+          en: 'You have seen my Father.',
+          choices: [
+            'You have seen my Father.',
+            'You see my Father.',
+            'You will see my Father.',
+            'My Father has seen you.'
+          ],
+          note: 'ἑώρακας: irregular perfect 2nd-sg of ὁράω. Reduplication takes the form ἑω-, the stem is -ορα-/-ορακ-. Compare aorist εἶδες (suppletive root ἰδ-).'
+        },
+        {
+          g: 'τετηρήκαμεν τὰς ἐντολὰς αὐτοῦ, καὶ ἐν τῇ ἀγάπῃ αὐτοῦ μεμενήκαμεν.',
+          level: 3,
+          en: 'We have kept his commandments, and we have remained in his love.',
+          choices: [
+            'We have kept his commandments, and we have remained in his love.',
+            'We keep his commandments, and we remain in his love.',
+            'We will keep his commandments and remain in his love.',
+            'His commandments have been kept, and his love remains.'
+          ],
+          note: 'Two perfects: τετηρήκαμεν (τηρέω, with reduplication τε- and lengthened stem τηρη-) and μεμενήκαμεν (μένω). Both signal a present standing result.'
+        },
+        {
+          g: 'γέγραπται γὰρ ὅτι ἀπέσταλκεν ὁ θεὸς τὸν υἱὸν αὐτοῦ εἰς τὸν κόσμον.',
+          level: 3,
+          en: 'For it has been written that God has sent his son into the world.',
+          choices: [
+            'For it has been written that God has sent his son into the world.',
+            'For it is written, the son sent God into the world.',
+            'God\'s son has written that he was sent into the world.',
+            'For he writes that God sent his son into the world.'
+          ],
+          note: 'γέγραπται (perfect mid./pass. of γράφω) — recurring NT formula. ἀπέσταλκεν: perfect act. of ἀποστέλλω (liquid; reduplication + κ + α-class).'
         }
       ]
     },
@@ -1819,6 +2899,78 @@
             'God\'s judgment of us makes us repent and keep his commandments.'
           ],
           note: 'Negative purpose ἵνα μή + pres. mid./pass. subj. (κρινώμεθα). Hortatory subj. with two contract verbs: μετανοῶμεν, τηρῶμεν.'
+        },
+        {
+          g: 'ἐάν τις ἀκούῃ τὸν λόγον, σωθήσεται.',
+          level: 1,
+          en: 'If anyone hears the word, he will be saved.',
+          choices: [
+            'If anyone hears the word, he will be saved.',
+            'Whoever was saved heard the word.',
+            'If someone heard the word, he was saved.',
+            'Although anyone hears the word, he will be saved.'
+          ],
+          note: 'ἐάν + pres. subj. (ἀκούῃ) for a future-more-vivid / general condition. Apodosis in future indicative (σωθήσεται, fut. pass. of σῴζω).'
+        },
+        {
+          g: 'ἔρχομαι ἵνα δοξάσω τὸν θεόν.',
+          level: 1,
+          en: 'I am coming in order that I may glorify God.',
+          choices: [
+            'I am coming in order that I may glorify God.',
+            'I came so that I glorified God.',
+            'I will come because I glorified God.',
+            'I am glorifying God when I come.'
+          ],
+          note: 'ἵνα + aor. subj. (δοξάσω, 1st-sg) = standard purpose clause. Aorist subj. ⇒ perfective aspect, not past time.'
+        },
+        {
+          g: 'μὴ κρίνωμεν ἀλλήλους.',
+          level: 2,
+          en: 'Let us not judge one another.',
+          choices: [
+            'Let us not judge one another.',
+            'We do not judge one another.',
+            'Do not judge us.',
+            'We will not judge one another.'
+          ],
+          note: 'Negative hortatory: μή + 1st-pl pres. subj. (κρίνωμεν). ἀλλήλους is the reciprocal pronoun (acc. pl. masc., "one another").'
+        },
+        {
+          g: 'ὅταν ἁμαρτάνωσιν, ὁ πατὴρ ἐλεεῖ αὐτούς.',
+          level: 2,
+          en: 'Whenever they sin, the Father has mercy on them.',
+          choices: [
+            'Whenever they sin, the Father has mercy on them.',
+            'When they sinned, the Father had mercy on them.',
+            'If they sin, the Father will have mercy on them.',
+            'The Father has mercy, although they sin.'
+          ],
+          note: 'ὅταν (= ὅτε + ἄν) + pres. subj. (ἁμαρτάνωσιν) for an indefinite/iterative time clause. Apodosis is present indicative — habitual. ἐλεέω + acc. of person = "have mercy on".'
+        },
+        {
+          g: 'οὐ μὴ εἰσέλθῃ εἰς τὴν βασιλείαν τοῦ θεοῦ ὁ μὴ φιλῶν τὸν ἀδελφὸν αὐτοῦ.',
+          level: 3,
+          en: 'The one who does not love his brother will certainly not enter into the kingdom of God.',
+          choices: [
+            'The one who does not love his brother will certainly not enter into the kingdom of God.',
+            'Whoever loves his brother will certainly enter into God\'s kingdom.',
+            'The one who does not love his brother does not enter the kingdom.',
+            'He will not love his brother in the kingdom of God.'
+          ],
+          note: 'οὐ μή + aor. subj. (εἰσέλθῃ) = strongest possible negation. Substantival adverbial ptcp. ὁ μὴ φιλῶν ("the one not loving") with μή instead of οὐ — expected with non-indicative / indefinite forms.'
+        },
+        {
+          g: 'δοξάζωμεν τὸν θεόν, ἵνα γνωσθῇ ἐν ἡμῖν, καὶ ἵνα ὁ κόσμος πιστεύσῃ.',
+          level: 3,
+          en: 'Let us glorify God, in order that he may be known in us, and in order that the world may believe.',
+          choices: [
+            'Let us glorify God, in order that he may be known in us, and in order that the world may believe.',
+            'We glorify God because he is known in us and the world believes.',
+            'Let God be known and the world believe through our glorifying.',
+            'We will glorify God so that he knows us and the world believes.'
+          ],
+          note: 'Hortatory δοξάζωμεν (1st-pl pres. subj. of δοξάζω). Two ἵνα + subj. purpose clauses: γνωσθῇ (aor. pass. subj. of γινώσκω) and πιστεύσῃ (aor. act. subj.).'
         }
       ]
     },
@@ -1932,6 +3084,78 @@
             'He spoke the Father\'s commandments to the disciples who followed him.'
           ],
           note: 'τοῦ + inf. (here used after a verb of commanding) for purpose / indirect command. Two infinitives coordinated: τοῦ ἀκολουθεῖν … (καὶ) τηρεῖν.'
+        },
+        {
+          g: 'δύναται ὁ θεὸς σῶσαι τὸν λαὸν αὐτοῦ.',
+          level: 1,
+          en: 'God is able to save his people.',
+          choices: [
+            'God is able to save his people.',
+            'God will save his people.',
+            'His people are able to save God.',
+            'God saves his people.'
+          ],
+          note: 'δύναμαι (deponent + complementary inf.) = "be able to V". σῶσαι: aor. act. inf. of σῴζω.'
+        },
+        {
+          g: 'οἶδα ὅτι ὁ κύριος ἀκούει μου.',
+          level: 1,
+          en: 'I know that the Lord hears me.',
+          choices: [
+            'I know that the Lord hears me.',
+            'The Lord knows that I hear him.',
+            'I know to hear the Lord.',
+            'I knew that the Lord heard me.'
+          ],
+          note: 'οἶδα: perfect-formed verb with present meaning ("I know"). ὅτι + indicative for indirect statement. ἀκούω + gen. of person.'
+        },
+        {
+          g: 'πορεύου εἰς τὴν πόλιν καὶ κήρυσσε τὸ εὐαγγέλιον.',
+          level: 2,
+          en: 'Go into the city and preach the gospel.',
+          choices: [
+            'Go into the city and preach the gospel.',
+            'He goes into the city and preaches the gospel.',
+            'Going into the city, he preached the gospel.',
+            'Let us go into the city and preach the gospel.'
+          ],
+          note: 'Two pres. imperatives: πορεύου (mid. 2nd-sg of πορεύομαι) and κήρυσσε (act. 2nd-sg of κηρύσσω). Imperatives are 2nd or 3rd person only.'
+        },
+        {
+          g: 'ἀξιόν ἐστιν τὸν δοῦλον λαμβάνειν τὸν μισθὸν αὐτοῦ.',
+          level: 2,
+          en: 'It is worthy for the slave to receive his wages.',
+          choices: [
+            'It is worthy for the slave to receive his wages.',
+            'It is worthy for the slave to give his wages.',
+            'The slave\'s worthy wage is given.',
+            'The wages are worthy of the slave\'s receiving.'
+          ],
+          note: 'Adj. + ἐστίν + acc. + inf.: τὸν δοῦλον is the acc. "subject" of the inf. λαμβάνειν. Standard infinitive-with-accusative-subject pattern.'
+        },
+        {
+          g: 'διὰ τὸ μὴ εἶναι ἱκανὸν ἑαυτόν, οὐκ ἦλθεν πρὸς τὸν Ἰησοῦν.',
+          level: 3,
+          en: 'Because he was not sufficient himself, he did not come to Jesus.',
+          choices: [
+            'Because he was not sufficient himself, he did not come to Jesus.',
+            'He came to Jesus, not because he was sufficient.',
+            'Although he was sufficient, he did not come to Jesus himself.',
+            'Jesus did not come to him, for he was sufficient.'
+          ],
+          note: 'διά + acc. + articular inf. (τὸ … εἶναι) = causal ("because of being"). Negative μή with the inf. (not οὐ). Acc. ἑαυτόν is the subject of εἶναι; ἱκανόν is the predicate complement.'
+        },
+        {
+          g: 'ὥστε καθήμενοι ἐν τῷ μέσῳ τοῦ ὄχλου, ἤκουον τοὺς λόγους τοῦ διδασκάλου.',
+          level: 3,
+          en: 'So that, sitting in the midst of the crowd, they were hearing the words of the teacher.',
+          choices: [
+            'So that, sitting in the midst of the crowd, they were hearing the words of the teacher.',
+            'Therefore the teacher\'s words sat in the midst of the hearing crowd.',
+            'Although they sat in the midst of the crowd, they did not hear the teacher.',
+            'The teacher sat in the midst of the crowd and heard their words.'
+          ],
+          note: 'ὥστε + indicative shows actual result (here imperfect ἤκουον). καθήμενοι: pres. mid./pass. ptcp. of κάθημαι ("sit") modifying the unstated subject. Articular μέσῳ + gen. = "midst of".'
         }
       ]
     },
@@ -2045,6 +3269,78 @@
             'The Son alone has come to the Father, having been sent.'
           ],
           note: 'εἰ μή = "except". ἐλήλυθεν: perfect of ἔρχομαι (suppletive). ἀπέστειλεν: liquid aor. of ἀποστέλλω (no σ; stem-vowel change).'
+        },
+        {
+          g: 'ὁ κύριος δίδωσιν ζωὴν τοῖς ἀνθρώποις.',
+          level: 1,
+          en: 'The Lord gives life to people.',
+          choices: [
+            'The Lord gives life to people.',
+            'The Lord will give life to people.',
+            'People give life to the Lord.',
+            'The Lord gave life to people.'
+          ],
+          note: 'δίδωσιν: pres. act. 3rd-sg of δίδωμι (athematic; long stem διδω-). Dat. of indirect object: τοῖς ἀνθρώποις.'
+        },
+        {
+          g: 'ὁ διδάσκαλος ἀφίησιν τὰς ἁμαρτίας ἡμῶν.',
+          level: 1,
+          en: 'The teacher forgives our sins.',
+          choices: [
+            'The teacher forgives our sins.',
+            'The teacher gives us our sins.',
+            'Our sins forgive the teacher.',
+            'The teacher forgave our sins.'
+          ],
+          note: 'ἀφίησιν: pres. 3rd-sg of ἀφίημι (compound of ἀπό + -ίημι); senses include "let go, forgive, leave". -μι verb with athematic endings.'
+        },
+        {
+          g: 'τότε ἔδωκεν αὐτοῖς ὁ θεὸς ἐξουσίαν τέκνα γενέσθαι.',
+          level: 2,
+          en: 'Then God gave them authority to become children.',
+          choices: [
+            'Then God gave them authority to become children.',
+            'Then God\'s children received authority from him.',
+            'Then God gave them children with authority.',
+            'Then God\'s authority became children to them.'
+          ],
+          note: 'ἔδωκεν: κ-aor. of δίδωμι. ἐξουσίαν + complementary inf. (γενέσθαι, 2nd-aor. mid. inf. of γίνομαι). τέκνα is predicate nom. (after γενέσθαι, "to become children").'
+        },
+        {
+          g: 'ὁ ἀπόστολος ἀπέστειλεν τὸν μαθητὴν εἰς τὴν πόλιν.',
+          level: 2,
+          en: 'The apostle sent the disciple into the city.',
+          choices: [
+            'The apostle sent the disciple into the city.',
+            'The apostle will send the disciple into the city.',
+            'The disciple sent the apostle into the city.',
+            'The apostle was sending the disciple into the city.'
+          ],
+          note: 'ἀπέστειλεν: liquid aor. of ἀποστέλλω (no σ; stem-vowel change ε → ει). Compound verb (ἀπό + στέλλω).'
+        },
+        {
+          g: 'ἀπόλλυται ὁ ἁμαρτωλός, εἰ μὴ μετανοεῖ καὶ ἐπιστρέφει πρὸς τὸν θεόν.',
+          level: 3,
+          en: 'The sinner is destroyed, unless he repents and turns back to God.',
+          choices: [
+            'The sinner is destroyed, unless he repents and turns back to God.',
+            'The sinner repents and turns to God in order not to be destroyed.',
+            'If the sinner does not repent, God will destroy him.',
+            'The sinner is destroyed, although he repents and turns to God.'
+          ],
+          note: 'ἀπόλλυται: pres. mid./pass. of ἀπόλλυμι (-μι verb, passive sense "is destroyed"). εἰ μή = "unless / except". Two coordinated indicatives in the εἰ-clause.'
+        },
+        {
+          g: 'ἐτίθεσαν οἱ μαθηταὶ τοὺς ἀσθενεῖς ἐπὶ τὰς ὁδούς, ἵνα ἀνίστῃ αὐτοὺς ὁ Ἰησοῦς.',
+          level: 3,
+          en: 'The disciples were placing the sick on the roads, so that Jesus might raise them up.',
+          choices: [
+            'The disciples were placing the sick on the roads, so that Jesus might raise them up.',
+            'The disciples placed the sick, who were raised up by Jesus on the roads.',
+            'Jesus placed the sick on the roads to raise the disciples.',
+            'The disciples set out, so that the sick might raise Jesus on the roads.'
+          ],
+          note: 'ἐτίθεσαν: imperfect 3rd-pl of τίθημι (short stem τιθε- + secondary -σαν). ἵνα + pres. subj. ἀνίστῃ (3rd-sg of ἀνίστημι) = purpose, imperfective aspect.'
         }
       ]
     },
@@ -2158,6 +3454,78 @@
             'The leader and servant become greater than the small one.'
           ],
           note: 'γενέσθω: 3rd-sg aor. mid. imperative of γίνομαι ("let him become"). Two comparatives substantivally (ὁ πλείων, ὁ μικρός). μᾶλλον = "rather, more". τιμάτω: 3rd-sg pres. act. imperative of τιμάω ("let him honor").'
+        },
+        {
+          g: 'δύο ἀδελφοὺς ἔχει ὁ διδάσκαλος.',
+          level: 1,
+          en: 'The teacher has two brothers.',
+          choices: [
+            'The teacher has two brothers.',
+            'Two brothers have the teacher.',
+            'The teachers have two brothers.',
+            'The teacher had two brothers.'
+          ],
+          note: 'δύο is indeclinable across most cases. Object phrase fronted; subject (ὁ διδάσκαλος) follows the verb.'
+        },
+        {
+          g: 'οἱ δώδεκα ἀκολουθοῦσιν τῷ Ἰησοῦ.',
+          level: 1,
+          en: 'The twelve follow Jesus.',
+          choices: [
+            'The twelve follow Jesus.',
+            'Twelve follow Jesus.',
+            'Jesus follows the twelve.',
+            'The twelve followed Jesus.'
+          ],
+          note: 'δώδεκα is indeclinable. Article + numeral ("the twelve") = definite group. ἀκολουθέω + dative.'
+        },
+        {
+          g: 'ἑαυτὸν οὐ δύναται σῶσαι ὁ ἁμαρτωλός.',
+          level: 2,
+          en: 'The sinner cannot save himself.',
+          choices: [
+            'The sinner cannot save himself.',
+            'The sinner cannot be saved by himself.',
+            'He cannot save the sinner himself.',
+            'The sinner saves only himself.'
+          ],
+          note: 'Reflexive ἑαυτόν fronted. δύναμαι + complementary inf. (σῶσαι, aor. act. inf.). Negation οὐ before δύναται.'
+        },
+        {
+          g: 'εἰ ἦν ὧδε ὁ κύριος, οὐκ ἂν ἀπέθανεν ὁ ἀδελφός μου.',
+          level: 2,
+          en: 'If the Lord were here, my brother would not have died.',
+          choices: [
+            'If the Lord were here, my brother would not have died.',
+            'If the Lord is here, my brother does not die.',
+            'When the Lord came here, my brother did not die.',
+            'Although the Lord is here, my brother died.'
+          ],
+          note: 'Contrary-to-fact (2nd-class) conditional: εἰ + impf./aor. ind. (ἦν), apodosis with ἄν + aor. ind. (ἀπέθανεν). Iconic Lazarus-type construction.'
+        },
+        {
+          g: 'ὁ ἐλάχιστος ἐν τῇ βασιλείᾳ μείζων ἐστὶν τοῦ Ἰωάννου.',
+          level: 3,
+          en: 'The least one in the kingdom is greater than John.',
+          choices: [
+            'The least one in the kingdom is greater than John.',
+            'John is the least in the kingdom and greater.',
+            'The greatest in the kingdom is least, like John.',
+            'The least and greatest in the kingdom is John.'
+          ],
+          note: 'Substantival ἐλάχιστος ("the least one", superlative of μικρός) and comparative μείζων ("greater"). Genitive of comparison: τοῦ Ἰωάννου ("than John").'
+        },
+        {
+          g: 'μᾶλλον γὰρ ἀγαπᾷ ὁ πατὴρ τὸν υἱὸν τὸν μικρὸν ἢ τοὺς λοιπούς.',
+          level: 3,
+          en: 'For the father loves the small son more than the rest.',
+          choices: [
+            'For the father loves the small son more than the rest.',
+            'For the small son loves the father more than the rest.',
+            'The father, like the rest, loves the small son.',
+            'The father loves more the rest than the small son.'
+          ],
+          note: 'μᾶλλον ("more, rather") + ἤ ("than") for explicit comparison. Article-noun-article-adj second attributive (τὸν υἱὸν τὸν μικρόν). γάρ postpositive.'
         }
       ]
     }
