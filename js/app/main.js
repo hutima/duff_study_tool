@@ -1021,6 +1021,7 @@ function buildPersistedStatePayload() {
     selectedKeys: [...selectedKeys],
     shuffled,
     requiredOnly,
+    requiredOnlyDefaultedV1: true,
     directionToGreek,
     spacedRepetition,
     studyMode,
