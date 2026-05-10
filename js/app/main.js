@@ -3160,9 +3160,7 @@ function renderReview() {
         : (progress.seenCount || progress.passCount || progress.failCount)
           ? `<span style="display:block;color:var(--muted);font-size:12px">seen ×${progress.seenCount || 0} · ${confidenceMeta}</span>`
           : '';
-      const returnBtn = (isSupplementalCard(card) || isAdvancedCard(card))
-        ? ''
-        : `<button class="return-btn" title="Return this card to circulation now" onclick="returnSeenCardToDeck('${encodeURIComponent(card.id)}')">✕</button>`;
+      const returnBtn = `<button class="return-btn" title="Return this card to circulation now" onclick="returnSeenCardToDeck('${encodeURIComponent(card.id)}')">✕</button>`;
       listHtml += `<div class="review-item">
         <span class="rg">${getCardReviewLeft(card)}${srsMeta}</span>
         <span class="re">${getCardReviewRight(card)}<span style="display:block;color:var(--muted);font-size:12px">${getCardMetaLine(card)}</span></span>
@@ -3179,7 +3177,7 @@ function renderReview() {
 function returnSeenCardToDeck(encodedId) {
   const cardId = decodeURIComponent(encodedId);
   const card = originalDeck.find(c => c.id === cardId);
-  if (!card || isSupplementalCard(card) || isAdvancedCard(card)) return;
+  if (!card) return;
 
   moveCardToBackOfActivePile(card);
 
