@@ -709,13 +709,16 @@ function buildStudyDeck(cards, options = {}) {
 
   let deferredCards = cards.filter(card => !isCardDue(card));
 
-  // ~1/100 chance per rebuild (≈ per flip) to bring one previously-confirmed
-  // card back into the active pile. Cards still in their post-"again"/"pass"
-  // delay are excluded so they stay scheduled ahead until the pile clears.
+  // ~1/100 chance per rebuild (≈ per flip) to bring one high-confidence
+  // (>75%) deferred card back into the active pile. Lower-confidence cards
+  // stay scheduled ahead until the pile clears.
   if (KNOWN_CARD_RANDOM_RETURN_FLIP_ODDS > 0 && Math.random() < 1 / KNOWN_CARD_RANDOM_RETURN_FLIP_ODDS) {
-    const confirmedDeferred = deferredCards.filter(card => marks[card.id] === 'known');
-    if (confirmedDeferred.length) {
-      const pick = confirmedDeferred[Math.floor(Math.random() * confirmedDeferred.length)];
+    const eligible = deferredCards.filter(card => {
+      const pct = getConfidencePct(getWordProgress(card.id));
+      return pct !== null && pct > 75;
+    });
+    if (eligible.length) {
+      const pick = eligible[Math.floor(Math.random() * eligible.length)];
       getWordProgress(pick.id).dueAt = Date.now();
       dueCards = cards.filter(isCardDue);
       deferredCards = cards.filter(card => !isCardDue(card));
