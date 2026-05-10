@@ -66,12 +66,16 @@ function isAdvancedSet(set) {
   return !!(set && (set.advanced || set.type === 'advanced'));
 }
 
+function isSupplementalSet(set) {
+  return !!(set && (set.supplemental || set.type === 'supplemental'));
+}
+
 export function getAllVocabKeys() {
-  // Course-wide keys exclude the Advanced bonus vocab so it never inflates
-  // course completion analytics. Selecting an advanced bucket still loads
-  // those cards via getSelectedVocabCards.
+  // Course-wide keys exclude Advanced bonus vocab and supplemental sets so
+  // they never inflate course completion analytics. Selecting those buckets
+  // still loads their cards via getSelectedVocabCards.
   const sets = getSets();
-  return Object.keys(sets).filter(key => !isAdvancedSet(sets[key]));
+  return Object.keys(sets).filter(key => !isAdvancedSet(sets[key]) && !isSupplementalSet(sets[key]));
 }
 
 export function getAllChapterKeys() {
