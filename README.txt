@@ -1,10 +1,17 @@
-Elementary NT Greek — Flashcards (PWA)
-=====================================
+Mounce BBG Greek — Flashcards (PWA)
+====================================
 
 A static, offline-capable progressive web app for studying Koine Greek
-alongside Duff's *Elements of New Testament Greek* (Wycliffe WYB1513YY
-lecture beats). Hosted on GitHub Pages; works at a domain root or under
-a project subpath.
+alongside William D. Mounce, *Basics of Biblical Greek* (3rd ed.).
+Hosted on GitHub Pages; works at a domain root or under a project
+subpath.
+
+This is the Mounce variant, forked from the original Duff/Wycliffe
+build. Vocabulary comes verbatim from Paul Denisowski's BBG3 per-
+chapter lists (bundled in this repo as bbg3_all.zip and unpacked at
+build time into js/data/words.js). Grammar concepts and paradigm
+sequence follow Mounce's published overheads (mounce_overheads.pdf in
+the repo root).
 
 
 FEATURE SET
@@ -13,26 +20,25 @@ FEATURE SET
 Study modes
 - Vocab — Greek ↔ English flashcards with optional direction reversal.
 - Grammar — multiple-choice parsing / morphology / concept questions
-  with inline wrong-answer explanations and an optional "self-check"
-  mode that reveals the answer without grading.
-- Reader — NT verses sequenced so each chapter is readable after
-  finishing the corresponding Duff chapter (Textus Receptus text).
+  aligned to Mounce's overheads (Noun Rules 1–8, Five Rules of
+  Contraction, Three Uses of αὐτός, Master Verb Chart, Five Rules of
+  μι Verbs, conditional-sentence classes, etc.) with inline notes
+  and an optional self-check mode.
+- Translate — short author-written Greek phrases per chapter, scoped
+  to vocab and grammar introduced through that chapter. (No NT-verse
+  curation in the Mounce variant.)
 - Memorization — separate page (`pages/memorization.html`) for guided
-  paradigm memorization aligned to the lecture weeks.
+  paradigm memorization in Mounce's order.
 
 Session / set selectors
-- Preset Sessions — weekly study days (wk1t, wk1f, wk2t, …),
-  Mid-Term Prep (Ch 1–11), and Final Exam Prep (Ch 1–20). Sessions
-  expand to chapters plus the per-week odd supplements (W1O–W8O);
-  paradigm breakdown sets are opt-in via the supplemental selector.
-- Manual chapter selection — toggle individual chapters 1–20.
-- Supplemental selector — grouped by week, with each week expandable
-  into the per-week odd supplement (W1O–W8O), the "all of set X"
-  button, and individual paradigm rows (Morphology / Grammar items).
-  A "Deselect all supplementals" control at the top clears every
-  supplemental selection while leaving chapter selections intact.
-  Multiple supplementals from any combination of weeks can be active
-  at once.
+- Pre-built sessions — Mounce's four Parts (Introduction · Noun
+  System · Indicative Verb · Nonindicative & μι), plus cumulative
+  milestones through Ch 14, Ch 25, and all 36 chapters.
+- Manual chapter selection — toggle individual chapters 1–36.
+- Supplemental selector — chapter-keyed paradigm decks; multiple
+  selections from any chapters can be active at once. A "Deselect
+  all supplementals" control clears every supplemental selection
+  while leaving chapter selections intact.
 
 Deck controls
 - Shuffle, Required-only, Direction (Gk → En / En → Gk),
@@ -71,15 +77,17 @@ REPOSITORY LAYOUT
 -----------------
 - index.html, styles.css, manifest.json, sw.js, favicon.svg, icons/
 - pages/memorization.html
+- mounce_overheads.pdf      — Dr. Mounce's overheads (chapter-by-
+                               chapter teaching aids; canonical
+                               source for grammar concept order)
+- bbg3_all.zip               — Paul Denisowski's BBG3 per-chapter
+                               vocab lists (raw source for words.js)
 - js/app/main.js              — entry point (ES module)
 - js/data/                    — vocabulary, morphology, grammar,
                                  reader, memorization, parsing /
                                  concept / grammar examples, set
                                  metadata
-- js/data/supplementals/      — per-week paradigm files plus the
-                                 W3O/W6O/W7O/W8O supplements,
-                                 adjective paradigms, custom
-                                 supplement, and paradigm morphology
+- js/data/supplementals/      — per-chapter paradigm files
 - js/logic/pos_logic.js       — parsing helpers
 - js/utils/                   — helpers, time, storage, Greek sort
 - js/domain/srs/              — SRS constants, scheduler, confidence
@@ -87,6 +95,16 @@ REPOSITORY LAYOUT
 - js/domain/grammar/          — explanations
 - js/domain/gamification/     — levels, usage stats
 - js/state/                   — store, migrations
+
+
+REGENERATING WORDS.JS
+---------------------
+The vocab is generated from bbg3_all.zip. To rebuild after editing
+the underlying CSVs, unzip into a temporary directory and run a
+script equivalent to /tmp/build_full_words.py used during the
+initial Mounce port (see commit history for the working version).
+Each entry follows the schema:
+    { g: "headword (with parsing info)", e: "gloss(es)", required: true }
 
 
 DEPLOYMENT
@@ -112,5 +130,5 @@ KNOWN BEHAVIOR
   large content reorderings are handled by versioned migrations
   (`STATE_MIGRATIONS`) that drop orphaned entries cleanly.
 - This is an unofficial student-built study aid. Verify against
-  course content and official materials before relying on anything
-  it says.
+  Mounce's textbook, your instructor, and official course materials
+  before relying on anything it says.

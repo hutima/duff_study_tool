@@ -1,7 +1,8 @@
-GitHub Pages packaging notes
-===========================
+GitHub Pages packaging notes — Mounce BBG variant
+=================================================
 
-This zip is ready to upload directly to a GitHub repository configured for Pages.
+This zip is ready to upload directly to a GitHub repository configured
+for Pages.
 
 Recommended setup:
 1. Unzip this package.
@@ -15,5 +16,5 @@ Important details:
 - .nojekyll is included so GitHub Pages serves the static app as-is.
 - manifest.json and sw.js use relative/project-safe URLs, so the app works at
   https://username.github.io/repository/ as well as at a custom domain root.
-- The custom grammar supplement is in js/data/supplemental.js and can be swapped
-  independently.
+- Vocabulary source is bbg3_all.zip in the repo root (Paul Denisowski's
+  BBG3 chapter lists). Grammar concept order follows mounce_overheads.pdf.

@@ -192,7 +192,7 @@ function getSessions() {
 }
 
 function getProfileDescription() {
-  return 'Full layout with vocabulary, grammar, reader, and memorization. Time totals stay shared, while progress remains separate by module.';
+  return 'Full layout with vocabulary, grammar, translation drills, and memorization. Time totals stay shared, while progress remains separate by module.';
 }
 
 function normalizeStudyMode(mode) {
@@ -1845,7 +1845,7 @@ function buildSupplementalSelector() {
     weekSummary.className = 'supplemental-week-summary';
     const totalVocab = entries.reduce((s, e) => s + e.vocabCount, 0);
     const totalStudy = entries.reduce((s, e) => s + e.studyCount, 0);
-    const weekLabel = weekNum == null ? 'Other supplements' : `Week ${weekNum}`;
+    const weekLabel = weekNum == null ? 'Other supplements' : `Chapter ${weekNum}`;
     const weekCount = canAccessGrammarUi()
       ? `${entries.length} paradigm${entries.length === 1 ? '' : 's'} · ${totalVocab} vocab${totalStudy ? ` · ${totalStudy} grammar` : ''}`
       : `${entries.length} paradigm${entries.length === 1 ? '' : 's'} · ${totalVocab} vocab`;
@@ -2237,7 +2237,7 @@ function renderReaderModule() {
 
   const verseByChapter = new Map(chapters.map(ch => [ch.chapter, ch.verses || []]));
 
-  let html = '<div class="reader-wrap"><div class="reader-intro">Work through translation drills (one at a time, in increasing difficulty) for each Duff chapter, then read the Textus Receptus verses unlocked by that chapter. Drills use only vocabulary and grammar introduced through the chapter; tap any verse to reveal a literal translation.</div>';
+  let html = '<div class="reader-wrap"><div class="reader-intro">Short author-written Greek phrases per Mounce chapter, increasing in difficulty. Drills use only vocabulary and grammar introduced through that chapter. The Mounce variant ships without NT-verse curation — the focus here is bridging from flashcards to syntax, one chapter at a time.</div>';
 
   for (const chapterNum of allChapterNums) {
     const drillsRaw = drillSets[chapterNum] && Array.isArray(drillSets[chapterNum].sentences)

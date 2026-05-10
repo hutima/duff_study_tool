@@ -2,12 +2,16 @@
 import { isPlainObject } from '../utils/helpers.js';
 
 // ── Persistence keys ──
-export const STORAGE_KEY = 'greekFlashcardsStateV18';
-export const CONSENT_STORAGE_KEY = 'greekFlashcardsConsentV1';
-export const WHATS_NEW_V1_1_STORAGE_KEY = 'greekFlashcardsWhatsNewV1_1Seen';
+//
+// Mounce variant: bumped to a Mounce-prefixed namespace so a fresh
+// install starts clean instead of inheriting Duff-keyed progress
+// (chapter IDs and grammar item indices are different between builds).
+export const STORAGE_KEY = 'mounceBbgFlashcardsStateV1';
+export const CONSENT_STORAGE_KEY = 'mounceBbgFlashcardsConsentV1';
+export const WHATS_NEW_V1_1_STORAGE_KEY = 'mounceBbgFlashcardsMounceVariantSeen';
 export const THEME_STORAGE_KEY = 'greekFlashcardsThemeMode';
-export const PROGRESS_EXPORT_FORMAT = 'greek-flashcards-progress-export';
-export const PROGRESS_EXPORT_VERSION = 2;
+export const PROGRESS_EXPORT_FORMAT = 'mounce-bbg-flashcards-progress-export';
+export const PROGRESS_EXPORT_VERSION = 1;
 export const STUDY_IDLE_MS = 90 * 1000;
 export const STUDY_SESSION_BREAK_MS = 30 * 60 * 1000;
 export const MAX_STUDY_SESSION_HISTORY = 500;
