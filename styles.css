@@ -734,6 +734,18 @@
     margin-bottom: 8px;
   }
 
+  .morph-form-english {
+    font-family: 'EB Garamond', serif;
+    font-size: clamp(20px, 4vw, 28px);
+    line-height: 1.35;
+    padding: 0 4px;
+  }
+
+  .choice-btn-greek {
+    font-family: 'Noto Serif', serif;
+    font-size: clamp(18px, 3.2vw, 22px);
+  }
+
   .morph-hint {
     font-style: italic;
     color: var(--muted);

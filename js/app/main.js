@@ -90,7 +90,18 @@ function getDirectionKey() {
 }
 
 function getStudyStoreKey() {
-  return studyMode === 'morph' ? 'morph' : getDirectionKey();
+  if (studyMode === 'morph') {
+    return directionToGreek ? 'morph_e2g' : 'morph';
+  }
+  return getDirectionKey();
+}
+
+function isReverseGrammarActive() {
+  return studyMode === 'morph' && directionToGreek;
+}
+
+function reverseDisplayActive(card) {
+  return isReverseGrammarActive() && !!card && card.reversible === true;
 }
 
 function ensureDirectionalStores() {
@@ -111,9 +122,11 @@ function ensureDirectionalStores() {
   if (!globalWordMarks.g2e || typeof globalWordMarks.g2e !== 'object') globalWordMarks.g2e = {};
   if (!globalWordMarks.e2g || typeof globalWordMarks.e2g !== 'object') globalWordMarks.e2g = {};
   if (!globalWordMarks.morph || typeof globalWordMarks.morph !== 'object') globalWordMarks.morph = {};
+  if (!globalWordMarks.morph_e2g || typeof globalWordMarks.morph_e2g !== 'object') globalWordMarks.morph_e2g = {};
   if (!globalWordProgress.g2e || typeof globalWordProgress.g2e !== 'object') globalWordProgress.g2e = {};
   if (!globalWordProgress.e2g || typeof globalWordProgress.e2g !== 'object') globalWordProgress.e2g = {};
   if (!globalWordProgress.morph || typeof globalWordProgress.morph !== 'object') globalWordProgress.morph = {};
+  if (!globalWordProgress.morph_e2g || typeof globalWordProgress.morph_e2g !== 'object') globalWordProgress.morph_e2g = {};
 }
 
 function getDirectionalMarksStore() {
@@ -271,14 +284,23 @@ function syncToggleButtons() {
 
   if (shuffleSwitch)   shuffleSwitch.classList.toggle('on',   !!shuffled);
   if (requiredSwitch)  requiredSwitch.classList.toggle('on',  !!requiredOnly);
-  if (directionSwitch) directionSwitch.classList.toggle('on', !!directionToGreek && !isMorphologyMode());
+  if (directionSwitch) directionSwitch.classList.toggle('on', !!directionToGreek);
   if (spacedSwitch)    spacedSwitch.classList.toggle('on',    !!spacedRepetition);
   if (selfCheckBtn)    selfCheckBtn.classList.toggle('on',    !!morphSelfCheck && isMorphologyMode());
   if (shuffleToggle)   shuffleToggle.setAttribute('aria-checked',   shuffled ? 'true' : 'false');
   if (requiredToggle)  requiredToggle.setAttribute('aria-checked',  requiredOnly ? 'true' : 'false');
-  if (directionToggle) directionToggle.setAttribute('aria-checked', (directionToGreek && !isMorphologyMode()) ? 'true' : 'false');
+  if (directionToggle) directionToggle.setAttribute('aria-checked', directionToGreek ? 'true' : 'false');
   if (spacedToggle)    spacedToggle.setAttribute('aria-checked',    spacedRepetition ? 'true' : 'false');
   if (selfCheckToggle) selfCheckToggle.setAttribute('aria-checked', (morphSelfCheck && isMorphologyMode()) ? 'true' : 'false');
+
+  if (directionToggle) {
+    const directionLabel = directionToggle.querySelector('.toggle-text');
+    if (directionLabel) {
+      directionLabel.textContent = isMorphologyMode()
+        ? 'English → Greek'
+        : 'Eng → Gk';
+    }
+  }
   if (modeVocabBtn)    modeVocabBtn.classList.toggle('active', studyMode === 'vocab');
   if (modeMorphBtn)    modeMorphBtn.classList.toggle('active', studyMode === 'morph');
   if (modeReaderBtn)   modeReaderBtn.classList.toggle('active', studyMode === 'reader');
@@ -320,7 +342,7 @@ function syncLayoutVisibility() {
   if (reviewShell) reviewShell.style.display = reviewDeckMode ? '' : 'none';
   if (navRow) navRow.style.display = reviewDeckMode && selectedKeys.length ? 'flex' : 'none';
   if (markRow) markRow.style.display = reviewDeckMode && selectedKeys.length && !isMorphologyMode() ? 'flex' : 'none';
-  if (directionToggle) directionToggle.style.display = studyMode === 'vocab' ? 'flex' : 'none';
+  if (directionToggle) directionToggle.style.display = (studyMode === 'vocab' || studyMode === 'morph') ? 'flex' : 'none';
   if (requiredToggle) requiredToggle.style.display = studyMode === 'vocab' ? 'flex' : 'none';
   if (selfCheckToggle) selfCheckToggle.style.display = isMorphologyMode() && canAccessGrammarUi() ? 'flex' : 'none';
   if (modeGroup) modeGroup.style.display = canAccessGrammarUi() ? 'inline-flex' : 'none';
@@ -483,7 +505,11 @@ function applyUnspacedSharedSchedule(card, outcome, reviewedAt = Date.now()) {
 
 function getSelectedCards(keys) {
   if (isMorphologyMode()) {
-    return getSelectedGrammarCards(keys);
+    const cards = getSelectedGrammarCards(keys);
+    if (isReverseGrammarActive()) {
+      return cards.filter(card => card && card.reversible === true);
+    }
+    return cards;
   }
   return getSelectedVocabCards(keys, false);
 }
@@ -816,10 +842,15 @@ function answerMorphologyChoice(choiceIndex) {
   if (!isMorphologyMode()) return;
   noteStudyInteraction();
   const card = deck[currentIdx];
-  if (!card || !Array.isArray(card.choices) || morphAnswerState.answered) return;
+  if (!card || morphAnswerState.answered) return;
 
-  const selected = card.choices[choiceIndex];
-  const isCorrect = selected === card.answer;
+  const reversed = reverseDisplayActive(card);
+  const choices = reversed ? card.reverseChoices : card.choices;
+  if (!Array.isArray(choices)) return;
+
+  const selected = choices[choiceIndex];
+  const correctAnswer = reversed ? card.form : card.answer;
+  const isCorrect = selected === correctAnswer;
   morphAnswerState = {
     answered: true,
     revealed: true,
@@ -1984,9 +2015,14 @@ function renderCard() {
   syncLayoutVisibility();
 
   if (!deck.length) {
-    const emptyMessage = isMorphologyMode()
-      ? 'No grammar quiz material is available yet for this selection.'
-      : (requiredOnly ? 'No required-vocabulary cards match this selection.' : 'No cards in this deck.');
+    let emptyMessage;
+    if (isMorphologyMode()) {
+      emptyMessage = isReverseGrammarActive()
+        ? 'No reversible grammar items in this selection. Toggle “English → Greek” off to see all questions.'
+        : 'No grammar quiz material is available yet for this selection.';
+    } else {
+      emptyMessage = requiredOnly ? 'No required-vocabulary cards match this selection.' : 'No cards in this deck.';
+    }
     area.innerHTML = `<div class="empty-state"><div class="big">—</div>${emptyMessage}</div>`;
     return;
   }
@@ -2024,18 +2060,34 @@ function renderCard() {
   const card = deck[currentIdx];
 
   if (isMorphCard(card)) {
+    const reversed = reverseDisplayActive(card);
+    const displayPrompt = reversed
+      ? (card.reversePrompt || 'Choose the correct Greek form.')
+      : (card.prompt || 'Parse this form.');
+    const displayForm = reversed ? card.answer : card.form;
+    const displayChoices = reversed ? (card.reverseChoices || []) : (card.choices || []);
+    const correctAnswer = reversed ? card.form : card.answer;
+    const formClass = reversed ? 'morph-form morph-form-english' : 'morph-form';
+
     const noteHtml = card.note ? `<div class="morph-note">${card.note}</div>` : '';
     const contextHtml = card.context
       ? `<div class="morph-context"><span class="morph-context-label">Context:</span> ${card.context}</div>`
       : '';
+
+    const resultBody = reversed
+      ? `${card.answer} = ${card.form}`
+      : `${card.form} = ${card.answer}`;
 
     let interactionHtml = '';
     let resultHtml = '';
 
     if (morphSelfCheck) {
       if (!morphAnswerState.revealed) {
+        const placeholder = reversed
+          ? 'Recall the Greek form yourself first, then reveal the answer.'
+          : 'Parse it yourself first, then reveal the answer.';
         interactionHtml = `<div class="morph-selfcheck-actions"><button class="ctrl-btn morph-reveal-btn" type="button" onclick="revealMorphologyAnswer()">Reveal answer</button></div>`;
-        resultHtml = `<div class="morph-result pending">Parse it yourself first, then reveal the answer.</div>`;
+        resultHtml = `<div class="morph-result pending">${placeholder}</div>`;
       } else {
         const resultClass = morphAnswerState.answered
           ? (morphAnswerState.isCorrect ? 'correct' : 'incorrect')
@@ -2052,18 +2104,19 @@ function renderCard() {
 
         resultHtml = `<div class="morph-result ${resultClass}">
             <div class="morph-result-title">${resultTitle}</div>
-            <div class="morph-result-body">${card.form} = ${card.answer}</div>
+            <div class="morph-result-body">${resultBody}</div>
             <div class="morph-result-meta">${card.lemma}${card.gloss ? ` · “${card.gloss}”` : ''}${card.family ? ` · ${card.family}` : ''}</div>
-            ${buildGrammarSupportHtml(card)}
+            ${buildGrammarSupportHtml(card, null, { reversed })}
             ${noteHtml}
           </div>${ratingHtml}`;
       }
     } else {
-      const choiceButtons = (card.choices || []).map((choice, idx) => {
+      const choiceButtons = displayChoices.map((choice, idx) => {
         const classes = ['choice-btn'];
+        if (reversed) classes.push('choice-btn-greek');
         if (morphAnswerState.answered) {
-          if (choice === card.answer) classes.push('correct');
-          if (idx === morphAnswerState.selectedIndex && choice !== card.answer) classes.push('incorrect');
+          if (choice === correctAnswer) classes.push('correct');
+          if (idx === morphAnswerState.selectedIndex && choice !== correctAnswer) classes.push('incorrect');
         }
         return `<button class="${classes.join(' ')}" type="button" ${morphAnswerState.answered ? 'disabled' : ''} onclick="answerMorphologyChoice(${idx})">${choice}</button>`;
       }).join('');
@@ -2072,25 +2125,28 @@ function renderCard() {
       const wrongChoice = morphAnswerState.answered
         && !morphAnswerState.isCorrect
         && morphAnswerState.selectedIndex >= 0
-        ? card.choices[morphAnswerState.selectedIndex]
+        ? displayChoices[morphAnswerState.selectedIndex]
         : null;
+      const pendingLabel = reversed
+        ? 'Choose the correct Greek form.'
+        : 'Choose the best parsing option.';
       resultHtml = morphAnswerState.answered
         ? `<div class="morph-result ${morphAnswerState.isCorrect ? 'correct' : 'incorrect'}">
             <div class="morph-result-title">${morphAnswerState.isCorrect ? 'Correct' : 'Not quite'}</div>
-            <div class="morph-result-body">${card.form} = ${card.answer}</div>
+            <div class="morph-result-body">${resultBody}</div>
             <div class="morph-result-meta">${card.lemma}${card.gloss ? ` · “${card.gloss}”` : ''}${card.family ? ` · ${card.family}` : ''}</div>
-            ${buildGrammarSupportHtml(card, wrongChoice)}
+            ${buildGrammarSupportHtml(card, wrongChoice, { reversed })}
             ${noteHtml}
           </div>`
-        : `<div class="morph-result pending">Choose the best parsing option.</div>`;
+        : `<div class="morph-result pending">${pendingLabel}</div>`;
     }
 
     area.innerHTML = `
       <div class="morph-card">
-        <div class="morph-label">Grammar</div>
-        <div class="morph-prompt">${card.prompt || 'Parse this form.'}</div>
+        <div class="morph-label">Grammar${reversed ? ' · English → Greek' : ''}</div>
+        <div class="morph-prompt">${displayPrompt}</div>
         ${card.gloss ? `<div class="morph-gloss">Gloss: “${card.gloss}”</div>` : ''}
-        <div class="morph-form">${card.form}</div>
+        <div class="${formClass}">${displayForm}</div>
         ${contextHtml}
         <div class="morph-hint">${card.lemma}</div>
         <div class="morph-source">${card.sourceLabel}${card.family ? ` · ${card.family}` : ''}${morphSelfCheck ? ' · Self-check' : ''}</div>
@@ -2440,11 +2496,11 @@ function toggleRequiredOnly() {
 }
 
 function toggleDirection() {
-  if (isMorphologyMode()) return;
   directionToGreek = !directionToGreek;
   clearSpacedUndoSnapshot();
   ensureDirectionalStores();
   marks = getDirectionalMarksStore();
+  resetMorphAnswerState();
   syncToggleButtons();
   if (selectedKeys.length) {
     const keysToLoad = currentSession ? expandSessionSets(currentSession) : selectedKeys;

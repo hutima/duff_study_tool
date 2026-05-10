@@ -3,20 +3,20 @@
 // GitHub Pages note: all app-shell URLs are resolved relative to the
 // service worker registration scope so this works both at a domain root
 // and at a project path such as https://user.github.io/repository/.
-const CACHE_NAME = 'greek-flashcards-pwa-v41-github-pages';
+const CACHE_NAME = 'greek-flashcards-pwa-v42-github-pages';
 const BASE_URL = new URL('./', self.registration.scope);
 
 const APP_SHELL_PATHS = [
   './',
   'index.html',
   'pages/memorization.html',
-  'styles.css?v=36',
+  'styles.css?v=37',
   'manifest.json?v=25',
   'favicon.svg?v=25',
   'js/data/words.js?v=32',
-  'js/data/morphology.js?v=33',
+  'js/data/morphology.js?v=34',
   'js/data/supplemental.js?v=31',
-  'js/data/grammar.js?v=31',
+  'js/data/grammar.js?v=32',
   'js/data/memorization.js?v=32',
   'js/data/parsing_examples.js?v=26',
   'js/data/concept_examples.js?v=32',
@@ -24,7 +24,7 @@ const APP_SHELL_PATHS = [
   'js/data/setMeta.js?v=26',
   'js/logic/pos_logic.js?v=32',
   'js/data/reader.js?v=32',
-  'js/app/main.js?v=37',
+  'js/app/main.js?v=38',
   'js/data/supplementals/week_1_paradigms.js?v=2',
   'js/data/supplementals/week_2_paradigms.js?v=2',
   'js/data/supplementals/week_3_paradigms.js?v=2',
@@ -52,7 +52,7 @@ const APP_SHELL_PATHS = [
   'js/domain/gamification/usageStats.js?v=30',
   'js/domain/deck/ordering.js?v=32',
   'js/domain/deck/filters.js?v=32',
-  'js/domain/grammar/explanations.js?v=26',
+  'js/domain/grammar/explanations.js?v=27',
   'js/state/migrations.js?v=26',
   'js/state/store.js?v=26',
   'icons/icon-192.png',
