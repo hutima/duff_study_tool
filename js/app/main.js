@@ -1984,6 +1984,26 @@ function toggleSet(key) {
 }
 
 
+const readerDrillState = new Map();
+
+function getReaderDrillIdx(chapterNum) {
+  return readerDrillState.get(chapterNum) || 0;
+}
+
+function setReaderDrillIdx(chapterNum, idx) {
+  readerDrillState.set(chapterNum, idx);
+}
+
+function sortReaderDrillsByLevel(drills) {
+  if (!Array.isArray(drills)) return [];
+  return drills.map((d, i) => ({ d, i })).sort((a, b) => {
+    const la = Number.isFinite(a.d && a.d.level) ? a.d.level : 99;
+    const lb = Number.isFinite(b.d && b.d.level) ? b.d.level : 99;
+    if (la !== lb) return la - lb;
+    return a.i - b.i;
+  }).map(x => x.d);
+}
+
 function renderReaderModule() {
   const area = document.getElementById('cardArea');
   if (!area) return;
@@ -2005,16 +2025,17 @@ function renderReaderModule() {
 
   const verseByChapter = new Map(chapters.map(ch => [ch.chapter, ch.verses || []]));
 
-  let html = '<div class="reader-wrap"><div class="reader-intro">Translate short Greek sentences (Greek → English) for each Duff chapter, then read the SBL GNT verses unlocked by that chapter. Drills use only vocabulary and grammar introduced through the chapter; literal translations are provided for selected verses.</div>';
+  let html = '<div class="reader-wrap"><div class="reader-intro">Work through translation drills (one at a time, in increasing difficulty) for each Duff chapter, then read the SBL GNT verses unlocked by that chapter. Drills use only vocabulary and grammar introduced through the chapter; tap any verse to reveal a literal translation.</div>';
 
   for (const chapterNum of allChapterNums) {
-    const drills = drillSets[chapterNum] && Array.isArray(drillSets[chapterNum].sentences)
+    const drillsRaw = drillSets[chapterNum] && Array.isArray(drillSets[chapterNum].sentences)
       ? drillSets[chapterNum].sentences
       : [];
     const verses = verseByChapter.get(chapterNum) || [];
 
-    if (!drills.length && !verses.length) continue;
+    if (!drillsRaw.length && !verses.length) continue;
 
+    const drills = sortReaderDrillsByLevel(drillsRaw);
     const summaryBits = [];
     if (drills.length) summaryBits.push(`${drills.length} drill${drills.length === 1 ? '' : 's'}`);
     if (verses.length) summaryBits.push(`${verses.length} verse${verses.length === 1 ? '' : 's'}`);
@@ -2022,11 +2043,7 @@ function renderReaderModule() {
     html += `<details class="reader-chapter"${drills.length ? ' open' : ''}><summary class="reader-chapter-header"><span class="reader-ch-label">After Chapter ${chapterNum}</span><span class="reader-ch-count">${summaryBits.join(' · ')}</span><span class="reader-ch-arrow" aria-hidden="true">▶</span></summary>`;
 
     if (drills.length) {
-      html += '<div class="reader-drill-section"><div class="reader-section-label">Translation drills</div>';
-      drills.forEach((drill, idx) => {
-        html += renderReaderDrillHtml(chapterNum, idx, drill);
-      });
-      html += '</div>';
+      html += renderReaderDrillSectionHtml(chapterNum, drills);
     }
 
     if (verses.length) {
@@ -2051,8 +2068,58 @@ function readerDrillId(chapterNum, idx) {
   return `reader-drill-ch${chapterNum}-${idx}`;
 }
 
-function readerVerseDrillId(chapterNum, vIdx) {
-  return `reader-verse-drill-ch${chapterNum}-${vIdx}`;
+function readerDrillSectionId(chapterNum) {
+  return `reader-drill-section-ch${chapterNum}`;
+}
+
+function readerVerseRevealId(chapterNum, vIdx) {
+  return `reader-verse-reveal-ch${chapterNum}-${vIdx}`;
+}
+
+function renderReaderDrillSectionHtml(chapterNum, drillsSorted) {
+  const sectionId = readerDrillSectionId(chapterNum);
+  const total = drillsSorted.length;
+  if (!total) {
+    return `<div class="reader-drill-section" id="${sectionId}"><div class="reader-section-label">Translation drills</div></div>`;
+  }
+  const idx = Math.max(0, Math.min(getReaderDrillIdx(chapterNum), total - 1));
+  setReaderDrillIdx(chapterNum, idx);
+  const drill = drillsSorted[idx];
+  const drillHtml = renderReaderDrillHtml(chapterNum, idx, drill);
+  const prevDisabled = idx === 0 ? 'disabled' : '';
+  const nextDisabled = idx === total - 1 ? 'disabled' : '';
+  return `<div class="reader-drill-section" id="${sectionId}">
+    <div class="reader-drill-section-head">
+      <div class="reader-section-label">Translation drills</div>
+      <div class="reader-drill-progress">Drill ${idx + 1} of ${total}</div>
+    </div>
+    ${drillHtml}
+    <div class="reader-drill-nav">
+      <button class="reader-drill-nav-btn" type="button" ${prevDisabled} onclick="advanceReaderDrill(${chapterNum}, -1)">← Previous</button>
+      <button class="reader-drill-nav-btn" type="button" ${nextDisabled} onclick="advanceReaderDrill(${chapterNum}, 1)">Next →</button>
+    </div>
+  </div>`;
+}
+
+function advanceReaderDrill(chapterNum, delta) {
+  const drillSets = (window.READER_TRANSLATION_SETS && typeof window.READER_TRANSLATION_SETS === 'object')
+    ? window.READER_TRANSLATION_SETS : {};
+  const drillsRaw = drillSets[chapterNum] && Array.isArray(drillSets[chapterNum].sentences)
+    ? drillSets[chapterNum].sentences : [];
+  const drills = sortReaderDrillsByLevel(drillsRaw);
+  if (!drills.length) return;
+
+  const cur = getReaderDrillIdx(chapterNum);
+  const next = Math.max(0, Math.min(drills.length - 1, cur + delta));
+  if (next === cur) return;
+
+  setReaderDrillIdx(chapterNum, next);
+  const sectionEl = document.getElementById(readerDrillSectionId(chapterNum));
+  if (!sectionEl) return;
+  const wrapper = document.createElement('div');
+  wrapper.innerHTML = renderReaderDrillSectionHtml(chapterNum, drills);
+  const replacement = wrapper.firstElementChild;
+  if (replacement) sectionEl.replaceWith(replacement);
 }
 
 function renderReaderDrillHtml(chapterNum, idx, drill) {
@@ -2089,26 +2156,27 @@ function renderReaderVerseHtml(chapterNum, vIdx, verse) {
   if (!verse) return '';
   const greek = escapeHtml(verse.g || '');
   const ref = escapeHtml(verse.r || '');
-  if (!verse.literal || !Array.isArray(verse.literal.choices) || !verse.literal.choices.length) {
+  const literal = verse.literal;
+  const literalText = typeof literal === 'string'
+    ? literal
+    : (literal && typeof literal === 'object' ? (literal.en || '') : '');
+  const noteText = (literal && typeof literal === 'object') ? (literal.note || '') : '';
+
+  if (!literalText) {
     return `<div class="reader-verse"><span class="reader-verse-greek">${greek}</span><span class="reader-verse-ref">${ref}</span></div>`;
   }
 
-  const id = readerVerseDrillId(chapterNum, vIdx);
-  const literal = verse.literal;
-  const choiceButtons = literal.choices.map((choice, cIdx) =>
-    `<button class="reader-choice-btn" type="button" onclick="selectReaderDrillChoice('${id}', ${cIdx})">${escapeHtml(choice)}</button>`
-  ).join('');
-  const noteHtml = literal.note ? `<div class="reader-drill-note" id="${id}-note" style="display:none">${escapeHtml(literal.note)}</div>` : '';
+  const id = readerVerseRevealId(chapterNum, vIdx);
+  const noteHtml = noteText ? `<div class="reader-drill-note">${escapeHtml(noteText)}</div>` : '';
   return `
     <div class="reader-verse reader-verse-with-drill">
       <div class="reader-verse-row">
         <span class="reader-verse-greek">${greek}</span>
         <span class="reader-verse-ref">${ref}</span>
       </div>
-      <details class="reader-verse-drill" id="${id}" data-answer="${escapeHtml(literal.en || '')}">
-        <summary class="reader-verse-drill-summary">Try a literal translation</summary>
-        <div class="reader-choices">${choiceButtons}</div>
-        <div class="reader-drill-result" id="${id}-result"></div>
+      <details class="reader-verse-reveal" id="${id}">
+        <summary class="reader-verse-reveal-summary">Tap to reveal translation</summary>
+        <div class="reader-verse-literal-text">${escapeHtml(literalText)}</div>
         ${noteHtml}
       </details>
     </div>`;
@@ -4300,7 +4368,7 @@ const GLOBAL_CLICK_HANDLERS = {
   restoreSpacedUndo, setAppProfile, setStudyMode, setThemeMode,
   showDisclaimerModal, startStudying, toggleDirection, toggleMorphSelfCheck,
   toggleRequiredOnly, toggleShuffle, toggleSpacedRepetition, triggerImportProgress,
-  openReaderTab, selectReaderDrillChoice
+  openReaderTab, selectReaderDrillChoice, advanceReaderDrill
 };
 if (typeof globalThis !== 'undefined') Object.assign(globalThis, GLOBAL_CLICK_HANDLERS);
 if (typeof window !== 'undefined' && window !== globalThis) Object.assign(window, GLOBAL_CLICK_HANDLERS);
