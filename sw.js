@@ -3,7 +3,7 @@
 // GitHub Pages note: all app-shell URLs are resolved relative to the
 // service worker registration scope so this works both at a domain root
 // and at a project path such as https://user.github.io/repository/.
-const CACHE_NAME = 'greek-flashcards-pwa-v53-github-pages';
+const CACHE_NAME = 'greek-flashcards-pwa-v54-github-pages';
 const BASE_URL = new URL('./', self.registration.scope);
 
 const APP_SHELL_PATHS = [
@@ -15,7 +15,7 @@ const APP_SHELL_PATHS = [
   'favicon.svg?v=25',
   'js/data/words.js?v=33',
   'js/data/morphology.js?v=34',
-  'js/data/supplemental.js?v=31',
+  'js/data/supplemental.js?v=32',
   'js/data/grammar.js?v=32',
   'js/data/memorization.js?v=32',
   'js/data/parsing_examples.js?v=26',
@@ -42,6 +42,31 @@ const APP_SHELL_PATHS = [
   'js/data/supplementals/w7o_supplemental.js?v=2',
   'js/data/supplementals/w8o_supplemental.js?v=2',
   'js/data/supplementals/paradigm_morphology.js?v=2',
+  'js/data/advanced/advanced_01.js?v=2',
+  'js/data/advanced/advanced_02.js?v=2',
+  'js/data/advanced/advanced_03.js?v=2',
+  'js/data/advanced/advanced_04.js?v=2',
+  'js/data/advanced/advanced_05.js?v=2',
+  'js/data/advanced/advanced_06.js?v=2',
+  'js/data/advanced/advanced_07.js?v=2',
+  'js/data/advanced/advanced_08.js?v=2',
+  'js/data/advanced/advanced_09.js?v=2',
+  'js/data/advanced/advanced_10.js?v=2',
+  'js/data/advanced/advanced_11.js?v=2',
+  'js/data/advanced/advanced_12.js?v=2',
+  'js/data/advanced/advanced_13.js?v=2',
+  'js/data/advanced/advanced_14.js?v=2',
+  'js/data/advanced/advanced_15.js?v=2',
+  'js/data/advanced/advanced_16.js?v=2',
+  'js/data/advanced/advanced_17.js?v=2',
+  'js/data/advanced/advanced_18.js?v=2',
+  'js/data/advanced/advanced_19.js?v=2',
+  'js/data/advanced/advanced_20.js?v=2',
+  'js/data/advanced/advanced_21.js?v=2',
+  'js/data/advanced/advanced_22.js?v=2',
+  'js/data/advanced/advanced_23.js?v=2',
+  'js/data/advanced/advanced_24.js?v=2',
+  'js/data/advanced/advanced_25.js?v=2',
   'js/app/main.bundle.js?v=31',
   'js/utils/helpers.js?v=26',
   'js/utils/time.js?v=26',
@@ -99,9 +124,10 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Static assets: cache first, then network.
+  // Static assets: cache first, then network. ignoreSearch lets bare ES
+  // module imports (no ?v=) match precached entries that include ?v=N.
   event.respondWith(
-    caches.match(req).then(cached => {
+    caches.match(req, { ignoreSearch: true }).then(cached => {
       if (cached) return cached;
       return fetch(req).then(res => {
         const copy = res.clone();
