@@ -349,12 +349,17 @@ function syncLayoutVisibility() {
   if (modeGroup) modeGroup.style.display = canAccessGrammarUi() ? 'inline-flex' : 'none';
   if (!reviewDeckMode) return;
   if (prevBtn) {
-    prevBtn.style.display = spacedRepetition && !isMorphologyMode() ? 'none' : '';
+    const hidePrev = isMorphologyMode() || (spacedRepetition && !isMorphologyMode());
+    prevBtn.style.display = hidePrev ? 'none' : '';
     const atStart = !deck.length || currentIdx <= 0;
     prevBtn.disabled = atStart;
     prevBtn.classList.toggle('nav-disabled', atStart);
   }
-  if (undoBtn) undoBtn.style.display = spacedRepetition && !isMorphologyMode() && !!spacedUndoSnapshot ? '' : 'none';
+  if (undoBtn) {
+    const morphUndoActive = isMorphologyMode() && morphAnswerState.answered && !!spacedUndoSnapshot;
+    const vocabUndoActive = spacedRepetition && !isMorphologyMode() && !!spacedUndoSnapshot;
+    undoBtn.style.display = (morphUndoActive || vocabUndoActive) ? '' : 'none';
+  }
   if (nextBtn) {
     if (isMorphologyMode()) {
       nextBtn.textContent = 'Next →';
@@ -619,7 +624,11 @@ function clearSpacedUndoSnapshot() {
 }
 
 function captureSpacedUndoSnapshot() {
-  if (!spacedRepetition || !selectedKeys.length || isMorphologyMode() || currentIdx >= activeDeckCount || !deck[currentIdx]) {
+  if (!selectedKeys.length || !deck[currentIdx]) {
+    clearSpacedUndoSnapshot();
+    return;
+  }
+  if (spacedRepetition && currentIdx >= activeDeckCount) {
     clearSpacedUndoSnapshot();
     return;
   }
@@ -635,6 +644,8 @@ function captureSpacedUndoSnapshot() {
     activeDeckCount,
     isFlipped,
     unspacedPendingRecycle,
+    morphAnswerState: cloneForUndo(morphAnswerState),
+    morphPendingAdvance,
     deck: cloneForUndo(deck),
     originalDeck: cloneForUndo(originalDeck),
     marksStore: cloneForUndo(getDirectionalMarksStore()),
@@ -645,11 +656,12 @@ function captureSpacedUndoSnapshot() {
 }
 
 function restoreSpacedUndo() {
-  if (!spacedUndoSnapshot || !spacedUndoSnapshot.spacedRepetition) return;
+  if (!spacedUndoSnapshot) return;
   if (studyMode !== spacedUndoSnapshot.studyMode) return;
   if (directionToGreek !== spacedUndoSnapshot.directionToGreek) return;
   if (requiredOnly !== spacedUndoSnapshot.requiredOnly) return;
   if (shuffled !== spacedUndoSnapshot.shuffled) return;
+  if (spacedRepetition !== spacedUndoSnapshot.spacedRepetition) return;
   if (JSON.stringify(selectedKeys) !== JSON.stringify(spacedUndoSnapshot.selectedKeys || [])) return;
   if ((currentSession ? currentSession.id : null) !== (spacedUndoSnapshot.currentSessionId || null)) return;
 
@@ -674,8 +686,13 @@ function restoreSpacedUndo() {
   activeDeckCount = Math.max(0, spacedUndoSnapshot.activeDeckCount || 0);
   isFlipped = !!spacedUndoSnapshot.isFlipped;
   unspacedPendingRecycle = !!spacedUndoSnapshot.unspacedPendingRecycle;
+  if (isMorphologyMode() && spacedUndoSnapshot.morphAnswerState) {
+    morphAnswerState = cloneForUndo(spacedUndoSnapshot.morphAnswerState);
+    morphPendingAdvance = !!spacedUndoSnapshot.morphPendingAdvance;
+  } else {
+    resetMorphAnswerState();
+  }
   clearSpacedUndoSnapshot();
-  resetMorphAnswerState();
   renderCard();
   renderReview();
   renderProgress();
@@ -852,6 +869,8 @@ function answerMorphologyChoice(choiceIndex) {
   const choices = reversed ? card.reverseChoices : card.choices;
   if (!Array.isArray(choices)) return;
 
+  captureSpacedUndoSnapshot();
+
   const selected = choices[choiceIndex];
   const correctAnswer = reversed ? card.form : card.answer;
   const isCorrect = selected === correctAnswer;
@@ -899,6 +918,8 @@ function rateMorphologySelfCheck(isCorrect) {
   const card = deck[currentIdx];
   if (!card || !morphAnswerState.revealed || morphAnswerState.answered) return;
 
+  captureSpacedUndoSnapshot();
+
   morphAnswerState = {
     answered: true,
     revealed: true,
@@ -930,6 +951,8 @@ function markMorphologyDontKnow() {
   noteStudyInteraction();
   const card = deck[currentIdx];
   if (!card || morphAnswerState.answered) return;
+
+  captureSpacedUndoSnapshot();
 
   morphAnswerState = {
     answered: true,
@@ -2751,6 +2774,7 @@ function navigate(dir, options = {}) {
       } else {
         currentIdx = Math.min(currentIdx + 1, activeDeckCount);
       }
+      clearSpacedUndoSnapshot();
     } else {
       currentIdx = Math.min(currentIdx, activeDeckCount);
       maybeReturnConfirmedDeferredCard();
@@ -2778,6 +2802,7 @@ function navigate(dir, options = {}) {
       currentIdx = nextIdx;
       unspacedPendingRecycle = false;
     }
+    clearSpacedUndoSnapshot();
     resetMorphAnswerState();
     renderCard();
     renderReview();
