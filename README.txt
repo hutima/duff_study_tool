@@ -96,9 +96,14 @@ DEPLOYMENT
 3. Open the published URL once online so the service worker caches
    the new app shell.
 
-When any cached file changes, bump:
-- `CACHE_NAME` in `sw.js`,
-- the matching `?v=N` for that file in `sw.js` and `index.html`.
+When any cached file changes, bump a single shared version number:
+- the `vNN` suffix in `CACHE_NAME` (e.g. `…-pwa-v54-github-pages`),
+- every `?v=NN` query string in `sw.js` and `index.html`.
+
+The simplest way is a search-and-replace from the previous version
+to the next across both files (e.g. `v54` → `v55`). The service
+worker uses `caches.match(req, { ignoreSearch: true })` so bare ES
+module imports still resolve to the versioned precache entries.
 
 Without those bumps the service worker will keep serving the old
 cached assets after redeploy.

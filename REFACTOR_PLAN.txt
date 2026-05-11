@@ -1,0 +1,166 @@
+main.js Refactor Plan (deferred)
+================================
+
+State as of v54: `js/app/main.js` is 4,698 lines / 197 functions. The
+earlier split into `js/utils/`, `js/domain/srs/`, `js/domain/gamification/`,
+`js/domain/deck/`, `js/domain/grammar/`, `js/state/` is real and used,
+but new features kept landing in `main.js` so it never finished. Pick
+this up post-flight; the items below are an actionable inventory, not
+a started-but-undone refactor.
+
+
+Natural module boundaries (section comments already drawn in main.js)
+---------------------------------------------------------------------
+  Lines        Section                       Suggested target
+  ----------   ---------------------------   --------------------------------
+  1–1676       (setup, state, deck logic)    multiple — see below
+  1677–2433    BUILD SELECTORS               js/ui/selectors.js (~760 lines)
+  2434–2650    RENDER                        js/ui/render.js (~220 lines)
+  2651–3083    NAVIGATE + MARK               js/ui/navigation.js (~430 lines)
+  3084–3344    PROGRESS + REVIEW             js/ui/progress.js (~260 lines)
+  3345–3865    KEYBOARD + INIT               js/ui/keyboard.js + js/app/init.js
+  3866–4605    GAMIFICATION HELPERS          js/domain/gamification/xp.js
+                                              (rebuild — file existed, was dead)
+  4606–4612    READER TAB                    js/ui/reader.js
+  4613–end     GLOBAL EXPORTS                stays in main.js (entry point)
+
+The 1–1676 block is the hardest: it mixes module-level state, theme
+bootstrap, deck building, SRS coupling, and study-mode helpers. Split
+it last, after the leaf sections are extracted and the shared-state
+surface is clear.
+
+
+Shared module-level state (the implicit "store")
+------------------------------------------------
+main.js declares ~30 module-level `let` bindings that every section
+reads or writes. Before extracting anything, decide how these get
+shared. Two viable approaches:
+
+A. Pass state into pure functions. Best for RENDER, PROGRESS, parts
+   of NAVIGATE. Verbose but trivially correct.
+
+B. Centralize into `js/state/runtime.js` exporting a single mutable
+   object. Closest to status quo; minimal call-site churn. Risk: if
+   two modules both `import { runtimeState }` and one reassigns a
+   property, the other sees it — fine, that's the point — but it
+   makes implicit dependencies harder to spot.
+
+Recommendation: B for the genuinely-shared state (deck, currentIdx,
+selectedKeys, marks, deckStates, globalWord{Marks,Progress}, study/
+spaced/required/direction toggles), A for UI helpers that only need
+a card or a count.
+
+Current module-level bindings to relocate:
+  Usage/gamification: appUsageStats, appProfile, appGamification,
+    usageTickHandle, usageVisibilityBound, usageTickCounter,
+    levelToastHideTimer, levelToastRemoveTimer, toastQueue, toastActive
+  Modal/UI: hasAcceptedDisclaimer, disclaimerModalRequiresAgreement,
+    transferModalMode, themeMode, transferPrimaryAction,
+    transferSecondaryAction
+  Study state: studyMode, morphSelfCheck, morphAnswerState,
+    morphPendingAdvance, currentSession, selectedKeys, deck,
+    originalDeck, currentIdx, isFlipped, shuffled, requiredOnly,
+    directionToGreek, spacedRepetition, activeDeckCount,
+    unspacedPendingRecycle, unspacedCycleState, unspacedDeferredIds,
+    flipsSinceReshuffle, spacedUndoSnapshot, marks
+  Persisted: deckStates, globalWordMarks, globalWordProgress
+
+
+HTML onclick handlers — the non-negotiable surface
+--------------------------------------------------
+34 functions are exported via GLOBAL_CLICK_HANDLERS (main.js:4618) so
+that `onclick="..."` attributes in index.html can reach them. Any
+extraction must keep these reachable:
+
+  flipCard, navigate, markCard, answerMorphologyChoice,
+  revealMorphologyAnswer, rateMorphologySelfCheck, returnSeenCardToDeck,
+  closeAnalyticsOverlay, closeTransferModal, exportProgressJson,
+  closeShortcutsModal, closeStudySelector, handleConsentAction,
+  handleTransferPrimaryAction, handleTransferSecondaryAction,
+  openShortcutsModal, openStudySelector, openAnalyticsOverlay,
+  resetAllStats, resetCurrentDeck, reshuffleEligible, restoreSpacedUndo,
+  setAppProfile, setStudyMode, setThemeMode, showDisclaimerModal,
+  startStudying, toggleDirection, toggleMorphSelfCheck,
+  toggleRequiredOnly, toggleShuffle, toggleSpacedRepetition,
+  triggerImportProgress, openReaderTab, selectReaderDrillChoice,
+  advanceReaderDrill, closeWhatsNewV1_1Modal
+
+The cleanest pattern after the split: each UI module exports its
+handlers as named exports; `main.js` re-imports them and rebuilds
+GLOBAL_CLICK_HANDLERS in one place. Don't try to assign to `window`
+from inside individual modules — that scatters the surface.
+
+
+Suggested extraction order (least risky first)
+----------------------------------------------
+1. GAMIFICATION HELPERS (3866–4605). Almost pure functions (XP math,
+   level lookups, achievement checks). Few state writes. The earlier
+   `js/domain/gamification/xp.js` file targeted exactly this — its
+   signature (e.g. `migrateLegacyXp`) still appears verbatim at
+   main.js:4052, so the import can drop in with minimal call-site
+   changes.
+
+2. READER TAB (4606–4612). Six lines that open an external HTML page;
+   trivial to move.
+
+3. PROGRESS + REVIEW (3084–3344). Mostly reads state to render the
+   overlay. Few writebacks. Safe to extract once #1 lands the
+   gamification imports it depends on.
+
+4. RENDER (2434–2650). Reads `deck`, `currentIdx`, `marks`, study
+   toggles; produces DOM. Pure-ish if state is passed in.
+
+5. KEYBOARD + INIT (3345–3865). Wire-up logic; depends on most
+   handlers being importable.
+
+6. BUILD SELECTORS (1677–2433). Touches selectedKeys + deckStates
+   heavily; do this after the runtime-state module exists.
+
+7. NAVIGATE + MARK (2651–3083). The hottest path. Couples SRS,
+   gamification, study mode, undo, morph answer state. Extract last.
+
+8. The pre-1677 block: split into js/app/state.js (the shared store
+   from "Shared module-level state" above) and any remaining helpers
+   that fall out naturally.
+
+
+Verification (no tests exist, so this is manual)
+------------------------------------------------
+After each extraction:
+  - `node -c js/app/main.js` and `node -c <new module>` for syntax.
+  - Serve the repo (`python3 -m http.server` from the root) and walk
+    the smoke path:
+      1. Accept disclaimer.
+      2. Choose session → Mid-Term Prep.
+      3. Vocab: flip a card, mark Easy / Uncertain / Hard, navigate.
+      4. Grammar: answer a multiple choice; toggle self-check.
+      5. Reader: open chapter 1, expand verses, run a translation
+         drill.
+      6. Analytics: open overlay, scroll heatmap + time chart.
+      7. Theme: System / Dark / Light.
+      8. Export progress, then Import the same JSON.
+      9. Reload the page — state should restore.
+  - Bump CACHE_NAME + every `?v=N` (now aligned to a single number;
+    see README) so the SW reinstalls.
+  - DevTools → Application → Service Workers → "Update on reload" +
+    "Offline" — verify the smoke path still works offline.
+
+
+Things to be careful about
+--------------------------
+- Module imports in `js/app/main.js` use bare paths (no `?v=N`); SW
+  matches them via `caches.match(req, { ignoreSearch: true })`. New
+  modules under `js/ui/` etc. need adding to `APP_SHELL_PATHS` (with
+  the shared `?v=N`) AND need the directory to exist on disk.
+- `domain/gamification/usageStats.js` already exports the
+  primitives main.js wraps in local `accumulate*` helpers — confirm
+  the extraction uses them rather than reintroducing duplicates.
+- `js/domain/gamification/levels.js` exports XP_LEVELS and
+  REVIEW_XP_SCHEDULE — the new xp.js module should import from it
+  rather than redefining.
+- `state/store.js` already owns STORAGE_KEY, CONSENT_STORAGE_KEY,
+  THEME_STORAGE_KEY, PROGRESS_EXPORT_FORMAT etc. Don't shadow them.
+- HTML `onclick="setThemeMode('system')"` etc. fires before
+  `main.js` runs (the script is `type="module"`, so it loads
+  async). The current code handles this by initializing globals
+  before any onclick can fire — keep that invariant.
