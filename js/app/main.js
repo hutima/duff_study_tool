@@ -348,7 +348,12 @@ function syncLayoutVisibility() {
   if (selfCheckToggle) selfCheckToggle.style.display = isMorphologyMode() && canAccessGrammarUi() ? 'flex' : 'none';
   if (modeGroup) modeGroup.style.display = canAccessGrammarUi() ? 'inline-flex' : 'none';
   if (!reviewDeckMode) return;
-  if (prevBtn) prevBtn.style.display = spacedRepetition && !isMorphologyMode() ? 'none' : '';
+  if (prevBtn) {
+    prevBtn.style.display = spacedRepetition && !isMorphologyMode() ? 'none' : '';
+    const atStart = !deck.length || currentIdx <= 0;
+    prevBtn.disabled = atStart;
+    prevBtn.classList.toggle('nav-disabled', atStart);
+  }
   if (undoBtn) undoBtn.style.display = spacedRepetition && !isMorphologyMode() && !!spacedUndoSnapshot ? '' : 'none';
   if (nextBtn) {
     if (isMorphologyMode()) {
@@ -911,6 +916,37 @@ function rateMorphologySelfCheck(isCorrect) {
     recordStudyOutcome(card.id, isCorrect ? 'known' : 'review', reviewedAt);
     applyUnspacedSharedSchedule(card, isCorrect ? 'easy' : 'again', reviewedAt);
     getDirectionalMarksStore()[card.id] = mark;
+    marks = getDirectionalMarksStore();
+  }
+
+  renderCard();
+  renderProgress();
+  renderReview();
+  saveState();
+}
+
+function markMorphologyDontKnow() {
+  if (!isMorphologyMode()) return;
+  noteStudyInteraction();
+  const card = deck[currentIdx];
+  if (!card || morphAnswerState.answered) return;
+
+  morphAnswerState = {
+    answered: true,
+    revealed: true,
+    selfRated: true,
+    selectedIndex: -1,
+    isCorrect: false
+  };
+
+  if (spacedRepetition) {
+    applySpacedReview(card, getMorphSpacedOutcome(card, false));
+    morphPendingAdvance = true;
+  } else {
+    const reviewedAt = Date.now();
+    recordStudyOutcome(card.id, 'review', reviewedAt);
+    applyUnspacedSharedSchedule(card, 'again', reviewedAt);
+    getDirectionalMarksStore()[card.id] = 'unsure';
     marks = getDirectionalMarksStore();
   }
 
@@ -2511,7 +2547,10 @@ function renderCard() {
         const placeholder = reversed
           ? 'Recall the Greek form yourself first, then reveal the answer.'
           : 'Parse it yourself first, then reveal the answer.';
-        interactionHtml = `<div class="morph-selfcheck-actions"><button class="ctrl-btn morph-reveal-btn" type="button" onclick="revealMorphologyAnswer()">Reveal answer</button></div>`;
+        interactionHtml = `<div class="morph-selfcheck-actions">
+          <button class="ctrl-btn morph-reveal-btn" type="button" onclick="revealMorphologyAnswer()">Reveal answer</button>
+          <button class="ctrl-btn morph-dontknow-btn" type="button" onclick="markMorphologyDontKnow()">I don't know</button>
+        </div>`;
         resultHtml = `<div class="morph-result pending">${placeholder}</div>`;
       } else {
         const resultClass = morphAnswerState.answered
@@ -2546,7 +2585,12 @@ function renderCard() {
         return `<button class="${classes.join(' ')}" type="button" ${morphAnswerState.answered ? 'disabled' : ''} onclick="answerMorphologyChoice(${idx})">${choice}</button>`;
       }).join('');
 
-      interactionHtml = `<div class="morph-choices">${choiceButtons}</div>`;
+      const dontKnowHtml = morphAnswerState.answered
+        ? ''
+        : `<div class="morph-dontknow-row">
+             <button class="ctrl-btn morph-dontknow-btn" type="button" onclick="markMorphologyDontKnow()">I don't know</button>
+           </div>`;
+      interactionHtml = `<div class="morph-choices">${choiceButtons}</div>${dontKnowHtml}`;
       const wrongChoice = morphAnswerState.answered
         && !morphAnswerState.isCorrect
         && morphAnswerState.selectedIndex >= 0
@@ -4617,7 +4661,7 @@ function openReaderTab() {
 // ═══════════════════════════════════════════════════════
 const GLOBAL_CLICK_HANDLERS = {
   flipCard, navigate, markCard, answerMorphologyChoice,
-  revealMorphologyAnswer, rateMorphologySelfCheck, returnSeenCardToDeck,
+  revealMorphologyAnswer, rateMorphologySelfCheck, markMorphologyDontKnow, returnSeenCardToDeck,
   closeAnalyticsOverlay, closeTransferModal, exportProgressJson,
   closeShortcutsModal, closeStudySelector,
   handleConsentAction, handleTransferPrimaryAction, handleTransferSecondaryAction,
