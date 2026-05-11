@@ -348,8 +348,18 @@ function syncLayoutVisibility() {
   if (selfCheckToggle) selfCheckToggle.style.display = isMorphologyMode() && canAccessGrammarUi() ? 'flex' : 'none';
   if (modeGroup) modeGroup.style.display = canAccessGrammarUi() ? 'inline-flex' : 'none';
   if (!reviewDeckMode) return;
-  if (prevBtn) prevBtn.style.display = spacedRepetition && !isMorphologyMode() ? 'none' : '';
-  if (undoBtn) undoBtn.style.display = spacedRepetition && !isMorphologyMode() && !!spacedUndoSnapshot ? '' : 'none';
+  if (prevBtn) {
+    const hidePrev = isMorphologyMode() || (spacedRepetition && !isMorphologyMode());
+    prevBtn.style.display = hidePrev ? 'none' : '';
+    const atStart = !deck.length || currentIdx <= 0;
+    prevBtn.disabled = atStart;
+    prevBtn.classList.toggle('nav-disabled', atStart);
+  }
+  if (undoBtn) {
+    const morphUndoActive = isMorphologyMode() && morphAnswerState.answered && !!spacedUndoSnapshot;
+    const vocabUndoActive = spacedRepetition && !isMorphologyMode() && !!spacedUndoSnapshot;
+    undoBtn.style.display = (morphUndoActive || vocabUndoActive) ? '' : 'none';
+  }
   if (nextBtn) {
     if (isMorphologyMode()) {
       nextBtn.textContent = 'Next →';
@@ -614,7 +624,11 @@ function clearSpacedUndoSnapshot() {
 }
 
 function captureSpacedUndoSnapshot() {
-  if (!spacedRepetition || !selectedKeys.length || isMorphologyMode() || currentIdx >= activeDeckCount || !deck[currentIdx]) {
+  if (!selectedKeys.length || !deck[currentIdx]) {
+    clearSpacedUndoSnapshot();
+    return;
+  }
+  if (spacedRepetition && currentIdx >= activeDeckCount) {
     clearSpacedUndoSnapshot();
     return;
   }
@@ -630,6 +644,8 @@ function captureSpacedUndoSnapshot() {
     activeDeckCount,
     isFlipped,
     unspacedPendingRecycle,
+    morphAnswerState: cloneForUndo(morphAnswerState),
+    morphPendingAdvance,
     deck: cloneForUndo(deck),
     originalDeck: cloneForUndo(originalDeck),
     marksStore: cloneForUndo(getDirectionalMarksStore()),
@@ -640,11 +656,12 @@ function captureSpacedUndoSnapshot() {
 }
 
 function restoreSpacedUndo() {
-  if (!spacedUndoSnapshot || !spacedUndoSnapshot.spacedRepetition) return;
+  if (!spacedUndoSnapshot) return;
   if (studyMode !== spacedUndoSnapshot.studyMode) return;
   if (directionToGreek !== spacedUndoSnapshot.directionToGreek) return;
   if (requiredOnly !== spacedUndoSnapshot.requiredOnly) return;
   if (shuffled !== spacedUndoSnapshot.shuffled) return;
+  if (spacedRepetition !== spacedUndoSnapshot.spacedRepetition) return;
   if (JSON.stringify(selectedKeys) !== JSON.stringify(spacedUndoSnapshot.selectedKeys || [])) return;
   if ((currentSession ? currentSession.id : null) !== (spacedUndoSnapshot.currentSessionId || null)) return;
 
@@ -669,8 +686,13 @@ function restoreSpacedUndo() {
   activeDeckCount = Math.max(0, spacedUndoSnapshot.activeDeckCount || 0);
   isFlipped = !!spacedUndoSnapshot.isFlipped;
   unspacedPendingRecycle = !!spacedUndoSnapshot.unspacedPendingRecycle;
+  if (isMorphologyMode() && spacedUndoSnapshot.morphAnswerState) {
+    morphAnswerState = cloneForUndo(spacedUndoSnapshot.morphAnswerState);
+    morphPendingAdvance = !!spacedUndoSnapshot.morphPendingAdvance;
+  } else {
+    resetMorphAnswerState();
+  }
   clearSpacedUndoSnapshot();
-  resetMorphAnswerState();
   renderCard();
   renderReview();
   renderProgress();
@@ -847,6 +869,8 @@ function answerMorphologyChoice(choiceIndex) {
   const choices = reversed ? card.reverseChoices : card.choices;
   if (!Array.isArray(choices)) return;
 
+  captureSpacedUndoSnapshot();
+
   const selected = choices[choiceIndex];
   const correctAnswer = reversed ? card.form : card.answer;
   const isCorrect = selected === correctAnswer;
@@ -894,6 +918,8 @@ function rateMorphologySelfCheck(isCorrect) {
   const card = deck[currentIdx];
   if (!card || !morphAnswerState.revealed || morphAnswerState.answered) return;
 
+  captureSpacedUndoSnapshot();
+
   morphAnswerState = {
     answered: true,
     revealed: true,
@@ -911,6 +937,39 @@ function rateMorphologySelfCheck(isCorrect) {
     recordStudyOutcome(card.id, isCorrect ? 'known' : 'review', reviewedAt);
     applyUnspacedSharedSchedule(card, isCorrect ? 'easy' : 'again', reviewedAt);
     getDirectionalMarksStore()[card.id] = mark;
+    marks = getDirectionalMarksStore();
+  }
+
+  renderCard();
+  renderProgress();
+  renderReview();
+  saveState();
+}
+
+function markMorphologyDontKnow() {
+  if (!isMorphologyMode()) return;
+  noteStudyInteraction();
+  const card = deck[currentIdx];
+  if (!card || morphAnswerState.answered) return;
+
+  captureSpacedUndoSnapshot();
+
+  morphAnswerState = {
+    answered: true,
+    revealed: true,
+    selfRated: true,
+    selectedIndex: -1,
+    isCorrect: false
+  };
+
+  if (spacedRepetition) {
+    applySpacedReview(card, getMorphSpacedOutcome(card, false));
+    morphPendingAdvance = true;
+  } else {
+    const reviewedAt = Date.now();
+    recordStudyOutcome(card.id, 'review', reviewedAt);
+    applyUnspacedSharedSchedule(card, 'again', reviewedAt);
+    getDirectionalMarksStore()[card.id] = 'unsure';
     marks = getDirectionalMarksStore();
   }
 
@@ -2511,7 +2570,10 @@ function renderCard() {
         const placeholder = reversed
           ? 'Recall the Greek form yourself first, then reveal the answer.'
           : 'Parse it yourself first, then reveal the answer.';
-        interactionHtml = `<div class="morph-selfcheck-actions"><button class="ctrl-btn morph-reveal-btn" type="button" onclick="revealMorphologyAnswer()">Reveal answer</button></div>`;
+        interactionHtml = `<div class="morph-selfcheck-actions">
+          <button class="ctrl-btn morph-reveal-btn" type="button" onclick="revealMorphologyAnswer()">Reveal answer</button>
+          <button class="ctrl-btn morph-dontknow-btn" type="button" onclick="markMorphologyDontKnow()">I don't know</button>
+        </div>`;
         resultHtml = `<div class="morph-result pending">${placeholder}</div>`;
       } else {
         const resultClass = morphAnswerState.answered
@@ -2546,7 +2608,12 @@ function renderCard() {
         return `<button class="${classes.join(' ')}" type="button" ${morphAnswerState.answered ? 'disabled' : ''} onclick="answerMorphologyChoice(${idx})">${choice}</button>`;
       }).join('');
 
-      interactionHtml = `<div class="morph-choices">${choiceButtons}</div>`;
+      const dontKnowHtml = morphAnswerState.answered
+        ? ''
+        : `<div class="morph-dontknow-row">
+             <button class="ctrl-btn morph-dontknow-btn" type="button" onclick="markMorphologyDontKnow()">I don't know</button>
+           </div>`;
+      interactionHtml = `<div class="morph-choices">${choiceButtons}</div>${dontKnowHtml}`;
       const wrongChoice = morphAnswerState.answered
         && !morphAnswerState.isCorrect
         && morphAnswerState.selectedIndex >= 0
@@ -2707,6 +2774,7 @@ function navigate(dir, options = {}) {
       } else {
         currentIdx = Math.min(currentIdx + 1, activeDeckCount);
       }
+      clearSpacedUndoSnapshot();
     } else {
       currentIdx = Math.min(currentIdx, activeDeckCount);
       maybeReturnConfirmedDeferredCard();
@@ -2734,6 +2802,7 @@ function navigate(dir, options = {}) {
       currentIdx = nextIdx;
       unspacedPendingRecycle = false;
     }
+    clearSpacedUndoSnapshot();
     resetMorphAnswerState();
     renderCard();
     renderReview();
@@ -4617,7 +4686,7 @@ function openReaderTab() {
 // ═══════════════════════════════════════════════════════
 const GLOBAL_CLICK_HANDLERS = {
   flipCard, navigate, markCard, answerMorphologyChoice,
-  revealMorphologyAnswer, rateMorphologySelfCheck, returnSeenCardToDeck,
+  revealMorphologyAnswer, rateMorphologySelfCheck, markMorphologyDontKnow, returnSeenCardToDeck,
   closeAnalyticsOverlay, closeTransferModal, exportProgressJson,
   closeShortcutsModal, closeStudySelector,
   handleConsentAction, handleTransferPrimaryAction, handleTransferSecondaryAction,

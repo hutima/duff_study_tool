@@ -902,6 +902,30 @@
     min-width: 150px;
   }
 
+  .morph-dontknow-row {
+    display: flex;
+    justify-content: center;
+    margin: 8px 0 16px;
+  }
+
+  .morph-dontknow-btn {
+    min-width: 180px;
+    background: rgba(107, 98, 60, 0.10);
+    border: 1px solid var(--gold-dim);
+    color: var(--muted);
+  }
+
+  .morph-dontknow-btn:hover {
+    border-color: var(--gold);
+    color: var(--cream);
+  }
+
+  .nav-btn.nav-disabled,
+  .nav-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
   .morph-result {
     border-radius: 10px;
     padding: 12px 14px;
