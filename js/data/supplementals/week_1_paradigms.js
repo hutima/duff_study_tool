@@ -59,12 +59,10 @@
     label: 'ἔργον — 2nd-decl. neut. with article',
     week: 1,
     cards: [
-      { g: 'τὸ ἔργον', e: 'the work (subject) (Nom. sg.)', required: true },
-      { g: 'τὸ ἔργον', e: 'the work (object) (Acc. sg.)', required: true },
+      { g: 'τὸ ἔργον', e: 'the work (subject/object) (Nom./Acc. sg.)', required: true },
       { g: 'τοῦ ἔργου', e: 'the work (of) (Gen. sg.)', required: true },
       { g: 'τῷ ἔργῳ', e: 'the work (to/for) (Dat. sg.)', required: true },
-      { g: 'τὰ ἔργα', e: 'the work (subject) (Nom. pl.)', required: true },
-      { g: 'τὰ ἔργα', e: 'the work (object) (Acc. pl.)', required: true },
+      { g: 'τὰ ἔργα', e: 'the work (subject/object) (Nom./Acc. pl.)', required: true },
       { g: 'τῶν ἔργων', e: 'the work (of) (Gen. pl.)', required: true },
       { g: 'τοῖς ἔργοις', e: 'the work (to/for) (Dat. pl.)', required: true }
     ]
@@ -76,10 +74,9 @@
     cards: [
       { g: 'ἡμέρα', e: 'day (Nom. sg.)', required: true },
       { g: 'ἡμέραν', e: 'day (Acc. sg.)', required: true },
-      { g: 'ἡμέρας', e: 'day (Gen. sg.)', required: true },
+      { g: 'ἡμέρας', e: 'day (Gen. sg. / Acc. pl.)', required: true },
       { g: 'ἡμέρᾳ', e: 'day (Dat. sg.)', required: true },
       { g: 'ἡμέραι', e: 'day (Nom. pl.)', required: true },
-      { g: 'ἡμέρας', e: 'day (Acc. pl.)', required: true },
       { g: 'ἡμερῶν', e: 'day (Gen. pl.)', required: true },
       { g: 'ἡμέραις', e: 'day (Dat. pl.)', required: true }
     ]
@@ -104,27 +101,23 @@
     label: 'αὐτός, αὐτή, αὐτό',
     week: 1,
     cards: [
-      { g: 'αὐτός', e: 'he (Nom. sg.)', required: true },
-      { g: 'αὐτόν', e: 'him (Acc. sg.)', required: true },
-      { g: 'αὐτοῦ', e: 'his (Gen. sg.)', required: true },
-      { g: 'αὐτῷ', e: 'to him (Dat. sg.)', required: true },
-      { g: 'αὐτοί', e: 'they (Nom. pl.)', required: true },
-      { g: 'αὐτούς', e: 'them (Acc. pl.)', required: true },
+      { g: 'αὐτός', e: 'he (masc. Nom. sg.)', required: true },
+      { g: 'αὐτόν', e: 'him (masc. Acc. sg.)', required: true },
+      { g: 'αὐτοῦ', e: 'his/its (masc./neut. Gen. sg.)', required: true },
+      { g: 'αὐτῷ', e: 'to him/it (masc./neut. Dat. sg.)', required: true },
+      { g: 'αὐτοί', e: 'they (masc. Nom. pl.)', required: true },
+      { g: 'αὐτούς', e: 'them (masc. Acc. pl.)', required: true },
       { g: 'αὐτῶν', e: 'their (Gen. pl.)', required: true },
-      { g: 'αὐτοῖς', e: 'to them (Dat. pl.)', required: true },
-      { g: 'αὐτή', e: 'she (Nom. sg.)', required: true },
-      { g: 'αὐτήν', e: 'her (Acc. sg.)', required: true },
-      { g: 'αὐτῆς', e: 'her (Gen. sg.)', required: true },
-      { g: 'αὐτῇ', e: 'to her (Dat. sg.)', required: true },
-      { g: 'αὐταί', e: 'they (Nom. pl.)', required: true },
-      { g: 'αὐτάς', e: 'them (Acc. pl.)', required: true },
-      { g: 'αὐταῖς', e: 'to them (Dat. pl.)', required: true },
-      { g: 'αὐτό', e: 'it (Nom. sg.)', required: true },
-      { g: 'αὐτό', e: 'it (Acc. sg.)', required: true },
-      { g: 'αὐτοῦ', e: 'its (Gen. sg.)', required: true },
-      { g: 'αὐτῷ', e: 'to it (Dat. sg.)', required: true },
-      { g: 'αὐτά', e: 'they (Nom. pl.)', required: true },
-      { g: 'αὐτά', e: 'them (Acc. pl.)', required: true }
+      { g: 'αὐτοῖς', e: 'to them (masc. Dat. pl.)', required: true },
+      { g: 'αὐτή', e: 'she (fem. Nom. sg.)', required: true },
+      { g: 'αὐτήν', e: 'her (fem. Acc. sg.)', required: true },
+      { g: 'αὐτῆς', e: 'her (fem. Gen. sg.)', required: true },
+      { g: 'αὐτῇ', e: 'to her (fem. Dat. sg.)', required: true },
+      { g: 'αὐταί', e: 'they (fem. Nom. pl.)', required: true },
+      { g: 'αὐτάς', e: 'them (fem. Acc. pl.)', required: true },
+      { g: 'αὐταῖς', e: 'to them (fem. Dat. pl.)', required: true },
+      { g: 'αὐτό', e: 'it (neut. Nom./Acc. sg.)', required: true },
+      { g: 'αὐτά', e: 'they/them (neut. Nom./Acc. pl.)', required: true }
     ]
   });
 
