@@ -158,8 +158,8 @@ let flipsSinceReshuffle = 0;         // forward navigations since last periodic 
 let spacedUndoSnapshot = null;
 
 // Fixed 1-in-N chance per flip (not scaled by pool size) to return one
-// random known card to the active pile. 100 → ~1 return per 100 flips.
-const KNOWN_CARD_RANDOM_RETURN_FLIP_ODDS = 100;
+// random known card to the active pile. 50 → ~1 return per 50 flips (2%).
+const KNOWN_CARD_RANDOM_RETURN_FLIP_ODDS = 50;
 
 let marks = {};
 
@@ -1023,7 +1023,7 @@ function maybePeriodicReshuffle() {
   }
 }
 
-// Per-flip ~1/100 chance to bring one high-confidence (>75%) deferred card
+// Per-flip ~1/50 (2%) chance to bring one high-confidence (>75%) deferred card
 // back into the active pile. Skipped when shuffle is off or in morphology mode.
 function maybeReturnConfirmedDeferredCard() {
   if (!spacedRepetition || !shuffled || isMorphologyMode()) return false;
