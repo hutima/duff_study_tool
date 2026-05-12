@@ -9,6 +9,86 @@ function getLegacyStableIdMap() {
   return typeof window.buildLegacyStableIdMap === 'function' ? window.buildLegacyStableIdMap() : new Map();
 }
 
+// Vocab card IDs have the shape `${lookupKey}-${idx}-${stableKey(card.g)}`.
+// A very old format omitted the index: `${lookupKey}-${stableKey(card.g)}`.
+// lookupKey contains no hyphens; stableKey is hyphen-free (it only allows
+// Greek letters, digits, and underscores), so both shapes parse unambiguously.
+const VOCAB_ID_INDEXED = /^([^-]+)-(\d+)-(.+)$/u;
+const VOCAB_ID_UNINDEXED = /^([^-]+)-(.+)$/u;
+
+function parseVocabId(id) {
+  const s = String(id || '');
+  if (s.startsWith('grammar-') || s.startsWith('morph-')) return null;
+  let m = s.match(VOCAB_ID_INDEXED);
+  if (m) return { rawKey: m[1], stableKey: m[3] };
+  m = s.match(VOCAB_ID_UNINDEXED);
+  if (m) return { rawKey: m[1], stableKey: m[2] };
+  return null;
+}
+
+function getCurrentVocabCardIds() {
+  const ids = new Set();
+  const byStableKey = new Map();
+  try {
+    const sets = window.SETS && typeof window.SETS === 'object' ? window.SETS : {};
+    Object.keys(sets).forEach(rawKey => {
+      const set = sets[rawKey];
+      if (!set || !Array.isArray(set.cards)) return;
+      set.cards.forEach((card, idx) => {
+        const sk = stableKey(card.g);
+        const id = `${rawKey}-${idx}-${sk}`;
+        ids.add(id);
+        if (!byStableKey.has(sk)) byStableKey.set(sk, []);
+        byStableKey.get(sk).push(id);
+      });
+    });
+  } catch (err) {
+    console.warn('Could not enumerate current vocab card ids for migration safety.', err);
+  }
+  return { ids, byStableKey };
+}
+
+const MARK_RANK = { known: 2, unsure: 1 };
+
+function mergeMark(existing, incoming) {
+  if (!incoming) return existing;
+  if (!existing) return incoming;
+  return (MARK_RANK[existing] || 0) >= (MARK_RANK[incoming] || 0) ? existing : incoming;
+}
+
+function minNonZero(a, b) {
+  const aNum = Number.isFinite(a) ? a : 0;
+  const bNum = Number.isFinite(b) ? b : 0;
+  if (!aNum) return bNum;
+  if (!bNum) return aNum;
+  return Math.min(aNum, bNum);
+}
+
+function mergeProgressEntry(existing, incoming) {
+  if (!isPlainObject(incoming)) return existing;
+  if (!isPlainObject(existing)) return { ...incoming };
+  const histA = Array.isArray(existing.confidenceHistory) ? existing.confidenceHistory : [];
+  const histB = Array.isArray(incoming.confidenceHistory) ? incoming.confidenceHistory : [];
+  return {
+    ...existing,
+    seenCount: (existing.seenCount || 0) + (incoming.seenCount || 0),
+    passCount: (existing.passCount || 0) + (incoming.passCount || 0),
+    failCount: (existing.failCount || 0) + (incoming.failCount || 0),
+    streak: Math.max(existing.streak || 0, incoming.streak || 0),
+    easyStreak: Math.max(existing.easyStreak || 0, incoming.easyStreak || 0),
+    srsStage: Math.max(existing.srsStage || 0, incoming.srsStage || 0),
+    ease: Math.max(existing.ease || 0, incoming.ease || 0),
+    intervalDays: Math.max(existing.intervalDays || 0, incoming.intervalDays || 0),
+    lastEasyIntervalDays: Math.max(existing.lastEasyIntervalDays || 0, incoming.lastEasyIntervalDays || 0),
+    dueAt: Math.max(existing.dueAt || 0, incoming.dueAt || 0),
+    lastReviewedAt: Math.max(existing.lastReviewedAt || 0, incoming.lastReviewedAt || 0),
+    firstSeenAt: minNonZero(existing.firstSeenAt, incoming.firstSeenAt),
+    firstConfirmedAt: minNonZero(existing.firstConfirmedAt, incoming.firstConfirmedAt),
+    confidence: Math.max(existing.confidence || 0, incoming.confidence || 0),
+    confidenceHistory: [...histA, ...histB].slice(-10)
+  };
+}
+
 export function getCurrentGrammarAndMorphCardIdSet() {
   const ids = new Set();
   try {
@@ -167,6 +247,57 @@ export const STATE_MIGRATIONS = [
       };
       if (saved.globalWordMarks?.morph) saved.globalWordMarks.morph = dropOrphans(saved.globalWordMarks.morph);
       if (saved.globalWordProgress?.morph) saved.globalWordProgress.morph = dropOrphans(saved.globalWordProgress.morph);
+      saved.deckStates = {};
+      return saved;
+    }
+  },
+
+  {
+    // Drop vocab card entries whose owning set was deprecated. When a live
+    // card shares the same Greek stableKey (the word survives in another
+    // module), the orphan's per-card counters are merged in so study history
+    // for that word isn't lost. Runs in g2e and e2g buckets independently.
+    name: 'vocab-orphans-cleanup-and-merge',
+    match(saved) {
+      const { ids } = getCurrentVocabCardIds();
+      if (!ids.size) return false;
+      const buckets = [
+        saved.globalWordMarks?.g2e, saved.globalWordMarks?.e2g,
+        saved.globalWordProgress?.g2e, saved.globalWordProgress?.e2g,
+      ];
+      return buckets.some(bucket => bucket && Object.keys(bucket).some(id => {
+        const parsed = parseVocabId(id);
+        return !!parsed && !ids.has(id);
+      }));
+    },
+    migrate(saved) {
+      const { ids: liveIds, byStableKey } = getCurrentVocabCardIds();
+      if (!liveIds.size) return saved;
+
+      const reconcileBucket = (bucket, merge) => {
+        if (!bucket) return bucket;
+        const next = { ...bucket };
+        Object.keys(bucket).forEach(id => {
+          const parsed = parseVocabId(id);
+          if (!parsed) return;
+          if (liveIds.has(id)) return;
+          const targets = byStableKey.get(parsed.stableKey) || [];
+          targets.forEach(targetId => {
+            next[targetId] = merge(next[targetId], bucket[id]);
+          });
+          delete next[id];
+        });
+        return next;
+      };
+
+      ['g2e', 'e2g'].forEach(dir => {
+        if (saved.globalWordMarks?.[dir]) {
+          saved.globalWordMarks[dir] = reconcileBucket(saved.globalWordMarks[dir], mergeMark);
+        }
+        if (saved.globalWordProgress?.[dir]) {
+          saved.globalWordProgress[dir] = reconcileBucket(saved.globalWordProgress[dir], mergeProgressEntry);
+        }
+      });
       saved.deckStates = {};
       return saved;
     }
