@@ -2142,6 +2142,24 @@ function deselectAllChapters() {
   loadDeckFromKeys(selectedKeys, null);
 }
 
+function deselectAll() {
+  if (!selectedKeys.length && !currentSession) return;
+  saveCurrentDeckStateToBank();
+  currentSession = null;
+  selectedKeys = [];
+  setActiveSessionButton();
+  setActiveSetButtons();
+  deck = [];
+  originalDeck = [];
+  marks = {};
+  currentIdx = 0;
+  document.getElementById('cardArea').innerHTML = '<div class="empty-state"><div class="big">αβγ</div>Tap to choose a session and start studying.</div>';
+  clearSpacedUndoSnapshot();
+  syncToggleButtons();
+  renderReview();
+  saveState();
+}
+
 function toggleAdvancedSubGroup(setKey, subKey) {
   // Sub-groups load only the cards in that sub-bucket. We model this as a
   // pseudo-key that getAdvancedSubKeyCards expands at deck-build time.
@@ -5095,6 +5113,7 @@ const GLOBAL_CLICK_HANDLERS = {
   revealMorphologyAnswer, rateMorphologySelfCheck, markMorphologyDontKnow, returnSeenCardToDeck,
   closeAnalyticsOverlay, closeTransferModal, exportProgressJson,
   closeShortcutsModal, closeStudySelector,
+  deselectAllChapters, deselectAllSupplementals, deselectAllAdvanced, deselectAll,
   handleConsentAction, handleTransferPrimaryAction, handleTransferSecondaryAction,
   openShortcutsModal, openStudySelector,
   openAnalyticsOverlay, resetAllStats, resetCurrentDeck, reshuffleEligible,
