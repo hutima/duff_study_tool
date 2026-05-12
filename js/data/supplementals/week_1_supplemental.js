@@ -3,8 +3,8 @@
     label: 'Week 1 Supplemental',
     week: 1,
     cards: [
-      { g: 'ἄλλος, -η, -ο', e: 'another, different', required: true },
-      { g: 'ὅσος, -η, -ον', e: 'as/how great/much', required: true }
+      { g: 'ἄλλος, -η, -ο', e: 'another, other', required: true },
+      { g: 'ὅσος, -η, -ον', e: 'as much/many as; how great/many', required: true }
     ]
   });
 })();
