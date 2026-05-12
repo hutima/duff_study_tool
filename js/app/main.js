@@ -344,7 +344,7 @@ function syncLayoutVisibility() {
   if (reviewShell) reviewShell.style.display = reviewDeckMode ? '' : 'none';
   if (navRow) navRow.style.display = reviewDeckMode && selectedKeys.length ? 'flex' : 'none';
   if (markRow) markRow.style.display = reviewDeckMode && selectedKeys.length && !isMorphologyMode() ? 'flex' : 'none';
-  if (ffRow) ffRow.style.display = reviewDeckMode && selectedKeys.length && !isMorphologyMode() && spacedRepetition ? 'flex' : 'none';
+  if (ffRow) ffRow.style.display = reviewDeckMode && selectedKeys.length && spacedRepetition ? 'flex' : 'none';
   if (directionToggle) directionToggle.style.display = (studyMode === 'vocab' || studyMode === 'morph') ? 'flex' : 'none';
   if (requiredToggle) requiredToggle.style.display = studyMode === 'vocab' ? 'flex' : 'none';
   if (selfCheckToggle) selfCheckToggle.style.display = isMorphologyMode() && canAccessGrammarUi() ? 'flex' : 'none';
@@ -3068,6 +3068,7 @@ function fastForwardScheduling(advanceMs) {
   deck = buildStudyDeck(originalDeck);
   currentIdx = 0;
   isFlipped = false;
+  resetMorphAnswerState();
   renderCard();
   renderProgress();
   renderReview();
