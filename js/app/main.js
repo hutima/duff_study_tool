@@ -3053,6 +3053,26 @@ function reshuffleEligible() {
   saveState();
 }
 
+function fastForwardScheduling(advanceMs) {
+  if (!spacedRepetition || !originalDeck.length) return;
+  advanceScheduledCards(originalDeck, advanceMs);
+  deck = buildStudyDeck(originalDeck);
+  currentIdx = 0;
+  isFlipped = false;
+  renderCard();
+  renderProgress();
+  renderReview();
+  saveState();
+}
+
+function fastForwardOneDay() {
+  fastForwardScheduling(SRS_DAY_MS);
+}
+
+function fastForwardOneWeek() {
+  fastForwardScheduling(7 * SRS_DAY_MS);
+}
+
 function resetCurrentDeck() {
   clearSpacedUndoSnapshot();
   if (!selectedKeys.length) {
@@ -4692,6 +4712,7 @@ const GLOBAL_CLICK_HANDLERS = {
   handleConsentAction, handleTransferPrimaryAction, handleTransferSecondaryAction,
   openShortcutsModal, openStudySelector,
   openAnalyticsOverlay, resetAllStats, resetCurrentDeck, reshuffleEligible,
+  fastForwardOneDay, fastForwardOneWeek,
   restoreSpacedUndo, setAppProfile, setStudyMode, setThemeMode,
   showDisclaimerModal, startStudying, toggleDirection, toggleMorphSelfCheck,
   toggleRequiredOnly, toggleShuffle, toggleSpacedRepetition, triggerImportProgress,
