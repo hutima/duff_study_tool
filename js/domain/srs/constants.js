@@ -6,9 +6,9 @@ export const SRS_UNCERTAIN_MIN_MS = 60 * 60 * 1000;        // 1h floor for uncer
 export const SRS_UNCERTAIN_MAX_MS = 7 * 24 * 60 * 60 * 1000; // 1-week ceiling for uncertain cards (scaled by certainty)
 export const SRS_UNCERTAIN_CAP_MS = SRS_UNCERTAIN_MIN_MS;  // legacy alias
 export const SRS_UNSPACED_RECOVERY_MS = SRS_UNCERTAIN_MIN_MS;
-// Guide steps tuned for an 8-week course: ramp 1→3→7→14 days then
-// confidence-scaled growth closes the gap to the 14-day cap.
-export const SRS_GUIDE_STEPS_DAYS = [1, 3, 7, 14];
+// Stabilization rule (in scheduler.js): "easy" caps at 1 day until the card
+// has 5+ recent flips AND ≥50% confidence. Then confidence-scaled growth
+// ramps 1 → 3 → 8 → 14 at top confidence rather than jumping to the cap.
 export const SRS_MAX_INTERVAL_DAYS = 14;
 export const SRS_NEAR_WINDOW_MS = 30 * 60 * 1000;
 export const SRS_CYCLE_ADVANCE_MS = 60 * 60 * 1000;
