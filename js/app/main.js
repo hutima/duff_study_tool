@@ -4479,6 +4479,173 @@ function buildTitleLadderHtml(xpData) {
   `;
 }
 
+function computeChapterMastery() {
+  const g2eMarks = globalWordMarks.g2e || {};
+  const isConfirmed = (card) => {
+    if (g2eMarks[card.id] === 'known') return true;
+    const pct = getConfidencePct(getWordProgress(card.id));
+    return pct !== null && pct >= 70;
+  };
+  return getAllChapterKeys().map(chKey => {
+    const cards = getChapterVocabCards(chKey, false);
+    const total = cards.length;
+    const confirmed = cards.filter(isConfirmed).length;
+    return { chapterKey: chKey, total, confirmed, pct: total ? confirmed / total : 0 };
+  });
+}
+
+function buildChapterGridHtml(mastery) {
+  if (!mastery.length) return '';
+  const tile = (row) => {
+    const pctRound = Math.round(row.pct * 100);
+    const label = `Ch. ${row.chapterKey}: ${row.confirmed} / ${row.total} (${pctRound}%)`;
+    let className = 'chapter-tile';
+    if (row.pct >= 0.9) className += ' tile-mastered';
+    else if (row.pct >= 0.7) className += ' tile-confirmed';
+    else if (row.pct > 0) className += ' tile-building';
+    else className += ' tile-empty';
+    return `<div class="${className}" title="${escapeHtml(label)}"><span class="chapter-tile-num">${escapeHtml(row.chapterKey)}</span><span class="chapter-tile-pct">${pctRound}%</span></div>`;
+  };
+  return `
+    <div class="analytics-chart-card chapter-grid-card">
+      <div class="analytics-chart-title">Chapter map</div>
+      <div class="chapter-grid">${mastery.map(tile).join('')}</div>
+      <div class="stacked-legend">
+        <span class="stacked-legend-item"><span class="stacked-legend-dot stacked-seg-100"></span>≥ 90%</span>
+        <span class="stacked-legend-item"><span class="stacked-legend-dot stacked-seg-50"></span>70–89%</span>
+        <span class="stacked-legend-item"><span class="stacked-legend-dot stacked-seg-0"></span>1–69%</span>
+        <span class="stacked-legend-item"><span class="stacked-legend-dot stacked-seg-unseen"></span>Unstarted</span>
+      </div>
+    </div>
+  `;
+}
+
+function computePersonalRecords(usage, sessionHistory, streaks, courseData) {
+  const longestSessionMs = sessionHistory.reduce((max, s) => Math.max(max, s.durationMs || 0), 0);
+
+  // Best day = day with most cards first-confirmed.
+  const byDay = {};
+  const mergeFirstConfirmed = (store) => {
+    Object.values(store || {}).forEach(entry => {
+      const ts = Number(entry?.firstConfirmedAt) || 0;
+      if (!ts) return;
+      const key = getUsageDayKey(ts);
+      byDay[key] = (byDay[key] || 0) + 1;
+    });
+  };
+  mergeFirstConfirmed(globalWordProgress.g2e);
+  mergeFirstConfirmed(globalWordProgress.e2g);
+  mergeFirstConfirmed(globalWordProgress.morph);
+  let bestDayCount = 0;
+  let bestDayKey = '';
+  Object.entries(byDay).forEach(([key, count]) => {
+    if (count > bestDayCount) { bestDayCount = count; bestDayKey = key; }
+  });
+
+  const totalConfirmed = courseData.allVocabConfirmed + (canAccessGrammarUi() ? courseData.allGrammarConfirmed : 0);
+  return {
+    longestSessionMs,
+    bestStreak: streaks.longest || 0,
+    bestDayCount,
+    bestDayKey,
+    totalConfirmed
+  };
+}
+
+function buildRecordsHtml(records) {
+  const items = [
+    { label: 'Longest session',  value: records.longestSessionMs ? formatUsageDuration(records.longestSessionMs) : '—', note: 'Active study, single sitting' },
+    { label: 'Best day',          value: records.bestDayCount ? `${records.bestDayCount} cards` : '—', note: records.bestDayKey ? `On ${formatAnalyticsDate(new Date(records.bestDayKey + 'T00:00:00').getTime())}` : 'First confirmations in a single day' },
+    { label: 'Best streak',       value: records.bestStreak ? `${records.bestStreak} day${records.bestStreak === 1 ? '' : 's'}` : '—', note: 'Longest consecutive run' },
+    { label: 'Cards confirmed',   value: records.totalConfirmed.toLocaleString(), note: 'Course-wide, all directions' }
+  ];
+  return `
+    <div class="analytics-chart-card records-card">
+      <div class="analytics-chart-title">Personal records</div>
+      <div class="records-grid">${items.map(it => `
+        <div class="records-cell">
+          <div class="records-value">${escapeHtml(it.value)}</div>
+          <div class="records-label">${escapeHtml(it.label)}</div>
+          <div class="records-note">${escapeHtml(it.note)}</div>
+        </div>
+      `).join('')}</div>
+    </div>
+  `;
+}
+
+function computeStubbornCards(cards, progressStore) {
+  return (cards || [])
+    .map(card => {
+      const p = progressStore?.[card.id];
+      if (!p) return null;
+      const fails = Number(p.failCount) || 0;
+      const passes = Number(p.passCount) || 0;
+      const seen = Number(p.seenCount) || 0;
+      if (fails < 2 || seen < 3) return null;
+      const total = fails + passes;
+      const failRate = total ? fails / total : 0;
+      return { card, fails, passes, seen, failRate };
+    })
+    .filter(Boolean)
+    .sort((a, b) => (b.fails - a.fails) || (b.failRate - a.failRate))
+    .slice(0, 5);
+}
+
+function buildStubbornListHtml(vocabRows, grammarRows) {
+  if (!vocabRows.length && !grammarRows.length) return '';
+  const renderRow = (row, kind) => {
+    const card = row.card;
+    const headword = kind === 'grammar'
+      ? `${card.form || card.lemma || '—'}${card.lemma && card.form && card.form !== card.lemma ? ` <span class="stubborn-lemma">(${escapeHtml(card.lemma)})</span>` : ''}`
+      : escapeHtml(card.g || '—');
+    const gloss = kind === 'grammar' ? (card.answer || card.gloss || '') : (card.e || '');
+    return `
+      <li class="stubborn-row">
+        <div class="stubborn-word">${headword}</div>
+        <div class="stubborn-gloss">${escapeHtml(gloss)}</div>
+        <div class="stubborn-stats">${row.fails} miss${row.fails === 1 ? '' : 'es'} · ${Math.round(row.failRate * 100)}% miss rate · ${row.seen} flips</div>
+      </li>
+    `;
+  };
+
+  const vocabSection = vocabRows.length ? `
+    <div class="stubborn-group">
+      <div class="stubborn-group-label">Stubborn vocabulary</div>
+      <ol class="stubborn-list">${vocabRows.map(r => renderRow(r, 'vocab')).join('')}</ol>
+    </div>
+  ` : '';
+  const grammarSection = grammarRows.length ? `
+    <div class="stubborn-group">
+      <div class="stubborn-group-label">Stubborn grammar</div>
+      <ol class="stubborn-list">${grammarRows.map(r => renderRow(r, 'grammar')).join('')}</ol>
+    </div>
+  ` : '';
+
+  return `
+    <div class="analytics-chart-card stubborn-card">
+      <div class="analytics-chart-title">Most stubborn in this selection</div>
+      <div class="stubborn-subtitle">Cards you've missed most — worth a focused pass.</div>
+      ${vocabSection}
+      ${grammarSection}
+    </div>
+  `;
+}
+
+function computeAtRiskCount(cards, progressStore) {
+  if (!cards?.length) return 0;
+  const now = Date.now();
+  let count = 0;
+  cards.forEach(card => {
+    const p = progressStore?.[card.id];
+    if (!p) return;
+    if (!p.dueAt || !p.firstConfirmedAt) return;
+    if (p.dueAt > now) return;
+    const pct = getConfidencePct(p);
+    if (pct === null || pct < 70) count++;
+  });
+  return count;
+}
+
 function renderAnalyticsOverlay() {
   const overlay = document.getElementById('analyticsOverlay'); if (!overlay) return;
   accumulateActiveStudyTime();
@@ -4594,6 +4761,20 @@ function renderAnalyticsOverlay() {
     `;
   }
 
+  // ── Chapter mastery grid (course-wide) ──
+  const chapterGridEl = document.getElementById('analyticsChapterGrid');
+  if (chapterGridEl) {
+    const mastery = computeChapterMastery();
+    chapterGridEl.innerHTML = mastery.length ? buildChapterGridHtml(mastery) : '';
+  }
+
+  // ── Personal records (course-wide) ──
+  const recordsEl = document.getElementById('analyticsRecords');
+  if (recordsEl) {
+    const records = computePersonalRecords(usage, sessionHistory, streaks, courseData);
+    recordsEl.innerHTML = buildRecordsHtml(records);
+  }
+
   // ── Heatmap ──
   const heatmapEl = document.getElementById('analyticsHeatmap');
   if (heatmapEl) {
@@ -4664,11 +4845,65 @@ function renderAnalyticsOverlay() {
   if (overallChartEl) overallChartEl.innerHTML = usageSeries.length ? buildLineChartSvg(usageSeries, { title: 'Cumulative active study time' }) : `<div class="analytics-empty">Start studying and this cumulative time chart will wake up.</div>`;
   if (sessionEl) sessionEl.textContent = latestSession ? `Latest session: ${formatAnalyticsDateTime(latestSession.startedAt)} \u2192 ${formatAnalyticsDateTime(latestSession.endedAt)} \u00B7 ${formatUsageDuration(latestSession.durationMs)} \u00B7 ${latestSession.interactionCount || 0} study actions` : 'No study session history yet.';
 
-  // ── Vocab section (untouched logic) ──
-  renderAnalyticsSection('analyticsVocabSection', { title: 'Vocabulary progress', subtitle: selectedKeys.length ? `${requiredOnly ? 'Required-only' : 'All selected'} vocabulary for the current selection` : 'Choose one or more vocabulary sets to populate this view.', total: vocabProgress.total, metrics: [ { label: 'Confirmed now', value: `${vocabProgress.currentConfirmed} / ${vocabProgress.total || 0}`, note: 'Marked known or ≥70% recent accuracy' }, { label: 'Weekly progress', value: `${vocabProgress.weeklyPct.toFixed(1)}%`, note: 'Share of selected vocabulary first confirmed in the last 7 days' }, { label: 'Avg active time / confirmed word', value: vocabProgress.currentConfirmed ? formatUsageDuration(activePerConfirmed) : '\u2014', note: 'Based on total active study time' }, { label: 'Projected completion', value: vocabProgress.currentConfirmed >= vocabProgress.total && vocabProgress.total ? 'Complete' : (vocabProjection ? formatAnalyticsDate(vocabProjection.projectedTs) : '\u2014'), note: vocabProjection ? `${vocabProjection.cardsPerDay.toFixed(2)} words/day regression` : 'Needs more recent progress data' } ], lineTitle: 'Cumulative confirmed vocabulary fraction', lineSvg: vocabProgress.series.length ? buildLineChartSvg(vocabProgress.series, { title: 'Vocabulary progress', percent: true, maxValue: 1 }) : `<div class="analytics-empty">No confirmed vocabulary history yet for this selection.</div>`, barTitle: 'Vocabulary confirmation % (last 10 flips)', barSvg: buildHistogramSvg(vocabBuckets, { title: 'Vocabulary confirmation %' }) });
+  // ── Current-selection subtitle (frames the section below) ──
+  const selectionSubtitleEl = document.getElementById('analyticsSelectionSubtitle');
+  if (selectionSubtitleEl) {
+    if (!selectedKeys.length) {
+      selectionSubtitleEl.textContent = 'Pick a session or chapter on the home screen to populate these stats.';
+    } else {
+      const scopeBit = requiredOnly ? 'Required-only (graded) vocabulary' : 'All vocabulary, graded + nice-to-haves';
+      const grammarBit = canAccessGrammarUi() ? ' plus the matching grammar drills' : '';
+      selectionSubtitleEl.textContent = `${scopeBit}${grammarBit} across ${selectedKeys.length} set${selectedKeys.length === 1 ? '' : 's'}.`;
+    }
+  }
 
-  // ── Grammar section (untouched logic) ──
-  renderAnalyticsSection('analyticsGrammarSection', { title: 'Grammar progress', subtitle: canAccessGrammarUi() ? 'Morphology and grammar items in the current selection' : 'Switch to the full vocabulary + grammar layout to track grammar progress here.', total: grammarProgress.total, metrics: [ { label: 'Confirmed now', value: `${grammarProgress.currentConfirmed} / ${grammarProgress.total || 0}`, note: 'Marked known or ≥70% recent accuracy' }, { label: 'Weekly progress', value: `${grammarProgress.weeklyPct.toFixed(1)}%`, note: 'Share first confirmed in the last 7 days' }, { label: 'Projected completion', value: grammarProgress.currentConfirmed >= grammarProgress.total && grammarProgress.total ? 'Complete' : (grammarProjection ? formatAnalyticsDate(grammarProjection.projectedTs) : '\u2014'), note: grammarProjection ? `${grammarProjection.cardsPerDay.toFixed(2)} items/day regression` : 'Needs more recent progress data' }, { label: 'Required toggle', value: requiredOnly ? 'Vocabulary only' : 'All vocabulary', note: 'Grammar totals are not filtered by required-only' } ], lineTitle: 'Cumulative confirmed grammar fraction', lineSvg: grammarProgress.series.length ? buildLineChartSvg(grammarProgress.series, { title: 'Grammar progress', percent: true, maxValue: 1 }) : `<div class="analytics-empty">No confirmed grammar history yet for this selection.</div>`, barTitle: 'Grammar confirmation % (last 10 flips)', barSvg: buildHistogramSvg(grammarBuckets, { title: 'Grammar confirmation %' }) });
+  // ── Vocab section (selection-scoped). Required-only IS the graded subset,
+  //    so the toggle is a real lever — surface it in the subtitle, not as a metric. ──
+  const vocabAtRisk = computeAtRiskCount(vocabCards, directionToGreek ? e2gProgressStore : g2eProgressStore);
+  renderAnalyticsSection('analyticsVocabSection', {
+    title: 'Vocabulary progress',
+    subtitle: selectedKeys.length
+      ? `${requiredOnly ? 'Required-only (graded) vocabulary' : 'All vocabulary, graded + nice-to-haves'} in the current selection`
+      : 'Choose one or more vocabulary sets to populate this view.',
+    total: vocabProgress.total,
+    metrics: [
+      { label: 'Confirmed now',     value: `${vocabProgress.currentConfirmed} / ${vocabProgress.total || 0}`, note: 'Marked known or ≥70% recent accuracy' },
+      { label: 'New this week',     value: `${vocabProgress.weeklyPct.toFixed(1)}%`, note: 'Share first confirmed in the last 7 days' },
+      { label: 'Slipping now',      value: `${vocabAtRisk}`, note: 'Confirmed before but accuracy now < 70%' },
+      { label: 'Projected finish',  value: vocabProgress.currentConfirmed >= vocabProgress.total && vocabProgress.total ? 'Complete' : (vocabProjection ? formatAnalyticsDate(vocabProjection.projectedTs) : '\u2014'), note: vocabProjection ? `${vocabProjection.cardsPerDay.toFixed(2)} words/day regression` : 'Needs more recent progress data' }
+    ],
+    lineTitle: 'Cumulative confirmed vocabulary fraction',
+    lineSvg: vocabProgress.series.length ? buildLineChartSvg(vocabProgress.series, { title: 'Vocabulary progress', percent: true, maxValue: 1 }) : `<div class="analytics-empty">No confirmed vocabulary history yet for this selection.</div>`,
+    barTitle: 'Vocabulary confirmation breakdown',
+    barSvg: buildHistogramSvg(vocabBuckets, { title: 'Vocabulary confirmation' })
+  });
+
+  // ── Grammar section (selection-scoped). All paradigms are required, so the
+  //    required-only toggle does not apply here — the 'Required toggle' pseudo-metric is gone. ──
+  const grammarAtRisk = computeAtRiskCount(grammarCards, morphProgressStore);
+  renderAnalyticsSection('analyticsGrammarSection', {
+    title: 'Grammar progress',
+    subtitle: canAccessGrammarUi() ? 'Morphology and grammar drills in the current selection. Paradigms are all required.' : 'Switch to the full vocabulary + grammar layout to track grammar progress here.',
+    total: grammarProgress.total,
+    metrics: [
+      { label: 'Confirmed now',    value: `${grammarProgress.currentConfirmed} / ${grammarProgress.total || 0}`, note: 'Marked known or ≥70% recent accuracy' },
+      { label: 'New this week',    value: `${grammarProgress.weeklyPct.toFixed(1)}%`, note: 'Share first confirmed in the last 7 days' },
+      { label: 'Slipping now',     value: `${grammarAtRisk}`, note: 'Confirmed before but accuracy now < 70%' },
+      { label: 'Projected finish', value: grammarProgress.currentConfirmed >= grammarProgress.total && grammarProgress.total ? 'Complete' : (grammarProjection ? formatAnalyticsDate(grammarProjection.projectedTs) : '\u2014'), note: grammarProjection ? `${grammarProjection.cardsPerDay.toFixed(2)} items/day regression` : 'Needs more recent progress data' }
+    ],
+    lineTitle: 'Cumulative confirmed grammar fraction',
+    lineSvg: grammarProgress.series.length ? buildLineChartSvg(grammarProgress.series, { title: 'Grammar progress', percent: true, maxValue: 1 }) : `<div class="analytics-empty">No confirmed grammar history yet for this selection.</div>`,
+    barTitle: 'Grammar confirmation breakdown',
+    barSvg: buildHistogramSvg(grammarBuckets, { title: 'Grammar confirmation' })
+  });
+
+  // ── Stubborn cards (selection-scoped, vocab + grammar) ──
+  const stubbornEl = document.getElementById('analyticsStubbornWords');
+  if (stubbornEl) {
+    const vocabStubborn = computeStubbornCards(vocabCards, directionToGreek ? e2gProgressStore : g2eProgressStore);
+    const grammarStubborn = canAccessGrammarUi() ? computeStubbornCards(grammarCards, morphProgressStore) : [];
+    stubbornEl.innerHTML = selectedKeys.length ? buildStubbornListHtml(vocabStubborn, grammarStubborn) : '';
+  }
 }
 
 document.addEventListener('keydown', e => {

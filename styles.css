@@ -1398,11 +1398,18 @@
   .analytics-metric-note,
   .analytics-section-head p,
   .analytics-session-summary,
-  .analytics-empty,
-  .analytics-axis-text {
+  .analytics-empty {
     color: var(--muted);
     font-size: 13px;
     line-height: 1.45;
+  }
+
+  /* SVG text scales with the viewBox, not with CSS pixels, so we use a
+     larger size here so date / value labels stay readable when an
+     860-wide viewBox is rendered into a ~400px-wide column on mobile. */
+  .analytics-axis-text {
+    fill: var(--muted);
+    font-size: 22px;
   }
 
   .analytics-section {
@@ -2087,6 +2094,130 @@
 
   html[data-theme="light"] .heatmap-svg rect[fill="rgba(255,255,255,0.02)"] {
     fill: rgba(0,0,0,0.02);
+  }
+
+  /* ── Chapter mastery grid (course-wide) ── */
+  .chapter-grid-card { margin-top: 12px; }
+  .chapter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+    gap: 6px;
+    margin: 8px 0 10px;
+  }
+  .chapter-tile {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    font-family: 'Cinzel', serif;
+    transition: transform 0.12s ease;
+  }
+  .chapter-tile-num {
+    font-size: 13px;
+    color: var(--cream);
+    letter-spacing: 0.5px;
+  }
+  .chapter-tile-pct {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+  }
+  .chapter-tile.tile-mastered  { background: rgba(102, 164, 120, 0.30); border-color: rgba(102, 164, 120, 0.55); }
+  .chapter-tile.tile-confirmed { background: rgba(201, 168, 76, 0.22); border-color: rgba(201, 168, 76, 0.55); }
+  .chapter-tile.tile-building  { background: rgba(166, 88, 88, 0.20); border-color: rgba(166, 88, 88, 0.50); }
+  .chapter-tile.tile-empty     { background: rgba(138, 143, 168, 0.10); }
+  .chapter-tile.tile-mastered .chapter-tile-pct,
+  .chapter-tile.tile-confirmed .chapter-tile-pct {
+    color: var(--cream);
+  }
+
+  /* ── Personal records strip ── */
+  .records-card { margin-top: 12px; }
+  .records-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+    margin-top: 6px;
+  }
+  .records-cell {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .records-value {
+    font-family: 'Cinzel', serif;
+    color: var(--gold-light);
+    font-size: 20px;
+    line-height: 1.1;
+  }
+  .records-label {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    color: var(--gold-dim);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+  .records-note {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 4px;
+    line-height: 1.35;
+  }
+
+  /* ── Stubborn words list ── */
+  .stubborn-card { margin-top: 12px; }
+  .stubborn-subtitle {
+    color: var(--muted);
+    font-size: 13px;
+    margin: 0 0 10px;
+  }
+  .stubborn-group-label {
+    font-family: 'Cinzel', serif;
+    color: var(--gold-dim);
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin: 10px 0 6px;
+  }
+  .stubborn-list {
+    list-style: decimal inside;
+    margin: 0;
+    padding: 0;
+  }
+  .stubborn-row {
+    border-bottom: 1px dashed rgba(201,168,76,0.12);
+    padding: 8px 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+  .stubborn-row:last-child { border-bottom: 0; }
+  .stubborn-word {
+    color: var(--cream);
+    font-weight: 600;
+  }
+  .stubborn-lemma {
+    color: var(--muted);
+    font-weight: 400;
+    font-size: 0.9em;
+  }
+  .stubborn-gloss {
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .stubborn-stats {
+    color: rgba(166, 88, 88, 0.85);
+    font-size: 12px;
+  }
+
+  html[data-theme="light"] .records-cell {
+    background: rgba(255,255,255,0.72);
   }
 
   /* ── Responsive ── */
