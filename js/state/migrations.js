@@ -26,6 +26,22 @@ function parseVocabId(id) {
   return null;
 }
 
+// Grammar/morph card IDs are content-keyed: the trailing segments encode
+// the lemma/form/answer (and prompt, for grammar) via stableGrammarKey, so
+// two cards with the same trailing fingerprint represent the same drill
+// even if the owning set was reorganized.
+const MORPH_ID_FORMAT = /^morph-([^-]+)-(\d+)-(\d+)-(.+)$/u;
+const GRAMMAR_ID_FORMAT = /^grammar-([^-]+)-(\d+)-(\d+)-(.+)$/u;
+
+function parseGrammarMorphId(id) {
+  const s = String(id || '');
+  let m = s.match(MORPH_ID_FORMAT);
+  if (m) return { kind: 'morph', fingerprint: m[4] };
+  m = s.match(GRAMMAR_ID_FORMAT);
+  if (m) return { kind: 'grammar', fingerprint: m[4] };
+  return null;
+}
+
 function getCurrentVocabCardIds() {
   const ids = new Set();
   const byStableKey = new Map();
@@ -119,6 +135,19 @@ export function isLegacyOrphanedMorphId(id, validIds = null) {
   const liveIds = validIds || getCurrentGrammarAndMorphCardIdSet();
   if (!liveIds.size) return false;
   return !liveIds.has(String(id));
+}
+
+function getCurrentGrammarMorphMaps() {
+  const ids = getCurrentGrammarAndMorphCardIdSet();
+  const byFingerprint = new Map();
+  ids.forEach(id => {
+    const parsed = parseGrammarMorphId(id);
+    if (!parsed) return;
+    const key = `${parsed.kind}|${parsed.fingerprint}`;
+    if (!byFingerprint.has(key)) byFingerprint.set(key, []);
+    byFingerprint.get(key).push(id);
+  });
+  return { ids, byFingerprint };
 }
 
 export function summarizePersistedState(state) {
@@ -224,29 +253,49 @@ export const STATE_MIGRATIONS = [
   },
 
   {
-    name: 'grammar-consolidation-clear-orphans',
+    // Drop grammar/morph card entries whose set was deprecated. If a live
+    // card carries the same lemma/form/answer fingerprint (the trailing
+    // content portion of the id), the orphan's counters are merged into
+    // it so grammar study history survives module reorganization.
+    name: 'grammar-orphans-cleanup-and-merge',
     match(saved) {
-      const liveIds = getCurrentGrammarAndMorphCardIdSet();
+      const { ids } = getCurrentGrammarMorphMaps();
+      if (!ids.size) return false;
       const buckets = [
         saved.globalWordMarks?.morph,
         saved.globalWordProgress?.morph,
       ];
-      return buckets.some(bucket => bucket && Object.keys(bucket).some(id =>
-        isLegacyOrphanedMorphId(id, liveIds)
-      ));
+      return buckets.some(bucket => bucket && Object.keys(bucket).some(id => {
+        const parsed = parseGrammarMorphId(id);
+        return !!parsed && !ids.has(id);
+      }));
     },
     migrate(saved) {
-      const liveIds = getCurrentGrammarAndMorphCardIdSet();
-      const dropOrphans = (bucket) => {
+      const { ids: liveIds, byFingerprint } = getCurrentGrammarMorphMaps();
+      if (!liveIds.size) return saved;
+
+      const reconcileBucket = (bucket, merge) => {
         if (!bucket) return bucket;
-        const next = {};
+        const next = { ...bucket };
         Object.keys(bucket).forEach(id => {
-          if (!isLegacyOrphanedMorphId(id, liveIds)) next[id] = bucket[id];
+          const parsed = parseGrammarMorphId(id);
+          if (!parsed) return;
+          if (liveIds.has(id)) return;
+          const targets = byFingerprint.get(`${parsed.kind}|${parsed.fingerprint}`) || [];
+          targets.forEach(targetId => {
+            next[targetId] = merge(next[targetId], bucket[id]);
+          });
+          delete next[id];
         });
         return next;
       };
-      if (saved.globalWordMarks?.morph) saved.globalWordMarks.morph = dropOrphans(saved.globalWordMarks.morph);
-      if (saved.globalWordProgress?.morph) saved.globalWordProgress.morph = dropOrphans(saved.globalWordProgress.morph);
+
+      if (saved.globalWordMarks?.morph) {
+        saved.globalWordMarks.morph = reconcileBucket(saved.globalWordMarks.morph, mergeMark);
+      }
+      if (saved.globalWordProgress?.morph) {
+        saved.globalWordProgress.morph = reconcileBucket(saved.globalWordProgress.morph, mergeProgressEntry);
+      }
       saved.deckStates = {};
       return saved;
     }
