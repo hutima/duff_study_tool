@@ -2605,7 +2605,7 @@ function renderCard() {
         resultHtml = `<div class="morph-result ${resultClass}">
             <div class="morph-result-title">${resultTitle}</div>
             <div class="morph-result-body">${resultBody}</div>
-            <div class="morph-result-meta">${card.lemma}${card.gloss ? ` · “${card.gloss}”` : ''}${card.family ? ` · ${card.family}` : ''}</div>
+            <div class="morph-result-meta">${card.lemma}${card.family ? ` · ${card.family}` : ''}</div>
             ${buildGrammarSupportHtml(card, null, { reversed })}
             ${noteHtml}
           </div>${ratingHtml}`;
@@ -2639,7 +2639,7 @@ function renderCard() {
         ? `<div class="morph-result ${morphAnswerState.isCorrect ? 'correct' : 'incorrect'}">
             <div class="morph-result-title">${morphAnswerState.isCorrect ? 'Correct' : 'Not quite'}</div>
             <div class="morph-result-body">${resultBody}</div>
-            <div class="morph-result-meta">${card.lemma}${card.gloss ? ` · “${card.gloss}”` : ''}${card.family ? ` · ${card.family}` : ''}</div>
+            <div class="morph-result-meta">${card.lemma}${card.family ? ` · ${card.family}` : ''}</div>
             ${buildGrammarSupportHtml(card, wrongChoice, { reversed })}
             ${noteHtml}
           </div>`
@@ -2650,7 +2650,7 @@ function renderCard() {
       <div class="morph-card">
         <div class="morph-label">Grammar${reversed ? ' · English → Greek' : ''}</div>
         <div class="morph-prompt">${displayPrompt}</div>
-        ${card.gloss ? `<div class="morph-gloss">Gloss: “${card.gloss}”</div>` : ''}
+        ${card.lemmaGloss || card.gloss ? `<div class="morph-gloss">Gloss: “${card.lemmaGloss || card.gloss}”</div>` : ''}
         <div class="${formClass}">${displayForm}</div>
         ${contextHtml}
         <div class="morph-hint">${card.lemma}</div>

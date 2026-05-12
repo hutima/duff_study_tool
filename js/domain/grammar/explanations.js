@@ -69,8 +69,8 @@ export function getGrammarExplanation(card) {
   if (!answer) return '';
 
   if (/parse|identify this form|parse this article|parse this relative pronoun|parse this form of/i.test(prompt)) {
-    if (card.gloss && !/\(/.test(answer)) {
-      return `Plain English: ${answer}. The form means "${card.gloss}."`;
+    if (card.gloss) {
+      return `Plain English: “${card.gloss}.”`;
     }
     return `Plain English: ${answer}.`;
   }

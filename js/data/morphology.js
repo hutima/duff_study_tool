@@ -186,6 +186,7 @@
             family: item.family,
             lemma: item.lemma,
             gloss: q.gloss || item.gloss,
+            lemmaGloss: item.gloss,
             form: q.form,
             prompt: 'Parse this form.',
             context: q.context || '',
