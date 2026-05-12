@@ -9,6 +9,67 @@
 
   const TENSE_PREFIX_REGEX = /^(1st Aorist [A-Za-z]+|2nd Aorist [A-Za-z]+|Aorist Passive|Present|Future|Imperfect|Aorist|Perfect|Pluperfect)\s*:\s*/;
 
+  // Lowercases and reorders parsing components so every answer follows the
+  // same shape: [qualifier|tense] [voice] [mood] [person] [case] [number] [gender]
+  // matching the canonical format used by the chapter morphology sets.
+  function canonicalizePart(text) {
+    if (!text) return '';
+    let t = String(text).toLowerCase();
+    t = t
+      .replace(/\b1st\b/g, 'first')
+      .replace(/\b2nd\b/g, 'second')
+      .replace(/\b3rd\b/g, 'third')
+      .replace(/\bsg\./g, 'singular')
+      .replace(/\bpl\./g, 'plural')
+      .replace(/\bnom\./g, 'nominative')
+      .replace(/\bacc\./g, 'accusative')
+      .replace(/\bgen\./g, 'genitive')
+      .replace(/\bdat\./g, 'dative')
+      .replace(/\bvoc\./g, 'vocative')
+      .replace(/\bmasc\./g, 'masculine')
+      .replace(/\bfem\./g, 'feminine')
+      .replace(/\bneut\./g, 'neuter')
+      .replace(/,/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    const find = (re) => {
+      const m = t.match(re);
+      return m ? m[0].trim() : '';
+    };
+
+    const qualifier = find(/\b(first aorist|second aorist)\b/);
+    const tense = find(/\b(present|future|imperfect|aorist|perfect|pluperfect)\b/);
+    const voice = find(/\b(middle\/passive|middle or passive|active|middle|passive)\b/);
+    const mood = find(/\b(indicative|subjunctive|imperative|infinitive|participle)\b/);
+    const person = find(/\b(first|second|third) person\b/);
+    const number = find(/\b(singular|plural)\b/);
+    const casePart = find(/\b(nominative|accusative|genitive|dative|vocative)(?:\/(?:nominative|accusative|genitive|dative|vocative))*\b/);
+    const genderPart = find(/\b(masculine|feminine|neuter)(?:\/(?:masculine|feminine|neuter))*\b/);
+
+    const out = [];
+    if (qualifier) out.push(qualifier);
+    else if (tense) out.push(tense);
+    if (voice) out.push(voice);
+    if (mood) out.push(mood);
+    if (person) out.push(person);
+    if (casePart) out.push(casePart);
+    if (number) out.push(number);
+    if (genderPart) out.push(genderPart);
+
+    const canonical = out.join(' ').trim();
+    return canonical || t;
+  }
+
+  function canonicalizeAnswer(answer) {
+    if (!answer) return '';
+    return String(answer)
+      .split(/\s*;\s*/)
+      .map(canonicalizePart)
+      .filter(Boolean)
+      .join('; ');
+  }
+
   function extractParsing(eText) {
     if (!eText) return null;
     const text = String(eText).trim();
@@ -43,6 +104,31 @@
     return text;
   }
 
+  // Strips the parsing parenthetical and any leading tense label so we keep
+  // just the case-appropriate English meaning of the form (e.g.
+  // "of the beginning" for the genitive of ἀρχή).
+  function extractCardGloss(card) {
+    if (!card || !card.e) return '';
+    let gloss = String(card.e).replace(/\s*\([^)]*\)\s*/g, ' ').trim();
+    gloss = gloss
+      .replace(/^(Present|Future|Imperfect|Aorist|Perfect|Pluperfect|1st [Aa]orist|2nd [Aa]orist)\s*:\s*/i, '')
+      .trim();
+    return gloss;
+  }
+
+  // Item-level fallback: pick the first card's gloss as the lemma's general
+  // meaning, used when a particular question has no per-form gloss.
+  function extractLemmaGloss(set) {
+    if (!Array.isArray(set.cards)) return '';
+    for (const card of set.cards) {
+      if (!card || !card.g) continue;
+      if (/[→]/.test(String(card.g).trim())) continue;
+      const gloss = extractCardGloss(card);
+      if (gloss) return gloss;
+    }
+    return '';
+  }
+
   function buildMorphologyForSet(key, set) {
     if (!set || !Array.isArray(set.cards) || set.cards.length === 0) return null;
 
@@ -54,10 +140,13 @@
       // Stem-pair entries like "βάλλω → ἔβαλον" are study notes, not parseable
       // single forms — skip them so the quiz prompts a real Greek form.
       if (/[→]/.test(form)) return;
-      const answer = extractParsing(card.e);
+      const rawAnswer = extractParsing(card.e);
+      if (!rawAnswer) return;
+      const answer = canonicalizeAnswer(rawAnswer);
       if (!answer) return;
+      const gloss = extractCardGloss(card);
       seenForms.add(form);
-      questions.push({ form, answer });
+      questions.push({ form, answer, gloss });
     });
 
     if (questions.length < 2) return null;
@@ -65,6 +154,7 @@
     if (distinctAnswers.size < 2) return null;
 
     const lemma = extractLemma(set.label) || key;
+    const gloss = extractLemmaGloss(set);
     return {
       label: set.label || key,
       week: set.week ?? null,
@@ -72,7 +162,7 @@
         {
           family: set.label || key,
           lemma,
-          gloss: '',
+          gloss,
           questions
         }
       ]
