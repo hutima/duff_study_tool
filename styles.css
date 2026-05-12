@@ -461,6 +461,9 @@
   .mark-row {
     display: flex; gap: 10px; justify-content: center; margin-bottom: 24px;
   }
+  .ff-row {
+    display: flex; gap: 10px; justify-content: center; margin-bottom: 24px; flex-wrap: wrap;
+  }
   .mark-btn {
     font-family: 'EB Garamond', serif; font-size: 14px;
     padding: 8px 20px; border-radius: 6px; cursor: pointer;
