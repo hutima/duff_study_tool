@@ -48,12 +48,16 @@ export function normalizeGrammarAnswerText(answer) {
     .replace(/\b1st\b/g, 'first')
     .replace(/\b2nd\b/g, 'second')
     .replace(/\b3rd\b/g, 'third')
-    .replace(/\bsg\./g, 'singular')
-    .replace(/\bpl\./g, 'plural')
-    .replace(/\bnom\./g, 'nominative')
-    .replace(/\bgen\./g, 'genitive')
-    .replace(/\bdat\./g, 'dative')
-    .replace(/\bacc\./g, 'accusative')
+    .replace(/\bsg\./gi, 'singular')
+    .replace(/\bpl\./gi, 'plural')
+    .replace(/\bnom\./gi, 'nominative')
+    .replace(/\bgen\./gi, 'genitive')
+    .replace(/\bdat\./gi, 'dative')
+    .replace(/\bacc\./gi, 'accusative')
+    .replace(/\bvoc\./gi, 'vocative')
+    .replace(/\bmasc\./gi, 'masculine')
+    .replace(/\bfem\./gi, 'feminine')
+    .replace(/\bneut\./gi, 'neuter')
     .replace(/\s+/g, ' ')
     .trim();
 }
@@ -66,7 +70,7 @@ export function getGrammarExplanation(card) {
 
   if (/parse|identify this form|parse this article|parse this relative pronoun|parse this form of/i.test(prompt)) {
     if (card.gloss && !/\(/.test(answer)) {
-      return `Plain English: ${answer}. The lemma means "${card.gloss}."`;
+      return `Plain English: ${answer}. The form means "${card.gloss}."`;
     }
     return `Plain English: ${answer}.`;
   }

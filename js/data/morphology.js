@@ -185,7 +185,7 @@
             chapter: Number(selection.baseKey),
             family: item.family,
             lemma: item.lemma,
-            gloss: item.gloss,
+            gloss: q.gloss || item.gloss,
             form: q.form,
             prompt: 'Parse this form.',
             context: q.context || '',
