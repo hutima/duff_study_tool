@@ -985,6 +985,13 @@ function getKnownCount() {
   return originalDeck.filter(card => marks[card.id] === 'known').length;
 }
 
+function getHighConfidenceCount() {
+  return originalDeck.filter(card => {
+    const pct = getConfidencePct(getWordProgress(card.id));
+    return pct !== null && pct > 75;
+  }).length;
+}
+
 function getRemainingCards() {
   if (spacedRepetition) {
     return deck.slice(0, activeDeckCount);
@@ -3217,7 +3224,7 @@ function renderReview() {
   const panel = document.getElementById('reviewPanel');
   panel.classList.add('show');
 
-  const knownCount = getKnownCount();
+  const knownCount = getHighConfidenceCount();
   const unsureCount = originalDeck.filter(card => marks[card.id] === 'unsure').length;
   const remainingCount = Math.max(originalDeck.length - knownCount, 0);
   const aggregateStats = getDeckAggregateStats(originalDeck);
