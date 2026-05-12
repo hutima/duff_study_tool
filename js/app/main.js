@@ -326,6 +326,7 @@ function syncLayoutVisibility() {
   const controlsBar = document.getElementById('controlsBar');
   const navRow = document.getElementById('navRow');
   const markRow = document.getElementById('markRow');
+  const ffRow = document.getElementById('ffRow');
   const prevBtn = navRow ? navRow.querySelector('.nav-prev') : null;
   const nextBtn = navRow ? navRow.querySelector('.nav-next') : null;
   const undoBtn = document.getElementById('spacedUndoBtn');
@@ -343,6 +344,7 @@ function syncLayoutVisibility() {
   if (reviewShell) reviewShell.style.display = reviewDeckMode ? '' : 'none';
   if (navRow) navRow.style.display = reviewDeckMode && selectedKeys.length ? 'flex' : 'none';
   if (markRow) markRow.style.display = reviewDeckMode && selectedKeys.length && !isMorphologyMode() ? 'flex' : 'none';
+  if (ffRow) ffRow.style.display = reviewDeckMode && selectedKeys.length && !isMorphologyMode() && spacedRepetition ? 'flex' : 'none';
   if (directionToggle) directionToggle.style.display = (studyMode === 'vocab' || studyMode === 'morph') ? 'flex' : 'none';
   if (requiredToggle) requiredToggle.style.display = studyMode === 'vocab' ? 'flex' : 'none';
   if (selfCheckToggle) selfCheckToggle.style.display = isMorphologyMode() && canAccessGrammarUi() ? 'flex' : 'none';
