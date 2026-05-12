@@ -73,6 +73,7 @@ let transferSecondaryAction = null;
 let usageTickHandle = null;
 let usageVisibilityBound = false;
 let usageTickCounter = 0;
+let analyticsExpandedChapter = null;
 let studyMode = 'vocab';
 let levelToastHideTimer = null;
 let levelToastRemoveTimer = null;
@@ -3717,9 +3718,10 @@ function installTouchSafeTapBridge() {
   document.addEventListener('click', suppressNativeFollowupClick, true);
 }
 
-function backfillConfirmedMilestones(cards, marksStore) {
+function backfillConfirmedMilestones(cards, marksStore, progressStore) {
   (cards || []).forEach(card => {
-    const progress = getWordProgress(card.id);
+    const progress = progressStore?.[card.id];
+    if (!progress) return;
     if (!progress.firstSeenAt && progress.lastReviewedAt) progress.firstSeenAt = progress.lastReviewedAt;
     if (!progress.firstConfirmedAt && marksStore?.[card.id] === 'known' && progress.lastReviewedAt) progress.firstConfirmedAt = progress.lastReviewedAt;
   });
@@ -3744,14 +3746,14 @@ function buildDailyCumulativeSeriesFromMap(dailyMap, startTs = 0) {
   return series;
 }
 
-function buildCumulativeConfirmationSeries(cards, marksStore) {
+function buildCumulativeConfirmationSeries(cards, marksStore, progressStore) {
   const total = (cards || []).length;
   if (!total) return { total: 0, currentConfirmed: 0, weeklyPct: 0, series: [] };
-  backfillConfirmedMilestones(cards, marksStore);
-  const confirmedTimes = cards.map(card => getWordProgress(card.id).firstConfirmedAt || 0).filter(Boolean).sort((a, b) => a - b);
+  backfillConfirmedMilestones(cards, marksStore, progressStore);
+  const confirmedTimes = cards.map(card => progressStore?.[card.id]?.firstConfirmedAt || 0).filter(Boolean).sort((a, b) => a - b);
   const currentConfirmed = (cards || []).filter(card => {
     if (marksStore?.[card.id] === 'known') return true;
-    const p = getWordProgress(card.id);
+    const p = progressStore?.[card.id];
     const pct = getConfidencePct(p);
     return pct !== null && pct >= 70;
   }).length;
@@ -3798,30 +3800,33 @@ function getRegressionProjection(series, currentCount, totalCount) {
   return projectedTs >= Date.now() ? { cardsPerDay: slope, projectedTs } : null;
 }
 
-function getCertaintyBucketForCard(card, marksStore) {
-  const progress = getWordProgress(card.id);
+function getCertaintyBucketForCard(card, marksStore, progressStore) {
+  const progress = progressStore?.[card.id];
   const confidence = getConfidencePct(progress);
-  if ((!progress.seenCount && confidence === null) && marksStore?.[card.id] !== 'known') return 'unseen';
+  if ((!progress?.seenCount && confidence === null) && marksStore?.[card.id] !== 'known') return 'unseen';
   if (marksStore?.[card.id] === 'known') return '100';
-  if (confidence === null) return progress.seenCount ? '0' : 'unseen';
+  if (confidence === null) return progress?.seenCount ? '0' : 'unseen';
   if (confidence >= 80) return '100';
   if (confidence >= 25) return '50';
   return '0';
 }
 
-function buildCertaintyBuckets(cards, marksStore) {
+function buildCertaintyBuckets(cards, marksStore, progressStore) {
   const buckets = { unseen: 0, '0': 0, '50': 0, '100': 0 };
-  (cards || []).forEach(card => { buckets[getCertaintyBucketForCard(card, marksStore)] += 1; });
+  (cards || []).forEach(card => { buckets[getCertaintyBucketForCard(card, marksStore, progressStore)] += 1; });
   return buckets;
 }
 
-// Returns array of 11 counts: [unseen, 0-9%, 10-19%, ..., 90-100%]
-function buildConfirmationHistogram(cards) {
+// Returns array of 11 counts: [unseen, 0-9%, 10-19%, ..., 90-100%].
+// Accepts an explicit progressStore so analytics can be computed for a card
+// kind that doesn't match the current study mode (e.g. inspecting vocab stats
+// while in grammar mode).
+function buildConfirmationHistogram(cards, progressStore) {
   const counts = new Array(11).fill(0);
   (cards || []).forEach(card => {
-    const progress = getWordProgress(card.id);
+    const progress = progressStore?.[card.id];
     const pct = getConfidencePct(progress);
-    if (pct === null && !progress.seenCount) {
+    if (pct === null && !progress?.seenCount) {
       counts[0]++;
     } else {
       const p = pct === null ? 0 : pct;
@@ -3832,24 +3837,32 @@ function buildConfirmationHistogram(cards) {
 }
 
 // Roll the 11-bucket confidence histogram (unseen, 0-9%, ..., 90-100%) into
-// a four-band stacked horizontal bar so the story reads at a glance instead
-// of as eleven thin columns. Bands map to the same color language used by
-// the certainty stacked bar (unseen/hard/uncertain/easy).
+// six bands — five 20%-wide confidence bands plus Unseen — so the gradient
+// shows more granularity than the older three-band (Building/Confirmed/
+// Mastered) collapse while still reading at a glance.
 function buildHistogramSvg(counts, options = {}) {
   const safe = Array.isArray(counts) ? counts : [];
   const unseen = safe[0] || 0;
-  let building = 0;   // 0-69%
-  let confirmed = 0;  // 70-89%
-  let mastered = 0;   // 90-100%
-  for (let i = 1; i <= 7; i++) building += safe[i] || 0;
-  for (let i = 8; i <= 9; i++) confirmed += safe[i] || 0;
-  mastered += safe[10] || 0;
+  // Bucket index i ∈ [1..10] maps to confidence range [(i-1)*10, i*10)%.
+  // Pair them up into 20% bands.
+  const band = (loIdx, hiIdx) => {
+    let total = 0;
+    for (let i = loIdx; i <= hiIdx; i++) total += safe[i] || 0;
+    return total;
+  };
+  const b0_20  = band(1, 2);
+  const b20_40 = band(3, 4);
+  const b40_60 = band(5, 6);
+  const b60_80 = band(7, 8);
+  const b80_100 = band(9, 10);
 
   const segments = [
-    { label: 'Mastered',  range: '90–100%', count: mastered,  className: 'stacked-seg-100' },
-    { label: 'Confirmed', range: '70–89%',  count: confirmed, className: 'stacked-seg-50' },
-    { label: 'Building',  range: '0–69%',   count: building,  className: 'stacked-seg-0' },
-    { label: 'Unseen',    range: 'no data',      count: unseen,    className: 'stacked-seg-unseen' }
+    { label: '80–100%', range: '80–100%', count: b80_100, className: 'stacked-seg-b80' },
+    { label: '60–80%',  range: '60–80%',  count: b60_80,  className: 'stacked-seg-b60' },
+    { label: '40–60%',  range: '40–60%',  count: b40_60,  className: 'stacked-seg-b40' },
+    { label: '20–40%',  range: '20–40%',  count: b20_40,  className: 'stacked-seg-b20' },
+    { label: '0–20%',   range: '0–20%',   count: b0_20,   className: 'stacked-seg-b0'  },
+    { label: 'Unseen',  range: 'no data', count: unseen,  className: 'stacked-seg-unseen' }
   ];
   const total = segments.reduce((sum, s) => sum + s.count, 0);
   if (!total) {
@@ -4319,18 +4332,21 @@ function computeCourseWideData() {
   const reqVocab = getAllVocabCards(true);
   const allGrammar = getAllGrammarCards();
 
-  // Use g2e marks as the canonical direction for course completion
+  // Use g2e marks/progress as the canonical direction for course completion;
+  // grammar uses the morph store regardless of which mode is currently active.
   const g2eMarks = globalWordMarks.g2e || {};
   const morphMarks = globalWordMarks.morph || {};
+  const g2eProgress = globalWordProgress.g2e || {};
+  const morphProgress = globalWordProgress.morph || {};
 
-  const isEffectivelyConfirmed = (card, marks) => {
+  const isEffectivelyConfirmed = (card, marks, store) => {
     if (marks[card.id] === 'known') return true;
-    const pct = getConfidencePct(getWordProgress(card.id));
+    const pct = getConfidencePct(store?.[card.id]);
     return pct !== null && pct >= 70;
   };
-  const allVocabConfirmed = allVocab.filter(c => isEffectivelyConfirmed(c, g2eMarks)).length;
-  const reqVocabConfirmed = reqVocab.filter(c => isEffectivelyConfirmed(c, g2eMarks)).length;
-  const allGrammarConfirmed = allGrammar.filter(c => isEffectivelyConfirmed(c, morphMarks)).length;
+  const allVocabConfirmed = allVocab.filter(c => isEffectivelyConfirmed(c, g2eMarks, g2eProgress)).length;
+  const reqVocabConfirmed = reqVocab.filter(c => isEffectivelyConfirmed(c, g2eMarks, g2eProgress)).length;
+  const allGrammarConfirmed = allGrammar.filter(c => isEffectivelyConfirmed(c, morphMarks, morphProgress)).length;
 
   return {
     allVocabTotal: allVocab.length,
@@ -4479,11 +4495,12 @@ function buildTitleLadderHtml(xpData) {
   `;
 }
 
-function computeChapterMastery() {
-  const g2eMarks = globalWordMarks.g2e || {};
+function computeChapterMastery(progressStore, marksStore) {
+  const marks = marksStore || globalWordMarks.g2e || {};
+  const store = progressStore || globalWordProgress.g2e || {};
   const isConfirmed = (card) => {
-    if (g2eMarks[card.id] === 'known') return true;
-    const pct = getConfidencePct(getWordProgress(card.id));
+    if (marks[card.id] === 'known') return true;
+    const pct = getConfidencePct(store?.[card.id]);
     return pct !== null && pct >= 70;
   };
   return getAllChapterKeys().map(chKey => {
@@ -4496,15 +4513,17 @@ function computeChapterMastery() {
 
 function buildChapterGridHtml(mastery) {
   if (!mastery.length) return '';
+  const expandedKey = analyticsExpandedChapter || '';
   const tile = (row) => {
     const pctRound = Math.round(row.pct * 100);
-    const label = `Ch. ${row.chapterKey}: ${row.confirmed} / ${row.total} (${pctRound}%)`;
+    const label = `Ch. ${row.chapterKey}: ${row.confirmed} / ${row.total} (${pctRound}%) — tap for word stats`;
     let className = 'chapter-tile';
     if (row.pct >= 0.9) className += ' tile-mastered';
     else if (row.pct >= 0.7) className += ' tile-confirmed';
     else if (row.pct > 0) className += ' tile-building';
     else className += ' tile-empty';
-    return `<div class="${className}" title="${escapeHtml(label)}"><span class="chapter-tile-num">${escapeHtml(row.chapterKey)}</span><span class="chapter-tile-pct">${pctRound}%</span></div>`;
+    if (String(row.chapterKey) === expandedKey) className += ' chapter-tile-active';
+    return `<button type="button" class="${className}" data-chapter="${escapeHtml(String(row.chapterKey))}" title="${escapeHtml(label)}" aria-expanded="${String(row.chapterKey) === expandedKey ? 'true' : 'false'}"><span class="chapter-tile-num">${escapeHtml(row.chapterKey)}</span><span class="chapter-tile-pct">${pctRound}%</span></button>`;
   };
   return `
     <div class="analytics-chart-card chapter-grid-card">
@@ -4516,8 +4535,115 @@ function buildChapterGridHtml(mastery) {
         <span class="stacked-legend-item"><span class="stacked-legend-dot stacked-seg-0"></span>1–69%</span>
         <span class="stacked-legend-item"><span class="stacked-legend-dot stacked-seg-unseen"></span>Unstarted</span>
       </div>
+      <div class="chapter-detail-panel${expandedKey ? ' open' : ''}" id="chapterDetailPanel">${expandedKey ? buildChapterDetailHtml(expandedKey) : ''}</div>
     </div>
   `;
+}
+
+// ── Per-chapter word breakdown (shown when a chapter tile is tapped) ──
+// Reads the same g2e marks/progress as the chapter map so the headline %
+// and the per-word % match. Sorted weakest → strongest so it doubles as
+// a "what to drill next" list.
+function buildChapterDetailHtml(chapterKey) {
+  if (!chapterKey) return '';
+  const cards = getChapterVocabCards(String(chapterKey), false);
+  if (!cards.length) return `<div class="analytics-empty">No vocabulary for Ch. ${escapeHtml(String(chapterKey))} yet.</div>`;
+  const marks = globalWordMarks.g2e || {};
+  const store = globalWordProgress.g2e || {};
+  const required = cards.filter(c => c.required).length;
+  const headwordOf = (card) => typeof formatGreekHeadword === 'function' ? formatGreekHeadword(card.g) : (card.g || '—');
+
+  // Each row gets a confidence band that mirrors the headline histogram.
+  const rowFor = (card) => {
+    const progress = store[card.id];
+    const isKnownMark = marks[card.id] === 'known';
+    const rawPct = getConfidencePct(progress);
+    const seen = !!(progress?.seenCount) || !!progress?.lastReviewedAt;
+    let bandClass;
+    let bandLabel;
+    let pctText;
+    let sortPct;
+    if (!seen && rawPct === null && !isKnownMark) {
+      bandClass = 'stacked-seg-unseen'; bandLabel = 'Unseen'; pctText = '—'; sortPct = -1;
+    } else {
+      const pct = isKnownMark ? Math.max(100, rawPct ?? 100) : (rawPct ?? 0);
+      sortPct = pct;
+      pctText = `${pct}%`;
+      if (pct >= 80)      bandClass = 'stacked-seg-b80';
+      else if (pct >= 60) bandClass = 'stacked-seg-b60';
+      else if (pct >= 40) bandClass = 'stacked-seg-b40';
+      else if (pct >= 20) bandClass = 'stacked-seg-b20';
+      else                bandClass = 'stacked-seg-b0';
+    }
+    return {
+      card, bandClass, bandLabel, pctText, sortPct,
+      isConfirmed: isKnownMark || (rawPct !== null && rawPct >= 70)
+    };
+  };
+  const rows = cards.map(rowFor);
+  rows.sort((a, b) => {
+    if (a.sortPct !== b.sortPct) return a.sortPct - b.sortPct;
+    return (a.card.g || '').localeCompare(b.card.g || '');
+  });
+  const confirmedCount = rows.filter(r => r.isConfirmed).length;
+  const headlinePct = cards.length ? Math.round((confirmedCount / cards.length) * 100) : 0;
+
+  const rowHtml = rows.map(r => `
+    <li class="chapter-detail-row">
+      <span class="chapter-detail-dot ${r.bandClass}" aria-hidden="true"></span>
+      <span class="chapter-detail-word">${headwordOf(r.card)}</span>
+      <span class="chapter-detail-gloss">${escapeHtml(r.card.e || '')}</span>
+      <span class="chapter-detail-pct">${escapeHtml(r.pctText)}</span>
+    </li>
+  `).join('');
+
+  return `
+    <div class="chapter-detail-head">
+      <div class="chapter-detail-title">Ch. ${escapeHtml(String(chapterKey))} — ${confirmedCount} / ${cards.length} confirmed <span class="chapter-detail-meta">${headlinePct}%${required ? ` · ${required} required` : ''}</span></div>
+      <button type="button" class="chapter-detail-close" data-chapter-close="1" aria-label="Close chapter details">×</button>
+    </div>
+    <ol class="chapter-detail-list">${rowHtml}</ol>
+  `;
+}
+
+function renderChapterDetailPanel() {
+  const panel = document.getElementById('chapterDetailPanel');
+  if (!panel) return;
+  if (!analyticsExpandedChapter) {
+    panel.innerHTML = '';
+    panel.classList.remove('open');
+    return;
+  }
+  panel.innerHTML = buildChapterDetailHtml(analyticsExpandedChapter);
+  panel.classList.add('open');
+}
+
+function setupChapterGridInteractivity(rootEl) {
+  if (!rootEl || rootEl.dataset.chapterClickBound === '1') return;
+  rootEl.dataset.chapterClickBound = '1';
+  rootEl.addEventListener('click', (event) => {
+    const closeBtn = event.target.closest('[data-chapter-close]');
+    if (closeBtn) {
+      analyticsExpandedChapter = null;
+      rootEl.querySelectorAll('.chapter-tile').forEach(t => {
+        t.classList.remove('chapter-tile-active');
+        t.setAttribute('aria-expanded', 'false');
+      });
+      renderChapterDetailPanel();
+      return;
+    }
+    const tile = event.target.closest('.chapter-tile');
+    if (!tile || !rootEl.contains(tile)) return;
+    const key = tile.dataset.chapter || '';
+    if (!key) return;
+    analyticsExpandedChapter = analyticsExpandedChapter === key ? null : key;
+    rootEl.querySelectorAll('.chapter-tile').forEach(t => {
+      const active = t.dataset.chapter === analyticsExpandedChapter;
+      t.classList.toggle('chapter-tile-active', active);
+      t.setAttribute('aria-expanded', active ? 'true' : 'false');
+    });
+    renderChapterDetailPanel();
+  });
 }
 
 function computePersonalRecords(usage, sessionHistory, streaks, courseData) {
@@ -4655,18 +4781,28 @@ function renderAnalyticsOverlay() {
   if (usage.currentStudySession && usage.currentStudySession.startedAt) sessionHistory.push({ startedAt: usage.currentStudySession.startedAt, endedAt: usage.lastStudyCountedAt || Date.now(), durationMs: usage.currentStudySession.durationMs || 0, interactionCount: usage.currentStudySession.interactionCount || 0 });
   const latestSession = sessionHistory[sessionHistory.length - 1] || null;
 
+  // ── Per-direction progress stores. Analytics needs to read vocab progress
+  //    from the g2e/e2g store and grammar progress from the morph store
+  //    regardless of the current studyMode, otherwise getWordProgress()
+  //    (which is keyed on the active mode) reports every off-mode card as
+  //    "Unseen". ──
+  const g2eProgressStore = globalWordProgress.g2e || {};
+  const e2gProgressStore = globalWordProgress.e2g || {};
+  const morphProgressStore = globalWordProgress.morph || {};
+  const vocabProgressStore = directionToGreek ? e2gProgressStore : g2eProgressStore;
+
   // ── Vocab & Grammar data (used by both gamification and section renders) ──
   const vocabCards = selectedKeys.length ? getSelectedVocabCards(selectedKeys, requiredOnly) : [];
   const vocabMarks = directionToGreek ? globalWordMarks.e2g : globalWordMarks.g2e;
-  const vocabProgress = buildCumulativeConfirmationSeries(vocabCards, vocabMarks);
+  const vocabProgress = buildCumulativeConfirmationSeries(vocabCards, vocabMarks, vocabProgressStore);
   const vocabProjection = getRegressionProjection(vocabProgress.series, vocabProgress.currentConfirmed, vocabProgress.total);
-  const vocabBuckets = buildConfirmationHistogram(vocabCards);
+  const vocabBuckets = buildConfirmationHistogram(vocabCards, vocabProgressStore);
   const activePerConfirmed = vocabProgress.currentConfirmed ? usage.activeStudyMs / vocabProgress.currentConfirmed : 0;
   const grammarCards = canAccessGrammarUi() && selectedKeys.length ? getSelectedGrammarCards(selectedKeys) : [];
   const grammarMarks = globalWordMarks.morph;
-  const grammarProgress = buildCumulativeConfirmationSeries(grammarCards, grammarMarks);
+  const grammarProgress = buildCumulativeConfirmationSeries(grammarCards, grammarMarks, morphProgressStore);
   const grammarProjection = getRegressionProjection(grammarProgress.series, grammarProgress.currentConfirmed, grammarProgress.total);
-  const grammarBuckets = buildConfirmationHistogram(grammarCards);
+  const grammarBuckets = buildConfirmationHistogram(grammarCards, morphProgressStore);
 
   // ── Course-wide data (selection-independent, represents full course) ──
   const courseData = computeCourseWideData();
@@ -4674,9 +4810,6 @@ function renderAnalyticsOverlay() {
   // ── Gamification computations (all course-wide) ──
   const streaks = computeStudyStreaks(usage.activeDailyMs);
   const xpData = computeXpAndLevel(usage);
-  const g2eProgressStore = globalWordProgress.g2e || {};
-  const e2gProgressStore = globalWordProgress.e2g || {};
-  const morphProgressStore = globalWordProgress.morph || {};
   const mergedProgressStore = {};
   [g2eProgressStore, e2gProgressStore, morphProgressStore].forEach(store => {
     Object.entries(store).forEach(([cardId, entry]) => {
@@ -4741,11 +4874,11 @@ function renderAnalyticsOverlay() {
   if (courseEl) {
     const g2eMarks = globalWordMarks.g2e || {};
     const morphMarksAll = globalWordMarks.morph || {};
-    const courseVocabBuckets = buildConfirmationHistogram(courseData.allVocabCards);
+    const courseVocabBuckets = buildConfirmationHistogram(courseData.allVocabCards, g2eProgressStore);
     const showGrammar = canAccessGrammarUi();
     let courseGrammarHtml = '';
     if (showGrammar) {
-      const courseGrammarBuckets = buildConfirmationHistogram(courseData.allGrammarCards);
+      const courseGrammarBuckets = buildConfirmationHistogram(courseData.allGrammarCards, morphProgressStore);
       courseGrammarHtml = `
         <div class="analytics-chart-card" style="margin-top:10px">
           <div class="analytics-chart-title">Grammar \u2014 ${courseData.allGrammarConfirmed} / ${courseData.allGrammarTotal} confirmed</div>
@@ -4764,8 +4897,19 @@ function renderAnalyticsOverlay() {
   // ── Chapter mastery grid (course-wide) ──
   const chapterGridEl = document.getElementById('analyticsChapterGrid');
   if (chapterGridEl) {
-    const mastery = computeChapterMastery();
-    chapterGridEl.innerHTML = mastery.length ? buildChapterGridHtml(mastery) : '';
+    const mastery = computeChapterMastery(g2eProgressStore, globalWordMarks.g2e || {});
+    if (mastery.length) {
+      // Drop the expanded chapter if it's no longer in the mastery list (e.g.
+      // sets were removed) so we don't try to render a phantom panel.
+      if (analyticsExpandedChapter && !mastery.some(m => String(m.chapterKey) === analyticsExpandedChapter)) {
+        analyticsExpandedChapter = null;
+      }
+      chapterGridEl.innerHTML = buildChapterGridHtml(mastery);
+      setupChapterGridInteractivity(chapterGridEl);
+    } else {
+      chapterGridEl.innerHTML = '';
+      analyticsExpandedChapter = null;
+    }
   }
 
   // ── Personal records (course-wide) ──
