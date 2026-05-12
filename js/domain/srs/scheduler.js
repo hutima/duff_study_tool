@@ -1,5 +1,5 @@
 // SRS scheduling logic — pure functions, no state access
-import { SRS_DAY_MS, SRS_AGAIN_MS, SRS_UNCERTAIN_MIN_MS, SRS_UNCERTAIN_MAX_MS, SRS_UNSPACED_RECOVERY_MS, SRS_GUIDE_STEPS_DAYS, SRS_MAX_INTERVAL_DAYS } from './constants.js';
+import { SRS_DAY_MS, SRS_AGAIN_MS, SRS_UNCERTAIN_MIN_MS, SRS_UNCERTAIN_MAX_MS, SRS_UNSPACED_RECOVERY_MS, SRS_MAX_INTERVAL_DAYS } from './constants.js';
 import { clamp } from '../../utils/helpers.js';
 import { getConfidencePct } from './confidence.js';
 
@@ -49,35 +49,32 @@ export function getLastEasyIntervalDays(progress) {
 }
 
 export function getNextEasyIntervalDays(progress) {
-  const stage = getSrsStage(progress);
-  const guideDays = SRS_GUIDE_STEPS_DAYS;
-
-  // Guide phase: fixed ramp regardless of confidence
-  if (stage < guideDays.length) return guideDays[stage];
-
-  // Post-guide: derive multiplier from the last-10-flip confidence window.
-  // Confidence pct → multiplier:
-  //   90–100% → 2.5  (fast track to 14-day cap)
-  //   70–89%  → 1.5–2.0  (steady confirmed growth)
-  //   50–69%  → 1.2–1.4  (shaky, grow slowly)
-  //   <50%    → 1.1  (got "easy" this flip but history is rough — don't over-reward)
-  // Falls back to the stored ease factor when fewer than 5 flips are recorded.
   const history = Array.isArray(progress?.confidenceHistory)
     ? progress.confidenceHistory.filter(Number.isFinite)
     : [];
+  const recentPct = history.length
+    ? (history.reduce((s, v) => s + v, 0) / history.length) * 100
+    : 0;
+
+  // Stabilization: while the card has fewer than 5 recorded flips, or its
+  // last-10-flip confidence is under 50%, cap "easy" at 1 study day so the
+  // card has to reappear at least 5 times at high confidence before any
+  // longer interval is unlocked.
+  if (history.length < 5 || recentPct < 50) return 1;
+
+  // Post-stabilization: confidence-scaled multiplier on the previous
+  // interval. Growth is gradual (1 → 3 → 8 → 14 at top confidence) rather
+  // than a hard jump to the 14-day cap.
+  //   90–100% → 2.5
+  //   70–89%  → 1.5–2.0  (linear across 70–90%)
+  //   50–69%  → 1.2–1.4  (linear across 50–70%)
   let multiplier;
-  if (history.length >= 5) {
-    const pct = (history.reduce((s, v) => s + v, 0) / history.length) * 100;
-    if (pct >= 90)      multiplier = 2.5;
-    else if (pct >= 70) multiplier = 1.5 + (pct - 70) / 40;  // 1.5→2.0 across 70–90%
-    else if (pct >= 50) multiplier = 1.2 + (pct - 50) / 100; // 1.2→1.4 across 50–70%
-    else                multiplier = 1.1;
-  } else {
-    multiplier = getSrsEase(progress);
-  }
+  if (recentPct >= 90)      multiplier = 2.5;
+  else if (recentPct >= 70) multiplier = 1.5 + (recentPct - 70) / 40;
+  else                      multiplier = 1.2 + (recentPct - 50) / 100;
 
   const previousDays = Math.max(
-    guideDays[guideDays.length - 1],
+    1,
     getLastEasyIntervalDays(progress),
     Number.isFinite(Number(progress?.intervalDays)) ? Math.max(0, Number(progress.intervalDays)) : 0
   );
@@ -85,8 +82,8 @@ export function getNextEasyIntervalDays(progress) {
   const minNext = Math.ceil(previousDays + 1);
   let cappedDays = Math.min(SRS_MAX_INTERVAL_DAYS, Math.max(Math.round(proposedDays), minNext));
 
-  // If any of the last 3 flips were uncertain or unknown, cap at
-  // 7 days × recent certainty (overrides the global cap).
+  // Recent-3-flip uncertain ceiling: any shaky flip in the last 3 caps the
+  // interval at 7 days × certainty (overrides the global cap).
   const uncertainCeilingMs = getRecentUncertainCeilingMs(progress);
   if (uncertainCeilingMs !== null) {
     const uncertainCeilingDays = uncertainCeilingMs / SRS_DAY_MS;
