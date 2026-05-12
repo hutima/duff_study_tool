@@ -3831,58 +3831,49 @@ function buildConfirmationHistogram(cards) {
   return counts;
 }
 
+// Roll the 11-bucket confidence histogram (unseen, 0-9%, ..., 90-100%) into
+// a four-band stacked horizontal bar so the story reads at a glance instead
+// of as eleven thin columns. Bands map to the same color language used by
+// the certainty stacked bar (unseen/hard/uncertain/easy).
 function buildHistogramSvg(counts, options = {}) {
-  const width = options.width || 860;
-  const height = options.height || 180;
-  const padLeft = 36, padRight = 14, padTop = 16, padBottom = 28;
-  const n = 11;
-  const totalW = width - padLeft - padRight;
-  const barW = totalW / n;
-  const gap = 3;
-  const maxCount = Math.max(...counts, 1);
-  const usableH = height - padTop - padBottom;
+  const safe = Array.isArray(counts) ? counts : [];
+  const unseen = safe[0] || 0;
+  let building = 0;   // 0-69%
+  let confirmed = 0;  // 70-89%
+  let mastered = 0;   // 90-100%
+  for (let i = 1; i <= 7; i++) building += safe[i] || 0;
+  for (let i = 8; i <= 9; i++) confirmed += safe[i] || 0;
+  mastered += safe[10] || 0;
 
-  const bars = counts.map((count, i) => {
-    const barH = Math.max(0, (count / maxCount) * usableH);
-    const x = padLeft + i * barW + gap / 2;
-    const y = height - padBottom - barH;
-    const w = Math.max(0, barW - gap);
-    const minPct = (i - 1) * 10;
-    let fill;
-    if (i === 0) fill = 'rgba(138,143,168,0.4)';
-    else if (minPct >= 70) fill = 'rgba(102,164,120,0.85)';
-    else if (minPct >= 60) fill = 'rgba(201,168,76,0.85)';
-    else fill = 'rgba(166,88,88,0.7)';
-    const label = i === 0 ? '?' : `${minPct}–${minPct + 9}%`;
-    return barH > 0 ? `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${barH.toFixed(1)}" fill="${fill}" rx="2"><title>${label}: ${count}</title></rect>` : '';
+  const segments = [
+    { label: 'Mastered',  range: '90–100%', count: mastered,  className: 'stacked-seg-100' },
+    { label: 'Confirmed', range: '70–89%',  count: confirmed, className: 'stacked-seg-50' },
+    { label: 'Building',  range: '0–69%',   count: building,  className: 'stacked-seg-0' },
+    { label: 'Unseen',    range: 'no data',      count: unseen,    className: 'stacked-seg-unseen' }
+  ];
+  const total = segments.reduce((sum, s) => sum + s.count, 0);
+  if (!total) {
+    return `<div class="analytics-empty">${escapeHtml(options.emptyText || 'No cards in this selection yet.')}</div>`;
+  }
+
+  const visible = segments.filter(s => s.count > 0).map(s => {
+    const pct = (s.count / total) * 100;
+    return { ...s, pct };
   });
 
-  // Dashed 70% threshold line between bar 7 (60-69%) and bar 8 (70-79%)
-  const threshX = (padLeft + 8 * barW).toFixed(1);
-  const threshLine = `<line x1="${threshX}" y1="${padTop}" x2="${threshX}" y2="${height - padBottom}" stroke="rgba(102,164,120,0.5)" stroke-width="1.5" stroke-dasharray="4,3"/>
-    <text x="${threshX}" y="${padTop + 10}" text-anchor="middle" class="analytics-axis-text" fill="rgba(102,164,120,0.8)">70%+</text>`;
+  const barHtml = visible.map(s =>
+    `<div class="stacked-seg ${s.className}" style="width:${s.pct.toFixed(2)}%" title="${s.label} (${s.range}): ${s.count} (${Math.round(s.pct)}%)"></div>`
+  ).join('');
 
-  const xLabels = counts.map((_, i) => {
-    const x = padLeft + i * barW + barW / 2;
-    const label = i === 0 ? '?' : `${(i - 1) * 10}%`;
-    return `<text x="${x.toFixed(1)}" y="${height - 6}" text-anchor="middle" class="analytics-axis-text">${label}</text>`;
-  }).join('');
-
-  const yLabels = [0, Math.ceil(maxCount / 2), maxCount].map(v => {
-    const y = (height - padBottom - (v / maxCount) * usableH).toFixed(1);
-    return `<line x1="${padLeft}" y1="${y}" x2="${width - padRight}" y2="${y}" class="analytics-grid-line"></line>
-      <text x="${padLeft - 5}" y="${(parseFloat(y) + 4).toFixed(1)}" text-anchor="end" class="analytics-axis-text">${v}</text>`;
-  }).join('');
+  const legendHtml = visible.map(s =>
+    `<span class="stacked-legend-item"><span class="stacked-legend-dot ${s.className}"></span>${s.label} ${s.count} <span class="stacked-legend-pct">${Math.round(s.pct)}%</span></span>`
+  ).join('');
 
   return `
-    <svg class="analytics-chart-svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${escapeHtml(options.title || 'Confirmation histogram')}">
-      ${yLabels}
-      <line x1="${padLeft}" y1="${padTop}" x2="${padLeft}" y2="${height - padBottom}" class="analytics-axis-line"></line>
-      <line x1="${padLeft}" y1="${height - padBottom}" x2="${width - padRight}" y2="${height - padBottom}" class="analytics-axis-line"></line>
-      ${threshLine}
-      ${bars.join('')}
-      ${xLabels}
-    </svg>
+    <div class="stacked-bar-wrap" role="img" aria-label="${escapeHtml(options.title || 'Confirmation breakdown')}">
+      <div class="stacked-bar">${barHtml}</div>
+      <div class="stacked-legend">${legendHtml}</div>
+    </div>
   `;
 }
 
