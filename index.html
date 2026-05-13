@@ -327,6 +327,22 @@
   </div>
 </div>
 
+<div class="consent-overlay" id="resetSpacedOverlay" aria-hidden="true">
+  <div class="consent-modal reset-spaced-modal" role="dialog" aria-modal="true" aria-labelledby="resetSpacedTitle">
+    <div class="consent-label">Reset spaced review</div>
+    <h2 id="resetSpacedTitle">What would you like to reset?</h2>
+    <div class="consent-copy">
+      <p><strong>Set all to now</strong> keeps your SRS progress (streaks, intervals, ease) but makes every card in this deck due immediately, so you can review them all right away.</p>
+      <p><strong>Reset progress</strong> clears all SRS scheduling and progress for this deck. Pass history and unspaced marks are kept.</p>
+    </div>
+    <div class="consent-actions reset-spaced-actions">
+      <button class="ctrl-btn" type="button" onclick="closeResetSpacedModal()">Cancel</button>
+      <button class="ctrl-btn" type="button" onclick="confirmResetSpacedTimingOnly()">Set all to now</button>
+      <button class="ctrl-btn consent-primary" type="button" onclick="confirmResetSpacedProgress()">Reset progress</button>
+    </div>
+  </div>
+</div>
+
 <div class="consent-overlay" id="whatsNewV1_1Overlay" aria-hidden="true">
   <div class="consent-modal" role="dialog" aria-modal="true" aria-labelledby="whatsNewV1_1Title">
     <div class="consent-label">Version 1.1</div>
