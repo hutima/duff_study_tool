@@ -81,6 +81,12 @@ import {
   startStudying
 } from '../ui/modals.js';
 import {
+  configureProgress,
+  renderProgress,
+  renderReview,
+  returnSeenCardToDeck
+} from '../ui/progress.js';
+import {
   backfillConfirmedMilestones,
   buildDailyCumulativeSeriesFromMap,
   buildCumulativeConfirmationSeries,
@@ -127,6 +133,23 @@ configureModals({
   getDisclaimerModalRequiresAgreement: () => runtime.disclaimerModalRequiresAgreement,
   setDisclaimerModalRequiresAgreement: (v) => { runtime.disclaimerModalRequiresAgreement = v; },
   hasSelectedKeys: () => runtime.selectedKeys.length > 0
+});
+configureProgress({
+  accumulateUsageTime: () => accumulateUsageTime(),
+  accumulateActiveStudyTime: () => accumulateActiveStudyTime(),
+  updateUsageMeta: () => updateUsageMeta(),
+  getKnownCount: () => getKnownCount(),
+  getDueCount: (cards) => getDueCount(cards),
+  getRemainingCards: () => getRemainingCards(),
+  getHighConfidenceCount: () => getHighConfidenceCount(),
+  getDeckAggregateStats: (cards) => getDeckAggregateStats(cards),
+  getWordProgress: (id) => getWordProgress(id),
+  isMorphologyMode: () => isMorphologyMode(),
+  renderAnalyticsOverlay: () => renderAnalyticsOverlay(),
+  moveCardToBackOfActivePile: (card) => moveCardToBackOfActivePile(card),
+  buildStudyDeck: (cards, opts) => buildStudyDeck(cards, opts),
+  renderCard: () => renderCard(),
+  saveState: () => saveState()
 });
 
 
@@ -3007,139 +3030,7 @@ function resetAllStats() {
 // ═══════════════════════════════════════════════════════
 //  PROGRESS + REVIEW
 // ═══════════════════════════════════════════════════════
-function renderProgress() {
-  if (!document.hidden) {
-    accumulateUsageTime();
-    accumulateActiveStudyTime();
-  }
-  const total = runtime.originalDeck.length || runtime.deck.length;
-  const confirmed = getKnownCount();
-  const remaining = Math.max(total - confirmed, 0);
-  const progressPercentEl = document.getElementById('progressPercent');
-  updateUsageMeta();
-
-  if (runtime.spacedRepetition) {
-    const dueCount = getDueCount(runtime.originalDeck);
-    const nextCard = dueCount && runtime.currentIdx < dueCount ? runtime.currentIdx + 1 : dueCount;
-    const progressTextEl = document.getElementById('progressText');
-    if (progressTextEl) progressTextEl.textContent = total
-      ? `${nextCard} / ${dueCount} due · Confirmed ${confirmed} · Scheduled ${Math.max(total - dueCount, 0)}`
-      : '0 / 0';
-    const pct = total ? Math.round(((total - dueCount) / total) * 100) : 0;
-    const progressFillEl = document.getElementById('progressFill');
-    if (progressFillEl) progressFillEl.style.width = pct + '%';
-    if (progressPercentEl) progressPercentEl.textContent = `${pct}%`;
-    if (isAnalyticsModalOpen()) renderAnalyticsOverlay();
-    return;
-  }
-
-  const cycleSize = isMorphologyMode() ? total : (getRemainingCards().length || total);
-  const nextCard = total && runtime.currentIdx < runtime.deck.length ? Math.min(runtime.currentIdx + 1, cycleSize) : total;
-  const progressTextEl2 = document.getElementById('progressText');
-  if (progressTextEl2) progressTextEl2.textContent = total
-    ? `${nextCard} / ${cycleSize} · Confirmed ${confirmed} · Remaining ${remaining}${isMorphologyMode() ? ' · Grammar' : ''}`
-    : '0 / 0';
-  const pct = total ? Math.round((confirmed / total) * 100) : 0;
-  const progressFillEl2 = document.getElementById('progressFill');
-  if (progressFillEl2) progressFillEl2.style.width = pct + '%';
-  if (progressPercentEl) progressPercentEl.textContent = `${pct}%`;
-  if (isAnalyticsModalOpen()) renderAnalyticsOverlay();
-}
-
-
-function renderReview() {
-  const panel = document.getElementById('reviewPanel');
-  panel.classList.add('show');
-
-  const knownCount = getHighConfidenceCount();
-  const unsureCount = runtime.originalDeck.filter(card => runtime.marks[card.id] === 'unsure').length;
-  const remainingCount = Math.max(runtime.originalDeck.length - knownCount, 0);
-  const aggregateStats = getDeckAggregateStats(runtime.originalDeck);
-
-  if (runtime.spacedRepetition) {
-    const dueCount = getDueCount(runtime.originalDeck);
-    document.getElementById('reviewStats').innerHTML = `
-      <span class="stat-known">✓ Known: ${knownCount}</span>
-      <span class="stat-unsure">○ Due now: ${dueCount}</span>
-      <span class="stat-total">· Scheduled ahead: ${Math.max(runtime.originalDeck.length - dueCount, 0)}</span>
-      <span class="stat-total">· Seen ×${aggregateStats.seenCount}</span>
-      <span class="stat-total">· ${isMorphologyMode() ? 'Grammar deck' : (runtime.requiredOnly ? 'Required-only deck' : 'Full deck')}</span>`;
-  } else {
-    document.getElementById('reviewStats').innerHTML = `
-      <span class="stat-known">✓ Known: ${knownCount}</span>
-      <span class="stat-unsure">○ Not yet known: ${unsureCount}</span>
-      <span class="stat-total">· ${remainingCount} still to confirm</span>
-      <span class="stat-total">· Seen ×${aggregateStats.seenCount}</span>
-      <span class="stat-total">· ${isMorphologyMode() ? 'Grammar deck' : (runtime.requiredOnly ? 'Required-only deck' : 'Full deck')}</span>`;
-  }
-
-  let listHtml = '';
-  runtime.originalDeck
-    .map((card, idx) => ({ card, idx }))
-    .filter(({ card }) => {
-      const status = runtime.marks[card.id];
-      const progress = getWordProgress(card.id);
-      return status || progress.seenCount;
-    })
-    .sort((a, b) => compareGreekAlphabetical(a.card, b.card))
-    .forEach(({ card }) => {
-      const status = runtime.marks[card.id];
-      const progress = getWordProgress(card.id);
-      const confidencePct = getConfidencePct(progress);
-      const confidenceMeta = confidencePct === null ? 'confidence —' : `confidence ${confidencePct}%`;
-      const srsMeta = runtime.spacedRepetition
-        ? `<span style="display:block;color:var(--muted);font-size:12px">${progress.dueAt && progress.dueAt > Date.now() ? `due in ${formatRemainingForTable(progress.dueAt)}` : 'due now'} · seen ×${progress.seenCount || 0} · ${confidenceMeta}</span>`
-        : (progress.seenCount || progress.passCount || progress.failCount)
-          ? `<span style="display:block;color:var(--muted);font-size:12px">seen ×${progress.seenCount || 0} · ${confidenceMeta}</span>`
-          : '';
-      const returnBtn = `<button class="return-btn" title="Return this card to circulation now" onclick="returnSeenCardToDeck('${encodeURIComponent(card.id)}')">✕</button>`;
-      listHtml += `<div class="review-item">
-        <span class="rg">${getCardReviewLeft(card)}${srsMeta}</span>
-        <span class="re">${getCardReviewRight(card)}<span style="display:block;color:var(--muted);font-size:12px">${getCardMetaLine(card)}</span></span>
-        <span class="rb ${status || 'unsure'}">${status === 'known' ? '✓' : '○'}</span>
-        ${returnBtn}
-      </div>`;
-    });
-  document.getElementById('reviewList').innerHTML = listHtml || '<span style="color:var(--muted);font-size:14px;font-style:italic">Mark cards as you study to track your progress in this direction.</span>';
-}
-
-// Return a previously-known card to the active runtime.deck. Flips its mark back
-// to 'unsure', clears its due timer, and rebuilds the runtime.deck so the card
-// lands at the back (per buildStudyDeck's newly-eligible logic).
-function returnSeenCardToDeck(encodedId) {
-  const cardId = decodeURIComponent(encodedId);
-  const card = runtime.originalDeck.find(c => c.id === cardId);
-  if (!card) return;
-
-  moveCardToBackOfActivePile(card);
-
-  const progress = getWordProgress(cardId);
-  progress.dueAt = Date.now();
-  progress.intervalDays = 0;
-  progress.streak = 0;
-  progress.easyStreak = 0;
-  progress.srsStage = Math.max(0, getSrsStage(progress) - 1);
-
-  if (runtime.spacedRepetition) {
-    runtime.deck = buildStudyDeck(runtime.originalDeck);
-    const dueIdx = runtime.deck.findIndex(c => c.id === cardId);
-    if (dueIdx >= 0 && dueIdx < runtime.activeDeckCount) {
-      runtime.currentIdx = dueIdx;
-      runtime.isFlipped = false;
-    } else if (runtime.activeDeckCount > 0) {
-      runtime.currentIdx = Math.min(runtime.currentIdx, runtime.activeDeckCount - 1);
-    }
-  } else {
-    const returnedIdx = runtime.deck.findIndex(c => c.id === cardId);
-    runtime.currentIdx = returnedIdx >= 0 ? returnedIdx : Math.min(runtime.currentIdx, Math.max(runtime.deck.length - 1, 0));
-    runtime.isFlipped = false;
-  }
-
-  renderCard();
-  renderProgress();
-  renderReview();
-  saveState();
-}
+// Progress bar, Review panel, returnSeenCardToDeck live in js/ui/progress.js
 
 // Modal/overlay control (disclaimer, what's new, study selector, shortcuts,
 // analytics open/close, startStudying) lives in js/ui/modals.js
