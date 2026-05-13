@@ -2021,8 +2021,8 @@ function computeCourseWideData() {
   const g2eProgress = runtime.globalWordProgress.g2e || {};
   const morphProgress = runtime.globalWordProgress.morph || {};
 
-  const isEffectivelyConfirmed = (card, runtime.marks, store) => {
-    if (runtime.marks[card.id] === 'known') return true;
+  const isEffectivelyConfirmed = (card, marksMap, store) => {
+    if (marksMap[card.id] === 'known') return true;
     const pct = getConfidencePct(store?.[card.id]);
     return pct !== null && pct >= 70;
   };
