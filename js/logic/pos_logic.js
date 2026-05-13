@@ -277,9 +277,9 @@ function detectPartOfSpeech(card) {
   if (exactConjunctions.has(greek)) return 'Conjunction';
   if (exactParticles.has(greek)) return greek === 'ἰδού' ? 'Interjection' : 'Particle';
   if (exactAdverbs.has(greek)) return 'Adverb';
-  // Preposition headwords may carry a case tag like "ἀπό (+gen.)" so split
+  // Preposition headwords may carry a case tag like "ἀπό+gen." so split
   // multi-case prepositions can study one case per card.
-  const prepBare = greek.replace(/\s*\(\+\s*(?:gen|dat|acc)\.?\)\s*$/u, '').trim();
+  const prepBare = greek.replace(/\s*\+\s*(?:gen|dat|acc)\.?\s*$/u, '').trim();
   if (exactPrepositions.has(prepBare)) return 'Preposition';
 
   // 4. Nominal pattern → Noun. Rely on detectDeclension for '1st decl.' / '2nd decl.' / '3rd decl.' / 'indecl.'.
