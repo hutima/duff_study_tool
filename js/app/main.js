@@ -44,6 +44,7 @@ import {
   selectReaderDrillChoice,
   openReaderTab
 } from '../ui/reader.js';
+import { installKeyboardShortcuts } from '../ui/keyboard.js';
 
 // State
 import { STATE_MIGRATIONS, summarizePersistedState, formatPersistedStateSummary } from '../state/migrations.js';
@@ -4995,32 +4996,16 @@ function renderAnalyticsOverlay() {
   }
 }
 
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && isAnalyticsModalOpen()) { closeAnalyticsOverlay(); return; }
-  if (e.key === 'Escape' && isStudySelectorOpen()) { closeStudySelector(); return; }
-  if (e.key === 'Escape' && isShortcutsModalOpen()) { closeShortcutsModal(); return; }
-  if (e.key === 'Escape' && isWhatsNewV1_1ModalOpen()) { closeWhatsNewV1_1Modal(); return; }
-  if (isDisclaimerModalOpen() || isTransferModalOpen() || isAnalyticsModalOpen() || isStudySelectorOpen() || isShortcutsModalOpen() || isWhatsNewV1_1ModalOpen()) return;
-  if (!isReviewDeckMode() || !selectedKeys.length) return;
-
-  if (isMorphologyMode()) {
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') navigate(1);
-    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   navigate(-1);
-    if (/^[1-4]$/.test(e.key)) {
-      const idx = Number(e.key) - 1;
-      answerMorphologyChoice(idx);
-    }
-    return;
-  }
-
-  if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flipCard(); }
-  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') navigate(1);
-  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   navigate(-1);
-  if (e.key === '1') markCard('again');
-  if (e.key === '2') markCard('pass');
-  if (e.key === '3') markCard('easy');
-  if (e.key === 'k' || e.key === 'K') markCard('easy');
-  if (e.key === 'r' || e.key === 'R') markCard('again');
+installKeyboardShortcuts({
+  isAnalyticsModalOpen, closeAnalyticsOverlay,
+  isStudySelectorOpen, closeStudySelector,
+  isShortcutsModalOpen, closeShortcutsModal,
+  isWhatsNewV1_1ModalOpen, closeWhatsNewV1_1Modal,
+  isDisclaimerModalOpen, isTransferModalOpen,
+  isReviewDeckMode,
+  getSelectedKeys: () => selectedKeys,
+  isMorphologyMode,
+  navigate, answerMorphologyChoice, flipCard, markCard
 });
 
 // ═══════════════════════════════════════════════════════
