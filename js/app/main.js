@@ -1,6 +1,135 @@
 // ═══════════════════════════════════════════════════════
 //  GREEK FLASHCARDS — Modular Entry Point
 // ═══════════════════════════════════════════════════════
+//
+// ┌─ LLM ORIENTATION ─ READ FIRST ──────────────────────────────────────┐
+// │                                                                     │
+// │ This file (main.js) is the entry point + glue. Most logic lives in  │
+// │ modules under js/ui/, js/state/, and js/domain/. For most changes   │
+// │ you do NOT need to load this file — load the relevant module(s)     │
+// │ and js/state/runtime.js, that's it. See the task-to-files map below.│
+// │                                                                     │
+// │ STATE                                                               │
+// │   All cross-module state lives in js/state/runtime.js as a single   │
+// │   mutable `runtime` object. Modules `import { runtime }` and        │
+// │   mutate properties directly (runtime.deck = ..., runtime.marks[id] │
+// │   = 'known'). main.js does NOT own any module-level state.          │
+// │                                                                     │
+// │ WIRING                                                              │
+// │   This file imports each module, then calls configure*(deps) at the │
+// │   top to inject host callbacks the module needs. New host callbacks │
+// │   go in the matching configure* block; new modules add their own    │
+// │   configure call here. GLOBAL_CLICK_HANDLERS at the bottom is the   │
+// │   onclick="..." surface used by index.html — every name there must  │
+// │   resolve to either a local function or a named import.             │
+// │                                                                     │
+// │ MODULE MAP (load these, not this file, for the matching task)       │
+// │   js/state/runtime.js       all shared mutable state                │
+// │   js/state/persistence.js   save/restore, JSON export/import,       │
+// │                             Transfer modal, deck-state bank         │
+// │   js/state/store.js         storage keys, gamification sanitize     │
+// │   js/state/migrations.js    versioned state migrations              │
+// │   js/domain/srs/*           SRS scheduler, confidence, constants    │
+// │   js/domain/deck/*          deck ordering + filters (pure)          │
+// │   js/domain/gamification/   XP math, levels, usage-stats primitives │
+// │   js/domain/grammar/        grammar-support HTML                    │
+// │   js/ui/reader.js           Reader tab (drills + verses)            │
+// │   js/ui/keyboard.js         keyboard shortcuts                      │
+// │   js/ui/toast.js            level-up / badge toast queue            │
+// │   js/ui/touchTapBridge.js   iOS synthetic-tap polyfill              │
+// │   js/ui/modals.js           disclaimer, what's new, study selector, │
+// │                             shortcuts, analytics open/close,        │
+// │                             startStudying, isXxxOpen predicates     │
+// │   js/ui/charts.js           pure SVG/HTML builders (histogram,      │
+// │                             line, heatmap, ring, word stat card)    │
+// │   js/ui/progress.js         progress bar + Review panel +           │
+// │                             returnSeenCardToDeck                    │
+// │   js/ui/render.js           renderCard, flipCard (vocab + grammar)  │
+// │   js/ui/selectors.js        Study Selector overlay + load flow      │
+// │                             (buildSessions/Chapter/Suppl/Advanced,  │
+// │                             toggle/deselect, loadDeckFromKeys)      │
+// │   js/ui/navigation.js       navigate, markCard, setStudyMode,       │
+// │                             toggles (shuffle/required/direction/    │
+// │                             spaced/morphSelfCheck), reshuffle,      │
+// │                             fastForward, resetCurrentDeck,          │
+// │                             resetAllStats                           │
+// │   js/ui/analytics.js        renderAnalyticsOverlay + ~16 helpers,   │
+// │                             runtime-bound XP wrappers, celebrate-   │
+// │                             on-level-up/badge plumbing              │
+// │   js/utils/*                helpers, time, storage, Greek sort      │
+// │   js/logic/pos_logic.js     parsing helpers                         │
+// │                                                                     │
+// │ WHAT STAYS IN main.js (you only need this file for these)           │
+// │   - Theme bootstrap (resolve/applyThemeMode, sync*Buttons, init)    │
+// │   - Usage tracking (accumulate*, noteStudyInteraction,              │
+// │     startUsageTracking, updateUsageMeta)                            │
+// │   - Deck primitives: buildStudyDeck, applySpacedReview,             │
+// │     getDueCount, getKnownCount, getHighConfidenceCount,             │
+// │     getRemainingCards, moveCardToBackOfActivePile, reshuffle*,      │
+// │     maybe*, capture/restore SpacedUndoSnapshot,                     │
+// │     applyUnspacedSharedSchedule, recordStudyOutcome,                │
+// │     advanceScheduledCards, getWordProgress, getDeckAggregateStats   │
+// │   - Morphology answer flow (answerMorphologyChoice,                 │
+// │     revealMorphologyAnswer, rateMorphologySelfCheck,                │
+// │     markMorphologyDontKnow)                                         │
+// │   - Mode predicates (isMorphologyMode, isReaderMode,                │
+// │     canAccessGrammarUi, getDirectionalMarksStore, etc.)             │
+// │   - startNextCycle, resetStudyState, resetUnspacedCycleState        │
+// │   - GLOBAL_CLICK_HANDLERS, init at bottom                           │
+// │                                                                     │
+// │ TASK → MINIMAL FILE SET                                             │
+// │   "fix a card-render bug"           render.js + runtime.js          │
+// │   "fix an analytics chart"          analytics.js + charts.js +      │
+// │                                       runtime.js                    │
+// │   "tweak SRS scheduling"            domain/srs/scheduler.js +       │
+// │                                       main.js (applySpacedReview,   │
+// │                                       buildStudyDeck) + runtime.js  │
+// │   "change progress-bar text"        progress.js + runtime.js        │
+// │   "add a new toggle"                navigation.js + runtime.js +    │
+// │                                       main.js (configureNavigation, │
+// │                                       GLOBAL_CLICK_HANDLERS,        │
+// │                                       syncToggleButtons) +          │
+// │                                       index.html                    │
+// │   "add a new onclick handler"       owning module + main.js         │
+// │                                       (GLOBAL_CLICK_HANDLERS) +     │
+// │                                       index.html                    │
+// │   "add a Study Selector section"    selectors.js + runtime.js +     │
+// │                                       index.html                    │
+// │   "tweak export/import JSON shape"  persistence.js + runtime.js +   │
+// │                                       state/migrations.js (if       │
+// │                                       schema-breaking)              │
+// │   "add a new XP source"             domain/gamification/levels.js + │
+// │                                       domain/gamification/xp.js +   │
+// │                                       maybe analytics.js            │
+// │   "fix a modal close bug"           modals.js                       │
+// │   "fix the reader drill flow"       reader.js                       │
+// │                                                                     │
+// │ WHEN TO LOAD THIS FILE                                              │
+// │   - Wiring a brand-new module (you need to add a configure* call)   │
+// │   - A bug in one of the deck primitives or morphology answer flow   │
+// │   - A bug in the boot sequence (init at bottom of file)             │
+// │   - Adding a new onclick handler (GLOBAL_CLICK_HANDLERS)            │
+// │   In all other cases, prefer the relevant module(s). main.js is     │
+// │   ~1,450 lines; loading it for a small change wastes tokens.        │
+// │                                                                     │
+// │ DEPLOY                                                              │
+// │   Bump CACHE_NAME in sw.js (e.g. v64 → v65) AND every ?v=64 in      │
+// │   sw.js + index.html. New js/* files must be added to                │
+// │   APP_SHELL_PATHS in sw.js.                                         │
+// │                                                                     │
+// │ VERIFICATION                                                        │
+// │   Strict-import parse catches more than `node --check`:             │
+// │     node --input-type=module -e \                                   │
+// │       "import('./js/app/main.js').catch(e=>{                        │
+// │         console.error(e.message); process.exit(1);})"               │
+// │   `document is not defined` is a successful parse (DOM unavailable  │
+// │   in Node) — only treat actual SyntaxError / Invalid… as failures.  │
+// │                                                                     │
+// │ HISTORY                                                             │
+// │   See REFACTOR_PLAN.txt for module-by-module rationale, the         │
+// │   runtime-sweep methodology, and patterns to follow for future      │
+// │   extractions.                                                      │
+// └─────────────────────────────────────────────────────────────────────┘
 
 // Utils
 import { clamp, isPlainObject, shuffleArray, escapeHtml, cloneForUndo } from '../utils/helpers.js';
