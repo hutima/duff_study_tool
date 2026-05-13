@@ -291,6 +291,7 @@ import {
 } from '../ui/charts.js';
 
 // State
+import { runtime } from '../state/runtime.js';
 import { STATE_MIGRATIONS, summarizePersistedState, formatPersistedStateSummary } from '../state/migrations.js';
 import {
   sanitizeGamificationState,
