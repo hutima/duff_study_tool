@@ -339,8 +339,8 @@ function syncToggleButtons() {
   if (resetDeckBtn) {
     resetDeckBtn.textContent = runtime.spacedRepetition ? 'Reset spaced' : 'Reset unspaced';
     resetDeckBtn.title = runtime.spacedRepetition
-      ? 'Reset spaced-review scheduling for this runtime.deck only'
-      : 'Reset unspaced runtime.marks for this runtime.deck only';
+      ? 'Reset spaced-review scheduling for this deck only'
+      : 'Reset unspaced marks for this deck only';
   }
 
   const subtitle = document.getElementById('appSubtitle');
@@ -2336,7 +2336,7 @@ function renderCard() {
         ? 'No reversible grammar items in this selection. Toggle “English → Greek” off to see all questions.'
         : 'No grammar quiz material is available yet for this selection.';
     } else {
-      emptyMessage = runtime.requiredOnly ? 'No required-vocabulary cards match this selection.' : 'No cards in this runtime.deck.';
+      emptyMessage = runtime.requiredOnly ? 'No required-vocabulary cards match this selection.' : 'No cards in this deck.';
     }
     area.innerHTML = `<div class="empty-state"><div class="big">—</div>${emptyMessage}</div>`;
     return;
@@ -2360,7 +2360,7 @@ function renderCard() {
       ? 'Everything in this selection is scheduled ahead. Press next to advance the review clock by 1 hour and pull the next near-due cards back in.'
       : (isMorphologyMode()
         ? 'Everything in this grammar selection is currently marked correct. Press next to reshuffle the full selected set and run it again.'
-        : 'Every card in this runtime.deck is currently marked “I know this.”<br><span style="color:var(--muted);font-size:13px">Press next to reshuffle the full selected set for another unspaced pass.</span>');
+        : 'Every card in this deck is currently marked “I know this.”<br><span style="color:var(--muted);font-size:13px">Press next to reshuffle the full selected set for another unspaced pass.</span>');
 
     area.innerHTML = `
       <div class="done-card show">
@@ -2916,8 +2916,8 @@ function resetCurrentDeck() {
 
   const confirmed = window.confirm(
     runtime.spacedRepetition
-      ? 'Reset spaced-review scheduling for this runtime.deck only? This keeps your unspaced runtime.marks and pass history.'
-      : 'Reset unspaced runtime.marks for this runtime.deck only? This keeps your spaced-review scheduling and intervals.'
+      ? 'Reset spaced-review scheduling for this deck only? This keeps your unspaced marks and pass history.'
+      : 'Reset unspaced marks for this deck only? This keeps your spaced-review scheduling and intervals.'
   );
   if (!confirmed) return;
 
@@ -2964,7 +2964,7 @@ function resetCurrentDeck() {
 
 function resetAllStats() {
   clearSpacedUndoSnapshot();
-  const confirmed = window.confirm('Reset all saved study stats, runtime.marks, and spaced-review scheduling for both directions?');
+  const confirmed = window.confirm('Reset all saved study stats, marks, and spaced-review scheduling for both directions?');
   if (!confirmed) return;
 
   runtime.globalWordMarks = { g2e: {}, e2g: {}, morph: {} };
@@ -3063,14 +3063,14 @@ function renderReview() {
       <span class="stat-unsure">○ Due now: ${dueCount}</span>
       <span class="stat-total">· Scheduled ahead: ${Math.max(runtime.originalDeck.length - dueCount, 0)}</span>
       <span class="stat-total">· Seen ×${aggregateStats.seenCount}</span>
-      <span class="stat-total">· ${isMorphologyMode() ? 'Grammar runtime.deck' : (runtime.requiredOnly ? 'Required-only runtime.deck' : 'Full runtime.deck')}</span>`;
+      <span class="stat-total">· ${isMorphologyMode() ? 'Grammar deck' : (runtime.requiredOnly ? 'Required-only deck' : 'Full deck')}</span>`;
   } else {
     document.getElementById('reviewStats').innerHTML = `
       <span class="stat-known">✓ Known: ${knownCount}</span>
       <span class="stat-unsure">○ Not yet known: ${unsureCount}</span>
       <span class="stat-total">· ${remainingCount} still to confirm</span>
       <span class="stat-total">· Seen ×${aggregateStats.seenCount}</span>
-      <span class="stat-total">· ${isMorphologyMode() ? 'Grammar runtime.deck' : (runtime.requiredOnly ? 'Required-only runtime.deck' : 'Full runtime.deck')}</span>`;
+      <span class="stat-total">· ${isMorphologyMode() ? 'Grammar deck' : (runtime.requiredOnly ? 'Required-only deck' : 'Full deck')}</span>`;
   }
 
   let listHtml = '';
