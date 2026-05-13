@@ -74,6 +74,7 @@ let usageTickHandle = null;
 let usageVisibilityBound = false;
 let usageTickCounter = 0;
 let analyticsExpandedChapter = null;
+let analyticsExpandedWord = null;
 let studyMode = 'vocab';
 let levelToastHideTimer = null;
 let levelToastRemoveTimer = null;
@@ -4617,14 +4618,23 @@ function buildChapterDetailHtml(chapterKey) {
   const confirmedCount = rows.filter(r => r.isConfirmed).length;
   const headlinePct = cards.length ? Math.round((confirmedCount / cards.length) * 100) : 0;
 
-  const rowHtml = rows.map(r => `
-    <li class="chapter-detail-row">
-      <span class="chapter-detail-dot ${r.bandClass}" aria-hidden="true"></span>
-      <span class="chapter-detail-word">${headwordOf(r.card)}</span>
-      <span class="chapter-detail-gloss">${escapeHtml(r.card.e || '')}</span>
-      <span class="chapter-detail-pct">${escapeHtml(r.pctText)}</span>
-    </li>
-  `).join('');
+  const rowHtml = rows.map(r => {
+    const expanded = analyticsExpandedWord === r.card.id;
+    const cardHtml = expanded ? buildWordStatCardHtml(r.card, store[r.card.id], marks[r.card.id] === 'known') : '';
+    return `
+      <li class="chapter-detail-row${expanded ? ' chapter-detail-row-active' : ''}"
+          role="button"
+          tabindex="0"
+          aria-expanded="${expanded ? 'true' : 'false'}"
+          data-word-id="${escapeHtml(String(r.card.id))}">
+        <span class="chapter-detail-dot ${r.bandClass}" aria-hidden="true"></span>
+        <span class="chapter-detail-word">${headwordOf(r.card)}</span>
+        <span class="chapter-detail-gloss">${escapeHtml(r.card.e || '')}</span>
+        <span class="chapter-detail-pct">${escapeHtml(r.pctText)}</span>
+      </li>
+      ${expanded ? `<li class="chapter-detail-statcard-row" aria-hidden="false">${cardHtml}</li>` : ''}
+    `;
+  }).join('');
 
   return `
     <div class="chapter-detail-head">
@@ -4635,12 +4645,108 @@ function buildChapterDetailHtml(chapterKey) {
   `;
 }
 
+// ── Per-word stat card (revealed by tapping a word row inside a chapter) ──
+// Pulls everything off the same g2e progress record the SRS uses, so the
+// numbers here are authoritative — same source as Study screen.
+function buildWordStatCardHtml(card, progressRaw, isKnownMark) {
+  const progress = progressRaw || {};
+  const seenCount = progress.seenCount || 0;
+  const passCount = progress.passCount || 0;
+  const failCount = progress.failCount || 0;
+  const responses = passCount + failCount;
+  const rawPct = getConfidencePct(progress);
+  const hasActivity = seenCount > 0 || responses > 0 || !!progress.lastReviewedAt;
+
+  let statusLabel;
+  let statusClass;
+  if (isKnownMark) {
+    statusLabel = 'Marked known';
+    statusClass = 'word-stat-status-known';
+  } else if (rawPct !== null && rawPct >= 70) {
+    statusLabel = 'Confirmed (≥70%)';
+    statusClass = 'word-stat-status-confirmed';
+  } else if (hasActivity) {
+    statusLabel = 'Learning';
+    statusClass = 'word-stat-status-learning';
+  } else {
+    statusLabel = 'Unseen';
+    statusClass = 'word-stat-status-unseen';
+  }
+
+  const pctDisplay = rawPct === null ? '—' : `${rawPct}%`;
+  const accuracyDisplay = responses ? `${Math.round((passCount / responses) * 100)}%` : '—';
+  const dueDisplay = progress.dueAt
+    ? (progress.dueAt > Date.now() ? `in ${formatRemainingForTable(progress.dueAt)}` : 'due now')
+    : '—';
+  const lastReviewedDisplay = progress.lastReviewedAt ? formatAnalyticsDateTime(progress.lastReviewedAt) : '—';
+  const firstSeenDisplay = progress.firstSeenAt ? formatAnalyticsDate(progress.firstSeenAt) : '—';
+  const firstConfirmedDisplay = progress.firstConfirmedAt ? formatAnalyticsDate(progress.firstConfirmedAt) : '—';
+  const intervalDisplay = progress.intervalDays
+    ? (progress.intervalDays >= 1 ? `${progress.intervalDays.toFixed(progress.intervalDays >= 10 ? 0 : 1)}d` : `${Math.max(1, Math.round(progress.intervalDays * 24))}h`)
+    : '—';
+
+  // Tiny inline bar chart of the last (up to 10) confidence samples.
+  // 0 = red miss, 0.5 = amber pass, 1 = green easy. Most recent on the right.
+  const history = Array.isArray(progress.confidenceHistory) ? progress.confidenceHistory.filter(v => Number.isFinite(v)) : [];
+  const historyHtml = history.length
+    ? `<div class="word-stat-history" aria-label="Recent confidence samples">${history.map(v => {
+        const cls = v >= 1 ? 'word-stat-history-bar-easy' : v >= 0.5 ? 'word-stat-history-bar-pass' : 'word-stat-history-bar-miss';
+        const h = Math.max(20, Math.round(v * 100));
+        return `<span class="word-stat-history-bar ${cls}" style="height:${h}%"></span>`;
+      }).join('')}</div>`
+    : '<div class="word-stat-history-empty">No reviews yet</div>';
+
+  const headword = typeof formatGreekHeadword === 'function' ? formatGreekHeadword(card.g) : (card.g || '—');
+  const gloss = escapeHtml(card.e || '');
+
+  const tile = (label, value) => `
+    <div class="word-stat-tile">
+      <div class="word-stat-tile-label">${escapeHtml(label)}</div>
+      <div class="word-stat-tile-value">${escapeHtml(value)}</div>
+    </div>
+  `;
+
+  return `
+    <div class="word-stat-card">
+      <div class="word-stat-head">
+        <div class="word-stat-head-text">
+          <div class="word-stat-headword">${headword}</div>
+          <div class="word-stat-gloss">${gloss}</div>
+        </div>
+        <div class="word-stat-head-pct">
+          <div class="word-stat-pct-value">${escapeHtml(pctDisplay)}</div>
+          <div class="word-stat-status ${statusClass}">${escapeHtml(statusLabel)}</div>
+        </div>
+      </div>
+      <div class="word-stat-grid">
+        ${tile('Seen', `×${seenCount}`)}
+        ${tile('Pass / Fail', `${passCount} / ${failCount}`)}
+        ${tile('Accuracy', accuracyDisplay)}
+        ${tile('Streak', `${progress.streak || 0}`)}
+        ${tile('Easy streak', `${progress.easyStreak || 0}`)}
+        ${tile('SRS stage', `${progress.srsStage || 0}`)}
+        ${tile('Interval', intervalDisplay)}
+        ${tile('Next due', dueDisplay)}
+        ${tile('Last reviewed', lastReviewedDisplay)}
+        ${tile('First seen', firstSeenDisplay)}
+        ${tile('First confirmed', firstConfirmedDisplay)}
+        ${tile('Ease', (progress.ease || 2.3).toFixed(2))}
+      </div>
+      <div class="word-stat-history-wrap">
+        <div class="word-stat-history-label">Recent reviews (oldest → newest)</div>
+        ${historyHtml}
+      </div>
+    </div>
+  `;
+}
+
 function renderChapterDetailPanel() {
   const panel = document.getElementById('chapterDetailPanel');
   if (!panel) return;
   if (!analyticsExpandedChapter) {
     panel.innerHTML = '';
     panel.classList.remove('open');
+    analyticsExpandedWord = null;
     return;
   }
   panel.innerHTML = buildChapterDetailHtml(analyticsExpandedChapter);
@@ -4650,10 +4756,19 @@ function renderChapterDetailPanel() {
 function setupChapterGridInteractivity(rootEl) {
   if (!rootEl || rootEl.dataset.chapterClickBound === '1') return;
   rootEl.dataset.chapterClickBound = '1';
+
+  const handleWordRowToggle = (row) => {
+    const wordId = row.dataset.wordId || '';
+    if (!wordId) return;
+    analyticsExpandedWord = analyticsExpandedWord === wordId ? null : wordId;
+    renderChapterDetailPanel();
+  };
+
   rootEl.addEventListener('click', (event) => {
     const closeBtn = event.target.closest('[data-chapter-close]');
     if (closeBtn) {
       analyticsExpandedChapter = null;
+      analyticsExpandedWord = null;
       rootEl.querySelectorAll('.chapter-tile').forEach(t => {
         t.classList.remove('chapter-tile-active');
         t.setAttribute('aria-expanded', 'false');
@@ -4661,17 +4776,32 @@ function setupChapterGridInteractivity(rootEl) {
       renderChapterDetailPanel();
       return;
     }
+    const wordRow = event.target.closest('.chapter-detail-row[data-word-id]');
+    if (wordRow && rootEl.contains(wordRow)) {
+      handleWordRowToggle(wordRow);
+      return;
+    }
     const tile = event.target.closest('.chapter-tile');
     if (!tile || !rootEl.contains(tile)) return;
     const key = tile.dataset.chapter || '';
     if (!key) return;
-    analyticsExpandedChapter = analyticsExpandedChapter === key ? null : key;
+    const nextKey = analyticsExpandedChapter === key ? null : key;
+    if (nextKey !== analyticsExpandedChapter) analyticsExpandedWord = null;
+    analyticsExpandedChapter = nextKey;
     rootEl.querySelectorAll('.chapter-tile').forEach(t => {
       const active = t.dataset.chapter === analyticsExpandedChapter;
       t.classList.toggle('chapter-tile-active', active);
       t.setAttribute('aria-expanded', active ? 'true' : 'false');
     });
     renderChapterDetailPanel();
+  });
+
+  rootEl.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    const wordRow = event.target.closest('.chapter-detail-row[data-word-id]');
+    if (!wordRow || !rootEl.contains(wordRow)) return;
+    event.preventDefault();
+    handleWordRowToggle(wordRow);
   });
 }
 
@@ -4932,12 +5062,14 @@ function renderAnalyticsOverlay() {
       // sets were removed) so we don't try to render a phantom panel.
       if (analyticsExpandedChapter && !mastery.some(m => String(m.chapterKey) === analyticsExpandedChapter)) {
         analyticsExpandedChapter = null;
+        analyticsExpandedWord = null;
       }
       chapterGridEl.innerHTML = buildChapterGridHtml(mastery);
       setupChapterGridInteractivity(chapterGridEl);
     } else {
       chapterGridEl.innerHTML = '';
       analyticsExpandedChapter = null;
+      analyticsExpandedWord = null;
     }
   }
 
