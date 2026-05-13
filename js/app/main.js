@@ -86,6 +86,7 @@ import {
   renderReview,
   returnSeenCardToDeck
 } from '../ui/progress.js';
+import { configureRender, renderCard, flipCard } from '../ui/render.js';
 import {
   backfillConfirmedMilestones,
   buildDailyCumulativeSeriesFromMap,
@@ -150,6 +151,21 @@ configureProgress({
   buildStudyDeck: (cards, opts) => buildStudyDeck(cards, opts),
   renderCard: () => renderCard(),
   saveState: () => saveState()
+});
+configureRender({
+  saveState: () => saveState(),
+  syncLayoutVisibility: () => syncLayoutVisibility(),
+  noteStudyInteraction: () => noteStudyInteraction(),
+  isMorphologyMode: () => isMorphologyMode(),
+  isReverseGrammarActive: () => isReverseGrammarActive(),
+  isMorphCard: (card) => isMorphCard(card),
+  reverseDisplayActive: (card) => reverseDisplayActive(card),
+  startNextCycle: (mode) => startNextCycle(mode),
+  resetMorphAnswerState: () => resetMorphAnswerState(),
+  maybeReturnKnownCardToActivePile: () => maybeReturnKnownCardToActivePile(),
+  formatGreekHeadword: (g) => typeof window !== 'undefined' && typeof window.formatGreekHeadword === 'function' ? window.formatGreekHeadword(g) : (g || '—'),
+  transliterateGreek: (s) => typeof window !== 'undefined' && typeof window.transliterateGreek === 'function' ? window.transliterateGreek(s) : s,
+  detectPartOfSpeech: (card) => typeof window !== 'undefined' && typeof window.detectPartOfSpeech === 'function' ? window.detectPartOfSpeech(card) : ''
 });
 
 
@@ -2347,227 +2363,7 @@ function toggleSet(key) {
 // ═══════════════════════════════════════════════════════
 //  RENDER
 // ═══════════════════════════════════════════════════════
-function renderCard() {
-  const area = document.getElementById('cardArea');
-  saveState();
-  syncLayoutVisibility();
-
-  if (!runtime.deck.length) {
-    let emptyMessage;
-    if (isMorphologyMode()) {
-      emptyMessage = isReverseGrammarActive()
-        ? 'No reversible grammar items in this selection. Toggle “English → Greek” off to see all questions.'
-        : 'No grammar quiz material is available yet for this selection.';
-    } else {
-      emptyMessage = runtime.requiredOnly ? 'No required-vocabulary cards match this selection.' : 'No cards in this deck.';
-    }
-    area.innerHTML = `<div class="empty-state"><div class="big">—</div>${emptyMessage}</div>`;
-    return;
-  }
-
-  if (!runtime.spacedRepetition && runtime.currentIdx >= runtime.deck.length && runtime.unspacedPendingRecycle) {
-    startNextCycle('remaining');
-    resetMorphAnswerState();
-    renderCard();
-    renderReview();
-    renderProgress();
-    return;
-  }
-
-  if ((!runtime.spacedRepetition && runtime.currentIdx >= runtime.deck.length) || (runtime.spacedRepetition && runtime.currentIdx >= runtime.activeDeckCount)) {
-    const doneTitle = runtime.spacedRepetition
-      ? 'No cards currently due ✦'
-      : (isMorphologyMode() ? 'Grammar pass complete ✦' : 'Session Confirmed 🎉');
-
-    const doneSub = runtime.spacedRepetition
-      ? 'Everything in this selection is scheduled ahead. Press next to advance the review clock by 1 hour and pull the next near-due cards back in.'
-      : (isMorphologyMode()
-        ? 'Everything in this grammar selection is currently marked correct. Press next to reshuffle the full selected set and run it again.'
-        : 'Every card in this deck is currently marked “I know this.”<br><span style="color:var(--muted);font-size:13px">Press next to reshuffle the full selected set for another unspaced pass.</span>');
-
-    area.innerHTML = `
-      <div class="done-card show">
-        <div class="done-title">${doneTitle}</div>
-        <div class="done-sub">${doneSub}</div>
-      </div>`;
-    document.getElementById('markRow').style.display = 'none';
-    return;
-  }
-
-  document.getElementById('markRow').style.display = isMorphologyMode() ? 'none' : 'flex';
-  const card = runtime.deck[runtime.currentIdx];
-
-  if (isMorphCard(card)) {
-    const reversed = reverseDisplayActive(card);
-    const displayPrompt = reversed
-      ? (card.reversePrompt || 'Choose the correct Greek form.')
-      : (card.prompt || 'Parse this form.');
-    const displayForm = reversed ? card.answer : card.form;
-    const displayChoices = reversed ? (card.reverseChoices || []) : (card.choices || []);
-    const correctAnswer = reversed ? card.form : card.answer;
-    const formClass = reversed ? 'morph-form morph-form-english' : 'morph-form';
-
-    const noteHtml = card.note ? `<div class="morph-note">${card.note}</div>` : '';
-    const contextHtml = card.context
-      ? `<div class="morph-context"><span class="morph-context-label">Context:</span> ${card.context}</div>`
-      : '';
-
-    const resultBody = reversed
-      ? `${card.answer} = ${card.form}`
-      : `${card.form} = ${card.answer}`;
-
-    let interactionHtml = '';
-    let resultHtml = '';
-
-    if (runtime.morphSelfCheck) {
-      if (!runtime.morphAnswerState.revealed) {
-        const placeholder = reversed
-          ? 'Recall the Greek form yourself first, then reveal the answer.'
-          : 'Parse it yourself first, then reveal the answer.';
-        interactionHtml = `<div class="morph-selfcheck-actions">
-          <button class="ctrl-btn morph-reveal-btn" type="button" onclick="revealMorphologyAnswer()">Reveal answer</button>
-          <button class="ctrl-btn morph-dontknow-btn" type="button" onclick="markMorphologyDontKnow()">I don't know</button>
-        </div>`;
-        resultHtml = `<div class="morph-result pending">${placeholder}</div>`;
-      } else {
-        const resultClass = runtime.morphAnswerState.answered
-          ? (runtime.morphAnswerState.isCorrect ? 'correct' : 'incorrect')
-          : 'pending';
-        const resultTitle = runtime.morphAnswerState.answered
-          ? (runtime.morphAnswerState.isCorrect ? 'You had it' : 'Needs more review')
-          : 'Answer';
-        const ratingHtml = runtime.morphAnswerState.answered
-          ? ''
-          : `<div class="morph-selfcheck-actions">
-               <button class="choice-btn selfcheck-good" type="button" onclick="rateMorphologySelfCheck(true)">I had it</button>
-               <button class="choice-btn selfcheck-bad" type="button" onclick="rateMorphologySelfCheck(false)">Needs review</button>
-             </div>`;
-
-        resultHtml = `<div class="morph-result ${resultClass}">
-            <div class="morph-result-title">${resultTitle}</div>
-            <div class="morph-result-body">${resultBody}</div>
-            <div class="morph-result-meta">${card.lemma}${card.family ? ` · ${card.family}` : ''}</div>
-            ${buildGrammarSupportHtml(card, null, { reversed })}
-            ${noteHtml}
-          </div>${ratingHtml}`;
-      }
-    } else {
-      const choiceButtons = displayChoices.map((choice, idx) => {
-        const classes = ['choice-btn'];
-        if (reversed) classes.push('choice-btn-greek');
-        if (runtime.morphAnswerState.answered) {
-          if (choice === correctAnswer) classes.push('correct');
-          if (idx === runtime.morphAnswerState.selectedIndex && choice !== correctAnswer) classes.push('incorrect');
-        }
-        return `<button class="${classes.join(' ')}" type="button" ${runtime.morphAnswerState.answered ? 'disabled' : ''} onclick="answerMorphologyChoice(${idx})">${choice}</button>`;
-      }).join('');
-
-      const dontKnowHtml = runtime.morphAnswerState.answered
-        ? ''
-        : `<div class="morph-dontknow-row">
-             <button class="ctrl-btn morph-dontknow-btn" type="button" onclick="markMorphologyDontKnow()">I don't know</button>
-           </div>`;
-      interactionHtml = `<div class="morph-choices">${choiceButtons}</div>${dontKnowHtml}`;
-      const wrongChoice = runtime.morphAnswerState.answered
-        && !runtime.morphAnswerState.isCorrect
-        && runtime.morphAnswerState.selectedIndex >= 0
-        ? displayChoices[runtime.morphAnswerState.selectedIndex]
-        : null;
-      const pendingLabel = reversed
-        ? 'Choose the correct Greek form.'
-        : 'Choose the best parsing option.';
-      resultHtml = runtime.morphAnswerState.answered
-        ? `<div class="morph-result ${runtime.morphAnswerState.isCorrect ? 'correct' : 'incorrect'}">
-            <div class="morph-result-title">${runtime.morphAnswerState.isCorrect ? 'Correct' : 'Not quite'}</div>
-            <div class="morph-result-body">${resultBody}</div>
-            <div class="morph-result-meta">${card.lemma}${card.family ? ` · ${card.family}` : ''}</div>
-            ${buildGrammarSupportHtml(card, wrongChoice, { reversed })}
-            ${noteHtml}
-          </div>`
-        : `<div class="morph-result pending">${pendingLabel}</div>`;
-    }
-
-    area.innerHTML = `
-      <div class="morph-card">
-        <div class="morph-label">Grammar${reversed ? ' · English → Greek' : ''}</div>
-        <div class="morph-prompt">${displayPrompt}</div>
-        ${card.lemmaGloss || card.gloss ? `<div class="morph-gloss">Gloss: “${card.lemmaGloss || card.gloss}”</div>` : ''}
-        <div class="${formClass}">${displayForm}</div>
-        ${contextHtml}
-        <div class="morph-hint">${card.lemma}</div>
-        <div class="morph-source">${card.sourceLabel}${card.family ? ` · ${card.family}` : ''}${runtime.morphSelfCheck ? ' · Self-check' : ''}</div>
-        ${interactionHtml}
-        ${resultHtml}
-      </div>`;
-    runtime.isFlipped = false;
-    renderProgress();
-    return;
-  }
-
-  const advancedCountSuffix = (card.advanced && Number.isFinite(Number(card.count)))
-    ? ` [${Number(card.count)}× in NT]`
-    : '';
-  const sourceLabelDisplay = `${card.sourceLabel}${advancedCountSuffix}`;
-
-  let frontHTML, backHTML;
-  if (!runtime.directionToGreek) {
-    frontHTML = `
-        <div class="card-face card-front">
-          <span class="card-label">Greek</span>
-          <div class="card-greek">${formatGreekHeadword(card.g)}</div>
-          <div class="card-hint">${sourceLabelDisplay}</div>
-          <div class="flip-hint">click to reveal →</div>
-        </div>`;
-    backHTML = `
-        <div class="card-face card-back">
-          <span class="card-label">English</span>
-          <div class="card-english">${card.e || '—'}</div>
-          <div class="card-greek-small">${formatGreekHeadword(card.g)}</div>
-          <div class="card-hint">${transliterateGreek(formatGreekHeadword(card.g))}${advancedCountSuffix}</div>
-          <div class="card-pos">${detectPartOfSpeech(card)}</div>
-        </div>`;
-  } else {
-    frontHTML = `
-        <div class="card-face card-front">
-          <span class="card-label">English</span>
-          <div class="card-english">${card.e || '—'}</div>
-          <div class="card-hint">${sourceLabelDisplay}</div>
-          <div class="flip-hint">click to reveal →</div>
-        </div>`;
-    backHTML = `
-        <div class="card-face card-back">
-          <span class="card-label">Greek</span>
-          <div class="card-greek">${formatGreekHeadword(card.g)}</div>
-          <div class="card-hint">${transliterateGreek(formatGreekHeadword(card.g))}${advancedCountSuffix}</div>
-          <div class="card-pos">${detectPartOfSpeech(card)}</div>
-        </div>`;
-  }
-
-  area.innerHTML = `
-    <div class="card-wrapper" id="cardWrapper" onclick="flipCard()">
-      <div class="card-inner" id="cardInner">
-        ${frontHTML}
-        ${backHTML}
-      </div>
-    </div>`;
-
-  runtime.isFlipped = false;
-  renderProgress();
-}
-
-function flipCard() {
-  const wrapper = document.getElementById('cardWrapper');
-  if (!wrapper) return;
-  noteStudyInteraction();
-  runtime.isFlipped = !runtime.isFlipped;
-  wrapper.classList.toggle('flipped', runtime.isFlipped);
-
-  if (runtime.isFlipped && maybeReturnKnownCardToActivePile()) {
-    renderProgress();
-    renderReview();
-    saveState();
-  }
-}
+// renderCard and flipCard live in js/ui/render.js
 
 // ═══════════════════════════════════════════════════════
 //  NAVIGATE + MARK
