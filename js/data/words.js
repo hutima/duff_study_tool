@@ -382,93 +382,143 @@ const SETS = {
     "type": "chapter",
     "cards": [
       {
-        "g": "ἀπό",
-        "e": "(+gen.) (away) from",
+        "g": "ἀπό (+gen.)",
+        "e": "(away) from",
         "required": true
       },
       {
-        "g": "διά",
-        "e": "(+acc.) because of; (+gen.) through",
+        "g": "διά (+acc.)",
+        "e": "because of",
         "required": true
       },
       {
-        "g": "εἰς",
-        "e": "(+acc.) into",
+        "g": "διά (+gen.)",
+        "e": "through",
         "required": true
       },
       {
-        "g": "ἐκ",
-        "e": "(+gen.) (out of) from",
+        "g": "εἰς (+acc.)",
+        "e": "into",
         "required": true
       },
       {
-        "g": "ἐν",
-        "e": "(+dat.) in",
+        "g": "ἐκ (+gen.)",
+        "e": "(out of) from",
         "required": true
       },
       {
-        "g": "ἐνώπιον",
-        "e": "(+gen.) in front of, in the presence of",
+        "g": "ἐν (+dat.)",
+        "e": "in",
+        "required": true
+      },
+      {
+        "g": "ἐνώπιον (+gen.)",
+        "e": "in front of, in the presence of",
         "required": false
       },
       {
-        "g": "ἔξω",
-        "e": "(+gen.) outside",
+        "g": "ἔξω (+gen.)",
+        "e": "outside",
         "required": false
       },
       {
-        "g": "ἐπί",
-        "e": "(+acc.) onto; (+gen.) on; (+dat.) on the basis of",
+        "g": "ἐπί (+acc.)",
+        "e": "onto",
         "required": true
       },
       {
-        "g": "ἕως",
-        "e": "(+gen.) until",
+        "g": "ἐπί (+gen.)",
+        "e": "on",
+        "required": true
+      },
+      {
+        "g": "ἐπί (+dat.)",
+        "e": "on the basis of",
+        "required": true
+      },
+      {
+        "g": "ἕως (+gen.)",
+        "e": "until",
         "required": false
       },
       {
-        "g": "κατά",
-        "e": "(+acc.) according to; (+gen.) against",
+        "g": "κατά (+acc.)",
+        "e": "according to",
         "required": true
       },
       {
-        "g": "μετά",
-        "e": "(+acc.) after; (+gen.) with",
+        "g": "κατά (+gen.)",
+        "e": "against",
         "required": true
       },
       {
-        "g": "παρά",
-        "e": "(+acc.) alongside; (+gen.) from beside; (+dat.) beside",
+        "g": "μετά (+acc.)",
+        "e": "after",
         "required": true
       },
       {
-        "g": "περί",
-        "e": "(+acc.) around, approximately; (+gen.) concerning",
+        "g": "μετά (+gen.)",
+        "e": "with",
         "required": true
       },
       {
-        "g": "πρό",
-        "e": "(+gen.) before",
+        "g": "παρά (+acc.)",
+        "e": "alongside",
+        "required": true
+      },
+      {
+        "g": "παρά (+gen.)",
+        "e": "from beside",
+        "required": true
+      },
+      {
+        "g": "παρά (+dat.)",
+        "e": "beside",
+        "required": true
+      },
+      {
+        "g": "περί (+acc.)",
+        "e": "around, approximately",
+        "required": true
+      },
+      {
+        "g": "περί (+gen.)",
+        "e": "concerning",
+        "required": true
+      },
+      {
+        "g": "πρό (+gen.)",
+        "e": "before",
         "required": false
       },
       {
-        "g": "πρός",
-        "e": "(+acc.) to, towards",
+        "g": "πρός (+acc.)",
+        "e": "to, towards",
         "required": true
       },
       {
-        "g": "σύν",
-        "e": "(+dat.) together with",
+        "g": "σύν (+dat.)",
+        "e": "together with",
         "required": false
       },
       {
-        "g": "ὑπέρ",
-        "e": "(+acc.) above; (+gen.) on behalf of",
+        "g": "ὑπέρ (+acc.)",
+        "e": "above",
         "required": true
       },
       {
-        "g": "ὑπό",
-        "e": "(+acc.) under; (+gen.) by, at the hands of",
+        "g": "ὑπέρ (+gen.)",
+        "e": "on behalf of",
+        "required": true
+      },
+      {
+        "g": "ὑπό (+acc.)",
+        "e": "under",
+        "required": true
+      },
+      {
+        "g": "ὑπό (+gen.)",
+        "e": "by, at the hands of",
         "required": true
       },
       {
@@ -1493,23 +1543,23 @@ const SETS = {
         "required": true
       },
       {
-        "g": "ἔμπροσθεν",
-        "e": "(+gen.) in front of",
+        "g": "ἔμπροσθεν (+gen.)",
+        "e": "in front of",
         "required": true
       },
       {
-        "g": "ἕνεκα",
-        "e": "(+gen.) for the sake of",
+        "g": "ἕνεκα (+gen.)",
+        "e": "for the sake of",
         "required": false
       },
       {
-        "g": "πέραν",
-        "e": "(+gen.) on the other side of",
+        "g": "πέραν (+gen.)",
+        "e": "on the other side of",
         "required": false
       },
       {
-        "g": "χωρίς",
-        "e": "(+gen.) separate, apart from",
+        "g": "χωρίς (+gen.)",
+        "e": "separate, apart from",
         "required": true
       },
       {

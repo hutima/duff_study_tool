@@ -309,7 +309,7 @@
       items: [
         {
           family: "Single-case prepositions",
-          lemma: "ἐν, εἰς, ἐκ, ἀπό, σύν, πρός",
+          lemma: "ἐν, εἰς, ἐκ, ἀπό, σύν, πρός, ἐνώπιον, ἔξω, ἕως, πρό",
           gloss: "prepositions with one case",
           questions: [
             { form: "ἐν", prompt: "Which case does ἐν take?", answer: "dative",
@@ -331,7 +331,19 @@
             { form: "πρός", prompt: "Which case does πρός most commonly take in the NT?",
               answer: "accusative",
               choices: ["nominative", "genitive", "dative", "accusative"],
-              note: "'to', 'toward'. (πρός + dat./gen. are rare in the NT.)" }
+              note: "'to', 'toward'. (πρός + dat./gen. are rare in the NT.)" },
+            { form: "ἐνώπιον", prompt: "Which case does ἐνώπιον take?", answer: "genitive",
+              choices: ["nominative", "genitive", "dative", "accusative"],
+              note: "'in front of, in the presence of'. Improper preposition: always + gen." },
+            { form: "ἔξω", prompt: "Which case does ἔξω take?", answer: "genitive",
+              choices: ["nominative", "genitive", "dative", "accusative"],
+              note: "'outside'. Improper preposition: always + gen." },
+            { form: "ἕως", prompt: "Which case does ἕως take?", answer: "genitive",
+              choices: ["nominative", "genitive", "dative", "accusative"],
+              note: "'until, as far as'. Can also be a conjunction ('until')." },
+            { form: "πρό", prompt: "Which case does πρό take?", answer: "genitive",
+              choices: ["nominative", "genitive", "dative", "accusative"],
+              note: "'before' (time or place). Always + gen." }
           ]
         },
         {
@@ -392,6 +404,54 @@
               answer: "according to / throughout",
               choices: ["according to / throughout", "down from", "with", "before"],
               note: "κατὰ Μᾶρκον = 'according to Mark'." }
+          ]
+        },
+        {
+          family: "ἐπί (multi-case)",
+          lemma: "ἐπί",
+          gloss: "on / onto / on the basis of",
+          questions: [
+            { form: "ἐπί + accusative", prompt: "ἐπί + accusative means…",
+              answer: "onto, to (motion toward)",
+              choices: ["onto, to (motion toward)", "on (location)", "on the basis of", "against"] },
+            { form: "ἐπί + genitive", prompt: "ἐπί + genitive means…",
+              answer: "on, upon (location)",
+              choices: ["on, upon (location)", "onto (motion)", "on the basis of", "after"] },
+            { form: "ἐπί + dative", prompt: "ἐπί + dative means…",
+              answer: "on the basis of / at",
+              choices: ["on the basis of / at", "onto (motion)", "against", "through"],
+              note: "ἐπί is the most flexible preposition — context decides the case." }
+          ]
+        },
+        {
+          family: "παρά (multi-case)",
+          lemma: "παρά",
+          gloss: "from / beside / alongside",
+          questions: [
+            { form: "παρά + accusative", prompt: "παρά + accusative means…",
+              answer: "alongside (motion to a side)",
+              choices: ["alongside (motion to a side)", "from beside (source)", "beside (location)", "above"] },
+            { form: "παρά + genitive", prompt: "παρά + genitive means…",
+              answer: "from beside (source, often of a person)",
+              choices: ["from beside (source, often of a person)", "alongside (motion)", "beside (location)", "instead of"],
+              note: "Like ἀπό/ἐκ but personal: 'from (the side of) X'." },
+            { form: "παρά + dative", prompt: "παρά + dative means…",
+              answer: "beside, at (location, often with a person)",
+              choices: ["beside, at (location, often with a person)", "alongside (motion)", "from beside", "on behalf of"] }
+          ]
+        },
+        {
+          family: "περί (multi-case)",
+          lemma: "περί",
+          gloss: "around / concerning",
+          questions: [
+            { form: "περί + accusative", prompt: "περί + accusative means…",
+              answer: "around, about (location/approx.)",
+              choices: ["around, about (location/approx.)", "concerning, about (topic)", "after", "by"] },
+            { form: "περί + genitive", prompt: "περί + genitive means…",
+              answer: "concerning, about (topic)",
+              choices: ["concerning, about (topic)", "around (location)", "on behalf of", "through"],
+              note: "Mnemonic: gen. = 'about the topic'; acc. = 'around the place'." }
           ]
         }
       ]
