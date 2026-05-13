@@ -26,6 +26,14 @@ import {
   getUsageMsForDay,
   getActiveStudyMsForDay
 } from '../domain/gamification/usageStats.js';
+import {
+  migrateLegacyXp as migrateLegacyXpPure,
+  computeStudyStreaks,
+  computeXpAndLevel as computeXpAndLevelPure,
+  computeTodayStats,
+  computeAchievements as computeAchievementsPure,
+  getRegressionProjection
+} from '../domain/gamification/xp.js';
 
 // Domain — Deck
 import { isChapterKey, isAdvancedKey, sortSetKeys, sourceHint, expandSessionSets } from '../domain/deck/ordering.js';
@@ -3583,28 +3591,7 @@ function buildCumulativeConfirmationSeries(cards, marksStore, progressStore) {
   return { total, currentConfirmed, weeklyPct, series };
 }
 
-function getRegressionProjection(series, currentCount, totalCount) {
-  if (!Array.isArray(series) || series.length < 2 || !totalCount || currentCount >= totalCount) return null;
-  const recent = series.slice(-28);
-  if (recent.length < 2) return null;
-  const x0 = recent[0].ts;
-  const points = recent.map(point => ({ x: (point.ts - x0) / (24 * 60 * 60 * 1000), y: point.count }));
-  const n = points.length;
-  const sumX = points.reduce((sum, p) => sum + p.x, 0);
-  const sumY = points.reduce((sum, p) => sum + p.y, 0);
-  const sumXY = points.reduce((sum, p) => sum + (p.x * p.y), 0);
-  const sumXX = points.reduce((sum, p) => sum + (p.x * p.x), 0);
-  const denom = (n * sumXX) - (sumX * sumX);
-  if (!denom) return null;
-  const slope = ((n * sumXY) - (sumX * sumY)) / denom;
-  const intercept = (sumY - (slope * sumX)) / n;
-  if (!(slope > 0.01)) return null;
-  const projectedX = (totalCount - intercept) / slope;
-  if (!Number.isFinite(projectedX)) return null;
-  const projectedTs = x0 + (projectedX * 24 * 60 * 60 * 1000);
-  return projectedTs >= Date.now() ? { cardsPerDay: slope, projectedTs } : null;
-}
-
+// getRegressionProjection now lives in js/domain/gamification/xp.js
 function getCertaintyBucketForCard(card, marksStore, progressStore) {
   const progress = progressStore?.[card.id];
   const confidence = getConfidencePct(progress);
@@ -3969,174 +3956,12 @@ function maybeCelebrateAchievements() {
   appGamification.lastCelebratedBadgeDay = todayKey;
 }
 
-// One-time migration: compute old XP from seenCount and store as cardXpEarned
-function migrateLegacyXp(usage) {
-  let legacyCardXp = 0;
-  ['g2e', 'e2g', 'morph'].forEach(bucket => {
-    const store = globalWordProgress[bucket];
-    if (!store || typeof store !== 'object') return;
-    const keys = Object.keys(store);
-    for (let k = 0; k < keys.length; k++) {
-      const entry = store[keys[k]];
-      if (!entry || typeof entry !== 'object') continue;
-      const seen = Math.max(0, entry.seenCount || 0);
-      for (let i = 0; i < seen; i++) {
-        legacyCardXp += i < REVIEW_XP_SCHEDULE.length ? REVIEW_XP_SCHEDULE[i] : 1;
-      }
-    }
-  });
-  usage.cardXpEarned = legacyCardXp;
-}
-
-function computeTotalXp(usage) {
-  if (usage.cardXpEarned < 0) migrateLegacyXp(usage);
-  const cardXp = Math.max(0, usage.cardXpEarned || 0);
-  const timeXp = Math.floor((usage.activeStudyMs || 0) / (60 * 1000)) * 2;
-  return cardXp + timeXp;
-}
-
-function computeStudyStreaks(activeDailyMs) {
-  const map = activeDailyMs || {};
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  let current = 0;
-  let cursor = new Date(today);
-  // Allow today to have 0 — streak is still alive if yesterday had activity
-  if (!map[getUsageDayKey(cursor.getTime())]) {
-    cursor.setDate(cursor.getDate() - 1);
-  }
-  while (map[getUsageDayKey(cursor.getTime())] > 0) {
-    current++;
-    cursor.setDate(cursor.getDate() - 1);
-  }
-  // Longest streak
-  const keys = Object.keys(map).filter(k => map[k] > 0).sort();
-  let longest = 0; let run = 0; let prev = null;
-  for (const key of keys) {
-    const d = new Date(key + 'T00:00:00');
-    if (prev) {
-      const diff = Math.round((d - prev) / (24 * 60 * 60 * 1000));
-      run = diff === 1 ? run + 1 : 1;
-    } else {
-      run = 1;
-    }
-    if (run > longest) longest = run;
-    prev = d;
-  }
-  return { current, longest };
-}
-
-function computeXpAndLevel(usage) {
-  const totalXp = computeTotalXp(usage);
-  let currentLevel = XP_LEVELS[0];
-  let nextLevel = XP_LEVELS[1] || null;
-  for (let i = XP_LEVELS.length - 1; i >= 0; i--) {
-    if (totalXp >= XP_LEVELS[i].threshold) {
-      currentLevel = XP_LEVELS[i];
-      nextLevel = XP_LEVELS[i + 1] || null;
-      break;
-    }
-  }
-  const levelProgress = nextLevel
-    ? (totalXp - currentLevel.threshold) / (nextLevel.threshold - currentLevel.threshold)
-    : 1;
-  return { totalXp, currentLevel, nextLevel, levelProgress: Math.min(1, Math.max(0, levelProgress)) };
-}
-
-function computeTodayStats(activeDailyMs, cards, marksStore, progressStore) {
-  const todayKey = getUsageDayKey();
-  const todayMs = (activeDailyMs || {})[todayKey] || 0;
-  let reviewedToday = 0;
-  let newToday = 0;
-  const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
-  const todayTs = todayStart.getTime();
-
-  const sourceEntries = progressStore && typeof progressStore === 'object'
-    ? Object.entries(progressStore)
-    : [];
-
-  if (sourceEntries.length) {
-    sourceEntries.forEach(([cardId, p]) => {
-      if (!p) return;
-      if (p.lastReviewedAt && p.lastReviewedAt >= todayTs) {
-        reviewedToday++;
-      }
-      if (p.firstConfirmedAt && p.firstConfirmedAt >= todayTs) {
-        newToday++;
-      }
-    });
-  } else {
-    (cards || []).forEach(card => {
-      const p = progressStore?.[card.id];
-      if (!p) return;
-      if (p.lastReviewedAt && p.lastReviewedAt >= todayTs) reviewedToday++;
-      if (p.firstConfirmedAt && p.firstConfirmedAt >= todayTs) newToday++;
-    });
-  }
-
-  const firstCardTodayEarned = reviewedToday > 0 || newToday > 0;
-  return { todayMs, reviewedToday, newToday, firstCardTodayEarned };
-}
-
+// XP / level / streaks / achievements math now lives in js/domain/gamification/xp.js.
+// Wrappers bind the host runtime stores so call sites read the live state.
+function migrateLegacyXp(usage) { return migrateLegacyXpPure(usage, globalWordProgress); }
+function computeXpAndLevel(usage) { return computeXpAndLevelPure(usage, globalWordProgress); }
 function computeAchievements(usage, courseData, streaks, sessionCount, todayStats = null) {
-  const earned = [];
-  const check = (id, icon, name, desc, condition, group) => {
-    earned.push({ id, icon, name, desc, earned: !!condition, group: group || 'milestone' });
-  };
-
-  const totalConfirmed = courseData.allVocabConfirmed + courseData.allGrammarConfirmed;
-  const reviewedToday = Number(todayStats?.reviewedToday) || 0;
-  const newToday = Number(todayStats?.newToday) || 0;
-  const firstCardTodayEarned = !!todayStats?.firstCardTodayEarned;
-
-  // ── Daily ──
-  check('daily_first_card', '\u2605', 'First Card Today', 'Review your first card today', firstCardTodayEarned || reviewedToday > 0 || newToday > 0, 'daily');
-
-  // ── Card milestones ──
-  check('first_card',    '\u2726', 'First Light',     'Confirm your first card',            totalConfirmed >= 1);
-  check('ten_cards',     '\u2605', 'Kindled',         'Confirm 10 cards',                   totalConfirmed >= 10);
-  check('fifty_cards',   '\u2662', 'Diligent',        'Confirm 50 cards',                   totalConfirmed >= 50);
-  check('hundred_cards', '\u2736', 'Centurion',       'Confirm 100 cards',                  totalConfirmed >= 100);
-  check('twofifty',      '\u2741', 'Quarter-master',  'Confirm 250 cards',                  totalConfirmed >= 250);
-  check('five_hundred',  '\u2743', 'Half a Thousand', 'Confirm 500 cards',                  totalConfirmed >= 500);
-
-  // ── Streaks ──
-  check('streak_3',      '\u2668', 'Three-fold Cord', '3-day study streak',                 streaks.current >= 3 || streaks.longest >= 3);
-  check('streak_7',      '\u2604', 'Weekly Flame',    '7-day study streak',                 streaks.current >= 7 || streaks.longest >= 7);
-  check('streak_14',     '\u269D', 'Fortnight',       '14-day study streak',                streaks.current >= 14 || streaks.longest >= 14);
-  check('streak_30',     '\u2600', 'Monthly Devotion','30-day study streak',                streaks.current >= 30 || streaks.longest >= 30);
-
-  // ── Time & sessions ──
-  check('hour_one',      '\u231B', 'First Hour',      'Reach 1 hour of active study',       (usage.activeStudyMs || 0) >= 60 * 60 * 1000);
-  check('hour_five',     '\u23F3', 'Five Hours',      'Reach 5 hours of active study',      (usage.activeStudyMs || 0) >= 5 * 60 * 60 * 1000);
-  check('hour_ten',      '\u2316', 'Ten Hours',       'Reach 10 hours of active study',     (usage.activeStudyMs || 0) >= 10 * 60 * 60 * 1000);
-  check('sessions_10',   '\u2692', 'Seasoned',        'Log 10 study sessions',              sessionCount >= 10);
-  check('sessions_50',   '\u2694', 'Veteran',         'Log 50 study sessions',              sessionCount >= 50);
-
-  // ── Completion awards (course-wide, persist across selection) ──
-  check('req_vocab',     '\u2655', 'Required Lexicon','Confirm all required vocabulary',     courseData.reqVocabConfirmed >= courseData.reqVocabTotal && courseData.reqVocabTotal > 0);
-  check('all_vocab',     '\u265B', 'Full Lexicon',    'Confirm every vocabulary card',       courseData.allVocabConfirmed >= courseData.allVocabTotal && courseData.allVocabTotal > 0);
-  check('all_grammar',   '\u2654', 'Grammar Master',  'Confirm all grammar cards',           courseData.allGrammarConfirmed >= courseData.allGrammarTotal && courseData.allGrammarTotal > 0);
-
-  // ── Per-chapter awards (vocab, persist regardless of selection) ──
-  const chapterKeys = getAllChapterKeys();
-  chapterKeys.forEach(chKey => {
-    const chNum = Number(chKey);
-    const chCards = getChapterVocabCards(chKey, false);
-    if (!chCards.length) return;
-    // Check g2e marks (the primary direction)
-    const g2eMarks = globalWordMarks.g2e || {};
-    const confirmed = chCards.filter(c => g2eMarks[c.id] === 'known').length;
-    check(
-      `ch_${chNum}`,
-      '\u2720',
-      `Ch. ${chNum}`,
-      `Confirm all Ch. ${chNum} vocabulary (${chCards.length} cards)`,
-      confirmed >= chCards.length,
-      'chapter'
-    );
-  });
-
-  return earned;
+  return computeAchievementsPure(usage, courseData, streaks, sessionCount, todayStats, globalWordMarks);
 }
 
 function computeCourseWideData() {
