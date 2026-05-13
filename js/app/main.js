@@ -56,6 +56,31 @@ import { installKeyboardShortcuts } from '../ui/keyboard.js';
 import { showLevelToast, showBadgeToast } from '../ui/toast.js';
 import { installTouchSafeTapBridge } from '../ui/touchTapBridge.js';
 import {
+  configureModals,
+  updateConsentButtonState,
+  openDisclaimerModal,
+  closeDisclaimerModal,
+  handleConsentAction,
+  initializeConsentGate,
+  showDisclaimerModal,
+  isDisclaimerModalOpen,
+  maybeShowWhatsNewV1_1Modal,
+  openWhatsNewV1_1Modal,
+  closeWhatsNewV1_1Modal,
+  isWhatsNewV1_1ModalOpen,
+  isTransferModalOpen,
+  isStudySelectorOpen,
+  openStudySelector,
+  closeStudySelector,
+  isShortcutsModalOpen,
+  openShortcutsModal,
+  closeShortcutsModal,
+  isAnalyticsModalOpen,
+  openAnalyticsOverlay,
+  closeAnalyticsOverlay,
+  startStudying
+} from '../ui/modals.js';
+import {
   backfillConfirmedMilestones,
   buildDailyCumulativeSeriesFromMap,
   buildCumulativeConfirmationSeries,
@@ -88,8 +113,21 @@ import {
 } from '../state/store.js';
 
 // Wire UI modules with the host helpers they call back into.
-// Function declarations are hoisted, so passing references at module-top is safe.
+// Function declarations are hoisted; getter/setter closures defer reads to
+// invocation time, so let-binding values are valid by the time they're called.
 configureReader({ noteStudyInteraction, setStudyMode });
+configureModals({
+  renderAnalyticsOverlay: () => renderAnalyticsOverlay(),
+  buildSessions: () => buildSessions(),
+  buildChapterSelector: () => buildChapterSelector(),
+  buildSupplementalSelector: () => buildSupplementalSelector(),
+  buildAdvancedSelector: () => buildAdvancedSelector(),
+  getHasAcceptedDisclaimer: () => hasAcceptedDisclaimer,
+  setHasAcceptedDisclaimer: (v) => { hasAcceptedDisclaimer = v; },
+  getDisclaimerModalRequiresAgreement: () => disclaimerModalRequiresAgreement,
+  setDisclaimerModalRequiresAgreement: (v) => { disclaimerModalRequiresAgreement = v; },
+  hasSelectedKeys: () => selectedKeys.length > 0
+});
 
 let appUsageStats = {
   totalMs: 0,
@@ -3151,200 +3189,8 @@ function returnSeenCardToDeck(encodedId) {
   saveState();
 }
 
-function updateConsentButtonState() {
-  const checkbox = document.getElementById('consentCheckbox');
-  const btn = document.getElementById('consentContinueBtn');
-  if (!btn) return;
-  if (!disclaimerModalRequiresAgreement) {
-    btn.disabled = false;
-    btn.textContent = 'Close';
-    return;
-  }
-  btn.textContent = 'Agree and continue';
-  btn.disabled = !(checkbox && checkbox.checked);
-}
-
-function openDisclaimerModal(requireAgreement = !hasAcceptedDisclaimer) {
-  const overlay = document.getElementById('consentOverlay');
-  const checkRow = document.getElementById('consentCheckRow');
-  const checkbox = document.getElementById('consentCheckbox');
-  if (!overlay) return;
-
-  disclaimerModalRequiresAgreement = !!requireAgreement;
-  if (checkRow) checkRow.style.display = disclaimerModalRequiresAgreement ? 'flex' : 'none';
-  if (checkbox) checkbox.checked = false;
-  overlay.classList.add('show');
-  overlay.setAttribute('aria-hidden', 'false');
-  document.body.classList.add('modal-open');
-  updateConsentButtonState();
-}
-
-function closeDisclaimerModal() {
-  const overlay = document.getElementById('consentOverlay');
-  if (!overlay) return;
-  overlay.classList.remove('show');
-  overlay.setAttribute('aria-hidden', 'true');
-  if (!isTransferModalOpen() && !isAnalyticsModalOpen()) document.body.classList.remove('modal-open');
-}
-
-function handleConsentAction() {
-  if (!disclaimerModalRequiresAgreement) {
-    closeDisclaimerModal();
-    return;
-  }
-
-  const checkbox = document.getElementById('consentCheckbox');
-  if (!checkbox || !checkbox.checked) return;
-
-  hasAcceptedDisclaimer = true;
-  const storage = getStorage();
-  if (storage) {
-    storage.setItem(CONSENT_STORAGE_KEY, 'accepted');
-    // First-time accepters already see the new features as part of the base
-    // experience, so suppress the v1.1 announcement for them.
-    storage.setItem(WHATS_NEW_V1_1_STORAGE_KEY, 'seen');
-  }
-  closeDisclaimerModal();
-  openStudySelector();
-}
-
-function initializeConsentGate() {
-  const storage = getStorage();
-  hasAcceptedDisclaimer = storage ? storage.getItem(CONSENT_STORAGE_KEY) === 'accepted' : false;
-
-  const checkbox = document.getElementById('consentCheckbox');
-  if (checkbox) checkbox.addEventListener('change', updateConsentButtonState);
-
-  if (!hasAcceptedDisclaimer) {
-    openDisclaimerModal(true);
-  } else {
-    updateConsentButtonState();
-    maybeShowWhatsNewV1_1Modal();
-  }
-}
-
-function maybeShowWhatsNewV1_1Modal() {
-  if (!hasAcceptedDisclaimer) return;
-  const storage = getStorage();
-  if (!storage) return;
-  if (storage.getItem(WHATS_NEW_V1_1_STORAGE_KEY) === 'seen') return;
-  openWhatsNewV1_1Modal();
-}
-
-function openWhatsNewV1_1Modal() {
-  const overlay = document.getElementById('whatsNewV1_1Overlay');
-  if (!overlay) return;
-  overlay.classList.add('show');
-  overlay.setAttribute('aria-hidden', 'false');
-  document.body.classList.add('modal-open');
-}
-
-function closeWhatsNewV1_1Modal() {
-  const overlay = document.getElementById('whatsNewV1_1Overlay');
-  if (!overlay) return;
-  overlay.classList.remove('show');
-  overlay.setAttribute('aria-hidden', 'true');
-  const storage = getStorage();
-  if (storage) storage.setItem(WHATS_NEW_V1_1_STORAGE_KEY, 'seen');
-  if (!isDisclaimerModalOpen() && !isTransferModalOpen() && !isAnalyticsModalOpen() && !isStudySelectorOpen() && !isShortcutsModalOpen()) {
-    document.body.classList.remove('modal-open');
-  }
-}
-
-function isWhatsNewV1_1ModalOpen() {
-  return !!document.getElementById('whatsNewV1_1Overlay')?.classList.contains('show');
-}
-
-function showDisclaimerModal() {
-  openDisclaimerModal(false);
-}
-
-function isDisclaimerModalOpen() {
-  return !!document.getElementById('consentOverlay')?.classList.contains('show');
-}
-
-function isTransferModalOpen() {
-  return !!document.getElementById('transferOverlay')?.classList.contains('show');
-}
-
-function isStudySelectorOpen() {
-  return !!document.getElementById('studySelectorOverlay')?.classList.contains('show');
-}
-
-function isShortcutsModalOpen() {
-  return !!document.getElementById('shortcutsOverlay')?.classList.contains('show');
-}
-
-// ═══════════════════════════════════════════════════════
-//  KEYBOARD + INIT
-// ═══════════════════════════════════════════════════════
-function isAnalyticsModalOpen() {
-  const overlay = document.getElementById('analyticsOverlay');
-  return !!overlay && overlay.classList.contains('show');
-}
-
-function openAnalyticsOverlay() {
-  const overlay = document.getElementById('analyticsOverlay');
-  if (!overlay) return;
-  renderAnalyticsOverlay();
-  overlay.classList.add('show');
-  overlay.setAttribute('aria-hidden', 'false');
-  document.body.classList.add('modal-open');
-}
-
-function closeAnalyticsOverlay() {
-  const overlay = document.getElementById('analyticsOverlay');
-  if (!overlay) return;
-  overlay.classList.remove('show');
-  overlay.setAttribute('aria-hidden', 'true');
-  if (!isDisclaimerModalOpen() && !isTransferModalOpen() && !isStudySelectorOpen() && !isShortcutsModalOpen()) document.body.classList.remove('modal-open');
-}
-
-function openStudySelector() {
-  buildSessions();
-  buildChapterSelector();
-  buildSupplementalSelector();
-  buildAdvancedSelector();
-
-  const overlay = document.getElementById('studySelectorOverlay');
-  if (!overlay) return;
-  overlay.classList.add('show');
-  overlay.setAttribute('aria-hidden', 'false');
-  document.body.classList.add('modal-open');
-}
-
-function closeStudySelector() {
-  const overlay = document.getElementById('studySelectorOverlay');
-  if (!overlay) return;
-  overlay.classList.remove('show');
-  overlay.setAttribute('aria-hidden', 'true');
-  if (!isDisclaimerModalOpen() && !isTransferModalOpen() && !isAnalyticsModalOpen() && !isShortcutsModalOpen()) document.body.classList.remove('modal-open');
-}
-
-function openShortcutsModal() {
-  const overlay = document.getElementById('shortcutsOverlay');
-  if (!overlay) return;
-  overlay.classList.add('show');
-  overlay.setAttribute('aria-hidden', 'false');
-  document.body.classList.add('modal-open');
-}
-
-function closeShortcutsModal() {
-  const overlay = document.getElementById('shortcutsOverlay');
-  if (!overlay) return;
-  overlay.classList.remove('show');
-  overlay.setAttribute('aria-hidden', 'true');
-  if (!isDisclaimerModalOpen() && !isTransferModalOpen() && !isAnalyticsModalOpen() && !isStudySelectorOpen()) document.body.classList.remove('modal-open');
-}
-
-function startStudying() {
-  if (!selectedKeys.length) {
-    openStudySelector();
-    return;
-  }
-  const cardArea = document.getElementById('cardArea');
-  if (cardArea) cardArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
-}
+// Modal/overlay control (disclaimer, what's new, study selector, shortcuts,
+// analytics open/close, startStudying) lives in js/ui/modals.js
 
 
 // Touch-safe tap bridge for iOS/pointer quirks lives in js/ui/touchTapBridge.js
