@@ -4386,14 +4386,17 @@ function buildHeatmapSvg(activeDailyMs) {
   const totalDays = weeks * 7;
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const dayOfWeek = today.getDay(); // 0=Sun
+  // Anchor startDate on the Sunday that begins the column `weeks - 1` columns
+  // before the current week. Today then lands in the last column, on the row
+  // that matches its day of week (`i % 7`).
   const startDate = new Date(today);
-  startDate.setDate(startDate.getDate() - (totalDays - 1) - dayOfWeek);
+  startDate.setDate(startDate.getDate() - ((weeks - 1) * 7) - dayOfWeek);
 
   // collect values
   const cells = [];
   let maxVal = 0;
   const cursor = new Date(startDate);
-  for (let i = 0; i < totalDays + dayOfWeek + 1; i++) {
+  for (let i = 0; i < totalDays; i++) {
     const key = getUsageDayKey(cursor.getTime());
     const val = (activeDailyMs || {})[key] || 0;
     const msVal = val / (60 * 1000); // minutes
@@ -4402,10 +4405,10 @@ function buildHeatmapSvg(activeDailyMs) {
     cursor.setDate(cursor.getDate() + 1);
   }
 
-  // Build grid: columns = weeks, rows = days of week (Mon-Sun reordered)
+  // Build grid: columns = weeks, rows = days of week (Sun-Sat)
   const dayLabels = ['', 'M', '', 'W', '', 'F', ''];
   const labelWidth = 20;
-  const gridWidth = (weeks + 1) * (cellSize + cellGap);
+  const gridWidth = weeks * (cellSize + cellGap);
   const gridHeight = 7 * (cellSize + cellGap);
   const svgW = labelWidth + gridWidth + 10;
   const svgH = gridHeight + 28;
