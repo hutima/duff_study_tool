@@ -109,6 +109,23 @@ import {
   toggleSet
 } from '../ui/selectors.js';
 import {
+  configureNavigation,
+  navigate,
+  markCard,
+  setStudyMode,
+  setAppProfile,
+  toggleMorphSelfCheck,
+  toggleShuffle,
+  toggleRequiredOnly,
+  toggleDirection,
+  toggleSpacedRepetition,
+  reshuffleEligible,
+  fastForwardOneDay,
+  fastForwardOneWeek,
+  resetCurrentDeck,
+  resetAllStats
+} from '../ui/navigation.js';
+import {
   backfillConfirmedMilestones,
   buildDailyCumulativeSeriesFromMap,
   buildCumulativeConfirmationSeries,
@@ -204,6 +221,35 @@ configureSelectors({
   saveCurrentDeckStateToBank: () => saveCurrentDeckStateToBank(),
   saveState: () => saveState(),
   canAccessGrammarUi: () => canAccessGrammarUi()
+});
+configureNavigation({
+  noteStudyInteraction: () => noteStudyInteraction(),
+  isMorphologyMode: () => isMorphologyMode(),
+  isReaderMode: () => isReaderMode(),
+  normalizeStudyMode: (m) => normalizeStudyMode(m),
+  resetMorphAnswerState: () => resetMorphAnswerState(),
+  ensureDirectionalStores: () => ensureDirectionalStores(),
+  getDirectionalMarksStore: () => getDirectionalMarksStore(),
+  getDirectionalProgressStore: () => getDirectionalProgressStore(),
+  syncToggleButtons: () => syncToggleButtons(),
+  startNextCycle: (mode) => startNextCycle(mode),
+  getKnownCount: () => getKnownCount(),
+  advanceScheduledCards: (cards, ms) => advanceScheduledCards(cards, ms),
+  buildStudyDeck: (cards, opts) => buildStudyDeck(cards, opts),
+  captureSpacedUndoSnapshot: () => captureSpacedUndoSnapshot(),
+  applySpacedReview: (card, outcome) => applySpacedReview(card, outcome),
+  clearSpacedUndoSnapshot: () => clearSpacedUndoSnapshot(),
+  clearSavedState: () => clearSavedState(),
+  maybeReturnConfirmedDeferredCard: () => maybeReturnConfirmedDeferredCard(),
+  maybePeriodicReshuffle: () => maybePeriodicReshuffle(),
+  recordStudyOutcome: (id, outcome, at) => recordStudyOutcome(id, outcome, at),
+  applyUnspacedSharedSchedule: (card, outcome, at) => applyUnspacedSharedSchedule(card, outcome, at),
+  getRemainingCards: () => getRemainingCards(),
+  resetUnspacedCycleState: () => resetUnspacedCycleState(),
+  saveCurrentDeckStateToBank: () => saveCurrentDeckStateToBank(),
+  saveState: () => saveState(),
+  renderReaderModule: () => renderReaderModule(),
+  getDeckStateKey: (keys, req, spaced) => getDeckStateKey(keys, req, spaced)
 });
 
 
@@ -1836,461 +1882,7 @@ function resetStudyState() {
 // ═══════════════════════════════════════════════════════
 //  NAVIGATE + MARK
 // ═══════════════════════════════════════════════════════
-function navigate(dir, options = {}) {
-  if (!runtime.deck.length) return;
-  noteStudyInteraction();
-
-  if (dir < 0) {
-    runtime.currentIdx = Math.max(0, runtime.currentIdx - 1);
-    resetMorphAnswerState();
-    renderCard();
-    return;
-  }
-
-  if (!runtime.spacedRepetition && runtime.currentIdx >= runtime.deck.length) {
-    if (runtime.unspacedPendingRecycle) {
-      startNextCycle('remaining');
-      resetMorphAnswerState();
-      renderCard();
-      renderReview();
-      renderProgress();
-      saveState();
-    } else if (getKnownCount() === runtime.originalDeck.length) {
-      startNextCycle('full');
-      resetMorphAnswerState();
-      renderCard();
-      renderReview();
-      renderProgress();
-      saveState();
-    }
-    return;
-  }
-
-  if (runtime.spacedRepetition && runtime.currentIdx >= runtime.activeDeckCount) {
-    advanceScheduledCards(runtime.originalDeck, SRS_CYCLE_ADVANCE_MS);
-    runtime.deck = buildStudyDeck(runtime.originalDeck);
-    runtime.currentIdx = 0;
-    resetMorphAnswerState();
-    renderCard();
-    renderReview();
-    renderProgress();
-    saveState();
-    return;
-  }
-
-  if (runtime.spacedRepetition && runtime.currentIdx < runtime.activeDeckCount && !options.skipAutoReview && !isMorphologyMode()) {
-    captureSpacedUndoSnapshot();
-    applySpacedReview(runtime.deck[runtime.currentIdx], 'again');
-    runtime.deck = buildStudyDeck(runtime.originalDeck);
-  }
-
-  if (runtime.spacedRepetition) {
-    if (isMorphologyMode()) {
-      if (runtime.morphPendingAdvance) {
-        runtime.deck = buildStudyDeck(runtime.originalDeck);
-        runtime.currentIdx = Math.min(runtime.currentIdx, runtime.activeDeckCount);
-      } else {
-        runtime.currentIdx = Math.min(runtime.currentIdx + 1, runtime.activeDeckCount);
-      }
-      clearSpacedUndoSnapshot();
-    } else {
-      runtime.currentIdx = Math.min(runtime.currentIdx, runtime.activeDeckCount);
-      maybeReturnConfirmedDeferredCard();
-      maybePeriodicReshuffle();
-    }
-    resetMorphAnswerState();
-    renderCard();
-    renderReview();
-    renderProgress();
-    saveState();
-    return;
-  }
-
-  if (isMorphologyMode()) {
-    const nextIdx = runtime.currentIdx + 1;
-    if (nextIdx >= runtime.deck.length) {
-      if (getKnownCount() === runtime.originalDeck.length) {
-        runtime.currentIdx = runtime.deck.length;
-        runtime.unspacedPendingRecycle = false;
-      } else {
-        runtime.currentIdx = runtime.deck.length;
-        runtime.unspacedPendingRecycle = true;
-      }
-    } else {
-      runtime.currentIdx = nextIdx;
-      runtime.unspacedPendingRecycle = false;
-    }
-    clearSpacedUndoSnapshot();
-    resetMorphAnswerState();
-    renderCard();
-    renderReview();
-    renderProgress();
-    saveState();
-    return;
-  }
-
-  for (let i = runtime.currentIdx + 1; i < runtime.deck.length; i++) {
-    if (runtime.marks[runtime.deck[i].id] !== 'known' && !runtime.unspacedDeferredIds.has(runtime.deck[i].id)) {
-      runtime.currentIdx = i;
-      maybePeriodicReshuffle();
-      renderCard();
-      return;
-    }
-  }
-
-  if (getKnownCount() === runtime.originalDeck.length && runtime.unspacedDeferredIds.size === 0) {
-    runtime.currentIdx = runtime.deck.length;
-    runtime.unspacedPendingRecycle = false;
-  } else {
-    runtime.currentIdx = runtime.deck.length;
-    runtime.unspacedPendingRecycle = true;
-  }
-
-  resetMorphAnswerState();
-  renderCard();
-}
-
-function markCard(outcome) {
-  // outcome: 'again' | 'pass' | 'easy'
-  if (isMorphologyMode()) return;
-  noteStudyInteraction();
-  if ((!runtime.spacedRepetition && runtime.currentIdx >= runtime.deck.length) || (runtime.spacedRepetition && runtime.currentIdx >= runtime.activeDeckCount)) return;
-  const currentCard = runtime.deck[runtime.currentIdx];
-  if (runtime.spacedRepetition) {
-    captureSpacedUndoSnapshot();
-    applySpacedReview(currentCard, outcome);
-    runtime.deck = buildStudyDeck(runtime.originalDeck);
-    if (runtime.activeDeckCount <= 0) {
-      runtime.currentIdx = runtime.activeDeckCount;
-      resetMorphAnswerState();
-      renderCard();
-    } else {
-      navigate(1, { skipAutoReview: true });
-    }
-  } else {
-    // Non-SRS cards still write to the same shared schedule used by spaced review.
-    // Deck behaviour:
-    // - 'again' (wrong)    → immediately moved to back of active pile for same-pass retry.
-    // - 'pass' (uncertain) → deferred until the end of the pile; reappears next cycle.
-    // - 'easy' (known)     → pushed out of active pile as usual.
-    const mark = outcome === 'easy' ? 'known' : 'unsure';
-    const recordedOutcome = outcome === 'easy' ? 'known' : outcome === 'pass' ? 'pass' : 'review';
-    const reviewedAt = Date.now();
-    recordStudyOutcome(currentCard.id, recordedOutcome, reviewedAt);
-    applyUnspacedSharedSchedule(currentCard, outcome, reviewedAt);
-    getDirectionalMarksStore()[currentCard.id] = mark;
-    runtime.marks = getDirectionalMarksStore();
-
-    if (outcome === 'again') {
-      // Remove from current position; remaining cards shift down by 1,
-      // so runtime.currentIdx now points to what was the next card.
-      const cardToReturn = currentCard;
-      runtime.deck.splice(runtime.currentIdx, 1);
-      // Find the last non-known, non-deferred card that comes after runtime.currentIdx.
-      let lastActiveIdx = -1;
-      for (let i = runtime.currentIdx; i < runtime.deck.length; i++) {
-        if (runtime.marks[runtime.deck[i].id] !== 'known' && !runtime.unspacedDeferredIds.has(runtime.deck[i].id)) lastActiveIdx = i;
-      }
-      runtime.deck.splice(lastActiveIdx >= 0 ? lastActiveIdx + 1 : runtime.deck.length, 0, cardToReturn);
-      // runtime.currentIdx already points to the correct next card (or loops if it was the last).
-      renderCard();
-    } else {
-      if (outcome === 'pass') runtime.unspacedDeferredIds.add(currentCard.id);
-      navigate(1);
-    }
-  }
-  renderReview();
-  renderProgress();
-  saveState();
-}
-
-
-function setStudyMode(mode) {
-  const nextMode = normalizeStudyMode(mode);
-  if (runtime.studyMode === nextMode) return;
-
-  saveCurrentDeckStateToBank();
-  runtime.studyMode = nextMode;
-  clearSpacedUndoSnapshot();
-  resetMorphAnswerState();
-  ensureDirectionalStores();
-  runtime.marks = getDirectionalMarksStore();
-  syncToggleButtons();
-
-  if (isReaderMode()) {
-    renderReaderModule();
-    renderProgress();
-    saveState();
-    return;
-  }
-
-  if (!runtime.selectedKeys.length) {
-    saveState();
-    renderCard();
-    renderProgress();
-    renderReview();
-    return;
-  }
-
-  const keysToLoad = runtime.currentSession ? expandSessionSets(runtime.currentSession) : runtime.selectedKeys;
-  loadDeckFromKeys(keysToLoad, runtime.currentSession ? runtime.currentSession.id : null);
-}
-
-function setAppProfile(profile) {
-  const nextProfile = 'vocab_grammar';
-  if (runtime.appProfile === nextProfile) return;
-
-  saveCurrentDeckStateToBank();
-  runtime.appProfile = nextProfile;
-  clearSpacedUndoSnapshot();
-
-  ensureDirectionalStores();
-  runtime.marks = getDirectionalMarksStore();
-  buildSessions();
-  buildChapterSelector();
-  buildSupplementalSelector();
-  buildAdvancedSelector();
-  syncToggleButtons();
-
-  if (!runtime.selectedKeys.length) {
-    renderCard();
-    renderProgress();
-    renderReview();
-    saveState();
-    return;
-  }
-
-  const keysToLoad = runtime.currentSession ? expandSessionSets(runtime.currentSession) : runtime.selectedKeys;
-  loadDeckFromKeys(keysToLoad, runtime.currentSession ? runtime.currentSession.id : null);
-}
-
-function toggleMorphSelfCheck() {
-  if (!isMorphologyMode()) return;
-  runtime.morphSelfCheck = !runtime.morphSelfCheck;
-  resetMorphAnswerState();
-  syncToggleButtons();
-  renderCard();
-  saveState();
-}
-
-function toggleShuffle() {
-  if (isReaderMode()) return;
-  runtime.shuffled = !runtime.shuffled;
-  runtime.flipsSinceReshuffle = 0;
-  syncToggleButtons();
-
-  if (runtime.spacedRepetition) {
-    runtime.deck = buildStudyDeck(runtime.originalDeck, { forceShuffle: runtime.shuffled });
-    runtime.currentIdx = Math.min(runtime.currentIdx, runtime.activeDeckCount);
-  } else {
-    const activeCards = getRemainingCards();
-    const knownCards = runtime.deck.filter(card => runtime.marks[card.id] === 'known');
-    runtime.deck = runtime.shuffled ? [...shuffleArray([...activeCards]), ...knownCards] : [...activeCards, ...knownCards];
-
-    if (runtime.currentIdx >= activeCards.length) {
-      runtime.currentIdx = activeCards.length ? 0 : runtime.deck.length;
-    }
-  }
-
-  runtime.isFlipped = false;
-  renderCard();
-  renderProgress();
-  renderReview();
-  saveState();
-}
-
-function toggleRequiredOnly() {
-  runtime.requiredOnly = !runtime.requiredOnly;
-  syncToggleButtons();
-  if (!runtime.selectedKeys.length) {
-    saveState();
-    return;
-  }
-  const keysToLoad = runtime.currentSession ? expandSessionSets(runtime.currentSession) : runtime.selectedKeys;
-  loadDeckFromKeys(keysToLoad, runtime.currentSession ? runtime.currentSession.id : null);
-}
-
-function toggleDirection() {
-  runtime.directionToGreek = !runtime.directionToGreek;
-  clearSpacedUndoSnapshot();
-  ensureDirectionalStores();
-  runtime.marks = getDirectionalMarksStore();
-  resetMorphAnswerState();
-  syncToggleButtons();
-  if (runtime.selectedKeys.length) {
-    const keysToLoad = runtime.currentSession ? expandSessionSets(runtime.currentSession) : runtime.selectedKeys;
-    loadDeckFromKeys(keysToLoad, runtime.currentSession ? runtime.currentSession.id : null);
-    return;
-  }
-  runtime.isFlipped = false;
-  renderCard();
-  renderProgress();
-  renderReview();
-  saveState();
-}
-
-function toggleSpacedRepetition() {
-  if (isReaderMode()) return;
-  runtime.spacedRepetition = !runtime.spacedRepetition;
-  clearSpacedUndoSnapshot();
-  resetUnspacedCycleState();
-  syncToggleButtons();
-  if (!runtime.selectedKeys.length) {
-    saveState();
-    return;
-  }
-  runtime.deck = buildStudyDeck(runtime.originalDeck);
-  runtime.currentIdx = 0;
-  resetMorphAnswerState();
-  runtime.isFlipped = false;
-  renderCard();
-  renderProgress();
-  renderReview();
-  saveState();
-}
-
-function reshuffleEligible() {
-  if (!runtime.selectedKeys.length) return;
-
-  if (runtime.spacedRepetition) {
-    // Shuffle only currently-eligible (due) cards. SRS progress and
-    // scheduled-ahead deferrals are left untouched.
-    runtime.deck = buildStudyDeck(runtime.originalDeck, { forceShuffle: true });
-    runtime.currentIdx = runtime.activeDeckCount ? 0 : runtime.currentIdx;
-  } else {
-    // Non-spaced: shuffle the still-active (not-yet-known) portion only;
-    // known cards stay pinned to the end of the cycle.
-    const activeCards = getRemainingCards();
-    const knownCards = runtime.deck.filter(card => runtime.marks[card.id] === 'known');
-    runtime.deck = [...shuffleArray([...activeCards]), ...knownCards];
-    runtime.currentIdx = activeCards.length ? 0 : runtime.deck.length;
-  }
-
-  runtime.isFlipped = false;
-  renderCard();
-  renderProgress();
-  renderReview();
-  saveState();
-}
-
-function fastForwardScheduling(advanceMs) {
-  if (!runtime.spacedRepetition || !runtime.originalDeck.length) return;
-  advanceScheduledCards(runtime.originalDeck, advanceMs);
-  runtime.deck = buildStudyDeck(runtime.originalDeck);
-  runtime.currentIdx = 0;
-  runtime.isFlipped = false;
-  resetMorphAnswerState();
-  renderCard();
-  renderProgress();
-  renderReview();
-  saveState();
-}
-
-function fastForwardOneDay() {
-  fastForwardScheduling(SRS_DAY_MS);
-}
-
-function fastForwardOneWeek() {
-  fastForwardScheduling(7 * SRS_DAY_MS);
-}
-
-function resetCurrentDeck() {
-  clearSpacedUndoSnapshot();
-  if (!runtime.selectedKeys.length) {
-    clearSavedState();
-    return;
-  }
-
-  const confirmed = window.confirm(
-    runtime.spacedRepetition
-      ? 'Reset spaced-review scheduling for this deck only? This keeps your unspaced marks and pass history.'
-      : 'Reset unspaced marks for this deck only? This keeps your spaced-review scheduling and intervals.'
-  );
-  if (!confirmed) return;
-
-  const deckKey = getDeckStateKey(runtime.selectedKeys, runtime.requiredOnly, runtime.spacedRepetition);
-  delete runtime.deckStates[deckKey];
-  const directionalMarks = getDirectionalMarksStore();
-  const directionalProgress = getDirectionalProgressStore();
-
-  if (runtime.spacedRepetition) {
-    runtime.originalDeck.forEach(card => {
-      const p = directionalProgress[card.id];
-      if (p && typeof p === 'object') {
-        p.dueAt = 0;
-        p.intervalDays = 0;
-        p.streak = 0;
-        p.easyStreak = 0;
-        p.srsStage = 0;
-        p.ease = 2.3;
-        p.lastEasyIntervalDays = 0;
-        p.confidence = 0;
-        p.confidenceHistory = [];
-        // seenCount, passCount, failCount, lastReviewedAt intentionally kept
-      }
-    });
-  } else {
-    runtime.originalDeck.forEach(card => {
-      delete directionalMarks[card.id];
-    });
-  }
-
-  runtime.marks = directionalMarks;
-  resetUnspacedCycleState();
-  runtime.currentIdx = 0;
-  runtime.isFlipped = false;
-  resetMorphAnswerState();
-  runtime.deck = [];
-  runtime.activeDeckCount = 0;
-  runtime.deck = buildStudyDeck(runtime.originalDeck);
-  renderCard();
-  renderProgress();
-  renderReview();
-  saveState();
-}
-
-function resetAllStats() {
-  clearSpacedUndoSnapshot();
-  const confirmed = window.confirm('Reset all saved study stats, marks, and spaced-review scheduling for both directions?');
-  if (!confirmed) return;
-
-  runtime.globalWordMarks = { g2e: {}, e2g: {}, morph: {} };
-  runtime.globalWordProgress = { g2e: {}, e2g: {}, morph: {} };
-  runtime.deckStates = {};
-  runtime.appUsageStats = {
-    totalMs: 0,
-    dailyMs: {},
-    activeStudyMs: 0,
-    activeDailyMs: {},
-    lastActiveAt: document.hidden ? 0 : Date.now(),
-    lastStudyInteractionAt: 0,
-    lastStudyCountedAt: 0,
-    firstStudyAt: 0,
-    studySessionHistory: [],
-    currentStudySession: null
-  };
-  runtime.appGamification = sanitizeGamificationState({});
-  ensureDirectionalStores();
-  resetUnspacedCycleState();
-  runtime.marks = getDirectionalMarksStore();
-
-  if (runtime.selectedKeys.length) {
-    runtime.currentIdx = 0;
-    runtime.isFlipped = false;
-    runtime.deck = [];
-    runtime.activeDeckCount = 0;
-    runtime.deck = buildStudyDeck(runtime.originalDeck);
-    renderCard();
-    renderProgress();
-    renderReview();
-  } else {
-    renderReview();
-    renderProgress();
-  }
-
-  saveState();
-}
-
+// Navigation, marking, mode/profile setters, toggles and resets live in js/ui/navigation.js
 // ═══════════════════════════════════════════════════════
 //  PROGRESS + REVIEW
 // ═══════════════════════════════════════════════════════
