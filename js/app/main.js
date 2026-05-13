@@ -1102,6 +1102,7 @@ function buildPersistedStatePayload() {
     shuffled,
     requiredOnly,
     requiredOnlyDefaultedV1: true,
+    srsIntervalCapAlignedV1: true,
     directionToGreek,
     spacedRepetition,
     studyMode,
