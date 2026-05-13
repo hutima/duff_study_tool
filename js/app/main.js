@@ -122,60 +122,27 @@ configureModals({
   buildChapterSelector: () => buildChapterSelector(),
   buildSupplementalSelector: () => buildSupplementalSelector(),
   buildAdvancedSelector: () => buildAdvancedSelector(),
-  getHasAcceptedDisclaimer: () => hasAcceptedDisclaimer,
-  setHasAcceptedDisclaimer: (v) => { hasAcceptedDisclaimer = v; },
-  getDisclaimerModalRequiresAgreement: () => disclaimerModalRequiresAgreement,
-  setDisclaimerModalRequiresAgreement: (v) => { disclaimerModalRequiresAgreement = v; },
-  hasSelectedKeys: () => selectedKeys.length > 0
+  getHasAcceptedDisclaimer: () => runtime.hasAcceptedDisclaimer,
+  setHasAcceptedDisclaimer: (v) => { runtime.hasAcceptedDisclaimer = v; },
+  getDisclaimerModalRequiresAgreement: () => runtime.disclaimerModalRequiresAgreement,
+  setDisclaimerModalRequiresAgreement: (v) => { runtime.disclaimerModalRequiresAgreement = v; },
+  hasSelectedKeys: () => runtime.selectedKeys.length > 0
 });
 
-let appUsageStats = {
-  totalMs: 0,
-  dailyMs: {},
-  activeStudyMs: 0,
-  activeDailyMs: {},
-  lastActiveAt: 0,
-  lastStudyInteractionAt: 0,
-  lastStudyCountedAt: 0,
-  firstStudyAt: 0,
-  studySessionHistory: [],
-  currentStudySession: null
-};
-let appProfile = 'vocab_grammar';
-let appGamification = { lastCelebratedLevel: null, lastCelebratedBadgeDay: null, lastEarnedAchievementIds: [] };
-let hasAcceptedDisclaimer = false;
-let disclaimerModalRequiresAgreement = false;
-let transferModalMode = '';
-let themeMode = 'system';
-let transferPrimaryAction = null;
-let transferSecondaryAction = null;
-let usageTickHandle = null;
-let usageVisibilityBound = false;
-let usageTickCounter = 0;
-let analyticsExpandedChapter = null;
-let analyticsExpandedWord = null;
-let studyMode = 'vocab';
-let morphSelfCheck = false;
-let morphAnswerState = { answered: false, revealed: false, selfRated: false, selectedIndex: -1, isCorrect: null };
-let morphPendingAdvance = false;
-
-let deckStates = {};
-let globalWordMarks = {};
-let globalWordProgress = {};
 
 function getDirectionKey() {
-  return directionToGreek ? 'e2g' : 'g2e';
+  return runtime.directionToGreek ? 'e2g' : 'g2e';
 }
 
 function getStudyStoreKey() {
-  if (studyMode === 'morph') {
-    return directionToGreek ? 'morph_e2g' : 'morph';
+  if (runtime.studyMode === 'morph') {
+    return runtime.directionToGreek ? 'morph_e2g' : 'morph';
   }
   return getDirectionKey();
 }
 
 function isReverseGrammarActive() {
-  return studyMode === 'morph' && directionToGreek;
+  return runtime.studyMode === 'morph' && runtime.directionToGreek;
 }
 
 function reverseDisplayActive(card) {
@@ -183,8 +150,8 @@ function reverseDisplayActive(card) {
 }
 
 function ensureDirectionalStores() {
-  if (!globalWordMarks || typeof globalWordMarks !== 'object' || Array.isArray(globalWordMarks)) globalWordMarks = {};
-  if (!globalWordProgress || typeof globalWordProgress !== 'object' || Array.isArray(globalWordProgress)) globalWordProgress = {};
+  if (!runtime.globalWordMarks || typeof runtime.globalWordMarks !== 'object' || Array.isArray(runtime.globalWordMarks)) runtime.globalWordMarks = {};
+  if (!runtime.globalWordProgress || typeof runtime.globalWordProgress !== 'object' || Array.isArray(runtime.globalWordProgress)) runtime.globalWordProgress = {};
 
   const migrateLegacyBucket = (bucketObj) => {
     const keys = Object.keys(bucketObj || {});
@@ -194,66 +161,49 @@ function ensureDirectionalStores() {
     return bucketObj;
   };
 
-  globalWordMarks = migrateLegacyBucket(globalWordMarks);
-  globalWordProgress = migrateLegacyBucket(globalWordProgress);
+  runtime.globalWordMarks = migrateLegacyBucket(runtime.globalWordMarks);
+  runtime.globalWordProgress = migrateLegacyBucket(runtime.globalWordProgress);
 
-  if (!globalWordMarks.g2e || typeof globalWordMarks.g2e !== 'object') globalWordMarks.g2e = {};
-  if (!globalWordMarks.e2g || typeof globalWordMarks.e2g !== 'object') globalWordMarks.e2g = {};
-  if (!globalWordMarks.morph || typeof globalWordMarks.morph !== 'object') globalWordMarks.morph = {};
-  if (!globalWordMarks.morph_e2g || typeof globalWordMarks.morph_e2g !== 'object') globalWordMarks.morph_e2g = {};
-  if (!globalWordProgress.g2e || typeof globalWordProgress.g2e !== 'object') globalWordProgress.g2e = {};
-  if (!globalWordProgress.e2g || typeof globalWordProgress.e2g !== 'object') globalWordProgress.e2g = {};
-  if (!globalWordProgress.morph || typeof globalWordProgress.morph !== 'object') globalWordProgress.morph = {};
-  if (!globalWordProgress.morph_e2g || typeof globalWordProgress.morph_e2g !== 'object') globalWordProgress.morph_e2g = {};
+  if (!runtime.globalWordMarks.g2e || typeof runtime.globalWordMarks.g2e !== 'object') runtime.globalWordMarks.g2e = {};
+  if (!runtime.globalWordMarks.e2g || typeof runtime.globalWordMarks.e2g !== 'object') runtime.globalWordMarks.e2g = {};
+  if (!runtime.globalWordMarks.morph || typeof runtime.globalWordMarks.morph !== 'object') runtime.globalWordMarks.morph = {};
+  if (!runtime.globalWordMarks.morph_e2g || typeof runtime.globalWordMarks.morph_e2g !== 'object') runtime.globalWordMarks.morph_e2g = {};
+  if (!runtime.globalWordProgress.g2e || typeof runtime.globalWordProgress.g2e !== 'object') runtime.globalWordProgress.g2e = {};
+  if (!runtime.globalWordProgress.e2g || typeof runtime.globalWordProgress.e2g !== 'object') runtime.globalWordProgress.e2g = {};
+  if (!runtime.globalWordProgress.morph || typeof runtime.globalWordProgress.morph !== 'object') runtime.globalWordProgress.morph = {};
+  if (!runtime.globalWordProgress.morph_e2g || typeof runtime.globalWordProgress.morph_e2g !== 'object') runtime.globalWordProgress.morph_e2g = {};
 }
 
 function getDirectionalMarksStore() {
   ensureDirectionalStores();
-  return globalWordMarks[getStudyStoreKey()];
+  return runtime.globalWordMarks[getStudyStoreKey()];
 }
 
 function getDirectionalProgressStore() {
   ensureDirectionalStores();
-  return globalWordProgress[getStudyStoreKey()];
+  return runtime.globalWordProgress[getStudyStoreKey()];
 }
 
-let currentSession = null;
-let selectedKeys = [];
-let deck = [];
-let originalDeck = [];
-let currentIdx = 0;
-let isFlipped = false;
-let shuffled = true;          // shuffle on by default
-let requiredOnly = true;
-let directionToGreek = false; // false = Greek→English, true = English→Greek
-let spacedRepetition = true;
-let activeDeckCount = 0;
-let unspacedPendingRecycle = false;
-let unspacedCycleState = {};
-let unspacedDeferredIds = new Set(); // 'pass' cards excluded from current pass
-let flipsSinceReshuffle = 0;         // forward navigations since last periodic reshuffle
-let spacedUndoSnapshot = null;
 
 // Fixed 1-in-N chance per flip (not scaled by pool size) to return one
 // random known card to the active pile. 50 → ~1 return per 50 flips (2%).
 const KNOWN_CARD_RANDOM_RETURN_FLIP_ODDS = 50;
 
-let marks = {};
 
 function isMorphologyMode() {
-  return studyMode === 'morph';
+  return runtime.studyMode === 'morph';
 }
 
 function isReaderMode() {
-  return studyMode === 'reader';
+  return runtime.studyMode === 'reader';
 }
 
 function isCardStudyMode() {
-  return studyMode === 'vocab' || studyMode === 'morph' || studyMode === 'reader';
+  return runtime.studyMode === 'vocab' || runtime.studyMode === 'morph' || runtime.studyMode === 'reader';
 }
 
 function isReviewDeckMode() {
-  return studyMode === 'vocab' || studyMode === 'morph';
+  return runtime.studyMode === 'vocab' || runtime.studyMode === 'morph';
 }
 
 function isVocabOnlyProfile() {
@@ -283,8 +233,8 @@ function isMorphCard(card) {
 }
 
 function resetMorphAnswerState() {
-  morphAnswerState = { answered: false, revealed: false, selfRated: false, selectedIndex: -1, isCorrect: null };
-  morphPendingAdvance = false;
+  runtime.morphAnswerState = { answered: false, revealed: false, selfRated: false, selectedIndex: -1, isCorrect: null };
+  runtime.morphPendingAdvance = false;
 }
 
 function getModeDescription() {
@@ -293,22 +243,22 @@ function getModeDescription() {
   return 'Vocabulary Flashcards';
 }
 
-function resolveThemeMode(mode = themeMode) {
+function resolveThemeMode(mode = runtime.themeMode) {
   if (mode === 'light' || mode === 'dark') return mode;
   const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
   return prefersDark ? 'dark' : 'light';
 }
 
-function applyThemeMode(mode = themeMode, persist = true) {
-  themeMode = mode === 'light' || mode === 'dark' ? mode : 'system';
-  const resolved = resolveThemeMode(themeMode);
+function applyThemeMode(mode = runtime.themeMode, persist = true) {
+  runtime.themeMode = mode === 'light' || mode === 'dark' ? mode : 'system';
+  const resolved = resolveThemeMode(runtime.themeMode);
   document.documentElement.setAttribute('data-theme', resolved);
 
   const metaTheme = document.querySelector('meta[name="theme-color"]');
   if (metaTheme) metaTheme.setAttribute('content', resolved === 'light' ? '#f4efe3' : '#0e0f14');
 
   const storage = getStorage();
-  if (persist && storage) storage.setItem(THEME_STORAGE_KEY, themeMode);
+  if (persist && storage) storage.setItem(THEME_STORAGE_KEY, runtime.themeMode);
   syncThemeButtons();
 }
 
@@ -316,9 +266,9 @@ function syncThemeButtons() {
   const systemBtn = document.getElementById('themeSystemBtn');
   const darkBtn = document.getElementById('themeDarkBtn');
   const lightBtn = document.getElementById('themeLightBtn');
-  if (systemBtn) systemBtn.classList.toggle('active', themeMode === 'system');
-  if (darkBtn) darkBtn.classList.toggle('active', themeMode === 'dark');
-  if (lightBtn) lightBtn.classList.toggle('active', themeMode === 'light');
+  if (systemBtn) systemBtn.classList.toggle('active', runtime.themeMode === 'system');
+  if (darkBtn) darkBtn.classList.toggle('active', runtime.themeMode === 'dark');
+  if (lightBtn) lightBtn.classList.toggle('active', runtime.themeMode === 'light');
 }
 
 function setThemeMode(mode) {
@@ -328,13 +278,13 @@ function setThemeMode(mode) {
 function initializeThemeMode() {
   const storage = getStorage();
   const savedMode = storage ? storage.getItem(THEME_STORAGE_KEY) : null;
-  themeMode = savedMode === 'light' || savedMode === 'dark' || savedMode === 'system' ? savedMode : 'system';
-  applyThemeMode(themeMode, false);
+  runtime.themeMode = savedMode === 'light' || savedMode === 'dark' || savedMode === 'system' ? savedMode : 'system';
+  applyThemeMode(runtime.themeMode, false);
 
   if (window.matchMedia) {
     const media = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = () => {
-      if (themeMode === 'system') applyThemeMode('system', false);
+      if (runtime.themeMode === 'system') applyThemeMode('system', false);
     };
     if (typeof media.addEventListener === 'function') media.addEventListener('change', handleChange);
     else if (typeof media.addListener === 'function') media.addListener(handleChange);
@@ -360,16 +310,16 @@ function syncToggleButtons() {
   const modeShortcutReaderBtn = document.getElementById('modeShortcutReaderBtn');
   const resetDeckBtn = document.getElementById('resetDeckBtn');
 
-  if (shuffleSwitch)   shuffleSwitch.classList.toggle('on',   !!shuffled);
-  if (requiredSwitch)  requiredSwitch.classList.toggle('on',  !!requiredOnly);
-  if (directionSwitch) directionSwitch.classList.toggle('on', !!directionToGreek);
-  if (spacedSwitch)    spacedSwitch.classList.toggle('on',    !!spacedRepetition);
-  if (selfCheckBtn)    selfCheckBtn.classList.toggle('on',    !!morphSelfCheck && isMorphologyMode());
-  if (shuffleToggle)   shuffleToggle.setAttribute('aria-checked',   shuffled ? 'true' : 'false');
-  if (requiredToggle)  requiredToggle.setAttribute('aria-checked',  requiredOnly ? 'true' : 'false');
-  if (directionToggle) directionToggle.setAttribute('aria-checked', directionToGreek ? 'true' : 'false');
-  if (spacedToggle)    spacedToggle.setAttribute('aria-checked',    spacedRepetition ? 'true' : 'false');
-  if (selfCheckToggle) selfCheckToggle.setAttribute('aria-checked', (morphSelfCheck && isMorphologyMode()) ? 'true' : 'false');
+  if (shuffleSwitch)   shuffleSwitch.classList.toggle('on',   !!runtime.shuffled);
+  if (requiredSwitch)  requiredSwitch.classList.toggle('on',  !!runtime.requiredOnly);
+  if (directionSwitch) directionSwitch.classList.toggle('on', !!runtime.directionToGreek);
+  if (spacedSwitch)    spacedSwitch.classList.toggle('on',    !!runtime.spacedRepetition);
+  if (selfCheckBtn)    selfCheckBtn.classList.toggle('on',    !!runtime.morphSelfCheck && isMorphologyMode());
+  if (shuffleToggle)   shuffleToggle.setAttribute('aria-checked',   runtime.shuffled ? 'true' : 'false');
+  if (requiredToggle)  requiredToggle.setAttribute('aria-checked',  runtime.requiredOnly ? 'true' : 'false');
+  if (directionToggle) directionToggle.setAttribute('aria-checked', runtime.directionToGreek ? 'true' : 'false');
+  if (spacedToggle)    spacedToggle.setAttribute('aria-checked',    runtime.spacedRepetition ? 'true' : 'false');
+  if (selfCheckToggle) selfCheckToggle.setAttribute('aria-checked', (runtime.morphSelfCheck && isMorphologyMode()) ? 'true' : 'false');
 
   if (directionToggle) {
     const directionLabel = directionToggle.querySelector('.toggle-text');
@@ -379,18 +329,18 @@ function syncToggleButtons() {
         : 'Eng → Gk';
     }
   }
-  if (modeVocabBtn)    modeVocabBtn.classList.toggle('active', studyMode === 'vocab');
-  if (modeMorphBtn)    modeMorphBtn.classList.toggle('active', studyMode === 'morph');
-  if (modeReaderBtn)   modeReaderBtn.classList.toggle('active', studyMode === 'reader');
-  if (modeShortcutVocabBtn) modeShortcutVocabBtn.classList.toggle('active', studyMode === 'vocab');
-  if (modeShortcutMorphBtn) modeShortcutMorphBtn.classList.toggle('active', studyMode === 'morph');
-  if (modeShortcutReaderBtn) modeShortcutReaderBtn.classList.toggle('active', studyMode === 'reader');
+  if (modeVocabBtn)    modeVocabBtn.classList.toggle('active', runtime.studyMode === 'vocab');
+  if (modeMorphBtn)    modeMorphBtn.classList.toggle('active', runtime.studyMode === 'morph');
+  if (modeReaderBtn)   modeReaderBtn.classList.toggle('active', runtime.studyMode === 'reader');
+  if (modeShortcutVocabBtn) modeShortcutVocabBtn.classList.toggle('active', runtime.studyMode === 'vocab');
+  if (modeShortcutMorphBtn) modeShortcutMorphBtn.classList.toggle('active', runtime.studyMode === 'morph');
+  if (modeShortcutReaderBtn) modeShortcutReaderBtn.classList.toggle('active', runtime.studyMode === 'reader');
   syncThemeButtons();
   if (resetDeckBtn) {
-    resetDeckBtn.textContent = spacedRepetition ? 'Reset spaced' : 'Reset unspaced';
-    resetDeckBtn.title = spacedRepetition
-      ? 'Reset spaced-review scheduling for this deck only'
-      : 'Reset unspaced marks for this deck only';
+    resetDeckBtn.textContent = runtime.spacedRepetition ? 'Reset spaced' : 'Reset unspaced';
+    resetDeckBtn.title = runtime.spacedRepetition
+      ? 'Reset spaced-review scheduling for this runtime.deck only'
+      : 'Reset unspaced runtime.marks for this runtime.deck only';
   }
 
   const subtitle = document.getElementById('appSubtitle');
@@ -421,26 +371,26 @@ function syncLayoutVisibility() {
   if (controlsBar) controlsBar.style.display = 'flex';
   if (cardArea) cardArea.style.display = cardMode ? '' : 'none';
   if (reviewShell) reviewShell.style.display = reviewDeckMode ? '' : 'none';
-  if (navRow) navRow.style.display = reviewDeckMode && selectedKeys.length ? 'flex' : 'none';
-  if (markRow) markRow.style.display = reviewDeckMode && selectedKeys.length && !isMorphologyMode() ? 'flex' : 'none';
-  if (ffRow) ffRow.style.display = reviewDeckMode && selectedKeys.length && spacedRepetition ? 'flex' : 'none';
-  if (directionToggle) directionToggle.style.display = (studyMode === 'vocab' || studyMode === 'morph') ? 'flex' : 'none';
-  if (requiredToggle) requiredToggle.style.display = studyMode === 'vocab' ? 'flex' : 'none';
+  if (navRow) navRow.style.display = reviewDeckMode && runtime.selectedKeys.length ? 'flex' : 'none';
+  if (markRow) markRow.style.display = reviewDeckMode && runtime.selectedKeys.length && !isMorphologyMode() ? 'flex' : 'none';
+  if (ffRow) ffRow.style.display = reviewDeckMode && runtime.selectedKeys.length && runtime.spacedRepetition ? 'flex' : 'none';
+  if (directionToggle) directionToggle.style.display = (runtime.studyMode === 'vocab' || runtime.studyMode === 'morph') ? 'flex' : 'none';
+  if (requiredToggle) requiredToggle.style.display = runtime.studyMode === 'vocab' ? 'flex' : 'none';
   if (selfCheckToggle) selfCheckToggle.style.display = isMorphologyMode() && canAccessGrammarUi() ? 'flex' : 'none';
   if (shuffleToggle) shuffleToggle.style.display = reviewDeckMode ? 'flex' : 'none';
   if (spacedToggle) spacedToggle.style.display = reviewDeckMode ? 'flex' : 'none';
   if (modeGroup) modeGroup.style.display = canAccessGrammarUi() ? 'inline-flex' : 'none';
   if (!reviewDeckMode) return;
   if (prevBtn) {
-    const hidePrev = isMorphologyMode() || (spacedRepetition && !isMorphologyMode());
+    const hidePrev = isMorphologyMode() || (runtime.spacedRepetition && !isMorphologyMode());
     prevBtn.style.display = hidePrev ? 'none' : '';
-    const atStart = !deck.length || currentIdx <= 0;
+    const atStart = !runtime.deck.length || runtime.currentIdx <= 0;
     prevBtn.disabled = atStart;
     prevBtn.classList.toggle('nav-disabled', atStart);
   }
   if (undoBtn) {
-    const morphUndoActive = isMorphologyMode() && morphAnswerState.answered && !!spacedUndoSnapshot;
-    const vocabUndoActive = spacedRepetition && !isMorphologyMode() && !!spacedUndoSnapshot;
+    const morphUndoActive = isMorphologyMode() && runtime.morphAnswerState.answered && !!runtime.spacedUndoSnapshot;
+    const vocabUndoActive = runtime.spacedRepetition && !isMorphologyMode() && !!runtime.spacedUndoSnapshot;
     undoBtn.style.display = (morphUndoActive || vocabUndoActive) ? '' : 'none';
   }
   if (nextBtn) {
@@ -448,16 +398,16 @@ function syncLayoutVisibility() {
       nextBtn.textContent = 'Next →';
       nextBtn.classList.remove('spaced-again');
     } else {
-      nextBtn.textContent = spacedRepetition ? 'Again →' : 'Next →';
-      nextBtn.classList.toggle('spaced-again', !!spacedRepetition);
+      nextBtn.textContent = runtime.spacedRepetition ? 'Again →' : 'Next →';
+      nextBtn.classList.toggle('spaced-again', !!runtime.spacedRepetition);
     }
   }
 
 }
 
-function ensureUsageStats(stats = appUsageStats) {
+function ensureUsageStats(stats = runtime.appUsageStats) {
   const safe = sanitizeUsageStats(stats, MAX_STUDY_SESSION_HISTORY);
-  if (stats !== safe) appUsageStats = safe;
+  if (stats !== safe) runtime.appUsageStats = safe;
   return safe;
 }
 
@@ -481,7 +431,7 @@ function noteStudyInteraction(now = Date.now()) {
   noteStudyInteractionForStats(usage, {
     now,
     documentHidden: document.hidden,
-    hasSelectedCards: selectedKeys.length > 0,
+    hasSelectedCards: runtime.selectedKeys.length > 0,
     studyIdleMs: STUDY_IDLE_MS,
     studySessionBreakMs: STUDY_SESSION_BREAK_MS,
     maxStudySessionHistory: MAX_STUDY_SESSION_HISTORY
@@ -507,21 +457,21 @@ function updateUsageMeta() {
 
 function startUsageTracking() {
   ensureUsageStats();
-  if (!document.hidden && !appUsageStats.lastActiveAt) {
-    appUsageStats.lastActiveAt = Date.now();
+  if (!document.hidden && !runtime.appUsageStats.lastActiveAt) {
+    runtime.appUsageStats.lastActiveAt = Date.now();
   }
 
-  if (!usageVisibilityBound) {
+  if (!runtime.usageVisibilityBound) {
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
         const now = Date.now();
         accumulateUsageTime(now);
         finalizeStudySession(now);
-        appUsageStats.lastActiveAt = 0;
+        runtime.appUsageStats.lastActiveAt = 0;
         updateUsageMeta();
         saveState();
       } else {
-        appUsageStats.lastActiveAt = Date.now();
+        runtime.appUsageStats.lastActiveAt = Date.now();
         updateUsageMeta();
       }
     });
@@ -530,15 +480,15 @@ function startUsageTracking() {
       const now = Date.now();
       accumulateUsageTime(now);
       finalizeStudySession(now);
-      appUsageStats.lastActiveAt = 0;
+      runtime.appUsageStats.lastActiveAt = 0;
       saveState();
     });
 
-    usageVisibilityBound = true;
+    runtime.usageVisibilityBound = true;
   }
 
-  if (!usageTickHandle) {
-    usageTickHandle = window.setInterval(() => {
+  if (!runtime.usageTickHandle) {
+    runtime.usageTickHandle = window.setInterval(() => {
       if (document.hidden) return;
       const now = Date.now();
       const delta = accumulateUsageTime(now);
@@ -546,9 +496,9 @@ function startUsageTracking() {
       if (delta > 0 || activeDelta > 0) {
         updateUsageMeta();
         if (isAnalyticsModalOpen()) renderAnalyticsOverlay();
-        usageTickCounter += 1;
-        if (usageTickCounter >= 4) {
-          usageTickCounter = 0;
+        runtime.usageTickCounter += 1;
+        if (runtime.usageTickCounter >= 4) {
+          runtime.usageTickCounter = 0;
           saveState();
         }
       }
@@ -560,16 +510,16 @@ function startUsageTracking() {
 // ── Unspaced cycle state helpers (state-coupled) ──
 
 function resetUnspacedCycleState() {
-  unspacedCycleState = {};
-  unspacedDeferredIds = new Set();
-  flipsSinceReshuffle = 0;
+  runtime.unspacedCycleState = {};
+  runtime.unspacedDeferredIds = new Set();
+  runtime.flipsSinceReshuffle = 0;
 }
 
 function getUnspacedCycleEntry(cardId) {
-  if (!unspacedCycleState[cardId] || typeof unspacedCycleState[cardId] !== 'object') {
-    unspacedCycleState[cardId] = { wrongThisCycle: false, correctCount: 0, lastOutcome: null };
+  if (!runtime.unspacedCycleState[cardId] || typeof runtime.unspacedCycleState[cardId] !== 'object') {
+    runtime.unspacedCycleState[cardId] = { wrongThisCycle: false, correctCount: 0, lastOutcome: null };
   }
-  return unspacedCycleState[cardId];
+  return runtime.unspacedCycleState[cardId];
 }
 
 function applyUnspacedSharedSchedule(card, outcome, reviewedAt = Date.now()) {
@@ -634,7 +584,7 @@ function isAdvancedCard(card) {
   );
 }
 
-function advanceScheduledCards(cards = originalDeck, advanceMs = SRS_CYCLE_ADVANCE_MS) {
+function advanceScheduledCards(cards = runtime.originalDeck, advanceMs = SRS_CYCLE_ADVANCE_MS) {
   const now = Date.now();
   (cards || []).forEach(card => {
     const progress = getWordProgress(card.id);
@@ -688,7 +638,7 @@ function getWordProgress(cardId) {
 }
 
 function isCardDue(card) {
-  if (!spacedRepetition) return true;
+  if (!runtime.spacedRepetition) return true;
   const progress = getWordProgress(card.id);
   return !progress.dueAt || progress.dueAt <= Date.now();
 }
@@ -703,75 +653,75 @@ function sortCardsByDue(cards) {
 }
 
 function clearSpacedUndoSnapshot() {
-  spacedUndoSnapshot = null;
+  runtime.spacedUndoSnapshot = null;
 }
 
 function captureSpacedUndoSnapshot() {
-  if (!selectedKeys.length || !deck[currentIdx]) {
+  if (!runtime.selectedKeys.length || !runtime.deck[runtime.currentIdx]) {
     clearSpacedUndoSnapshot();
     return;
   }
-  if (spacedRepetition && currentIdx >= activeDeckCount) {
+  if (runtime.spacedRepetition && runtime.currentIdx >= runtime.activeDeckCount) {
     clearSpacedUndoSnapshot();
     return;
   }
-  spacedUndoSnapshot = {
-    selectedKeys: cloneForUndo(selectedKeys),
-    currentSessionId: currentSession ? currentSession.id : null,
-    studyMode,
-    directionToGreek,
-    requiredOnly,
-    shuffled,
-    spacedRepetition,
-    currentIdx,
-    activeDeckCount,
-    isFlipped,
-    unspacedPendingRecycle,
-    morphAnswerState: cloneForUndo(morphAnswerState),
-    morphPendingAdvance,
-    deck: cloneForUndo(deck),
-    originalDeck: cloneForUndo(originalDeck),
+  runtime.spacedUndoSnapshot = {
+    selectedKeys: cloneForUndo(runtime.selectedKeys),
+    currentSessionId: runtime.currentSession ? runtime.currentSession.id : null,
+    studyMode: runtime.studyMode,
+    directionToGreek: runtime.directionToGreek,
+    requiredOnly: runtime.requiredOnly,
+    shuffled: runtime.shuffled,
+    spacedRepetition: runtime.spacedRepetition,
+    currentIdx: runtime.currentIdx,
+    activeDeckCount: runtime.activeDeckCount,
+    isFlipped: runtime.isFlipped,
+    unspacedPendingRecycle: runtime.unspacedPendingRecycle,
+    morphAnswerState: cloneForUndo(runtime.morphAnswerState),
+    morphPendingAdvance: runtime.morphPendingAdvance,
+    deck: cloneForUndo(runtime.deck),
+    originalDeck: cloneForUndo(runtime.originalDeck),
     marksStore: cloneForUndo(getDirectionalMarksStore()),
     progressStore: cloneForUndo(getDirectionalProgressStore()),
-    appUsageStats: cloneForUndo(appUsageStats),
-    appGamification: cloneForUndo(appGamification)
+    appUsageStats: cloneForUndo(runtime.appUsageStats),
+    appGamification: cloneForUndo(runtime.appGamification)
   };
 }
 
 function restoreSpacedUndo() {
-  if (!spacedUndoSnapshot) return;
-  if (studyMode !== spacedUndoSnapshot.studyMode) return;
-  if (directionToGreek !== spacedUndoSnapshot.directionToGreek) return;
-  if (requiredOnly !== spacedUndoSnapshot.requiredOnly) return;
-  if (shuffled !== spacedUndoSnapshot.shuffled) return;
-  if (spacedRepetition !== spacedUndoSnapshot.spacedRepetition) return;
-  if (JSON.stringify(selectedKeys) !== JSON.stringify(spacedUndoSnapshot.selectedKeys || [])) return;
-  if ((currentSession ? currentSession.id : null) !== (spacedUndoSnapshot.currentSessionId || null)) return;
+  if (!runtime.spacedUndoSnapshot) return;
+  if (runtime.studyMode !== runtime.spacedUndoSnapshot.studyMode) return;
+  if (runtime.directionToGreek !== runtime.spacedUndoSnapshot.directionToGreek) return;
+  if (runtime.requiredOnly !== runtime.spacedUndoSnapshot.requiredOnly) return;
+  if (runtime.shuffled !== runtime.spacedUndoSnapshot.shuffled) return;
+  if (runtime.spacedRepetition !== runtime.spacedUndoSnapshot.spacedRepetition) return;
+  if (JSON.stringify(runtime.selectedKeys) !== JSON.stringify(runtime.spacedUndoSnapshot.selectedKeys || [])) return;
+  if ((runtime.currentSession ? runtime.currentSession.id : null) !== (runtime.spacedUndoSnapshot.currentSessionId || null)) return;
 
   const marksStore = getDirectionalMarksStore();
   Object.keys(marksStore).forEach(key => delete marksStore[key]);
-  Object.assign(marksStore, cloneForUndo(spacedUndoSnapshot.marksStore) || {});
+  Object.assign(marksStore, cloneForUndo(runtime.spacedUndoSnapshot.marksStore) || {});
 
   const progressStore = getDirectionalProgressStore();
   Object.keys(progressStore).forEach(key => delete progressStore[key]);
-  Object.assign(progressStore, cloneForUndo(spacedUndoSnapshot.progressStore) || {});
+  Object.assign(progressStore, cloneForUndo(runtime.spacedUndoSnapshot.progressStore) || {});
 
-  marks = marksStore;
-  originalDeck = cloneForUndo(spacedUndoSnapshot.originalDeck) || [];
-  deck = cloneForUndo(spacedUndoSnapshot.deck) || [];
-  appUsageStats = ensureUsageStats(cloneForUndo(spacedUndoSnapshot.appUsageStats));
-  appGamification = sanitizeGamificationState(cloneForUndo(spacedUndoSnapshot.appGamification));
-  const restoredLevel = computeXpAndLevel(appUsageStats).currentLevel.level;
-  if (!Number.isFinite(appGamification.lastCelebratedLevel) || appGamification.lastCelebratedLevel < 1 || appGamification.lastCelebratedLevel > restoredLevel) {
-    appGamification.lastCelebratedLevel = restoredLevel;
+  runtime.marks = marksStore;
+  runtime.originalDeck = cloneForUndo(runtime.spacedUndoSnapshot.originalDeck) || [];
+  runtime.deck = cloneForUndo(runtime.spacedUndoSnapshot.deck) || [];
+  runtime.appUsageStats = ensureUsageStats(cloneForUndo(runtime.spacedUndoSnapshot.appUsageStats));
+  runtime.appGamification = sanitizeGamificationState(cloneForUndo(runtime.spacedUndoSnapshot.appGamification));
+  const restoredLevel = computeXpAndLevel(runtime.appUsageStats).currentLevel.level;
+  if (!Number.isFinite(runtime.appGamification.lastCelebratedLevel) || runtime.appGamification.lastCelebratedLevel < 1 || runtime.appGamification.lastCelebratedLevel > restoredLevel) {
+    runtime.appGamification.lastCelebratedLevel = restoredLevel;
   }
-  currentIdx = Math.max(0, Math.min(spacedUndoSnapshot.currentIdx || 0, deck.length ? deck.length - 1 : 0));
-  activeDeckCount = Math.max(0, spacedUndoSnapshot.activeDeckCount || 0);
-  isFlipped = !!spacedUndoSnapshot.isFlipped;
-  unspacedPendingRecycle = !!spacedUndoSnapshot.unspacedPendingRecycle;
-  if (isMorphologyMode() && spacedUndoSnapshot.morphAnswerState) {
-    morphAnswerState = cloneForUndo(spacedUndoSnapshot.morphAnswerState);
-    morphPendingAdvance = !!spacedUndoSnapshot.morphPendingAdvance;
+  runtime.currentIdx = Math.max(0, Math.min(runtime.spacedUndoSnapshot.currentIdx || 0, runtime.deck.length ? runtime.deck.length - 1 : 0));
+  runtime.activeDeckCount = Math.max(0, runtime.spacedUndoSnapshot.activeDeckCount || 0);
+  runtime.isFlipped = !!runtime.spacedUndoSnapshot.isFlipped;
+  runtime.unspacedPendingRecycle = !!runtime.spacedUndoSnapshot.unspacedPendingRecycle;
+  if (isMorphologyMode() && runtime.spacedUndoSnapshot.morphAnswerState) {
+    runtime.morphAnswerState = cloneForUndo(runtime.spacedUndoSnapshot.morphAnswerState);
+    runtime.morphPendingAdvance = !!runtime.spacedUndoSnapshot.morphPendingAdvance;
   } else {
     resetMorphAnswerState();
   }
@@ -784,9 +734,9 @@ function restoreSpacedUndo() {
 }
 
 function buildStudyDeck(cards, options = {}) {
-  if (!spacedRepetition) {
-    activeDeckCount = cards.filter(card => marks[card.id] !== 'known').length;
-    return shuffled ? shuffleArray([...cards]) : [...cards];
+  if (!runtime.spacedRepetition) {
+    runtime.activeDeckCount = cards.filter(card => runtime.marks[card.id] !== 'known').length;
+    return runtime.shuffled ? shuffleArray([...cards]) : [...cards];
   }
 
   const forceShuffle = !!options.forceShuffle;
@@ -794,7 +744,7 @@ function buildStudyDeck(cards, options = {}) {
   let dueCards = cards.filter(isCardDue);
 
   // Backstop: if nothing is due but cards are deferred within 1 hour,
-  // promote them to due immediately so the user never hits a dead deck.
+  // promote them to due immediately so the user never hits a dead runtime.deck.
   if (!dueCards.length) {
     const now = Date.now();
     const nearCards = cards.filter(card => {
@@ -814,17 +764,17 @@ function buildStudyDeck(cards, options = {}) {
 
   const deferredCards = cards.filter(card => !isCardDue(card));
 
-  // Preserve existing order of due cards already in the current deck;
-  // append newly-eligible cards (including "(x) return to deck" and
+  // Preserve existing order of due cards already in the current runtime.deck;
+  // append newly-eligible cards (including "(x) return to runtime.deck" and
   // time-promoted cards) at the back.
   const prevDueIds = new Set(
-    (deck || []).slice(0, activeDeckCount || 0)
+    (runtime.deck || []).slice(0, runtime.activeDeckCount || 0)
       .filter(card => card && dueCards.some(d => d.id === card.id))
       .map(card => card.id)
   );
 
   const existingInOrder = [];
-  (deck || []).forEach(card => {
+  (runtime.deck || []).forEach(card => {
     if (card && prevDueIds.has(card.id)) {
       const match = dueCards.find(d => d.id === card.id);
       if (match) existingInOrder.push(match);
@@ -836,22 +786,22 @@ function buildStudyDeck(cards, options = {}) {
   if (forceShuffle || promotedNearCards) {
     orderedDue = shuffleArray([...dueCards]);
   } else if (!existingInOrder.length) {
-    // First build for this deck — apply shuffle preference if set.
-    orderedDue = shuffled ? shuffleArray([...dueCards]) : sortCardsByDue(dueCards);
+    // First build for this runtime.deck — apply shuffle preference if set.
+    orderedDue = runtime.shuffled ? shuffleArray([...dueCards]) : sortCardsByDue(dueCards);
   } else {
     // Keep in-flight order stable; newly eligible cards go to the back.
     orderedDue = [...existingInOrder, ...newlyDue];
   }
 
   const orderedDeferred = sortCardsByDue(deferredCards);
-  activeDeckCount = orderedDue.length;
+  runtime.activeDeckCount = orderedDue.length;
   return [...orderedDue, ...orderedDeferred];
 }
 
 function recordStudyOutcome(cardId, outcome, reviewedAt = Date.now()) {
   const progress = getWordProgress(cardId);
   const isFirstConfirmation = !progress.firstConfirmedAt;
-  const xpAward = computeCardXpAward(outcome, isFirstConfirmation, spacedRepetition);
+  const xpAward = computeCardXpAward(outcome, isFirstConfirmation, runtime.spacedRepetition);
   const usage = ensureUsageStats();
   if (usage.cardXpEarned < 0) migrateLegacyXp(usage);
   usage.cardXpEarned = (usage.cardXpEarned || 0) + xpAward;
@@ -882,7 +832,7 @@ function seedMinimumUncertainSchedule(cardId, reviewedAt = Date.now()) {
   return progress;
 }
 
-function getDeckAggregateStats(cards = originalDeck) {
+function getDeckAggregateStats(cards = runtime.originalDeck) {
   return (cards || []).reduce((totals, card) => {
     const progress = getWordProgress(card.id);
     totals.seenCount += progress.seenCount || 0;
@@ -926,10 +876,10 @@ function applySpacedReview(card, outcome) {
   }
 
   progress.lastSpacedOutcome = normalizedOutcome;
-  marks = getDirectionalMarksStore();
+  runtime.marks = getDirectionalMarksStore();
 }
 
-function getDueCount(cards = originalDeck) {
+function getDueCount(cards = runtime.originalDeck) {
   return (cards || []).filter(isCardDue).length;
 }
 
@@ -945,8 +895,8 @@ function getMorphSpacedOutcome(card, isCorrect) {
 function answerMorphologyChoice(choiceIndex) {
   if (!isMorphologyMode()) return;
   noteStudyInteraction();
-  const card = deck[currentIdx];
-  if (!card || morphAnswerState.answered) return;
+  const card = runtime.deck[runtime.currentIdx];
+  if (!card || runtime.morphAnswerState.answered) return;
 
   const reversed = reverseDisplayActive(card);
   const choices = reversed ? card.reverseChoices : card.choices;
@@ -957,7 +907,7 @@ function answerMorphologyChoice(choiceIndex) {
   const selected = choices[choiceIndex];
   const correctAnswer = reversed ? card.form : card.answer;
   const isCorrect = selected === correctAnswer;
-  morphAnswerState = {
+  runtime.morphAnswerState = {
     answered: true,
     revealed: true,
     selfRated: true,
@@ -965,16 +915,16 @@ function answerMorphologyChoice(choiceIndex) {
     isCorrect
   };
 
-  if (spacedRepetition) {
+  if (runtime.spacedRepetition) {
     applySpacedReview(card, getMorphSpacedOutcome(card, isCorrect));
-    morphPendingAdvance = true;
+    runtime.morphPendingAdvance = true;
   } else {
     const mark = isCorrect ? 'known' : 'unsure';
     const reviewedAt = Date.now();
     recordStudyOutcome(card.id, isCorrect ? 'known' : 'review', reviewedAt);
     applyUnspacedSharedSchedule(card, isCorrect ? 'easy' : 'again', reviewedAt);
     getDirectionalMarksStore()[card.id] = mark;
-    marks = getDirectionalMarksStore();
+    runtime.marks = getDirectionalMarksStore();
   }
 
   renderCard();
@@ -986,9 +936,9 @@ function answerMorphologyChoice(choiceIndex) {
 function revealMorphologyAnswer() {
   if (!isMorphologyMode()) return;
   noteStudyInteraction();
-  const card = deck[currentIdx];
-  if (!card || morphAnswerState.revealed) return;
-  morphAnswerState = {
+  const card = runtime.deck[runtime.currentIdx];
+  if (!card || runtime.morphAnswerState.revealed) return;
+  runtime.morphAnswerState = {
     ...morphAnswerState,
     revealed: true
   };
@@ -998,12 +948,12 @@ function revealMorphologyAnswer() {
 function rateMorphologySelfCheck(isCorrect) {
   if (!isMorphologyMode()) return;
   noteStudyInteraction();
-  const card = deck[currentIdx];
-  if (!card || !morphAnswerState.revealed || morphAnswerState.answered) return;
+  const card = runtime.deck[runtime.currentIdx];
+  if (!card || !runtime.morphAnswerState.revealed || runtime.morphAnswerState.answered) return;
 
   captureSpacedUndoSnapshot();
 
-  morphAnswerState = {
+  runtime.morphAnswerState = {
     answered: true,
     revealed: true,
     selfRated: true,
@@ -1011,16 +961,16 @@ function rateMorphologySelfCheck(isCorrect) {
     isCorrect: !!isCorrect
   };
 
-  if (spacedRepetition) {
+  if (runtime.spacedRepetition) {
     applySpacedReview(card, getMorphSpacedOutcome(card, isCorrect));
-    morphPendingAdvance = true;
+    runtime.morphPendingAdvance = true;
   } else {
     const mark = isCorrect ? 'known' : 'unsure';
     const reviewedAt = Date.now();
     recordStudyOutcome(card.id, isCorrect ? 'known' : 'review', reviewedAt);
     applyUnspacedSharedSchedule(card, isCorrect ? 'easy' : 'again', reviewedAt);
     getDirectionalMarksStore()[card.id] = mark;
-    marks = getDirectionalMarksStore();
+    runtime.marks = getDirectionalMarksStore();
   }
 
   renderCard();
@@ -1032,12 +982,12 @@ function rateMorphologySelfCheck(isCorrect) {
 function markMorphologyDontKnow() {
   if (!isMorphologyMode()) return;
   noteStudyInteraction();
-  const card = deck[currentIdx];
-  if (!card || morphAnswerState.answered) return;
+  const card = runtime.deck[runtime.currentIdx];
+  if (!card || runtime.morphAnswerState.answered) return;
 
   captureSpacedUndoSnapshot();
 
-  morphAnswerState = {
+  runtime.morphAnswerState = {
     answered: true,
     revealed: true,
     selfRated: true,
@@ -1045,15 +995,15 @@ function markMorphologyDontKnow() {
     isCorrect: false
   };
 
-  if (spacedRepetition) {
+  if (runtime.spacedRepetition) {
     applySpacedReview(card, getMorphSpacedOutcome(card, false));
-    morphPendingAdvance = true;
+    runtime.morphPendingAdvance = true;
   } else {
     const reviewedAt = Date.now();
     recordStudyOutcome(card.id, 'review', reviewedAt);
     applyUnspacedSharedSchedule(card, 'again', reviewedAt);
     getDirectionalMarksStore()[card.id] = 'unsure';
-    marks = getDirectionalMarksStore();
+    runtime.marks = getDirectionalMarksStore();
   }
 
   renderCard();
@@ -1065,50 +1015,50 @@ function markMorphologyDontKnow() {
 
 
 function getKnownCount() {
-  return originalDeck.filter(card => marks[card.id] === 'known').length;
+  return runtime.originalDeck.filter(card => runtime.marks[card.id] === 'known').length;
 }
 
 function getHighConfidenceCount() {
-  return originalDeck.filter(card => {
+  return runtime.originalDeck.filter(card => {
     const pct = getConfidencePct(getWordProgress(card.id));
     return pct !== null && pct > 75;
   }).length;
 }
 
 function getRemainingCards() {
-  if (spacedRepetition) {
-    return deck.slice(0, activeDeckCount);
+  if (runtime.spacedRepetition) {
+    return runtime.deck.slice(0, runtime.activeDeckCount);
   }
-  return deck.filter(card => marks[card.id] !== 'known');
+  return runtime.deck.filter(card => runtime.marks[card.id] !== 'known');
 }
 
 function moveCardToBackOfActivePile(card) {
   if (!card) return false;
   const directionalMarks = getDirectionalMarksStore();
 
-  const currentCardId = deck[currentIdx]?.id || null;
+  const currentCardId = runtime.deck[runtime.currentIdx]?.id || null;
   directionalMarks[card.id] = 'unsure';
-  marks = directionalMarks;
+  runtime.marks = directionalMarks;
 
-  deck = deck.filter(candidate => candidate.id !== card.id);
-  const splitAt = deck.findIndex(candidate => marks[candidate.id] === 'known');
-  const insertAt = splitAt === -1 ? deck.length : splitAt;
-  deck.splice(insertAt, 0, card);
+  runtime.deck = runtime.deck.filter(candidate => candidate.id !== card.id);
+  const splitAt = runtime.deck.findIndex(candidate => runtime.marks[candidate.id] === 'known');
+  const insertAt = splitAt === -1 ? runtime.deck.length : splitAt;
+  runtime.deck.splice(insertAt, 0, card);
 
-  activeDeckCount = originalDeck.filter(candidate => marks[candidate.id] !== 'known').length;
+  runtime.activeDeckCount = runtime.originalDeck.filter(candidate => runtime.marks[candidate.id] !== 'known').length;
   if (currentCardId) {
-    const restoredIdx = deck.findIndex(candidate => candidate.id === currentCardId);
-    if (restoredIdx >= 0) currentIdx = restoredIdx;
+    const restoredIdx = runtime.deck.findIndex(candidate => candidate.id === currentCardId);
+    if (restoredIdx >= 0) runtime.currentIdx = restoredIdx;
   }
-  unspacedPendingRecycle = false;
+  runtime.unspacedPendingRecycle = false;
   return true;
 }
 
 function maybePeriodicReshuffle() {
-  if (!shuffled) return;
-  flipsSinceReshuffle++;
-  if (flipsSinceReshuffle >= 10) {
-    flipsSinceReshuffle = 0;
+  if (!runtime.shuffled) return;
+  runtime.flipsSinceReshuffle++;
+  if (runtime.flipsSinceReshuffle >= 10) {
+    runtime.flipsSinceReshuffle = 0;
     reshuffleUpcomingCards();
   }
 }
@@ -1116,11 +1066,11 @@ function maybePeriodicReshuffle() {
 // Per-flip ~1/50 (2%) chance to bring one high-confidence (>75%) deferred card
 // back into the active pile. Skipped when shuffle is off or in morphology mode.
 function maybeReturnConfirmedDeferredCard() {
-  if (!spacedRepetition || !shuffled || isMorphologyMode()) return false;
+  if (!runtime.spacedRepetition || !runtime.shuffled || isMorphologyMode()) return false;
   if (KNOWN_CARD_RANDOM_RETURN_FLIP_ODDS <= 0) return false;
   if (Math.random() >= 1 / KNOWN_CARD_RANDOM_RETURN_FLIP_ODDS) return false;
 
-  const eligible = (originalDeck || []).filter(card => {
+  const eligible = (runtime.originalDeck || []).filter(card => {
     if (isCardDue(card)) return false;
     const pct = getConfidencePct(getWordProgress(card.id));
     return pct !== null && pct > 75;
@@ -1129,36 +1079,36 @@ function maybeReturnConfirmedDeferredCard() {
 
   const pick = eligible[Math.floor(Math.random() * eligible.length)];
   getWordProgress(pick.id).dueAt = Date.now();
-  deck = buildStudyDeck(originalDeck);
+  runtime.deck = buildStudyDeck(runtime.originalDeck);
   return true;
 }
 
 function reshuffleUpcomingCards() {
-  const start = currentIdx + 1;
+  const start = runtime.currentIdx + 1;
   // In spaced mode keep deferred (not-yet-due) cards in their dueAt order at
-  // the tail; only reshuffle the active (due) portion ahead of currentIdx.
-  const end = spacedRepetition
-    ? Math.min(activeDeckCount, deck.length)
-    : deck.length;
+  // the tail; only reshuffle the active (due) portion ahead of runtime.currentIdx.
+  const end = runtime.spacedRepetition
+    ? Math.min(runtime.activeDeckCount, runtime.deck.length)
+    : runtime.deck.length;
   if (start >= end) return;
   const upcoming = [];
   const pinned = [];
   for (let i = start; i < end; i++) {
-    const id = deck[i].id;
-    if (marks[id] === 'known' || unspacedDeferredIds.has(id)) pinned.push(deck[i]);
-    else upcoming.push(deck[i]);
+    const id = runtime.deck[i].id;
+    if (runtime.marks[id] === 'known' || runtime.unspacedDeferredIds.has(id)) pinned.push(runtime.deck[i]);
+    else upcoming.push(runtime.deck[i]);
   }
   if (upcoming.length < 2) return;
-  const tail = deck.slice(end);
-  deck = [...deck.slice(0, start), ...shuffleArray(upcoming), ...pinned, ...tail];
+  const tail = runtime.deck.slice(end);
+  runtime.deck = [...runtime.deck.slice(0, start), ...shuffleArray(upcoming), ...pinned, ...tail];
 }
 
 function maybeReturnKnownCardToActivePile() {
-  if (spacedRepetition || isMorphologyMode() || KNOWN_CARD_RANDOM_RETURN_FLIP_ODDS <= 0) return false;
-  if (!originalDeck.length || currentIdx >= deck.length) return false;
+  if (runtime.spacedRepetition || isMorphologyMode() || KNOWN_CARD_RANDOM_RETURN_FLIP_ODDS <= 0) return false;
+  if (!runtime.originalDeck.length || runtime.currentIdx >= runtime.deck.length) return false;
 
-  const currentCardId = deck[currentIdx]?.id || null;
-  const knownCards = originalDeck.filter(card => card.id !== currentCardId && marks[card.id] === 'known');
+  const currentCardId = runtime.deck[runtime.currentIdx]?.id || null;
+  const knownCards = runtime.originalDeck.filter(card => card.id !== currentCardId && runtime.marks[card.id] === 'known');
   if (!knownCards.length) return false;
 
   const returnChance = 1 / KNOWN_CARD_RANDOM_RETURN_FLIP_ODDS;
@@ -1173,21 +1123,21 @@ function buildPersistedStatePayload() {
   saveCurrentDeckStateToBank();
   const usage = ensureUsageStats();
   return {
-    currentSessionId: currentSession ? currentSession.id : null,
-    selectedKeys: [...selectedKeys],
-    shuffled,
-    requiredOnly,
+    currentSessionId: runtime.currentSession ? runtime.currentSession.id : null,
+    selectedKeys: [...runtime.selectedKeys],
+    shuffled: runtime.shuffled,
+    requiredOnly: runtime.requiredOnly,
     requiredOnlyDefaultedV1: true,
     srsIntervalCapAlignedV1: true,
-    directionToGreek,
-    spacedRepetition,
-    studyMode,
-    appProfile,
-    morphSelfCheck,
-    gamification: sanitizeGamificationState(appGamification),
-    deckStates,
-    globalWordMarks,
-    globalWordProgress,
+    directionToGreek: runtime.directionToGreek,
+    spacedRepetition: runtime.spacedRepetition,
+    studyMode: runtime.studyMode,
+    appProfile: runtime.appProfile,
+    morphSelfCheck: runtime.morphSelfCheck,
+    gamification: sanitizeGamificationState(runtime.appGamification),
+    deckStates: runtime.deckStates,
+    globalWordMarks: runtime.globalWordMarks,
+    globalWordProgress: runtime.globalWordProgress,
     appUsageStats: {
       totalMs: usage.totalMs,
       dailyMs: usage.dailyMs,
@@ -1206,6 +1156,8 @@ function buildPersistedStatePayload() {
 
 function sanitizeImportedState(candidate) {
   if (!isPlainObject(candidate)) return null;
+  // These are persisted-JSON property names — they must stay as the bare
+  // identifiers used in saveState's payload, not the runtime.* references.
   const hasRecognizedStateShape = ['selectedKeys', 'deckStates', 'globalWordMarks', 'globalWordProgress', 'appUsageStats']
     .some(key => key in candidate);
   if (!hasRecognizedStateShape) return null;
@@ -1252,22 +1204,22 @@ function applyImportedState(state, options = {}) {
   storage.setItem(STORAGE_KEY, JSON.stringify(sanitized));
   if (options.disclaimerAccepted) {
     storage.setItem(CONSENT_STORAGE_KEY, 'accepted');
-    hasAcceptedDisclaimer = true;
+    runtime.hasAcceptedDisclaimer = true;
   }
 
   const restored = restoreState();
   if (!restored) {
-    currentSession = null;
-    selectedKeys = [];
-    deck = [];
-    originalDeck = [];
-    currentIdx = 0;
-    isFlipped = false;
-    marks = getDirectionalMarksStore();
+    runtime.currentSession = null;
+    runtime.selectedKeys = [];
+    runtime.deck = [];
+    runtime.originalDeck = [];
+    runtime.currentIdx = 0;
+    runtime.isFlipped = false;
+    runtime.marks = getDirectionalMarksStore();
     resetMorphAnswerState();
     resetUnspacedCycleState();
-    unspacedPendingRecycle = false;
-    activeDeckCount = 0;
+    runtime.unspacedPendingRecycle = false;
+    runtime.activeDeckCount = 0;
     setActiveSessionButton();
     setActiveSetButtons();
     syncToggleButtons();
@@ -1296,11 +1248,11 @@ function buildProgressExportPayload() {
   // The persisted payload zeros currentStudySession. If there was an
   // in-progress session, push a snapshot into the exported history so
   // session time is not lost on import.
-  const liveSession = appUsageStats.currentStudySession;
+  const liveSession = runtime.appUsageStats.currentStudySession;
   if (liveSession && liveSession.startedAt && liveSession.durationMs > 0) {
     const sessionSnapshot = {
       startedAt: liveSession.startedAt,
-      endedAt: appUsageStats.lastStudyCountedAt || Date.now(),
+      endedAt: runtime.appUsageStats.lastStudyCountedAt || Date.now(),
       durationMs: liveSession.durationMs,
       interactionCount: liveSession.interactionCount || 0
     };
@@ -1370,9 +1322,9 @@ function openTransferModal(config) {
   const overlay = document.getElementById('transferOverlay');
   if (!overlay) return;
 
-  transferModalMode = config?.mode || '';
-  transferPrimaryAction = typeof config?.primaryAction === 'function' ? config.primaryAction : null;
-  transferSecondaryAction = typeof config?.secondaryAction === 'function' ? config.secondaryAction : null;
+  runtime.transferModalMode = config?.mode || '';
+  runtime.transferPrimaryAction = typeof config?.primaryAction === 'function' ? config.primaryAction : null;
+  runtime.transferSecondaryAction = typeof config?.secondaryAction === 'function' ? config.secondaryAction : null;
   setTransferModalContent(config || {});
   overlay.classList.add('show');
   overlay.setAttribute('aria-hidden', 'false');
@@ -1389,18 +1341,18 @@ function closeTransferModal() {
   if (!overlay) return;
   overlay.classList.remove('show');
   overlay.setAttribute('aria-hidden', 'true');
-  transferModalMode = '';
-  transferPrimaryAction = null;
-  transferSecondaryAction = null;
+  runtime.transferModalMode = '';
+  runtime.transferPrimaryAction = null;
+  runtime.transferSecondaryAction = null;
   if (!isDisclaimerModalOpen() && !isAnalyticsModalOpen()) document.body.classList.remove('modal-open');
 }
 
 function handleTransferPrimaryAction() {
-  if (typeof transferPrimaryAction === 'function') transferPrimaryAction();
+  if (typeof runtime.transferPrimaryAction === 'function') runtime.transferPrimaryAction();
 }
 
 function handleTransferSecondaryAction() {
-  if (typeof transferSecondaryAction === 'function') transferSecondaryAction();
+  if (typeof runtime.transferSecondaryAction === 'function') runtime.transferSecondaryAction();
 }
 
 function tryDownloadProgressJsonFile(jsonText, filename) {
@@ -1596,27 +1548,27 @@ function handleImportedProgressFile(event) {
   reader.readAsText(file);
 }
 
-function getDeckStateKey(keys = selectedKeys, requiredFlag = requiredOnly, spacedFlag = spacedRepetition) {
+function getDeckStateKey(keys = runtime.selectedKeys, requiredFlag = runtime.requiredOnly, spacedFlag = runtime.spacedRepetition) {
   const normalizedKeys = sortSetKeys((keys || []).map(String));
   return JSON.stringify({
     keys: normalizedKeys,
     requiredOnly: !!requiredFlag,
     spacedRepetition: !!spacedFlag,
     direction: getStudyStoreKey(),
-    mode: studyMode
+    mode: runtime.studyMode
   });
 }
 
 function saveCurrentDeckStateToBank() {
-  if (!selectedKeys.length) return;
+  if (!runtime.selectedKeys.length) return;
 
-  const deckKey = getDeckStateKey(selectedKeys, requiredOnly);
-  deckStates[deckKey] = {
-    currentSessionId: currentSession ? currentSession.id : null,
-    selectedKeys: [...selectedKeys],
-    deckIds: deck.map(card => card.id),
-    currentIdx,
-    unspacedPendingRecycle: !spacedRepetition && !!unspacedPendingRecycle
+  const deckKey = getDeckStateKey(runtime.selectedKeys, runtime.requiredOnly);
+  runtime.deckStates[deckKey] = {
+    currentSessionId: runtime.currentSession ? runtime.currentSession.id : null,
+    selectedKeys: [...runtime.selectedKeys],
+    deckIds: runtime.deck.map(card => card.id),
+    currentIdx: runtime.currentIdx,
+    unspacedPendingRecycle: !runtime.spacedRepetition && !!runtime.unspacedPendingRecycle
   };
 }
 
@@ -1693,63 +1645,63 @@ function restoreState() {
       }
     }
 
-    selectedKeys = Array.isArray(saved.selectedKeys) ? sortSetKeys(saved.selectedKeys.map(String)) : [];
-    requiredOnly = saved.requiredOnly !== false;
-    directionToGreek = !!saved.directionToGreek;
-    spacedRepetition = saved.spacedRepetition !== false;
-    appProfile = 'vocab_grammar';
+    runtime.selectedKeys = Array.isArray(saved.selectedKeys) ? sortSetKeys(saved.selectedKeys.map(String)) : [];
+    runtime.requiredOnly = saved.requiredOnly !== false;
+    runtime.directionToGreek = !!saved.directionToGreek;
+    runtime.spacedRepetition = saved.spacedRepetition !== false;
+    runtime.appProfile = 'vocab_grammar';
     const hadSavedAchievementSnapshot = Array.isArray(saved?.gamification?.lastEarnedAchievementIds);
-    appGamification = sanitizeGamificationState(saved.gamification);
-    studyMode = normalizeStudyMode(saved.studyMode);
-    morphSelfCheck = !!saved.morphSelfCheck;
-    shuffled = saved.shuffled !== false;
-    deckStates = saved.deckStates && typeof saved.deckStates === 'object' ? saved.deckStates : {};
-    globalWordMarks = saved.globalWordMarks && typeof saved.globalWordMarks === 'object' ? saved.globalWordMarks : {};
-    globalWordProgress = saved.globalWordProgress && typeof saved.globalWordProgress === 'object' ? saved.globalWordProgress : {};
-    appUsageStats = ensureUsageStats(saved.appUsageStats);
-    appUsageStats.lastActiveAt = 0;
-    const restoredLevel = computeXpAndLevel(appUsageStats).currentLevel.level;
-    if (!Number.isFinite(appGamification.lastCelebratedLevel) || appGamification.lastCelebratedLevel < 1 || appGamification.lastCelebratedLevel > restoredLevel) {
-      appGamification.lastCelebratedLevel = restoredLevel;
+    runtime.appGamification = sanitizeGamificationState(saved.gamification);
+    runtime.studyMode = normalizeStudyMode(saved.studyMode);
+    runtime.morphSelfCheck = !!saved.morphSelfCheck;
+    runtime.shuffled = saved.shuffled !== false;
+    runtime.deckStates = saved.deckStates && typeof saved.deckStates === 'object' ? saved.deckStates : {};
+    runtime.globalWordMarks = saved.globalWordMarks && typeof saved.globalWordMarks === 'object' ? saved.globalWordMarks : {};
+    runtime.globalWordProgress = saved.globalWordProgress && typeof saved.globalWordProgress === 'object' ? saved.globalWordProgress : {};
+    runtime.appUsageStats = ensureUsageStats(saved.appUsageStats);
+    runtime.appUsageStats.lastActiveAt = 0;
+    const restoredLevel = computeXpAndLevel(runtime.appUsageStats).currentLevel.level;
+    if (!Number.isFinite(runtime.appGamification.lastCelebratedLevel) || runtime.appGamification.lastCelebratedLevel < 1 || runtime.appGamification.lastCelebratedLevel > restoredLevel) {
+      runtime.appGamification.lastCelebratedLevel = restoredLevel;
     }
-    if (appGamification.lastCelebratedBadgeDay && !/^\d{4}-\d{2}-\d{2}$/.test(appGamification.lastCelebratedBadgeDay)) {
-      appGamification.lastCelebratedBadgeDay = null;
+    if (runtime.appGamification.lastCelebratedBadgeDay && !/^\d{4}-\d{2}-\d{2}$/.test(runtime.appGamification.lastCelebratedBadgeDay)) {
+      runtime.appGamification.lastCelebratedBadgeDay = null;
     }
     ensureDirectionalStores();
-    if (hadSavedAchievementSnapshot && !Array.isArray(appGamification.lastEarnedAchievementIds)) {
-      appGamification.lastEarnedAchievementIds = [];
+    if (hadSavedAchievementSnapshot && !Array.isArray(runtime.appGamification.lastEarnedAchievementIds)) {
+      runtime.appGamification.lastEarnedAchievementIds = [];
     }
 
-    if (!selectedKeys.length) {
+    if (!runtime.selectedKeys.length) {
       clearSpacedUndoSnapshot();
       syncToggleButtons();
       return false;
     }
 
-    currentSession = saved.currentSessionId ? getSessions().find(s => s.id === saved.currentSessionId) || null : null;
+    runtime.currentSession = saved.currentSessionId ? getSessions().find(s => s.id === saved.currentSessionId) || null : null;
 
-    const selectedCards = getSelectedCards(selectedKeys);
-    originalDeck = requiredOnly ? selectedCards.filter(card => card.required) : selectedCards;
+    const selectedCards = getSelectedCards(runtime.selectedKeys);
+    runtime.originalDeck = runtime.requiredOnly ? selectedCards.filter(card => card.required) : selectedCards;
     resetMorphAnswerState();
-    const savedDeckState = deckStates[getDeckStateKey(selectedKeys, requiredOnly)] || null;
-    marks = getDirectionalMarksStore();
-    const restoredDeck = savedDeckState ? reorderDeckFromIds(originalDeck, savedDeckState.deckIds) : null;
-    if (spacedRepetition && restoredDeck) {
-      deck = restoredDeck;
-      activeDeckCount = restoredDeck.length;
-      deck = buildStudyDeck(originalDeck, { forceShuffle: shuffled });
+    const savedDeckState = runtime.deckStates[getDeckStateKey(runtime.selectedKeys, runtime.requiredOnly)] || null;
+    runtime.marks = getDirectionalMarksStore();
+    const restoredDeck = savedDeckState ? reorderDeckFromIds(runtime.originalDeck, savedDeckState.deckIds) : null;
+    if (runtime.spacedRepetition && restoredDeck) {
+      runtime.deck = restoredDeck;
+      runtime.activeDeckCount = restoredDeck.length;
+      runtime.deck = buildStudyDeck(runtime.originalDeck, { forceShuffle: runtime.shuffled });
     } else if (restoredDeck) {
-      deck = shuffled ? shuffleArray([...restoredDeck]) : restoredDeck;
+      runtime.deck = runtime.shuffled ? shuffleArray([...restoredDeck]) : restoredDeck;
     } else {
-      deck = buildStudyDeck(originalDeck);
+      runtime.deck = buildStudyDeck(runtime.originalDeck);
     }
     resetUnspacedCycleState();
-    activeDeckCount = spacedRepetition ? getDueCount(originalDeck) : originalDeck.filter(card => marks[card.id] !== 'known').length;
-    currentIdx = savedDeckState && Number.isInteger(savedDeckState.currentIdx)
-      ? Math.min(Math.max(savedDeckState.currentIdx, 0), spacedRepetition ? activeDeckCount : deck.length)
+    runtime.activeDeckCount = runtime.spacedRepetition ? getDueCount(runtime.originalDeck) : runtime.originalDeck.filter(card => runtime.marks[card.id] !== 'known').length;
+    runtime.currentIdx = savedDeckState && Number.isInteger(savedDeckState.currentIdx)
+      ? Math.min(Math.max(savedDeckState.currentIdx, 0), runtime.spacedRepetition ? runtime.activeDeckCount : runtime.deck.length)
       : 0;
-    unspacedPendingRecycle = !spacedRepetition && !!(savedDeckState && savedDeckState.unspacedPendingRecycle);
-    isFlipped = false;
+    runtime.unspacedPendingRecycle = !runtime.spacedRepetition && !!(savedDeckState && savedDeckState.unspacedPendingRecycle);
+    runtime.isFlipped = false;
     clearSpacedUndoSnapshot();
 
     setActiveSessionButton();
@@ -1766,43 +1718,43 @@ function restoreState() {
 }
 
 function startNextCycle(mode = 'remaining') {
-  unspacedDeferredIds = new Set();
-  flipsSinceReshuffle = 0;
+  runtime.unspacedDeferredIds = new Set();
+  runtime.flipsSinceReshuffle = 0;
   if (mode === 'full') {
     const directionalMarks = getDirectionalMarksStore();
-    (originalDeck || []).forEach(card => {
+    (runtime.originalDeck || []).forEach(card => {
       delete directionalMarks[card.id];
     });
-    marks = directionalMarks;
-    const fullDeck = shuffleArray([...(originalDeck || [])]);
-    deck = fullDeck;
-    currentIdx = fullDeck.length ? 0 : deck.length;
+    runtime.marks = directionalMarks;
+    const fullDeck = shuffleArray([...(runtime.originalDeck || [])]);
+    runtime.deck = fullDeck;
+    runtime.currentIdx = fullDeck.length ? 0 : runtime.deck.length;
   } else {
     const remaining = shuffleArray([...getRemainingCards()]);
-    const known = (originalDeck || []).filter(card => marks[card.id] === 'known');
-    deck = [...remaining, ...known];
-    currentIdx = remaining.length ? 0 : deck.length;
+    const known = (runtime.originalDeck || []).filter(card => runtime.marks[card.id] === 'known');
+    runtime.deck = [...remaining, ...known];
+    runtime.currentIdx = remaining.length ? 0 : runtime.deck.length;
   }
   resetUnspacedCycleState();
-  unspacedPendingRecycle = false;
+  runtime.unspacedPendingRecycle = false;
   saveState();
 }
 
 function resetStudyState() {
-  marks = getDirectionalMarksStore();
-  currentIdx = 0;
-  activeDeckCount = spacedRepetition ? getDueCount(originalDeck) : originalDeck.filter(card => marks[card.id] !== 'known').length;
+  runtime.marks = getDirectionalMarksStore();
+  runtime.currentIdx = 0;
+  runtime.activeDeckCount = runtime.spacedRepetition ? getDueCount(runtime.originalDeck) : runtime.originalDeck.filter(card => runtime.marks[card.id] !== 'known').length;
   resetUnspacedCycleState();
-  unspacedPendingRecycle = false;
-  isFlipped = false;
+  runtime.unspacedPendingRecycle = false;
+  runtime.isFlipped = false;
 }
 
-function isSessionFullySelected(session, keys = selectedKeys) {
+function isSessionFullySelected(session, keys = runtime.selectedKeys) {
   const sessionKeys = expandSessionSets(session);
   return sessionKeys.length > 0 && sessionKeys.every(key => keys.includes(String(key)));
 }
 
-function findExactSessionMatch(keys = selectedKeys) {
+function findExactSessionMatch(keys = runtime.selectedKeys) {
   const normalizedKeys = sortSetKeys((keys || []).map(String));
   return getSessions().find(session => {
     const sessionKeys = expandSessionSets(session);
@@ -1820,7 +1772,7 @@ function setActiveSessionButton() {
 function setActiveSetButtons() {
   document.querySelectorAll('.chapter-btn').forEach(btn => {
     const key = btn.dataset.key;
-    btn.classList.toggle('active', selectedKeys.includes(key));
+    btn.classList.toggle('active', runtime.selectedKeys.includes(key));
   });
 }
 
@@ -1924,21 +1876,21 @@ function getSupplementalParadigmsForKey(key) {
 }
 
 function deselectAllSupplementals() {
-  const remaining = selectedKeys.filter(k => {
+  const remaining = runtime.selectedKeys.filter(k => {
     const base = getParadigmBaseKey(k) || k;
     return isChapterKey(base) || isAdvancedKey(base);
   });
-  if (remaining.length === selectedKeys.length) return;
+  if (remaining.length === runtime.selectedKeys.length) return;
   saveCurrentDeckStateToBank();
-  currentSession = null;
-  selectedKeys = remaining;
-  if (!selectedKeys.length) {
+  runtime.currentSession = null;
+  runtime.selectedKeys = remaining;
+  if (!runtime.selectedKeys.length) {
     setActiveSessionButton();
     setActiveSetButtons();
-    deck = [];
-    originalDeck = [];
-    marks = {};
-    currentIdx = 0;
+    runtime.deck = [];
+    runtime.originalDeck = [];
+    runtime.marks = {};
+    runtime.currentIdx = 0;
     document.getElementById('cardArea').innerHTML = '<div class="empty-state"><div class="big">αβγ</div>Tap to choose a session and start studying.</div>';
     clearSpacedUndoSnapshot();
     syncToggleButtons();
@@ -1946,7 +1898,7 @@ function deselectAllSupplementals() {
     saveState();
     return;
   }
-  loadDeckFromKeys(selectedKeys, null);
+  loadDeckFromKeys(runtime.selectedKeys, null);
 }
 
 function buildSupplementalSelector() {
@@ -1994,8 +1946,8 @@ function buildSupplementalSelector() {
     weekDetails.className = 'supplemental-week';
     const weekKeys = entries.map(e => String(e.key));
     weekDetails.open = entries.some(({ key }) =>
-      selectedKeys.includes(String(key)) ||
-      getSupplementalParadigmsForKey(key).some(p => selectedKeys.includes(p.key))
+      runtime.selectedKeys.includes(String(key)) ||
+      getSupplementalParadigmsForKey(key).some(p => runtime.selectedKeys.includes(p.key))
     );
     const weekSummary = document.createElement('summary');
     weekSummary.className = 'supplemental-week-summary';
@@ -2030,7 +1982,7 @@ function buildSupplementalSelector() {
 
       const details = document.createElement('details');
       details.className = 'supplemental-set';
-      details.open = selectedKeys.includes(String(key)) || paradigmList.some(paradigm => selectedKeys.includes(paradigm.key));
+      details.open = runtime.selectedKeys.includes(String(key)) || paradigmList.some(paradigm => runtime.selectedKeys.includes(paradigm.key));
 
       const summary = document.createElement('summary');
       summary.className = 'supplemental-summary';
@@ -2125,7 +2077,7 @@ function buildAdvancedSelector() {
 
     const details = document.createElement('details');
     details.className = 'supplemental-set advanced-set';
-    details.open = selectedKeys.includes(String(key));
+    details.open = runtime.selectedKeys.includes(String(key));
 
     const summary = document.createElement('summary');
     summary.className = 'supplemental-summary advanced-summary';
@@ -2167,21 +2119,21 @@ function buildAdvancedSelector() {
 }
 
 function deselectAllAdvanced() {
-  const remaining = selectedKeys.filter(k => {
+  const remaining = runtime.selectedKeys.filter(k => {
     const base = getParadigmBaseKey(k) || k;
     return !isAdvancedKey(base);
   });
-  if (remaining.length === selectedKeys.length) return;
+  if (remaining.length === runtime.selectedKeys.length) return;
   saveCurrentDeckStateToBank();
-  currentSession = null;
-  selectedKeys = remaining;
-  if (!selectedKeys.length) {
+  runtime.currentSession = null;
+  runtime.selectedKeys = remaining;
+  if (!runtime.selectedKeys.length) {
     setActiveSessionButton();
     setActiveSetButtons();
-    deck = [];
-    originalDeck = [];
-    marks = {};
-    currentIdx = 0;
+    runtime.deck = [];
+    runtime.originalDeck = [];
+    runtime.marks = {};
+    runtime.currentIdx = 0;
     document.getElementById('cardArea').innerHTML = '<div class="empty-state"><div class="big">αβγ</div>Tap to choose a session and start studying.</div>';
     clearSpacedUndoSnapshot();
     syncToggleButtons();
@@ -2189,26 +2141,26 @@ function deselectAllAdvanced() {
     saveState();
     return;
   }
-  loadDeckFromKeys(selectedKeys, null);
+  loadDeckFromKeys(runtime.selectedKeys, null);
 }
 
 function deselectAllChapters() {
-  const remaining = selectedKeys.filter(k => {
+  const remaining = runtime.selectedKeys.filter(k => {
     const base = getParadigmBaseKey(k) || k;
     return !isChapterKey(base);
   });
-  const sessionWasActive = !!currentSession;
-  if (remaining.length === selectedKeys.length && !sessionWasActive) return;
+  const sessionWasActive = !!runtime.currentSession;
+  if (remaining.length === runtime.selectedKeys.length && !sessionWasActive) return;
   saveCurrentDeckStateToBank();
-  currentSession = null;
-  selectedKeys = remaining;
-  if (!selectedKeys.length) {
+  runtime.currentSession = null;
+  runtime.selectedKeys = remaining;
+  if (!runtime.selectedKeys.length) {
     setActiveSessionButton();
     setActiveSetButtons();
-    deck = [];
-    originalDeck = [];
-    marks = {};
-    currentIdx = 0;
+    runtime.deck = [];
+    runtime.originalDeck = [];
+    runtime.marks = {};
+    runtime.currentIdx = 0;
     document.getElementById('cardArea').innerHTML = '<div class="empty-state"><div class="big">αβγ</div>Tap to choose a session and start studying.</div>';
     clearSpacedUndoSnapshot();
     syncToggleButtons();
@@ -2216,20 +2168,20 @@ function deselectAllChapters() {
     saveState();
     return;
   }
-  loadDeckFromKeys(selectedKeys, null);
+  loadDeckFromKeys(runtime.selectedKeys, null);
 }
 
 function deselectAll() {
-  if (!selectedKeys.length && !currentSession) return;
+  if (!runtime.selectedKeys.length && !runtime.currentSession) return;
   saveCurrentDeckStateToBank();
-  currentSession = null;
-  selectedKeys = [];
+  runtime.currentSession = null;
+  runtime.selectedKeys = [];
   setActiveSessionButton();
   setActiveSetButtons();
-  deck = [];
-  originalDeck = [];
-  marks = {};
-  currentIdx = 0;
+  runtime.deck = [];
+  runtime.originalDeck = [];
+  runtime.marks = {};
+  runtime.currentIdx = 0;
   document.getElementById('cardArea').innerHTML = '<div class="empty-state"><div class="big">αβγ</div>Tap to choose a session and start studying.</div>';
   clearSpacedUndoSnapshot();
   syncToggleButtons();
@@ -2239,7 +2191,7 @@ function deselectAll() {
 
 function toggleAdvancedSubGroup(setKey, subKey) {
   // Sub-groups load only the cards in that sub-bucket. We model this as a
-  // pseudo-key that getAdvancedSubKeyCards expands at deck-build time.
+  // pseudo-key that getAdvancedSubKeyCards expands at runtime.deck-build time.
   const pseudoKey = `${setKey}::sub::${subKey}`;
   toggleSet(pseudoKey);
 }
@@ -2248,38 +2200,38 @@ function loadDeckFromKeys(keys, sessionId = null) {
   saveCurrentDeckStateToBank();
   clearSpacedUndoSnapshot();
 
-  selectedKeys = sortSetKeys(keys.map(String));
-  currentSession = sessionId
-    ? getSessions().find(s => s.id === sessionId) || findExactSessionMatch(selectedKeys)
-    : findExactSessionMatch(selectedKeys);
+  runtime.selectedKeys = sortSetKeys(keys.map(String));
+  runtime.currentSession = sessionId
+    ? getSessions().find(s => s.id === sessionId) || findExactSessionMatch(runtime.selectedKeys)
+    : findExactSessionMatch(runtime.selectedKeys);
 
-  const selectedCards = getSelectedCards(selectedKeys);
-  originalDeck = requiredOnly ? selectedCards.filter(card => card.required) : selectedCards;
+  const selectedCards = getSelectedCards(runtime.selectedKeys);
+  runtime.originalDeck = runtime.requiredOnly ? selectedCards.filter(card => card.required) : selectedCards;
   resetMorphAnswerState();
 
-  const savedDeckState = deckStates[getDeckStateKey(selectedKeys, requiredOnly)] || null;
-  marks = getDirectionalMarksStore();
+  const savedDeckState = runtime.deckStates[getDeckStateKey(runtime.selectedKeys, runtime.requiredOnly)] || null;
+  runtime.marks = getDirectionalMarksStore();
   if (savedDeckState) {
-    const restoredDeck = reorderDeckFromIds(originalDeck, savedDeckState.deckIds);
-    if (spacedRepetition && restoredDeck) {
-      deck = restoredDeck;
-      activeDeckCount = restoredDeck.length;
-      deck = buildStudyDeck(originalDeck, { forceShuffle: shuffled });
+    const restoredDeck = reorderDeckFromIds(runtime.originalDeck, savedDeckState.deckIds);
+    if (runtime.spacedRepetition && restoredDeck) {
+      runtime.deck = restoredDeck;
+      runtime.activeDeckCount = restoredDeck.length;
+      runtime.deck = buildStudyDeck(runtime.originalDeck, { forceShuffle: runtime.shuffled });
     } else if (restoredDeck) {
-      deck = shuffled ? shuffleArray([...restoredDeck]) : restoredDeck;
+      runtime.deck = runtime.shuffled ? shuffleArray([...restoredDeck]) : restoredDeck;
     } else {
-      deck = buildStudyDeck(originalDeck);
+      runtime.deck = buildStudyDeck(runtime.originalDeck);
     }
-    activeDeckCount = spacedRepetition ? getDueCount(originalDeck) : originalDeck.filter(card => marks[card.id] !== 'known').length;
-    currentIdx = Number.isInteger(savedDeckState.currentIdx)
-      ? Math.min(Math.max(savedDeckState.currentIdx, 0), spacedRepetition ? activeDeckCount : deck.length)
+    runtime.activeDeckCount = runtime.spacedRepetition ? getDueCount(runtime.originalDeck) : runtime.originalDeck.filter(card => runtime.marks[card.id] !== 'known').length;
+    runtime.currentIdx = Number.isInteger(savedDeckState.currentIdx)
+      ? Math.min(Math.max(savedDeckState.currentIdx, 0), runtime.spacedRepetition ? runtime.activeDeckCount : runtime.deck.length)
       : 0;
-    unspacedPendingRecycle = !spacedRepetition && !!savedDeckState.unspacedPendingRecycle;
+    runtime.unspacedPendingRecycle = !runtime.spacedRepetition && !!savedDeckState.unspacedPendingRecycle;
     resetUnspacedCycleState();
-    isFlipped = false;
+    runtime.isFlipped = false;
   } else {
     resetStudyState();
-    deck = buildStudyDeck(originalDeck);
+    runtime.deck = buildStudyDeck(runtime.originalDeck);
   }
 
   setActiveSessionButton();
@@ -2295,7 +2247,7 @@ function loadDeckFromKeys(keys, sessionId = null) {
 }
 
 function loadSession(session) {
-  currentSession = session;
+  runtime.currentSession = session;
   loadDeckFromKeys(expandSessionSets(session), session.id);
 }
 
@@ -2307,19 +2259,19 @@ function toggleSession(session) {
 
   const alreadySelected = isSessionFullySelected(session);
   const nextKeys = alreadySelected
-    ? selectedKeys.filter(key => !sessionKeys.includes(key))
-    : sortSetKeys([...new Set([...selectedKeys, ...sessionKeys])]);
+    ? runtime.selectedKeys.filter(key => !sessionKeys.includes(key))
+    : sortSetKeys([...new Set([...runtime.selectedKeys, ...sessionKeys])]);
 
-  currentSession = null;
+  runtime.currentSession = null;
 
   if (!nextKeys.length) {
-    selectedKeys = [];
+    runtime.selectedKeys = [];
     setActiveSessionButton();
     setActiveSetButtons();
-    deck = [];
-    originalDeck = [];
-    marks = getDirectionalMarksStore();
-    currentIdx = 0;
+    runtime.deck = [];
+    runtime.originalDeck = [];
+    runtime.marks = getDirectionalMarksStore();
+    runtime.currentIdx = 0;
     document.getElementById('cardArea').innerHTML = '<div class="empty-state"><div class="big">αβγ</div>Tap to choose a session and start studying.</div>';
     clearSpacedUndoSnapshot();
     syncToggleButtons();
@@ -2340,24 +2292,24 @@ function getParadigmBaseKey(key) {
 
 function toggleSet(key) {
   saveCurrentDeckStateToBank();
-  currentSession = null;
+  runtime.currentSession = null;
   const raw = String(key);
   const baseKey = getParadigmBaseKey(raw);
-  if (selectedKeys.includes(raw)) {
-    selectedKeys = selectedKeys.filter(k => k !== raw);
+  if (runtime.selectedKeys.includes(raw)) {
+    runtime.selectedKeys = runtime.selectedKeys.filter(k => k !== raw);
   } else if (baseKey) {
-    selectedKeys = [...selectedKeys.filter(k => k !== baseKey), raw];
+    runtime.selectedKeys = [...runtime.selectedKeys.filter(k => k !== baseKey), raw];
   } else {
-    selectedKeys = [...selectedKeys.filter(k => getParadigmBaseKey(k) !== raw), raw];
+    runtime.selectedKeys = [...runtime.selectedKeys.filter(k => getParadigmBaseKey(k) !== raw), raw];
   }
 
-  if (!selectedKeys.length) {
+  if (!runtime.selectedKeys.length) {
     setActiveSessionButton();
     setActiveSetButtons();
-    deck = [];
-    originalDeck = [];
-    marks = {};
-    currentIdx = 0;
+    runtime.deck = [];
+    runtime.originalDeck = [];
+    runtime.marks = {};
+    runtime.currentIdx = 0;
     document.getElementById('cardArea').innerHTML = '<div class="empty-state"><div class="big">αβγ</div>Tap to choose a session and start studying.</div>';
     clearSpacedUndoSnapshot();
     syncToggleButtons();
@@ -2366,7 +2318,7 @@ function toggleSet(key) {
     return;
   }
 
-  loadDeckFromKeys(selectedKeys, null);
+  loadDeckFromKeys(runtime.selectedKeys, null);
 }
 // Reader UI (drills + verses) lives in js/ui/reader.js; configured at module-top above.
 // ═══════════════════════════════════════════════════════
@@ -2377,20 +2329,20 @@ function renderCard() {
   saveState();
   syncLayoutVisibility();
 
-  if (!deck.length) {
+  if (!runtime.deck.length) {
     let emptyMessage;
     if (isMorphologyMode()) {
       emptyMessage = isReverseGrammarActive()
         ? 'No reversible grammar items in this selection. Toggle “English → Greek” off to see all questions.'
         : 'No grammar quiz material is available yet for this selection.';
     } else {
-      emptyMessage = requiredOnly ? 'No required-vocabulary cards match this selection.' : 'No cards in this deck.';
+      emptyMessage = runtime.requiredOnly ? 'No required-vocabulary cards match this selection.' : 'No cards in this runtime.deck.';
     }
     area.innerHTML = `<div class="empty-state"><div class="big">—</div>${emptyMessage}</div>`;
     return;
   }
 
-  if (!spacedRepetition && currentIdx >= deck.length && unspacedPendingRecycle) {
+  if (!runtime.spacedRepetition && runtime.currentIdx >= runtime.deck.length && runtime.unspacedPendingRecycle) {
     startNextCycle('remaining');
     resetMorphAnswerState();
     renderCard();
@@ -2399,16 +2351,16 @@ function renderCard() {
     return;
   }
 
-  if ((!spacedRepetition && currentIdx >= deck.length) || (spacedRepetition && currentIdx >= activeDeckCount)) {
-    const doneTitle = spacedRepetition
+  if ((!runtime.spacedRepetition && runtime.currentIdx >= runtime.deck.length) || (runtime.spacedRepetition && runtime.currentIdx >= runtime.activeDeckCount)) {
+    const doneTitle = runtime.spacedRepetition
       ? 'No cards currently due ✦'
       : (isMorphologyMode() ? 'Grammar pass complete ✦' : 'Session Confirmed 🎉');
 
-    const doneSub = spacedRepetition
+    const doneSub = runtime.spacedRepetition
       ? 'Everything in this selection is scheduled ahead. Press next to advance the review clock by 1 hour and pull the next near-due cards back in.'
       : (isMorphologyMode()
         ? 'Everything in this grammar selection is currently marked correct. Press next to reshuffle the full selected set and run it again.'
-        : 'Every card in this deck is currently marked “I know this.”<br><span style="color:var(--muted);font-size:13px">Press next to reshuffle the full selected set for another unspaced pass.</span>');
+        : 'Every card in this runtime.deck is currently marked “I know this.”<br><span style="color:var(--muted);font-size:13px">Press next to reshuffle the full selected set for another unspaced pass.</span>');
 
     area.innerHTML = `
       <div class="done-card show">
@@ -2420,7 +2372,7 @@ function renderCard() {
   }
 
   document.getElementById('markRow').style.display = isMorphologyMode() ? 'none' : 'flex';
-  const card = deck[currentIdx];
+  const card = runtime.deck[runtime.currentIdx];
 
   if (isMorphCard(card)) {
     const reversed = reverseDisplayActive(card);
@@ -2444,8 +2396,8 @@ function renderCard() {
     let interactionHtml = '';
     let resultHtml = '';
 
-    if (morphSelfCheck) {
-      if (!morphAnswerState.revealed) {
+    if (runtime.morphSelfCheck) {
+      if (!runtime.morphAnswerState.revealed) {
         const placeholder = reversed
           ? 'Recall the Greek form yourself first, then reveal the answer.'
           : 'Parse it yourself first, then reveal the answer.';
@@ -2455,13 +2407,13 @@ function renderCard() {
         </div>`;
         resultHtml = `<div class="morph-result pending">${placeholder}</div>`;
       } else {
-        const resultClass = morphAnswerState.answered
-          ? (morphAnswerState.isCorrect ? 'correct' : 'incorrect')
+        const resultClass = runtime.morphAnswerState.answered
+          ? (runtime.morphAnswerState.isCorrect ? 'correct' : 'incorrect')
           : 'pending';
-        const resultTitle = morphAnswerState.answered
-          ? (morphAnswerState.isCorrect ? 'You had it' : 'Needs more review')
+        const resultTitle = runtime.morphAnswerState.answered
+          ? (runtime.morphAnswerState.isCorrect ? 'You had it' : 'Needs more review')
           : 'Answer';
-        const ratingHtml = morphAnswerState.answered
+        const ratingHtml = runtime.morphAnswerState.answered
           ? ''
           : `<div class="morph-selfcheck-actions">
                <button class="choice-btn selfcheck-good" type="button" onclick="rateMorphologySelfCheck(true)">I had it</button>
@@ -2480,30 +2432,30 @@ function renderCard() {
       const choiceButtons = displayChoices.map((choice, idx) => {
         const classes = ['choice-btn'];
         if (reversed) classes.push('choice-btn-greek');
-        if (morphAnswerState.answered) {
+        if (runtime.morphAnswerState.answered) {
           if (choice === correctAnswer) classes.push('correct');
-          if (idx === morphAnswerState.selectedIndex && choice !== correctAnswer) classes.push('incorrect');
+          if (idx === runtime.morphAnswerState.selectedIndex && choice !== correctAnswer) classes.push('incorrect');
         }
-        return `<button class="${classes.join(' ')}" type="button" ${morphAnswerState.answered ? 'disabled' : ''} onclick="answerMorphologyChoice(${idx})">${choice}</button>`;
+        return `<button class="${classes.join(' ')}" type="button" ${runtime.morphAnswerState.answered ? 'disabled' : ''} onclick="answerMorphologyChoice(${idx})">${choice}</button>`;
       }).join('');
 
-      const dontKnowHtml = morphAnswerState.answered
+      const dontKnowHtml = runtime.morphAnswerState.answered
         ? ''
         : `<div class="morph-dontknow-row">
              <button class="ctrl-btn morph-dontknow-btn" type="button" onclick="markMorphologyDontKnow()">I don't know</button>
            </div>`;
       interactionHtml = `<div class="morph-choices">${choiceButtons}</div>${dontKnowHtml}`;
-      const wrongChoice = morphAnswerState.answered
-        && !morphAnswerState.isCorrect
-        && morphAnswerState.selectedIndex >= 0
-        ? displayChoices[morphAnswerState.selectedIndex]
+      const wrongChoice = runtime.morphAnswerState.answered
+        && !runtime.morphAnswerState.isCorrect
+        && runtime.morphAnswerState.selectedIndex >= 0
+        ? displayChoices[runtime.morphAnswerState.selectedIndex]
         : null;
       const pendingLabel = reversed
         ? 'Choose the correct Greek form.'
         : 'Choose the best parsing option.';
-      resultHtml = morphAnswerState.answered
-        ? `<div class="morph-result ${morphAnswerState.isCorrect ? 'correct' : 'incorrect'}">
-            <div class="morph-result-title">${morphAnswerState.isCorrect ? 'Correct' : 'Not quite'}</div>
+      resultHtml = runtime.morphAnswerState.answered
+        ? `<div class="morph-result ${runtime.morphAnswerState.isCorrect ? 'correct' : 'incorrect'}">
+            <div class="morph-result-title">${runtime.morphAnswerState.isCorrect ? 'Correct' : 'Not quite'}</div>
             <div class="morph-result-body">${resultBody}</div>
             <div class="morph-result-meta">${card.lemma}${card.family ? ` · ${card.family}` : ''}</div>
             ${buildGrammarSupportHtml(card, wrongChoice, { reversed })}
@@ -2520,11 +2472,11 @@ function renderCard() {
         <div class="${formClass}">${displayForm}</div>
         ${contextHtml}
         <div class="morph-hint">${card.lemma}</div>
-        <div class="morph-source">${card.sourceLabel}${card.family ? ` · ${card.family}` : ''}${morphSelfCheck ? ' · Self-check' : ''}</div>
+        <div class="morph-source">${card.sourceLabel}${card.family ? ` · ${card.family}` : ''}${runtime.morphSelfCheck ? ' · Self-check' : ''}</div>
         ${interactionHtml}
         ${resultHtml}
       </div>`;
-    isFlipped = false;
+    runtime.isFlipped = false;
     renderProgress();
     return;
   }
@@ -2535,7 +2487,7 @@ function renderCard() {
   const sourceLabelDisplay = `${card.sourceLabel}${advancedCountSuffix}`;
 
   let frontHTML, backHTML;
-  if (!directionToGreek) {
+  if (!runtime.directionToGreek) {
     frontHTML = `
         <div class="card-face card-front">
           <span class="card-label">Greek</span>
@@ -2576,7 +2528,7 @@ function renderCard() {
       </div>
     </div>`;
 
-  isFlipped = false;
+  runtime.isFlipped = false;
   renderProgress();
 }
 
@@ -2584,10 +2536,10 @@ function flipCard() {
   const wrapper = document.getElementById('cardWrapper');
   if (!wrapper) return;
   noteStudyInteraction();
-  isFlipped = !isFlipped;
-  wrapper.classList.toggle('flipped', isFlipped);
+  runtime.isFlipped = !runtime.isFlipped;
+  wrapper.classList.toggle('flipped', runtime.isFlipped);
 
-  if (isFlipped && maybeReturnKnownCardToActivePile()) {
+  if (runtime.isFlipped && maybeReturnKnownCardToActivePile()) {
     renderProgress();
     renderReview();
     saveState();
@@ -2598,25 +2550,25 @@ function flipCard() {
 //  NAVIGATE + MARK
 // ═══════════════════════════════════════════════════════
 function navigate(dir, options = {}) {
-  if (!deck.length) return;
+  if (!runtime.deck.length) return;
   noteStudyInteraction();
 
   if (dir < 0) {
-    currentIdx = Math.max(0, currentIdx - 1);
+    runtime.currentIdx = Math.max(0, runtime.currentIdx - 1);
     resetMorphAnswerState();
     renderCard();
     return;
   }
 
-  if (!spacedRepetition && currentIdx >= deck.length) {
-    if (unspacedPendingRecycle) {
+  if (!runtime.spacedRepetition && runtime.currentIdx >= runtime.deck.length) {
+    if (runtime.unspacedPendingRecycle) {
       startNextCycle('remaining');
       resetMorphAnswerState();
       renderCard();
       renderReview();
       renderProgress();
       saveState();
-    } else if (getKnownCount() === originalDeck.length) {
+    } else if (getKnownCount() === runtime.originalDeck.length) {
       startNextCycle('full');
       resetMorphAnswerState();
       renderCard();
@@ -2627,10 +2579,10 @@ function navigate(dir, options = {}) {
     return;
   }
 
-  if (spacedRepetition && currentIdx >= activeDeckCount) {
-    advanceScheduledCards(originalDeck, SRS_CYCLE_ADVANCE_MS);
-    deck = buildStudyDeck(originalDeck);
-    currentIdx = 0;
+  if (runtime.spacedRepetition && runtime.currentIdx >= runtime.activeDeckCount) {
+    advanceScheduledCards(runtime.originalDeck, SRS_CYCLE_ADVANCE_MS);
+    runtime.deck = buildStudyDeck(runtime.originalDeck);
+    runtime.currentIdx = 0;
     resetMorphAnswerState();
     renderCard();
     renderReview();
@@ -2639,23 +2591,23 @@ function navigate(dir, options = {}) {
     return;
   }
 
-  if (spacedRepetition && currentIdx < activeDeckCount && !options.skipAutoReview && !isMorphologyMode()) {
+  if (runtime.spacedRepetition && runtime.currentIdx < runtime.activeDeckCount && !options.skipAutoReview && !isMorphologyMode()) {
     captureSpacedUndoSnapshot();
-    applySpacedReview(deck[currentIdx], 'again');
-    deck = buildStudyDeck(originalDeck);
+    applySpacedReview(runtime.deck[runtime.currentIdx], 'again');
+    runtime.deck = buildStudyDeck(runtime.originalDeck);
   }
 
-  if (spacedRepetition) {
+  if (runtime.spacedRepetition) {
     if (isMorphologyMode()) {
-      if (morphPendingAdvance) {
-        deck = buildStudyDeck(originalDeck);
-        currentIdx = Math.min(currentIdx, activeDeckCount);
+      if (runtime.morphPendingAdvance) {
+        runtime.deck = buildStudyDeck(runtime.originalDeck);
+        runtime.currentIdx = Math.min(runtime.currentIdx, runtime.activeDeckCount);
       } else {
-        currentIdx = Math.min(currentIdx + 1, activeDeckCount);
+        runtime.currentIdx = Math.min(runtime.currentIdx + 1, runtime.activeDeckCount);
       }
       clearSpacedUndoSnapshot();
     } else {
-      currentIdx = Math.min(currentIdx, activeDeckCount);
+      runtime.currentIdx = Math.min(runtime.currentIdx, runtime.activeDeckCount);
       maybeReturnConfirmedDeferredCard();
       maybePeriodicReshuffle();
     }
@@ -2668,18 +2620,18 @@ function navigate(dir, options = {}) {
   }
 
   if (isMorphologyMode()) {
-    const nextIdx = currentIdx + 1;
-    if (nextIdx >= deck.length) {
-      if (getKnownCount() === originalDeck.length) {
-        currentIdx = deck.length;
-        unspacedPendingRecycle = false;
+    const nextIdx = runtime.currentIdx + 1;
+    if (nextIdx >= runtime.deck.length) {
+      if (getKnownCount() === runtime.originalDeck.length) {
+        runtime.currentIdx = runtime.deck.length;
+        runtime.unspacedPendingRecycle = false;
       } else {
-        currentIdx = deck.length;
-        unspacedPendingRecycle = true;
+        runtime.currentIdx = runtime.deck.length;
+        runtime.unspacedPendingRecycle = true;
       }
     } else {
-      currentIdx = nextIdx;
-      unspacedPendingRecycle = false;
+      runtime.currentIdx = nextIdx;
+      runtime.unspacedPendingRecycle = false;
     }
     clearSpacedUndoSnapshot();
     resetMorphAnswerState();
@@ -2690,21 +2642,21 @@ function navigate(dir, options = {}) {
     return;
   }
 
-  for (let i = currentIdx + 1; i < deck.length; i++) {
-    if (marks[deck[i].id] !== 'known' && !unspacedDeferredIds.has(deck[i].id)) {
-      currentIdx = i;
+  for (let i = runtime.currentIdx + 1; i < runtime.deck.length; i++) {
+    if (runtime.marks[runtime.deck[i].id] !== 'known' && !runtime.unspacedDeferredIds.has(runtime.deck[i].id)) {
+      runtime.currentIdx = i;
       maybePeriodicReshuffle();
       renderCard();
       return;
     }
   }
 
-  if (getKnownCount() === originalDeck.length && unspacedDeferredIds.size === 0) {
-    currentIdx = deck.length;
-    unspacedPendingRecycle = false;
+  if (getKnownCount() === runtime.originalDeck.length && runtime.unspacedDeferredIds.size === 0) {
+    runtime.currentIdx = runtime.deck.length;
+    runtime.unspacedPendingRecycle = false;
   } else {
-    currentIdx = deck.length;
-    unspacedPendingRecycle = true;
+    runtime.currentIdx = runtime.deck.length;
+    runtime.unspacedPendingRecycle = true;
   }
 
   resetMorphAnswerState();
@@ -2715,14 +2667,14 @@ function markCard(outcome) {
   // outcome: 'again' | 'pass' | 'easy'
   if (isMorphologyMode()) return;
   noteStudyInteraction();
-  if ((!spacedRepetition && currentIdx >= deck.length) || (spacedRepetition && currentIdx >= activeDeckCount)) return;
-  const currentCard = deck[currentIdx];
-  if (spacedRepetition) {
+  if ((!runtime.spacedRepetition && runtime.currentIdx >= runtime.deck.length) || (runtime.spacedRepetition && runtime.currentIdx >= runtime.activeDeckCount)) return;
+  const currentCard = runtime.deck[runtime.currentIdx];
+  if (runtime.spacedRepetition) {
     captureSpacedUndoSnapshot();
     applySpacedReview(currentCard, outcome);
-    deck = buildStudyDeck(originalDeck);
-    if (activeDeckCount <= 0) {
-      currentIdx = activeDeckCount;
+    runtime.deck = buildStudyDeck(runtime.originalDeck);
+    if (runtime.activeDeckCount <= 0) {
+      runtime.currentIdx = runtime.activeDeckCount;
       resetMorphAnswerState();
       renderCard();
     } else {
@@ -2740,23 +2692,23 @@ function markCard(outcome) {
     recordStudyOutcome(currentCard.id, recordedOutcome, reviewedAt);
     applyUnspacedSharedSchedule(currentCard, outcome, reviewedAt);
     getDirectionalMarksStore()[currentCard.id] = mark;
-    marks = getDirectionalMarksStore();
+    runtime.marks = getDirectionalMarksStore();
 
     if (outcome === 'again') {
       // Remove from current position; remaining cards shift down by 1,
-      // so currentIdx now points to what was the next card.
+      // so runtime.currentIdx now points to what was the next card.
       const cardToReturn = currentCard;
-      deck.splice(currentIdx, 1);
-      // Find the last non-known, non-deferred card that comes after currentIdx.
+      runtime.deck.splice(runtime.currentIdx, 1);
+      // Find the last non-known, non-deferred card that comes after runtime.currentIdx.
       let lastActiveIdx = -1;
-      for (let i = currentIdx; i < deck.length; i++) {
-        if (marks[deck[i].id] !== 'known' && !unspacedDeferredIds.has(deck[i].id)) lastActiveIdx = i;
+      for (let i = runtime.currentIdx; i < runtime.deck.length; i++) {
+        if (runtime.marks[runtime.deck[i].id] !== 'known' && !runtime.unspacedDeferredIds.has(runtime.deck[i].id)) lastActiveIdx = i;
       }
-      deck.splice(lastActiveIdx >= 0 ? lastActiveIdx + 1 : deck.length, 0, cardToReturn);
-      // currentIdx already points to the correct next card (or loops if it was the last).
+      runtime.deck.splice(lastActiveIdx >= 0 ? lastActiveIdx + 1 : runtime.deck.length, 0, cardToReturn);
+      // runtime.currentIdx already points to the correct next card (or loops if it was the last).
       renderCard();
     } else {
-      if (outcome === 'pass') unspacedDeferredIds.add(currentCard.id);
+      if (outcome === 'pass') runtime.unspacedDeferredIds.add(currentCard.id);
       navigate(1);
     }
   }
@@ -2768,14 +2720,14 @@ function markCard(outcome) {
 
 function setStudyMode(mode) {
   const nextMode = normalizeStudyMode(mode);
-  if (studyMode === nextMode) return;
+  if (runtime.studyMode === nextMode) return;
 
   saveCurrentDeckStateToBank();
-  studyMode = nextMode;
+  runtime.studyMode = nextMode;
   clearSpacedUndoSnapshot();
   resetMorphAnswerState();
   ensureDirectionalStores();
-  marks = getDirectionalMarksStore();
+  runtime.marks = getDirectionalMarksStore();
   syncToggleButtons();
 
   if (isReaderMode()) {
@@ -2785,7 +2737,7 @@ function setStudyMode(mode) {
     return;
   }
 
-  if (!selectedKeys.length) {
+  if (!runtime.selectedKeys.length) {
     saveState();
     renderCard();
     renderProgress();
@@ -2793,27 +2745,27 @@ function setStudyMode(mode) {
     return;
   }
 
-  const keysToLoad = currentSession ? expandSessionSets(currentSession) : selectedKeys;
-  loadDeckFromKeys(keysToLoad, currentSession ? currentSession.id : null);
+  const keysToLoad = runtime.currentSession ? expandSessionSets(runtime.currentSession) : runtime.selectedKeys;
+  loadDeckFromKeys(keysToLoad, runtime.currentSession ? runtime.currentSession.id : null);
 }
 
 function setAppProfile(profile) {
   const nextProfile = 'vocab_grammar';
-  if (appProfile === nextProfile) return;
+  if (runtime.appProfile === nextProfile) return;
 
   saveCurrentDeckStateToBank();
-  appProfile = nextProfile;
+  runtime.appProfile = nextProfile;
   clearSpacedUndoSnapshot();
 
   ensureDirectionalStores();
-  marks = getDirectionalMarksStore();
+  runtime.marks = getDirectionalMarksStore();
   buildSessions();
   buildChapterSelector();
   buildSupplementalSelector();
   buildAdvancedSelector();
   syncToggleButtons();
 
-  if (!selectedKeys.length) {
+  if (!runtime.selectedKeys.length) {
     renderCard();
     renderProgress();
     renderReview();
@@ -2821,13 +2773,13 @@ function setAppProfile(profile) {
     return;
   }
 
-  const keysToLoad = currentSession ? expandSessionSets(currentSession) : selectedKeys;
-  loadDeckFromKeys(keysToLoad, currentSession ? currentSession.id : null);
+  const keysToLoad = runtime.currentSession ? expandSessionSets(runtime.currentSession) : runtime.selectedKeys;
+  loadDeckFromKeys(keysToLoad, runtime.currentSession ? runtime.currentSession.id : null);
 }
 
 function toggleMorphSelfCheck() {
   if (!isMorphologyMode()) return;
-  morphSelfCheck = !morphSelfCheck;
+  runtime.morphSelfCheck = !runtime.morphSelfCheck;
   resetMorphAnswerState();
   syncToggleButtons();
   renderCard();
@@ -2836,24 +2788,24 @@ function toggleMorphSelfCheck() {
 
 function toggleShuffle() {
   if (isReaderMode()) return;
-  shuffled = !shuffled;
-  flipsSinceReshuffle = 0;
+  runtime.shuffled = !runtime.shuffled;
+  runtime.flipsSinceReshuffle = 0;
   syncToggleButtons();
 
-  if (spacedRepetition) {
-    deck = buildStudyDeck(originalDeck, { forceShuffle: shuffled });
-    currentIdx = Math.min(currentIdx, activeDeckCount);
+  if (runtime.spacedRepetition) {
+    runtime.deck = buildStudyDeck(runtime.originalDeck, { forceShuffle: runtime.shuffled });
+    runtime.currentIdx = Math.min(runtime.currentIdx, runtime.activeDeckCount);
   } else {
     const activeCards = getRemainingCards();
-    const knownCards = deck.filter(card => marks[card.id] === 'known');
-    deck = shuffled ? [...shuffleArray([...activeCards]), ...knownCards] : [...activeCards, ...knownCards];
+    const knownCards = runtime.deck.filter(card => runtime.marks[card.id] === 'known');
+    runtime.deck = runtime.shuffled ? [...shuffleArray([...activeCards]), ...knownCards] : [...activeCards, ...knownCards];
 
-    if (currentIdx >= activeCards.length) {
-      currentIdx = activeCards.length ? 0 : deck.length;
+    if (runtime.currentIdx >= activeCards.length) {
+      runtime.currentIdx = activeCards.length ? 0 : runtime.deck.length;
     }
   }
 
-  isFlipped = false;
+  runtime.isFlipped = false;
   renderCard();
   renderProgress();
   renderReview();
@@ -2861,29 +2813,29 @@ function toggleShuffle() {
 }
 
 function toggleRequiredOnly() {
-  requiredOnly = !requiredOnly;
+  runtime.requiredOnly = !runtime.requiredOnly;
   syncToggleButtons();
-  if (!selectedKeys.length) {
+  if (!runtime.selectedKeys.length) {
     saveState();
     return;
   }
-  const keysToLoad = currentSession ? expandSessionSets(currentSession) : selectedKeys;
-  loadDeckFromKeys(keysToLoad, currentSession ? currentSession.id : null);
+  const keysToLoad = runtime.currentSession ? expandSessionSets(runtime.currentSession) : runtime.selectedKeys;
+  loadDeckFromKeys(keysToLoad, runtime.currentSession ? runtime.currentSession.id : null);
 }
 
 function toggleDirection() {
-  directionToGreek = !directionToGreek;
+  runtime.directionToGreek = !runtime.directionToGreek;
   clearSpacedUndoSnapshot();
   ensureDirectionalStores();
-  marks = getDirectionalMarksStore();
+  runtime.marks = getDirectionalMarksStore();
   resetMorphAnswerState();
   syncToggleButtons();
-  if (selectedKeys.length) {
-    const keysToLoad = currentSession ? expandSessionSets(currentSession) : selectedKeys;
-    loadDeckFromKeys(keysToLoad, currentSession ? currentSession.id : null);
+  if (runtime.selectedKeys.length) {
+    const keysToLoad = runtime.currentSession ? expandSessionSets(runtime.currentSession) : runtime.selectedKeys;
+    loadDeckFromKeys(keysToLoad, runtime.currentSession ? runtime.currentSession.id : null);
     return;
   }
-  isFlipped = false;
+  runtime.isFlipped = false;
   renderCard();
   renderProgress();
   renderReview();
@@ -2892,18 +2844,18 @@ function toggleDirection() {
 
 function toggleSpacedRepetition() {
   if (isReaderMode()) return;
-  spacedRepetition = !spacedRepetition;
+  runtime.spacedRepetition = !runtime.spacedRepetition;
   clearSpacedUndoSnapshot();
   resetUnspacedCycleState();
   syncToggleButtons();
-  if (!selectedKeys.length) {
+  if (!runtime.selectedKeys.length) {
     saveState();
     return;
   }
-  deck = buildStudyDeck(originalDeck);
-  currentIdx = 0;
+  runtime.deck = buildStudyDeck(runtime.originalDeck);
+  runtime.currentIdx = 0;
   resetMorphAnswerState();
-  isFlipped = false;
+  runtime.isFlipped = false;
   renderCard();
   renderProgress();
   renderReview();
@@ -2911,23 +2863,23 @@ function toggleSpacedRepetition() {
 }
 
 function reshuffleEligible() {
-  if (!selectedKeys.length) return;
+  if (!runtime.selectedKeys.length) return;
 
-  if (spacedRepetition) {
+  if (runtime.spacedRepetition) {
     // Shuffle only currently-eligible (due) cards. SRS progress and
     // scheduled-ahead deferrals are left untouched.
-    deck = buildStudyDeck(originalDeck, { forceShuffle: true });
-    currentIdx = activeDeckCount ? 0 : currentIdx;
+    runtime.deck = buildStudyDeck(runtime.originalDeck, { forceShuffle: true });
+    runtime.currentIdx = runtime.activeDeckCount ? 0 : runtime.currentIdx;
   } else {
     // Non-spaced: shuffle the still-active (not-yet-known) portion only;
     // known cards stay pinned to the end of the cycle.
     const activeCards = getRemainingCards();
-    const knownCards = deck.filter(card => marks[card.id] === 'known');
-    deck = [...shuffleArray([...activeCards]), ...knownCards];
-    currentIdx = activeCards.length ? 0 : deck.length;
+    const knownCards = runtime.deck.filter(card => runtime.marks[card.id] === 'known');
+    runtime.deck = [...shuffleArray([...activeCards]), ...knownCards];
+    runtime.currentIdx = activeCards.length ? 0 : runtime.deck.length;
   }
 
-  isFlipped = false;
+  runtime.isFlipped = false;
   renderCard();
   renderProgress();
   renderReview();
@@ -2935,11 +2887,11 @@ function reshuffleEligible() {
 }
 
 function fastForwardScheduling(advanceMs) {
-  if (!spacedRepetition || !originalDeck.length) return;
-  advanceScheduledCards(originalDeck, advanceMs);
-  deck = buildStudyDeck(originalDeck);
-  currentIdx = 0;
-  isFlipped = false;
+  if (!runtime.spacedRepetition || !runtime.originalDeck.length) return;
+  advanceScheduledCards(runtime.originalDeck, advanceMs);
+  runtime.deck = buildStudyDeck(runtime.originalDeck);
+  runtime.currentIdx = 0;
+  runtime.isFlipped = false;
   resetMorphAnswerState();
   renderCard();
   renderProgress();
@@ -2957,25 +2909,25 @@ function fastForwardOneWeek() {
 
 function resetCurrentDeck() {
   clearSpacedUndoSnapshot();
-  if (!selectedKeys.length) {
+  if (!runtime.selectedKeys.length) {
     clearSavedState();
     return;
   }
 
   const confirmed = window.confirm(
-    spacedRepetition
-      ? 'Reset spaced-review scheduling for this deck only? This keeps your unspaced marks and pass history.'
-      : 'Reset unspaced marks for this deck only? This keeps your spaced-review scheduling and intervals.'
+    runtime.spacedRepetition
+      ? 'Reset spaced-review scheduling for this runtime.deck only? This keeps your unspaced runtime.marks and pass history.'
+      : 'Reset unspaced runtime.marks for this runtime.deck only? This keeps your spaced-review scheduling and intervals.'
   );
   if (!confirmed) return;
 
-  const deckKey = getDeckStateKey(selectedKeys, requiredOnly, spacedRepetition);
-  delete deckStates[deckKey];
+  const deckKey = getDeckStateKey(runtime.selectedKeys, runtime.requiredOnly, runtime.spacedRepetition);
+  delete runtime.deckStates[deckKey];
   const directionalMarks = getDirectionalMarksStore();
   const directionalProgress = getDirectionalProgressStore();
 
-  if (spacedRepetition) {
-    originalDeck.forEach(card => {
+  if (runtime.spacedRepetition) {
+    runtime.originalDeck.forEach(card => {
       const p = directionalProgress[card.id];
       if (p && typeof p === 'object') {
         p.dueAt = 0;
@@ -2991,19 +2943,19 @@ function resetCurrentDeck() {
       }
     });
   } else {
-    originalDeck.forEach(card => {
+    runtime.originalDeck.forEach(card => {
       delete directionalMarks[card.id];
     });
   }
 
-  marks = directionalMarks;
+  runtime.marks = directionalMarks;
   resetUnspacedCycleState();
-  currentIdx = 0;
-  isFlipped = false;
+  runtime.currentIdx = 0;
+  runtime.isFlipped = false;
   resetMorphAnswerState();
-  deck = [];
-  activeDeckCount = 0;
-  deck = buildStudyDeck(originalDeck);
+  runtime.deck = [];
+  runtime.activeDeckCount = 0;
+  runtime.deck = buildStudyDeck(runtime.originalDeck);
   renderCard();
   renderProgress();
   renderReview();
@@ -3012,13 +2964,13 @@ function resetCurrentDeck() {
 
 function resetAllStats() {
   clearSpacedUndoSnapshot();
-  const confirmed = window.confirm('Reset all saved study stats, marks, and spaced-review scheduling for both directions?');
+  const confirmed = window.confirm('Reset all saved study stats, runtime.marks, and spaced-review scheduling for both directions?');
   if (!confirmed) return;
 
-  globalWordMarks = { g2e: {}, e2g: {}, morph: {} };
-  globalWordProgress = { g2e: {}, e2g: {}, morph: {} };
-  deckStates = {};
-  appUsageStats = {
+  runtime.globalWordMarks = { g2e: {}, e2g: {}, morph: {} };
+  runtime.globalWordProgress = { g2e: {}, e2g: {}, morph: {} };
+  runtime.deckStates = {};
+  runtime.appUsageStats = {
     totalMs: 0,
     dailyMs: {},
     activeStudyMs: 0,
@@ -3030,17 +2982,17 @@ function resetAllStats() {
     studySessionHistory: [],
     currentStudySession: null
   };
-  appGamification = sanitizeGamificationState({});
+  runtime.appGamification = sanitizeGamificationState({});
   ensureDirectionalStores();
   resetUnspacedCycleState();
-  marks = getDirectionalMarksStore();
+  runtime.marks = getDirectionalMarksStore();
 
-  if (selectedKeys.length) {
-    currentIdx = 0;
-    isFlipped = false;
-    deck = [];
-    activeDeckCount = 0;
-    deck = buildStudyDeck(originalDeck);
+  if (runtime.selectedKeys.length) {
+    runtime.currentIdx = 0;
+    runtime.isFlipped = false;
+    runtime.deck = [];
+    runtime.activeDeckCount = 0;
+    runtime.deck = buildStudyDeck(runtime.originalDeck);
     renderCard();
     renderProgress();
     renderReview();
@@ -3060,15 +3012,15 @@ function renderProgress() {
     accumulateUsageTime();
     accumulateActiveStudyTime();
   }
-  const total = originalDeck.length || deck.length;
+  const total = runtime.originalDeck.length || runtime.deck.length;
   const confirmed = getKnownCount();
   const remaining = Math.max(total - confirmed, 0);
   const progressPercentEl = document.getElementById('progressPercent');
   updateUsageMeta();
 
-  if (spacedRepetition) {
-    const dueCount = getDueCount(originalDeck);
-    const nextCard = dueCount && currentIdx < dueCount ? currentIdx + 1 : dueCount;
+  if (runtime.spacedRepetition) {
+    const dueCount = getDueCount(runtime.originalDeck);
+    const nextCard = dueCount && runtime.currentIdx < dueCount ? runtime.currentIdx + 1 : dueCount;
     const progressTextEl = document.getElementById('progressText');
     if (progressTextEl) progressTextEl.textContent = total
       ? `${nextCard} / ${dueCount} due · Confirmed ${confirmed} · Scheduled ${Math.max(total - dueCount, 0)}`
@@ -3082,7 +3034,7 @@ function renderProgress() {
   }
 
   const cycleSize = isMorphologyMode() ? total : (getRemainingCards().length || total);
-  const nextCard = total && currentIdx < deck.length ? Math.min(currentIdx + 1, cycleSize) : total;
+  const nextCard = total && runtime.currentIdx < runtime.deck.length ? Math.min(runtime.currentIdx + 1, cycleSize) : total;
   const progressTextEl2 = document.getElementById('progressText');
   if (progressTextEl2) progressTextEl2.textContent = total
     ? `${nextCard} / ${cycleSize} · Confirmed ${confirmed} · Remaining ${remaining}${isMorphologyMode() ? ' · Grammar' : ''}`
@@ -3100,42 +3052,42 @@ function renderReview() {
   panel.classList.add('show');
 
   const knownCount = getHighConfidenceCount();
-  const unsureCount = originalDeck.filter(card => marks[card.id] === 'unsure').length;
-  const remainingCount = Math.max(originalDeck.length - knownCount, 0);
-  const aggregateStats = getDeckAggregateStats(originalDeck);
+  const unsureCount = runtime.originalDeck.filter(card => runtime.marks[card.id] === 'unsure').length;
+  const remainingCount = Math.max(runtime.originalDeck.length - knownCount, 0);
+  const aggregateStats = getDeckAggregateStats(runtime.originalDeck);
 
-  if (spacedRepetition) {
-    const dueCount = getDueCount(originalDeck);
+  if (runtime.spacedRepetition) {
+    const dueCount = getDueCount(runtime.originalDeck);
     document.getElementById('reviewStats').innerHTML = `
       <span class="stat-known">✓ Known: ${knownCount}</span>
       <span class="stat-unsure">○ Due now: ${dueCount}</span>
-      <span class="stat-total">· Scheduled ahead: ${Math.max(originalDeck.length - dueCount, 0)}</span>
+      <span class="stat-total">· Scheduled ahead: ${Math.max(runtime.originalDeck.length - dueCount, 0)}</span>
       <span class="stat-total">· Seen ×${aggregateStats.seenCount}</span>
-      <span class="stat-total">· ${isMorphologyMode() ? 'Grammar deck' : (requiredOnly ? 'Required-only deck' : 'Full deck')}</span>`;
+      <span class="stat-total">· ${isMorphologyMode() ? 'Grammar runtime.deck' : (runtime.requiredOnly ? 'Required-only runtime.deck' : 'Full runtime.deck')}</span>`;
   } else {
     document.getElementById('reviewStats').innerHTML = `
       <span class="stat-known">✓ Known: ${knownCount}</span>
       <span class="stat-unsure">○ Not yet known: ${unsureCount}</span>
       <span class="stat-total">· ${remainingCount} still to confirm</span>
       <span class="stat-total">· Seen ×${aggregateStats.seenCount}</span>
-      <span class="stat-total">· ${isMorphologyMode() ? 'Grammar deck' : (requiredOnly ? 'Required-only deck' : 'Full deck')}</span>`;
+      <span class="stat-total">· ${isMorphologyMode() ? 'Grammar runtime.deck' : (runtime.requiredOnly ? 'Required-only runtime.deck' : 'Full runtime.deck')}</span>`;
   }
 
   let listHtml = '';
-  originalDeck
+  runtime.originalDeck
     .map((card, idx) => ({ card, idx }))
     .filter(({ card }) => {
-      const status = marks[card.id];
+      const status = runtime.marks[card.id];
       const progress = getWordProgress(card.id);
       return status || progress.seenCount;
     })
     .sort((a, b) => compareGreekAlphabetical(a.card, b.card))
     .forEach(({ card }) => {
-      const status = marks[card.id];
+      const status = runtime.marks[card.id];
       const progress = getWordProgress(card.id);
       const confidencePct = getConfidencePct(progress);
       const confidenceMeta = confidencePct === null ? 'confidence —' : `confidence ${confidencePct}%`;
-      const srsMeta = spacedRepetition
+      const srsMeta = runtime.spacedRepetition
         ? `<span style="display:block;color:var(--muted);font-size:12px">${progress.dueAt && progress.dueAt > Date.now() ? `due in ${formatRemainingForTable(progress.dueAt)}` : 'due now'} · seen ×${progress.seenCount || 0} · ${confidenceMeta}</span>`
         : (progress.seenCount || progress.passCount || progress.failCount)
           ? `<span style="display:block;color:var(--muted);font-size:12px">seen ×${progress.seenCount || 0} · ${confidenceMeta}</span>`
@@ -3151,12 +3103,12 @@ function renderReview() {
   document.getElementById('reviewList').innerHTML = listHtml || '<span style="color:var(--muted);font-size:14px;font-style:italic">Mark cards as you study to track your progress in this direction.</span>';
 }
 
-// Return a previously-known card to the active deck. Flips its mark back
-// to 'unsure', clears its due timer, and rebuilds the deck so the card
+// Return a previously-known card to the active runtime.deck. Flips its mark back
+// to 'unsure', clears its due timer, and rebuilds the runtime.deck so the card
 // lands at the back (per buildStudyDeck's newly-eligible logic).
 function returnSeenCardToDeck(encodedId) {
   const cardId = decodeURIComponent(encodedId);
-  const card = originalDeck.find(c => c.id === cardId);
+  const card = runtime.originalDeck.find(c => c.id === cardId);
   if (!card) return;
 
   moveCardToBackOfActivePile(card);
@@ -3168,19 +3120,19 @@ function returnSeenCardToDeck(encodedId) {
   progress.easyStreak = 0;
   progress.srsStage = Math.max(0, getSrsStage(progress) - 1);
 
-  if (spacedRepetition) {
-    deck = buildStudyDeck(originalDeck);
-    const dueIdx = deck.findIndex(c => c.id === cardId);
-    if (dueIdx >= 0 && dueIdx < activeDeckCount) {
-      currentIdx = dueIdx;
-      isFlipped = false;
-    } else if (activeDeckCount > 0) {
-      currentIdx = Math.min(currentIdx, activeDeckCount - 1);
+  if (runtime.spacedRepetition) {
+    runtime.deck = buildStudyDeck(runtime.originalDeck);
+    const dueIdx = runtime.deck.findIndex(c => c.id === cardId);
+    if (dueIdx >= 0 && dueIdx < runtime.activeDeckCount) {
+      runtime.currentIdx = dueIdx;
+      runtime.isFlipped = false;
+    } else if (runtime.activeDeckCount > 0) {
+      runtime.currentIdx = Math.min(runtime.currentIdx, runtime.activeDeckCount - 1);
     }
   } else {
-    const returnedIdx = deck.findIndex(c => c.id === cardId);
-    currentIdx = returnedIdx >= 0 ? returnedIdx : Math.min(currentIdx, Math.max(deck.length - 1, 0));
-    isFlipped = false;
+    const returnedIdx = runtime.deck.findIndex(c => c.id === cardId);
+    runtime.currentIdx = returnedIdx >= 0 ? returnedIdx : Math.min(runtime.currentIdx, Math.max(runtime.deck.length - 1, 0));
+    runtime.isFlipped = false;
   }
 
   renderCard();
@@ -3237,9 +3189,9 @@ function buildGamificationSnapshot() {
   }
   const streaks = computeStudyStreaks(usage.activeDailyMs);
   const courseData = computeCourseWideData();
-  const g2eProgressStore = globalWordProgress.g2e || {};
-  const e2gProgressStore = globalWordProgress.e2g || {};
-  const morphProgressStore = globalWordProgress.morph || {};
+  const g2eProgressStore = runtime.globalWordProgress.g2e || {};
+  const e2gProgressStore = runtime.globalWordProgress.e2g || {};
+  const morphProgressStore = runtime.globalWordProgress.morph || {};
   const mergedProgressStore = {};
   [g2eProgressStore, e2gProgressStore, morphProgressStore].forEach(store => {
     Object.entries(store).forEach(([cardId, entry]) => {
@@ -3253,7 +3205,7 @@ function buildGamificationSnapshot() {
     });
   });
   const allCourseCards = [...courseData.allVocabCards, ...courseData.allGrammarCards];
-  const mergedMarks = { ...(globalWordMarks.g2e || {}), ...(globalWordMarks.e2g || {}), ...(globalWordMarks.morph || {}) };
+  const mergedMarks = { ...(runtime.globalWordMarks.g2e || {}), ...(runtime.globalWordMarks.e2g || {}), ...(runtime.globalWordMarks.morph || {}) };
   const todayStats = computeTodayStats(usage.activeDailyMs, allCourseCards, mergedMarks, mergedProgressStore);
   const achievements = computeAchievements(usage, courseData, streaks, sessionHistory.length, todayStats);
   return { usage, sessionHistory, streaks, courseData, todayStats, achievements };
@@ -3261,8 +3213,8 @@ function buildGamificationSnapshot() {
 
 function syncEarnedAchievementSnapshot() {
   const snapshot = buildGamificationSnapshot();
-  appGamification.lastEarnedAchievementIds = snapshot.achievements.filter(a => a.earned).map(a => a.id);
-  appGamification.lastCelebratedBadgeDay = getUsageDayKey();
+  runtime.appGamification.lastEarnedAchievementIds = snapshot.achievements.filter(a => a.earned).map(a => a.id);
+  runtime.appGamification.lastCelebratedBadgeDay = getUsageDayKey();
   return snapshot;
 }
 
@@ -3270,12 +3222,12 @@ function maybeCelebrateLevelUp() {
   const usage = ensureUsageStats();
   const xpData = computeXpAndLevel(usage);
   const currentLevel = xpData.currentLevel?.level || 1;
-  const previousLevel = Number.isFinite(appGamification.lastCelebratedLevel) && appGamification.lastCelebratedLevel >= 1
-    ? appGamification.lastCelebratedLevel
+  const previousLevel = Number.isFinite(runtime.appGamification.lastCelebratedLevel) && runtime.appGamification.lastCelebratedLevel >= 1
+    ? runtime.appGamification.lastCelebratedLevel
     : currentLevel;
 
   if (currentLevel < previousLevel) {
-    appGamification.lastCelebratedLevel = currentLevel;
+    runtime.appGamification.lastCelebratedLevel = currentLevel;
     return;
   }
 
@@ -3283,31 +3235,31 @@ function maybeCelebrateLevelUp() {
     showLevelToast(xpData.currentLevel, xpData.totalXp);
   }
 
-  appGamification.lastCelebratedLevel = currentLevel;
+  runtime.appGamification.lastCelebratedLevel = currentLevel;
 }
 
 function maybeCelebrateAchievements() {
   const todayKey = getUsageDayKey();
-  if (appGamification.lastCelebratedBadgeDay && appGamification.lastCelebratedBadgeDay !== todayKey) {
-    appGamification.lastEarnedAchievementIds = (appGamification.lastEarnedAchievementIds || []).filter(id => id !== 'daily_first_card');
+  if (runtime.appGamification.lastCelebratedBadgeDay && runtime.appGamification.lastCelebratedBadgeDay !== todayKey) {
+    runtime.appGamification.lastEarnedAchievementIds = (runtime.appGamification.lastEarnedAchievementIds || []).filter(id => id !== 'daily_first_card');
   }
 
   const snapshot = buildGamificationSnapshot();
   const earnedAchievements = snapshot.achievements.filter(a => a.earned);
-  const priorEarnedIds = new Set(Array.isArray(appGamification.lastEarnedAchievementIds) ? appGamification.lastEarnedAchievementIds : []);
+  const priorEarnedIds = new Set(Array.isArray(runtime.appGamification.lastEarnedAchievementIds) ? runtime.appGamification.lastEarnedAchievementIds : []);
   const newlyEarned = earnedAchievements.filter(a => !priorEarnedIds.has(a.id));
 
   newlyEarned.forEach(showBadgeToast);
-  appGamification.lastEarnedAchievementIds = earnedAchievements.map(a => a.id);
-  appGamification.lastCelebratedBadgeDay = todayKey;
+  runtime.appGamification.lastEarnedAchievementIds = earnedAchievements.map(a => a.id);
+  runtime.appGamification.lastCelebratedBadgeDay = todayKey;
 }
 
 // XP / level / streaks / achievements math now lives in js/domain/gamification/xp.js.
 // Wrappers bind the host runtime stores so call sites read the live state.
-function migrateLegacyXp(usage) { return migrateLegacyXpPure(usage, globalWordProgress); }
-function computeXpAndLevel(usage) { return computeXpAndLevelPure(usage, globalWordProgress); }
+function migrateLegacyXp(usage) { return migrateLegacyXpPure(usage, runtime.globalWordProgress); }
+function computeXpAndLevel(usage) { return computeXpAndLevelPure(usage, runtime.globalWordProgress); }
 function computeAchievements(usage, courseData, streaks, sessionCount, todayStats = null) {
-  return computeAchievementsPure(usage, courseData, streaks, sessionCount, todayStats, globalWordMarks);
+  return computeAchievementsPure(usage, courseData, streaks, sessionCount, todayStats, runtime.globalWordMarks);
 }
 
 function computeCourseWideData() {
@@ -3315,15 +3267,15 @@ function computeCourseWideData() {
   const reqVocab = getAllVocabCards(true);
   const allGrammar = getAllGrammarCards();
 
-  // Use g2e marks/progress as the canonical direction for course completion;
+  // Use g2e runtime.marks/progress as the canonical direction for course completion;
   // grammar uses the morph store regardless of which mode is currently active.
-  const g2eMarks = globalWordMarks.g2e || {};
-  const morphMarks = globalWordMarks.morph || {};
-  const g2eProgress = globalWordProgress.g2e || {};
-  const morphProgress = globalWordProgress.morph || {};
+  const g2eMarks = runtime.globalWordMarks.g2e || {};
+  const morphMarks = runtime.globalWordMarks.morph || {};
+  const g2eProgress = runtime.globalWordProgress.g2e || {};
+  const morphProgress = runtime.globalWordProgress.morph || {};
 
-  const isEffectivelyConfirmed = (card, marks, store) => {
-    if (marks[card.id] === 'known') return true;
+  const isEffectivelyConfirmed = (card, runtime.marks, store) => {
+    if (runtime.marks[card.id] === 'known') return true;
     const pct = getConfidencePct(store?.[card.id]);
     return pct !== null && pct >= 70;
   };
@@ -3347,10 +3299,10 @@ function computeCourseWideData() {
 // Heatmap, ring, level-bar and title-ladder HTML builders live in js/ui/charts.js
 
 function computeChapterMastery(progressStore, marksStore) {
-  const marks = marksStore || globalWordMarks.g2e || {};
-  const store = progressStore || globalWordProgress.g2e || {};
+  const marksMap = marksStore || runtime.globalWordMarks.g2e || {};
+  const store = progressStore || runtime.globalWordProgress.g2e || {};
   const isConfirmed = (card) => {
-    if (marks[card.id] === 'known') return true;
+    if (marksMap[card.id] === 'known') return true;
     const pct = getConfidencePct(store?.[card.id]);
     return pct !== null && pct >= 70;
   };
@@ -3364,7 +3316,7 @@ function computeChapterMastery(progressStore, marksStore) {
 
 function buildChapterGridHtml(mastery) {
   if (!mastery.length) return '';
-  const expandedKey = analyticsExpandedChapter || '';
+  const expandedKey = runtime.analyticsExpandedChapter || '';
   const tile = (row) => {
     const pctRound = Math.round(row.pct * 100);
     const label = `Ch. ${row.chapterKey}: ${row.confirmed} / ${row.total} (${pctRound}%) — tap for word stats`;
@@ -3392,22 +3344,22 @@ function buildChapterGridHtml(mastery) {
 }
 
 // ── Per-chapter word breakdown (shown when a chapter tile is tapped) ──
-// Reads the same g2e marks/progress as the chapter map so the headline %
+// Reads the same g2e runtime.marks/progress as the chapter map so the headline %
 // and the per-word % match. Sorted weakest → strongest so it doubles as
 // a "what to drill next" list.
 function buildChapterDetailHtml(chapterKey) {
   if (!chapterKey) return '';
   const cards = getChapterVocabCards(String(chapterKey), false);
   if (!cards.length) return `<div class="analytics-empty">No vocabulary for Ch. ${escapeHtml(String(chapterKey))} yet.</div>`;
-  const marks = globalWordMarks.g2e || {};
-  const store = globalWordProgress.g2e || {};
+  const marksMap = runtime.globalWordMarks.g2e || {};
+  const store = runtime.globalWordProgress.g2e || {};
   const required = cards.filter(c => c.required).length;
   const headwordOf = (card) => typeof formatGreekHeadword === 'function' ? formatGreekHeadword(card.g) : (card.g || '—');
 
   // Each row gets a confidence band that mirrors the headline histogram.
   const rowFor = (card) => {
     const progress = store[card.id];
-    const isKnownMark = marks[card.id] === 'known';
+    const isKnownMark = marksMap[card.id] === 'known';
     const rawPct = getConfidencePct(progress);
     const seen = !!(progress?.seenCount) || !!progress?.lastReviewedAt;
     let bandClass;
@@ -3440,8 +3392,8 @@ function buildChapterDetailHtml(chapterKey) {
   const headlinePct = cards.length ? Math.round((confirmedCount / cards.length) * 100) : 0;
 
   const rowHtml = rows.map(r => {
-    const expanded = analyticsExpandedWord === r.card.id;
-    const cardHtml = expanded ? buildWordStatCardHtml(r.card, store[r.card.id], marks[r.card.id] === 'known') : '';
+    const expanded = runtime.analyticsExpandedWord === r.card.id;
+    const cardHtml = expanded ? buildWordStatCardHtml(r.card, store[r.card.id], marksMap[r.card.id] === 'known') : '';
     return `
       <li class="chapter-detail-row${expanded ? ' chapter-detail-row-active' : ''}"
           role="button"
@@ -3470,13 +3422,13 @@ function buildChapterDetailHtml(chapterKey) {
 function renderChapterDetailPanel() {
   const panel = document.getElementById('chapterDetailPanel');
   if (!panel) return;
-  if (!analyticsExpandedChapter) {
+  if (!runtime.analyticsExpandedChapter) {
     panel.innerHTML = '';
     panel.classList.remove('open');
-    analyticsExpandedWord = null;
+    runtime.analyticsExpandedWord = null;
     return;
   }
-  panel.innerHTML = buildChapterDetailHtml(analyticsExpandedChapter);
+  panel.innerHTML = buildChapterDetailHtml(runtime.analyticsExpandedChapter);
   panel.classList.add('open');
 }
 
@@ -3487,15 +3439,15 @@ function setupChapterGridInteractivity(rootEl) {
   const handleWordRowToggle = (row) => {
     const wordId = row.dataset.wordId || '';
     if (!wordId) return;
-    analyticsExpandedWord = analyticsExpandedWord === wordId ? null : wordId;
+    runtime.analyticsExpandedWord = runtime.analyticsExpandedWord === wordId ? null : wordId;
     renderChapterDetailPanel();
   };
 
   rootEl.addEventListener('click', (event) => {
     const closeBtn = event.target.closest('[data-chapter-close]');
     if (closeBtn) {
-      analyticsExpandedChapter = null;
-      analyticsExpandedWord = null;
+      runtime.analyticsExpandedChapter = null;
+      runtime.analyticsExpandedWord = null;
       rootEl.querySelectorAll('.chapter-tile').forEach(t => {
         t.classList.remove('chapter-tile-active');
         t.setAttribute('aria-expanded', 'false');
@@ -3512,11 +3464,11 @@ function setupChapterGridInteractivity(rootEl) {
     if (!tile || !rootEl.contains(tile)) return;
     const key = tile.dataset.chapter || '';
     if (!key) return;
-    const nextKey = analyticsExpandedChapter === key ? null : key;
-    if (nextKey !== analyticsExpandedChapter) analyticsExpandedWord = null;
-    analyticsExpandedChapter = nextKey;
+    const nextKey = runtime.analyticsExpandedChapter === key ? null : key;
+    if (nextKey !== runtime.analyticsExpandedChapter) runtime.analyticsExpandedWord = null;
+    runtime.analyticsExpandedChapter = nextKey;
     rootEl.querySelectorAll('.chapter-tile').forEach(t => {
-      const active = t.dataset.chapter === analyticsExpandedChapter;
+      const active = t.dataset.chapter === runtime.analyticsExpandedChapter;
       t.classList.toggle('chapter-tile-active', active);
       t.setAttribute('aria-expanded', active ? 'true' : 'false');
     });
@@ -3545,9 +3497,9 @@ function computePersonalRecords(usage, sessionHistory, streaks, courseData) {
       byDay[key] = (byDay[key] || 0) + 1;
     });
   };
-  mergeFirstConfirmed(globalWordProgress.g2e);
-  mergeFirstConfirmed(globalWordProgress.e2g);
-  mergeFirstConfirmed(globalWordProgress.morph);
+  mergeFirstConfirmed(runtime.globalWordProgress.g2e);
+  mergeFirstConfirmed(runtime.globalWordProgress.e2g);
+  mergeFirstConfirmed(runtime.globalWordProgress.morph);
   let bestDayCount = 0;
   let bestDayKey = '';
   Object.entries(byDay).forEach(([key, count]) => {
@@ -3669,23 +3621,23 @@ function renderAnalyticsOverlay() {
 
   // ── Per-direction progress stores. Analytics needs to read vocab progress
   //    from the g2e/e2g store and grammar progress from the morph store
-  //    regardless of the current studyMode, otherwise getWordProgress()
+  //    regardless of the current runtime.studyMode, otherwise getWordProgress()
   //    (which is keyed on the active mode) reports every off-mode card as
   //    "Unseen". ──
-  const g2eProgressStore = globalWordProgress.g2e || {};
-  const e2gProgressStore = globalWordProgress.e2g || {};
-  const morphProgressStore = globalWordProgress.morph || {};
-  const vocabProgressStore = directionToGreek ? e2gProgressStore : g2eProgressStore;
+  const g2eProgressStore = runtime.globalWordProgress.g2e || {};
+  const e2gProgressStore = runtime.globalWordProgress.e2g || {};
+  const morphProgressStore = runtime.globalWordProgress.morph || {};
+  const vocabProgressStore = runtime.directionToGreek ? e2gProgressStore : g2eProgressStore;
 
   // ── Vocab & Grammar data (used by both gamification and section renders) ──
-  const vocabCards = selectedKeys.length ? getSelectedVocabCards(selectedKeys, requiredOnly) : [];
-  const vocabMarks = directionToGreek ? globalWordMarks.e2g : globalWordMarks.g2e;
+  const vocabCards = runtime.selectedKeys.length ? getSelectedVocabCards(runtime.selectedKeys, runtime.requiredOnly) : [];
+  const vocabMarks = runtime.directionToGreek ? runtime.globalWordMarks.e2g : runtime.globalWordMarks.g2e;
   const vocabProgress = buildCumulativeConfirmationSeries(vocabCards, vocabMarks, vocabProgressStore);
   const vocabProjection = getRegressionProjection(vocabProgress.series, vocabProgress.currentConfirmed, vocabProgress.total);
   const vocabBuckets = buildConfirmationHistogram(vocabCards, vocabProgressStore);
   const activePerConfirmed = vocabProgress.currentConfirmed ? usage.activeStudyMs / vocabProgress.currentConfirmed : 0;
-  const grammarCards = canAccessGrammarUi() && selectedKeys.length ? getSelectedGrammarCards(selectedKeys) : [];
-  const grammarMarks = globalWordMarks.morph;
+  const grammarCards = canAccessGrammarUi() && runtime.selectedKeys.length ? getSelectedGrammarCards(runtime.selectedKeys) : [];
+  const grammarMarks = runtime.globalWordMarks.morph;
   const grammarProgress = buildCumulativeConfirmationSeries(grammarCards, grammarMarks, morphProgressStore);
   const grammarProjection = getRegressionProjection(grammarProgress.series, grammarProgress.currentConfirmed, grammarProgress.total);
   const grammarBuckets = buildConfirmationHistogram(grammarCards, morphProgressStore);
@@ -3709,7 +3661,7 @@ function renderAnalyticsOverlay() {
     });
   });
   const allCourseCards = [...courseData.allVocabCards, ...courseData.allGrammarCards];
-  const mergedMarks = { ...(globalWordMarks.g2e || {}), ...(globalWordMarks.e2g || {}), ...(globalWordMarks.morph || {}) };
+  const mergedMarks = { ...(runtime.globalWordMarks.g2e || {}), ...(runtime.globalWordMarks.e2g || {}), ...(runtime.globalWordMarks.morph || {}) };
   const todayStats = computeTodayStats(usage.activeDailyMs, allCourseCards, mergedMarks, mergedProgressStore);
   const achievements = computeAchievements(usage, courseData, streaks, sessionHistory.length, todayStats);
   const dailyAwards = achievements.filter(a => a.group === 'daily');
@@ -3758,8 +3710,8 @@ function renderAnalyticsOverlay() {
   // ── Course completion stacked bars (always course-wide) ──
   const courseEl = document.getElementById('analyticsCourseCompletion');
   if (courseEl) {
-    const g2eMarks = globalWordMarks.g2e || {};
-    const morphMarksAll = globalWordMarks.morph || {};
+    const g2eMarks = runtime.globalWordMarks.g2e || {};
+    const morphMarksAll = runtime.globalWordMarks.morph || {};
     const courseVocabBuckets = buildConfirmationHistogram(courseData.allVocabCards, g2eProgressStore);
     const showGrammar = canAccessGrammarUi();
     let courseGrammarHtml = '';
@@ -3783,20 +3735,20 @@ function renderAnalyticsOverlay() {
   // ── Chapter mastery grid (course-wide) ──
   const chapterGridEl = document.getElementById('analyticsChapterGrid');
   if (chapterGridEl) {
-    const mastery = computeChapterMastery(g2eProgressStore, globalWordMarks.g2e || {});
+    const mastery = computeChapterMastery(g2eProgressStore, runtime.globalWordMarks.g2e || {});
     if (mastery.length) {
       // Drop the expanded chapter if it's no longer in the mastery list (e.g.
       // sets were removed) so we don't try to render a phantom panel.
-      if (analyticsExpandedChapter && !mastery.some(m => String(m.chapterKey) === analyticsExpandedChapter)) {
-        analyticsExpandedChapter = null;
-        analyticsExpandedWord = null;
+      if (runtime.analyticsExpandedChapter && !mastery.some(m => String(m.chapterKey) === runtime.analyticsExpandedChapter)) {
+        runtime.analyticsExpandedChapter = null;
+        runtime.analyticsExpandedWord = null;
       }
       chapterGridEl.innerHTML = buildChapterGridHtml(mastery);
       setupChapterGridInteractivity(chapterGridEl);
     } else {
       chapterGridEl.innerHTML = '';
-      analyticsExpandedChapter = null;
-      analyticsExpandedWord = null;
+      runtime.analyticsExpandedChapter = null;
+      runtime.analyticsExpandedWord = null;
     }
   }
 
@@ -3880,22 +3832,22 @@ function renderAnalyticsOverlay() {
   // ── Current-selection subtitle (frames the section below) ──
   const selectionSubtitleEl = document.getElementById('analyticsSelectionSubtitle');
   if (selectionSubtitleEl) {
-    if (!selectedKeys.length) {
+    if (!runtime.selectedKeys.length) {
       selectionSubtitleEl.textContent = 'Pick a session or chapter on the home screen to populate these stats.';
     } else {
-      const scopeBit = requiredOnly ? 'Required-only (graded) vocabulary' : 'All vocabulary, graded + nice-to-haves';
+      const scopeBit = runtime.requiredOnly ? 'Required-only (graded) vocabulary' : 'All vocabulary, graded + nice-to-haves';
       const grammarBit = canAccessGrammarUi() ? ' plus the matching grammar drills' : '';
-      selectionSubtitleEl.textContent = `${scopeBit}${grammarBit} across ${selectedKeys.length} set${selectedKeys.length === 1 ? '' : 's'}.`;
+      selectionSubtitleEl.textContent = `${scopeBit}${grammarBit} across ${runtime.selectedKeys.length} set${runtime.selectedKeys.length === 1 ? '' : 's'}.`;
     }
   }
 
   // ── Vocab section (selection-scoped). Required-only IS the graded subset,
   //    so the toggle is a real lever — surface it in the subtitle, not as a metric. ──
-  const vocabAtRisk = computeAtRiskCount(vocabCards, directionToGreek ? e2gProgressStore : g2eProgressStore);
+  const vocabAtRisk = computeAtRiskCount(vocabCards, runtime.directionToGreek ? e2gProgressStore : g2eProgressStore);
   renderAnalyticsSection('analyticsVocabSection', {
     title: 'Vocabulary progress',
-    subtitle: selectedKeys.length
-      ? `${requiredOnly ? 'Required-only (graded) vocabulary' : 'All vocabulary, graded + nice-to-haves'} in the current selection`
+    subtitle: runtime.selectedKeys.length
+      ? `${runtime.requiredOnly ? 'Required-only (graded) vocabulary' : 'All vocabulary, graded + nice-to-haves'} in the current selection`
       : 'Choose one or more vocabulary sets to populate this view.',
     total: vocabProgress.total,
     metrics: [
@@ -3932,9 +3884,9 @@ function renderAnalyticsOverlay() {
   // ── Stubborn cards (selection-scoped, vocab + grammar) ──
   const stubbornEl = document.getElementById('analyticsStubbornWords');
   if (stubbornEl) {
-    const vocabStubborn = computeStubbornCards(vocabCards, directionToGreek ? e2gProgressStore : g2eProgressStore);
+    const vocabStubborn = computeStubbornCards(vocabCards, runtime.directionToGreek ? e2gProgressStore : g2eProgressStore);
     const grammarStubborn = canAccessGrammarUi() ? computeStubbornCards(grammarCards, morphProgressStore) : [];
-    stubbornEl.innerHTML = selectedKeys.length ? buildStubbornListHtml(vocabStubborn, grammarStubborn) : '';
+    stubbornEl.innerHTML = runtime.selectedKeys.length ? buildStubbornListHtml(vocabStubborn, grammarStubborn) : '';
   }
 }
 
@@ -3945,7 +3897,7 @@ installKeyboardShortcuts({
   isWhatsNewV1_1ModalOpen, closeWhatsNewV1_1Modal,
   isDisclaimerModalOpen, isTransferModalOpen,
   isReviewDeckMode,
-  getSelectedKeys: () => selectedKeys,
+  getSelectedKeys: () => runtime.selectedKeys,
   isMorphologyMode,
   navigate, answerMorphologyChoice, flipCard, markCard
 });
@@ -3983,7 +3935,7 @@ buildAdvancedSelector();
 if (!restoreState()) {
   syncToggleButtons(); // reflect default controls on load
 }
-// Rebuild after restore: appProfile may have changed, affecting grammar summary text
+// Rebuild after restore: runtime.appProfile may have changed, affecting grammar summary text
 buildSessions();
 buildChapterSelector();
 buildSupplementalSelector();
@@ -3996,9 +3948,9 @@ window.addEventListener('greekSupplementalDataChanged', () => {
   buildChapterSelector();
   buildSupplementalSelector();
   buildAdvancedSelector();
-  if (selectedKeys.length && selectedKeys.some(key => window.SETS?.[key]?.type === 'other')) {
-    const keysToLoad = currentSession ? expandSessionSets(currentSession) : selectedKeys;
-    loadDeckFromKeys(keysToLoad, currentSession ? currentSession.id : null);
+  if (runtime.selectedKeys.length && runtime.selectedKeys.some(key => window.SETS?.[key]?.type === 'other')) {
+    const keysToLoad = runtime.currentSession ? expandSessionSets(runtime.currentSession) : runtime.selectedKeys;
+    loadDeckFromKeys(keysToLoad, runtime.currentSession ? runtime.currentSession.id : null);
   }
 });
 
