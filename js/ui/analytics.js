@@ -345,8 +345,24 @@ function setupChapterGridInteractivity(rootEl) {
   const handleWordRowToggle = (row) => {
     const wordId = row.dataset.wordId || '';
     if (!wordId) return;
+    // The panel innerHTML is fully replaced on re-render, which destroys the
+    // inner <ol> and resets its scrollTop. Capture the tapped row's position
+    // within the scrollable list, then after re-render, adjust scrollTop so
+    // the same row stays visually fixed — otherwise the list jumps back to
+    // the top each time a word is opened or closed.
+    const list = row.closest('.chapter-detail-list');
+    const prevScrollTop = list ? list.scrollTop : 0;
+    const prevRowTop = list ? row.offsetTop : 0;
+
     runtime.analyticsExpandedWord = runtime.analyticsExpandedWord === wordId ? null : wordId;
     renderChapterDetailPanel();
+
+    const newList = document.querySelector('#chapterDetailPanel .chapter-detail-list');
+    if (!newList) return;
+    const newRow = newList.querySelector(`.chapter-detail-row[data-word-id="${CSS.escape(wordId)}"]`);
+    newList.scrollTop = newRow
+      ? prevScrollTop + (newRow.offsetTop - prevRowTop)
+      : prevScrollTop;
   };
 
   rootEl.addEventListener('click', (event) => {

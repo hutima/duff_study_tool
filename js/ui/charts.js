@@ -392,7 +392,10 @@ export function buildWordStatCardHtml(card, progressRaw, isKnownMark) {
     statusClass = 'word-stat-status-unseen';
   }
 
-  const pctDisplay = rawPct === null ? '—' : `${rawPct}%`;
+  // A "marked known" card should read 100% here, matching the list row above
+  // (which forces `Math.max(100, rawPct ?? 100)`); otherwise the headline
+  // contradicts the MARKED KNOWN status pill.
+  const pctDisplay = isKnownMark ? '100%' : (rawPct === null ? '—' : `${rawPct}%`);
   const accuracyDisplay = responses ? `${Math.round((passCount / responses) * 100)}%` : '—';
   const dueDisplay = progress.dueAt
     ? (progress.dueAt > Date.now() ? `in ${formatRemainingForTable(progress.dueAt)}` : 'due now')
