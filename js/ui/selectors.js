@@ -168,6 +168,25 @@ function getSupplementalParadigmsForKey(key) {
   return paradigms.filter(paradigm => paradigm.count > 0);
 }
 
+// Selecting the flat set key for every set in a week pulls in that set's
+// vocab plus all of its grammar/morph paradigms — including multi-paradigm
+// sets that are otherwise only reachable via split sub-keys.
+function selectAllWeekSupplementals(weekKeys) {
+  const keys = (weekKeys || []).map(String);
+  if (!keys.length) return;
+  host.saveCurrentDeckStateToBank();
+  runtime.currentSession = null;
+  const weekKeySet = new Set(keys);
+  // Drop any existing flat or split sub-key selections for these sets first,
+  // then re-add the flat keys so the whole set loads in every study mode.
+  const retained = runtime.selectedKeys.filter(k => {
+    const base = getParadigmBaseKey(k) || k;
+    return !weekKeySet.has(base);
+  });
+  const nextKeys = sortSetKeys([...new Set([...retained, ...keys])]);
+  loadDeckFromKeys(nextKeys, null);
+}
+
 export function deselectAllSupplementals() {
   const remaining = runtime.selectedKeys.filter(k => {
     const base = getParadigmBaseKey(k) || k;
@@ -244,6 +263,15 @@ export function buildSupplementalSelector() {
 
     const weekBody = document.createElement('div');
     weekBody.className = 'supplemental-week-body';
+
+    const selectAllBtn = document.createElement('button');
+    selectAllBtn.type = 'button';
+    selectAllBtn.className = 'chapter-btn supplemental-select-all-week';
+    selectAllBtn.textContent = weekNum == null
+      ? 'Select all other supplementals'
+      : `Select all Week ${weekNum} supplementals`;
+    selectAllBtn.onclick = () => selectAllWeekSupplementals(entries.map(e => e.key));
+    weekBody.appendChild(selectAllBtn);
 
     entries.forEach(({ key, set, vocabCount, studyCount }) => {
       const countLabel = host.canAccessGrammarUi()
