@@ -31,6 +31,7 @@ export const runtime = {
   analyticsExpandedChapter: null,
   analyticsExpandedWord: null,
   analyticsChapterSort: 'confidence', // 'confidence' | 'alphabetical'
+  analyticsGrammarReviewMode: 'review', // 'review' | 'all'
 
   // ── Modal / disclaimer / transfer / theme ───────────────────────────
   hasAcceptedDisclaimer: false,
@@ -62,6 +63,7 @@ export const runtime = {
   requiredOnly: true,
   directionToGreek: false,  // false = Greek→English, true = English→Greek
   spacedRepetition: true,
+  hardVocabReviewMode: false, // restrict vocab deck to cards missed >10× and still under 40% confidence
   activeDeckCount: 0,
   unspacedPendingRecycle: false,
   unspacedCycleState: {},
