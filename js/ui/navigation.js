@@ -329,6 +329,17 @@ export function toggleRequiredOnly() {
   loadDeckFromKeys(keysToLoad, runtime.currentSession ? runtime.currentSession.id : null);
 }
 
+export function toggleHardVocabReview() {
+  runtime.hardVocabReviewMode = !runtime.hardVocabReviewMode;
+  host.syncToggleButtons();
+  if (!runtime.selectedKeys.length) {
+    host.saveState();
+    return;
+  }
+  const keysToLoad = runtime.currentSession ? expandSessionSets(runtime.currentSession) : runtime.selectedKeys;
+  loadDeckFromKeys(keysToLoad, runtime.currentSession ? runtime.currentSession.id : null);
+}
+
 export function toggleDirection() {
   runtime.directionToGreek = !runtime.directionToGreek;
   host.clearSpacedUndoSnapshot();
