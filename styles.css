@@ -69,7 +69,10 @@
     pointer-events: none; z-index: 0;
   }
 
-  .app { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 24px 20px 60px; }
+  .app {
+    position: relative; z-index: 1; max-width: 900px; margin: 0 auto;
+    padding: calc(24px + env(safe-area-inset-top, 0px)) 20px 60px;
+  }
 
   /* ── Header ── */
   header { text-align: center; padding: 20px 0 28px; border-bottom: 1px solid var(--border); margin-bottom: 32px; }

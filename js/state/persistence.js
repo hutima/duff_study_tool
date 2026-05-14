@@ -60,10 +60,19 @@ export function configurePersistence(deps) {
 
 export function buildPersistedStatePayload() {
   saveCurrentDeckStateToBank();
+  // Keep the active mode's selection snapshot fresh before persisting.
+  if (runtime.splitSelection && (runtime.studyMode === 'vocab' || runtime.studyMode === 'morph')) {
+    runtime.modeSelections[runtime.studyMode] = {
+      selectedKeys: [...runtime.selectedKeys],
+      currentSessionId: runtime.currentSession ? runtime.currentSession.id : null
+    };
+  }
   const usage = host.ensureUsageStats();
   return {
     currentSessionId: runtime.currentSession ? runtime.currentSession.id : null,
     selectedKeys: [...runtime.selectedKeys],
+    splitSelection: runtime.splitSelection,
+    modeSelections: runtime.modeSelections,
     shuffled: runtime.shuffled,
     requiredOnly: runtime.requiredOnly,
     requiredOnlyDefaultedV1: true,
@@ -115,6 +124,8 @@ function sanitizeImportedState(candidate) {
   state.directionToGreek = !!candidate.directionToGreek;
   state.spacedRepetition = candidate.spacedRepetition !== false;
   state.hardVocabReviewMode = !!candidate.hardVocabReviewMode;
+  state.splitSelection = !!candidate.splitSelection;
+  state.modeSelections = isPlainObject(candidate.modeSelections) ? candidate.modeSelections : {};
   state.morphSelfCheck = !!candidate.morphSelfCheck;
 
   const usage = host.ensureUsageStats(candidate.appUsageStats);
@@ -598,6 +609,8 @@ export function restoreState() {
     runtime.directionToGreek = !!saved.directionToGreek;
     runtime.spacedRepetition = saved.spacedRepetition !== false;
     runtime.hardVocabReviewMode = !!saved.hardVocabReviewMode;
+    runtime.splitSelection = !!saved.splitSelection;
+    runtime.modeSelections = saved.modeSelections && typeof saved.modeSelections === 'object' ? saved.modeSelections : {};
     runtime.appProfile = 'vocab_grammar';
     const hadSavedAchievementSnapshot = Array.isArray(saved?.gamification?.lastEarnedAchievementIds);
     runtime.appGamification = sanitizeGamificationState(saved.gamification);
