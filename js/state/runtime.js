@@ -55,6 +55,8 @@ export const runtime = {
   // ── Current study session + deck cursor ─────────────────────────────
   currentSession: null,
   selectedKeys: [],
+  splitSelection: false,    // separate chapter selections for vocab vs grammar
+  modeSelections: {},       // { vocab: {selectedKeys, currentSessionId}, morph: {...} }
   deck: [],
   originalDeck: [],
   currentIdx: 0,
