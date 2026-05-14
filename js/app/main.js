@@ -1255,7 +1255,7 @@ function revealMorphologyAnswer() {
   const card = runtime.deck[runtime.currentIdx];
   if (!card || runtime.morphAnswerState.revealed) return;
   runtime.morphAnswerState = {
-    ...morphAnswerState,
+    ...runtime.morphAnswerState,
     revealed: true
   };
   renderCard();
