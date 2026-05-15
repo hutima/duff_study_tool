@@ -272,6 +272,7 @@ import {
   triggerImportProgress,
   getDeckStateKey,
   saveCurrentDeckStateToBank,
+  markActiveDeckRef,
   saveState,
   clearSavedState,
   reorderDeckFromIds,
@@ -375,6 +376,7 @@ configureSelectors({
   syncToggleButtons: () => syncToggleButtons(),
   clearSpacedUndoSnapshot: () => clearSpacedUndoSnapshot(),
   saveCurrentDeckStateToBank: () => saveCurrentDeckStateToBank(),
+  markActiveDeckRef: () => markActiveDeckRef(),
   saveState: () => saveState(),
   canAccessGrammarUi: () => canAccessGrammarUi()
 });
@@ -403,6 +405,7 @@ configureNavigation({
   getRemainingCards: () => getRemainingCards(),
   resetUnspacedCycleState: () => resetUnspacedCycleState(),
   saveCurrentDeckStateToBank: () => saveCurrentDeckStateToBank(),
+  markActiveDeckRef: () => markActiveDeckRef(),
   saveState: () => saveState(),
   renderReaderModule: () => renderReaderModule(),
   getDeckStateKey: (keys, req, spaced) => getDeckStateKey(keys, req, spaced),

@@ -36,6 +36,7 @@ let host = {
   syncToggleButtons: () => {},
   clearSpacedUndoSnapshot: () => {},
   saveCurrentDeckStateToBank: () => {},
+  markActiveDeckRef: () => {},
   saveState: () => {},
   canAccessGrammarUi: () => true
 };
@@ -434,6 +435,7 @@ function clearAndRenderEmpty() {
   setActiveSetButtons();
   runtime.deck = [];
   runtime.originalDeck = [];
+  runtime.activeDeckRef = null;
   runtime.marks = {};
   runtime.currentIdx = 0;
   document.getElementById('cardArea').innerHTML = '<div class="empty-state"><div class="big">αβγ</div>Tap to choose a session and start studying.</div>';
@@ -510,16 +512,16 @@ export function loadDeckFromKeys(keys, sessionId = null) {
 
   const savedDeckState = runtime.deckStates[host.getDeckStateKey(runtime.selectedKeys, runtime.requiredOnly)] || null;
   runtime.marks = host.getDirectionalMarksStore();
-  if (savedDeckState) {
-    const restoredDeck = host.reorderDeckFromIds(runtime.originalDeck, savedDeckState.deckIds);
-    if (runtime.spacedRepetition && restoredDeck) {
+  const restoredDeck = savedDeckState ? host.reorderDeckFromIds(runtime.originalDeck, savedDeckState.deckIds) : null;
+  // A bank entry whose ids don't line up with the current deck is a stale
+  // cross-mode save — ignore its cursor rather than clamp a meaningless index.
+  if (restoredDeck) {
+    if (runtime.spacedRepetition) {
       runtime.deck = restoredDeck;
       runtime.activeDeckCount = restoredDeck.length;
       runtime.deck = host.buildStudyDeck(runtime.originalDeck, { forceShuffle: runtime.shuffled });
-    } else if (restoredDeck) {
-      runtime.deck = runtime.shuffled ? shuffleArray([...restoredDeck]) : restoredDeck;
     } else {
-      runtime.deck = host.buildStudyDeck(runtime.originalDeck);
+      runtime.deck = runtime.shuffled ? shuffleArray([...restoredDeck]) : restoredDeck;
     }
     runtime.activeDeckCount = runtime.spacedRepetition ? host.getDueCount(runtime.originalDeck) : runtime.originalDeck.filter(card => runtime.marks[card.id] !== 'known').length;
     runtime.currentIdx = Number.isInteger(savedDeckState.currentIdx)
@@ -532,6 +534,7 @@ export function loadDeckFromKeys(keys, sessionId = null) {
     host.resetStudyState();
     runtime.deck = host.buildStudyDeck(runtime.originalDeck);
   }
+  host.markActiveDeckRef();
 
   setActiveSessionButton();
   setActiveSetButtons();
