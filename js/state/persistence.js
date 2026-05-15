@@ -518,13 +518,32 @@ export function getDeckStateKey(keys = runtime.selectedKeys, requiredFlag = runt
   });
 }
 
-export function saveCurrentDeckStateToBank() {
-  if (!runtime.selectedKeys.length) return;
-
-  const deckKey = getDeckStateKey(runtime.selectedKeys, runtime.requiredOnly);
-  runtime.deckStates[deckKey] = {
-    currentSessionId: runtime.currentSession ? runtime.currentSession.id : null,
+// Snapshot which deck-state-bank entry the current runtime.deck belongs to.
+// Call this whenever a deck is freshly built so saveCurrentDeckStateToBank can
+// file it correctly. Recomputing the key from live runtime state at save time
+// is unsafe: setStudyMode / toggleDirection / loadDeckFromKeys mutate the
+// key-relevant fields (studyMode, direction, selectedKeys) *before* the new
+// deck is built, so a save in that window would file the stale deck under the
+// new deck's key and corrupt it.
+export function markActiveDeckRef() {
+  if (!runtime.selectedKeys.length) {
+    runtime.activeDeckRef = null;
+    return;
+  }
+  runtime.activeDeckRef = {
+    key: getDeckStateKey(runtime.selectedKeys, runtime.requiredOnly),
     selectedKeys: [...runtime.selectedKeys],
+    currentSessionId: runtime.currentSession ? runtime.currentSession.id : null
+  };
+}
+
+export function saveCurrentDeckStateToBank() {
+  const ref = runtime.activeDeckRef;
+  if (!ref || !runtime.deck.length) return;
+
+  runtime.deckStates[ref.key] = {
+    currentSessionId: ref.currentSessionId,
+    selectedKeys: ref.selectedKeys,
     deckIds: runtime.deck.map(card => card.id),
     currentIdx: runtime.currentIdx,
     unspacedPendingRecycle: !runtime.spacedRepetition && !!runtime.unspacedPendingRecycle
@@ -556,6 +575,10 @@ export function reorderDeckFromIds(cards, deckIds) {
       byId.delete(id);
     }
   });
+  // Zero overlap means these ids belong to a different deck entirely — e.g. a
+  // stale cross-mode bank entry. Signal "no usable saved order" so callers
+  // fall back to a fresh deck instead of trusting its currentIdx.
+  if (!ordered.length) return null;
   ordered.push(...byId.values());
   return ordered;
 }
@@ -652,6 +675,10 @@ export function restoreState() {
     const savedDeckState = runtime.deckStates[getDeckStateKey(runtime.selectedKeys, runtime.requiredOnly)] || null;
     runtime.marks = host.getDirectionalMarksStore();
     const restoredDeck = savedDeckState ? reorderDeckFromIds(runtime.originalDeck, savedDeckState.deckIds) : null;
+    // A bank entry whose ids don't line up with the current deck is a stale
+    // cross-mode save — ignore its cursor entirely rather than clamp a
+    // meaningless index onto a different deck.
+    const usableDeckState = restoredDeck ? savedDeckState : null;
     if (runtime.spacedRepetition && restoredDeck) {
       runtime.deck = restoredDeck;
       runtime.activeDeckCount = restoredDeck.length;
@@ -663,12 +690,13 @@ export function restoreState() {
     }
     host.resetUnspacedCycleState();
     runtime.activeDeckCount = runtime.spacedRepetition ? host.getDueCount(runtime.originalDeck) : runtime.originalDeck.filter(card => runtime.marks[card.id] !== 'known').length;
-    runtime.currentIdx = savedDeckState && Number.isInteger(savedDeckState.currentIdx)
-      ? Math.min(Math.max(savedDeckState.currentIdx, 0), runtime.spacedRepetition ? runtime.activeDeckCount : runtime.deck.length)
+    runtime.currentIdx = usableDeckState && Number.isInteger(usableDeckState.currentIdx)
+      ? Math.min(Math.max(usableDeckState.currentIdx, 0), runtime.spacedRepetition ? runtime.activeDeckCount : runtime.deck.length)
       : 0;
-    runtime.unspacedPendingRecycle = !runtime.spacedRepetition && !!(savedDeckState && savedDeckState.unspacedPendingRecycle);
+    runtime.unspacedPendingRecycle = !runtime.spacedRepetition && !!(usableDeckState && usableDeckState.unspacedPendingRecycle);
     runtime.isFlipped = false;
     host.clearSpacedUndoSnapshot();
+    markActiveDeckRef();
 
     setActiveSessionButton();
     setActiveSetButtons();
