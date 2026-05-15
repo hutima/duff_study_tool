@@ -60,12 +60,12 @@ export function configurePersistence(deps) {
 
 export function buildPersistedStatePayload() {
   saveCurrentDeckStateToBank();
-  // Compact on every save (not just at load) so the payload can never bloat
-  // back up to the quota mid-session — getWordProgress() keeps minting blank
-  // entries as decks are built, and those would otherwise pile up between
-  // loads. This is safe here: saveState always runs after a handler has
-  // finished its mutations, so any entry still at its defaults is genuinely
-  // untouched and is recreated identically on next access.
+  // Defence in depth: getWordProgress no longer persists no-information
+  // entries, but compacting on every save still caps the deck-state bank and
+  // catches anything that slips through, so the payload can never creep back
+  // toward the quota mid-session. Safe here — saveState always runs after a
+  // handler has finished mutating, so an entry still at its defaults is
+  // genuinely untouched and is recreated identically on next access.
   compactPersistedState();
   // Keep the active mode's selection snapshot fresh before persisting.
   if (runtime.splitSelection && (runtime.studyMode === 'vocab' || runtime.studyMode === 'morph')) {

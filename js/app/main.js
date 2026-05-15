@@ -337,7 +337,7 @@ configureProgress({
   getRemainingCards: () => getRemainingCards(),
   getHighConfidenceCount: () => getHighConfidenceCount(),
   getDeckAggregateStats: (cards) => getDeckAggregateStats(cards),
-  getWordProgress: (id) => getWordProgress(id),
+  getWordProgress: (id, opts) => getWordProgress(id, opts),
   isMorphologyMode: () => isMorphologyMode(),
   renderAnalyticsOverlay: () => renderAnalyticsOverlay(),
   moveCardToBackOfActivePile: (card) => moveCardToBackOfActivePile(card),
@@ -842,7 +842,7 @@ function getUnspacedCycleEntry(cardId) {
 }
 
 function applyUnspacedSharedSchedule(card, outcome, reviewedAt = Date.now()) {
-  const progress = getWordProgress(card.id);
+  const progress = getWordProgress(card.id, { persist: true });
   const cycleEntry = getUnspacedCycleEntry(card.id);
   const normalizedOutcome = outcome === 'easy' ? 'easy' : outcome === 'pass' ? 'pass' : 'again';
 
@@ -914,7 +914,12 @@ function advanceScheduledCards(cards = runtime.originalDeck, advanceMs = SRS_CYC
   });
 }
 
-function getWordProgress(cardId) {
+// Read-only callers (deck building, review list, analytics, scheduling
+// queries) far outnumber the handful that actually record progress. Only the
+// latter pass { persist: true }; everyone else gets a throwaway default object
+// and the store is never polluted with no-information entries — which is what
+// kept bloating both the in-memory state and the saved payload.
+function getWordProgress(cardId, { persist = false } = {}) {
   const progressStore = getDirectionalProgressStore();
   const existing = progressStore[cardId];
   if (existing && typeof existing === 'object') {
@@ -952,7 +957,7 @@ function getWordProgress(cardId) {
     confidence: 0,
     confidenceHistory: []
   };
-  progressStore[cardId] = fresh;
+  if (persist) progressStore[cardId] = fresh;
   return fresh;
 }
 
@@ -1118,7 +1123,7 @@ function buildStudyDeck(cards, options = {}) {
 }
 
 function recordStudyOutcome(cardId, outcome, reviewedAt = Date.now()) {
-  const progress = getWordProgress(cardId);
+  const progress = getWordProgress(cardId, { persist: true });
   const isFirstConfirmation = !progress.firstConfirmedAt;
   const xpAward = computeCardXpAward(outcome, isFirstConfirmation, runtime.spacedRepetition);
   const usage = ensureUsageStats();
@@ -1142,7 +1147,7 @@ function recordStudyOutcome(cardId, outcome, reviewedAt = Date.now()) {
 }
 
 function seedMinimumUncertainSchedule(cardId, reviewedAt = Date.now()) {
-  const progress = getWordProgress(cardId);
+  const progress = getWordProgress(cardId, { persist: true });
   const minimumDelayMs = getUncertainDelayMs(progress);
   const minimumDueAt = reviewedAt + minimumDelayMs;
   if (!progress.dueAt || progress.dueAt < minimumDueAt) {
