@@ -60,6 +60,7 @@ export function configurePersistence(deps) {
 
 export function buildPersistedStatePayload() {
   saveCurrentDeckStateToBank();
+  pruneDeckStateBank();
   // Keep the active mode's selection snapshot fresh before persisting.
   if (runtime.splitSelection && (runtime.studyMode === 'vocab' || runtime.studyMode === 'morph')) {
     runtime.modeSelections[runtime.studyMode] = {
@@ -506,6 +507,114 @@ function handleImportedProgressFile(event) {
 
 // ── Deck state bank + save/restore ───────────────────────────────────────
 
+// Obsolete localStorage keys from earlier save formats. They are read once as
+// a migration fallback (see restoreState) and then deleted — left in place
+// they are pure dead weight that eats into the localStorage quota.
+const LEGACY_STORAGE_KEYS = [
+  'greekFlashcardsStateV17',
+  'greekFlashcardsStateV15',
+  'greekFlashcardsStateV14',
+  'greekFlashcardsStateV12',
+  'greekFlashcardsStateV11',
+  'greekFlashcardsStateV10'
+];
+
+// The deck-state bank is only a per-selection cursor cache. Capping it keeps
+// the persisted payload from growing without bound (one entry per unique
+// selection × mode × direction × flags combination), which on small-quota
+// browsers like iOS Safari is what eventually makes setItem throw.
+const MAX_DECK_STATE_BANK_ENTRIES = 24;
+
+function pruneDeckStateBank() {
+  const keys = Object.keys(runtime.deckStates);
+  if (keys.length <= MAX_DECK_STATE_BANK_ENTRIES) return;
+  // Object key order is insertion order; saveCurrentDeckStateToBank re-inserts
+  // touched entries at the end, so the front of the list is the least-recently
+  // used. Drop from the front.
+  for (const key of keys.slice(0, keys.length - MAX_DECK_STATE_BANK_ENTRIES)) {
+    delete runtime.deckStates[key];
+  }
+}
+
+function clearLegacySaves(storage) {
+  let cleared = false;
+  for (const key of LEGACY_STORAGE_KEYS) {
+    try {
+      if (storage.getItem(key) !== null) {
+        storage.removeItem(key);
+        cleared = true;
+      }
+    } catch (err) {
+      // Ignore — a removeItem failure just means we couldn't reclaim that key.
+    }
+  }
+  return cleared;
+}
+
+// A word-progress entry whose every field is still at its creation default
+// carries no information: getWordProgress() rebuilds an identical fresh entry
+// on demand. These accumulate because getWordProgress() runs for every card in
+// every deck the user ever loads (deck building, review list, analytics) — not
+// just cards they actually study — so most of a long-lived save is dead weight.
+function isDefaultProgressEntry(p) {
+  if (!p || typeof p !== 'object') return true;
+  const history = p.confidenceHistory;
+  return (
+    !p.seenCount && !p.passCount && !p.failCount && !p.streak && !p.easyStreak &&
+    !p.srsStage && !p.intervalDays && !p.lastEasyIntervalDays && !p.dueAt &&
+    !p.lastReviewedAt && !p.firstSeenAt && !p.firstConfirmedAt && !p.confidence &&
+    !p.lastSpacedOutcome &&
+    (p.ease === undefined || p.ease === 2.3) &&
+    (!Array.isArray(history) || history.length === 0)
+  );
+}
+
+// Shrinks the persisted footprint to the minimum that still preserves every
+// bit of real user progress and identical app behaviour:
+//   • drops no-information (all-default) word-progress entries
+//   • drops malformed word-mark entries (anything but 'known' / 'unsure')
+//   • caps the deck-state bank — a regenerable per-selection cursor cache
+// Format migration is handled separately by STATE_MIGRATIONS in restoreState;
+// this operates on the already-migrated runtime.* stores. Safe to call any
+// time those stores are fully populated (load time, quota recovery).
+export function compactPersistedState() {
+  let changed = false;
+
+  const progress = runtime.globalWordProgress;
+  if (progress && typeof progress === 'object') {
+    for (const bucket of Object.keys(progress)) {
+      const store = progress[bucket];
+      if (!store || typeof store !== 'object') continue;
+      for (const id of Object.keys(store)) {
+        if (isDefaultProgressEntry(store[id])) {
+          delete store[id];
+          changed = true;
+        }
+      }
+    }
+  }
+
+  const marks = runtime.globalWordMarks;
+  if (marks && typeof marks === 'object') {
+    for (const bucket of Object.keys(marks)) {
+      const store = marks[bucket];
+      if (!store || typeof store !== 'object') continue;
+      for (const id of Object.keys(store)) {
+        if (store[id] !== 'known' && store[id] !== 'unsure') {
+          delete store[id];
+          changed = true;
+        }
+      }
+    }
+  }
+
+  const deckStateCount = Object.keys(runtime.deckStates).length;
+  pruneDeckStateBank();
+  if (Object.keys(runtime.deckStates).length !== deckStateCount) changed = true;
+
+  return changed;
+}
+
 export function getDeckStateKey(keys = runtime.selectedKeys, requiredFlag = runtime.requiredOnly, spacedFlag = runtime.spacedRepetition) {
   const normalizedKeys = sortSetKeys((keys || []).map(String));
   return JSON.stringify({
@@ -541,6 +650,9 @@ export function saveCurrentDeckStateToBank() {
   const ref = runtime.activeDeckRef;
   if (!ref || !runtime.deck.length) return;
 
+  // Re-insert at the end so the bank stays ordered least- to most-recently
+  // used, which is what pruneDeckStateBank relies on.
+  delete runtime.deckStates[ref.key];
   runtime.deckStates[ref.key] = {
     currentSessionId: ref.currentSessionId,
     selectedKeys: ref.selectedKeys,
@@ -548,14 +660,50 @@ export function saveCurrentDeckStateToBank() {
     currentIdx: runtime.currentIdx,
     unspacedPendingRecycle: !runtime.spacedRepetition && !!runtime.unspacedPendingRecycle
   };
+  pruneDeckStateBank();
 }
 
+// saveState is called from the render path (renderCard runs it before drawing
+// the card) and from every interaction handler. It must never throw: a
+// persistence failure — most commonly QuotaExceededError on iOS Safari once
+// the payload grows large — would otherwise abort renderCard and leave the
+// card frozen mid-interaction. Any failure here is contained and logged.
 export function saveState() {
   const storage = getStorage();
   if (!storage) return;
-  maybeCelebrateLevelUp();
-  maybeCelebrateAchievements();
-  storage.setItem(STORAGE_KEY, JSON.stringify(buildPersistedStatePayload()));
+
+  try {
+    maybeCelebrateLevelUp();
+    maybeCelebrateAchievements();
+  } catch (err) {
+    console.warn('Gamification celebration step failed:', err);
+  }
+
+  let payload;
+  try {
+    payload = JSON.stringify(buildPersistedStatePayload());
+  } catch (err) {
+    console.warn('Could not serialize app state; skipping save:', err);
+    return;
+  }
+
+  try {
+    storage.setItem(STORAGE_KEY, payload);
+  } catch (err) {
+    // Almost always a quota error. Reclaim space — drop obsolete legacy saves
+    // and compact the live state down to essential progress — then retry once.
+    const reclaimedLegacy = clearLegacySaves(storage);
+    const compacted = compactPersistedState();
+    if (!reclaimedLegacy && !compacted) {
+      console.warn('Could not persist app state and found nothing to reclaim:', err);
+      return;
+    }
+    try {
+      storage.setItem(STORAGE_KEY, JSON.stringify(buildPersistedStatePayload()));
+    } catch (retryErr) {
+      console.warn('App state still too large to persist after reclaiming space:', retryErr);
+    }
+  }
 }
 
 export function clearSavedState() {
@@ -656,6 +804,14 @@ export function restoreState() {
     if (hadSavedAchievementSnapshot && !Array.isArray(runtime.appGamification.lastEarnedAchievementIds)) {
       runtime.appGamification.lastEarnedAchievementIds = [];
     }
+
+    // Migration (STATE_MIGRATIONS above) brought the save to the current
+    // format; compaction now strips it to the minimum that preserves real
+    // progress, so it reloads small and stays well under the storage quota.
+    compactPersistedState();
+    // Obsolete legacy-format saves are dead weight once the current format is
+    // the source of truth — reclaim that space.
+    if (storage.getItem(STORAGE_KEY) !== null) clearLegacySaves(storage);
 
     if (!runtime.selectedKeys.length) {
       host.clearSpacedUndoSnapshot();
