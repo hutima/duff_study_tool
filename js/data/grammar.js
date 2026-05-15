@@ -356,7 +356,15 @@
               choices: ["through (means or agency)", "because of, on account of", "with", "into"] },
             { form: "διά + accusative", prompt: "διά + accusative means…",
               answer: "because of, on account of",
-              choices: ["because of, on account of", "through (means or agency)", "with", "after"] }
+              choices: ["because of, on account of", "through (means or agency)", "with", "after"] },
+            { form: "διὰ τοῦτο", prompt: "Best translation?",
+              answer: "'on account of this' / 'for this reason'",
+              choices: ["'on account of this' / 'for this reason'", "'through this'", "'with this'", "'into this'"],
+              note: "διά + accusative = 'because of'. A very common NT discourse marker." },
+            { form: "διὰ τοῦ Ἰησοῦ", prompt: "Best translation?",
+              answer: "'through Jesus' (agency/means)",
+              choices: ["'through Jesus' (agency/means)", "'because of Jesus'", "'with Jesus'", "'after Jesus'"],
+              note: "διά + genitive = 'through' — typical for agency or means." }
           ]
         },
         {
@@ -369,7 +377,15 @@
               choices: ["with (in company with)", "after (in time)", "into", "by means of"] },
             { form: "μετά + accusative", prompt: "μετά + accusative means…",
               answer: "after (in time)",
-              choices: ["after (in time)", "with (in company with)", "before", "instead of"] }
+              choices: ["after (in time)", "with (in company with)", "before", "instead of"] },
+            { form: "μετὰ τῶν μαθητῶν", prompt: "Best translation?",
+              answer: "'with the disciples'",
+              choices: ["'with the disciples'", "'after the disciples'", "'through the disciples'", "'against the disciples'"],
+              note: "μετά + genitive = 'with' (association)." },
+            { form: "μετὰ ταῦτα", prompt: "Best translation?",
+              answer: "'after these things'",
+              choices: ["'after these things'", "'with these things'", "'because of these things'", "'around these things'"],
+              note: "μετά + accusative = 'after' — common temporal connector in narrative." }
           ]
         },
         {
@@ -403,7 +419,15 @@
             { form: "κατά + accusative", prompt: "κατά + accusative means…",
               answer: "according to / throughout",
               choices: ["according to / throughout", "down from", "with", "before"],
-              note: "κατὰ Μᾶρκον = 'according to Mark'." }
+              note: "κατὰ Μᾶρκον = 'according to Mark'." },
+            { form: "κατὰ τὸν νόμον", prompt: "Best translation?",
+              answer: "'according to the law'",
+              choices: ["'according to the law'", "'against the law'", "'down from the law'", "'with the law'"],
+              note: "κατά + accusative = 'according to' — a defining NT idiom." },
+            { form: "κατὰ τοῦ Ἰησοῦ", prompt: "Best translation?",
+              answer: "'against Jesus'",
+              choices: ["'against Jesus'", "'according to Jesus'", "'with Jesus'", "'through Jesus'"],
+              note: "κατά + genitive often = 'against' (or 'down from'). Contrast κατά + accusative = 'according to'." }
           ]
         },
         {
@@ -451,7 +475,15 @@
             { form: "περί + genitive", prompt: "περί + genitive means…",
               answer: "concerning, about (topic)",
               choices: ["concerning, about (topic)", "around (location)", "on behalf of", "through"],
-              note: "Mnemonic: gen. = 'about the topic'; acc. = 'around the place'." }
+              note: "Mnemonic: gen. = 'about the topic'; acc. = 'around the place'." },
+            { form: "περὶ τοῦ Χριστοῦ", prompt: "Best translation?",
+              answer: "'concerning Christ' / 'about Christ'",
+              choices: ["'concerning Christ' / 'about Christ'", "'around Christ' (locational)", "'on behalf of Christ'", "'through Christ'"],
+              note: "περί + gen. for the topic of speech or thought." },
+            { form: "περὶ τὴν θάλασσαν", prompt: "Best translation?",
+              answer: "'around the sea' (locational)",
+              choices: ["'around the sea' (locational)", "'concerning the sea' (topic)", "'after the sea'", "'against the sea'"],
+              note: "περί + acc. = 'around' (spatial)." }
           ]
         }
       ]
@@ -935,7 +967,27 @@
                 "fact: 'that he untied'",
                 "command: 'untie!'",
                 "hope: 'may he untie!'"
-              ] }
+              ] },
+            { form: "ἵνα content",
+              prompt: "Besides pure purpose, what other use of ἵνα is common in the NT?",
+              answer: "a content clause spelling out what was said, asked, or commanded ('that …')",
+              choices: [
+                "a content clause spelling out what was said, asked, or commanded ('that …')",
+                "a causal clause ('because …')",
+                "a temporal clause ('when …')",
+                "a conditional clause ('if …')"
+              ],
+              note: "Especially after verbs of asking, telling, or wishing: αἰτῶ ἵνα = 'I ask that …'." },
+            { form: "ἵνα + subjunctive vs indicative",
+              prompt: "What aspect distinction does the choice of present or aorist subjunctive after ἵνα carry?",
+              answer: "Aspect, not time — present = ongoing action; aorist = action as a single whole.",
+              choices: [
+                "Aspect, not time — present = ongoing action; aorist = action as a single whole.",
+                "Time — present = present time, aorist = past time.",
+                "Mood — present subjunctive is stronger than aorist.",
+                "Nothing — they are interchangeable."
+              ],
+              note: "The subjunctive itself carries no time reference outside the indicative." }
           ]
         },
         {
@@ -955,7 +1007,26 @@
             { form: "ὅτι (causal)",
               prompt: "ὅτι can also be causal, meaning…",
               answer: "'because'",
-              choices: ["'because'", "'although'", "'when'", "'unless'"] }
+              choices: ["'because'", "'although'", "'when'", "'unless'"] },
+            { form: "ὅτι (recitative)",
+              prompt: "In Mark/John, ὅτι sometimes simply introduces a direct quotation. How is it then translated?",
+              answer: "usually left untranslated (it functions like opening quotation marks)",
+              choices: [
+                "usually left untranslated (it functions like opening quotation marks)",
+                "always 'because' — direct speech is causal",
+                "always 'so that' — direct speech is result",
+                "always 'although' — direct speech is concessive"
+              ],
+              note: "Called 'ὅτι recitativum'. Compare λέγει ὅτι Ἐγώ εἰμι = 'he says, “I am”'." },
+            { form: "ὅτι vs ἵνα content",
+              prompt: "What mood typically follows ὅτι in a content clause (vs ἵνα)?",
+              answer: "indicative — ὅτι asserts a fact, while ἵνα + subjunctive is contingent",
+              choices: [
+                "indicative — ὅτι asserts a fact, while ἵνα + subjunctive is contingent",
+                "subjunctive, like ἵνα",
+                "imperative",
+                "infinitive"
+              ] }
           ]
         },
         {
@@ -972,7 +1043,26 @@
               prompt: "What mood normally follows ἐάν?",
               answer: "subjunctive",
               choices: ["subjunctive", "indicative", "imperative", "optative"],
-              note: "Third-class condition: ἐάν + subjunctive — future/general probability." }
+              note: "Third-class condition: ἐάν + subjunctive — future/general probability." },
+            { form: "εἰ + indicative",
+              prompt: "Which class of condition does εἰ + a present/past indicative protasis introduce?",
+              answer: "first-class (assumed true for argument's sake)",
+              choices: [
+                "first-class (assumed true for argument's sake)",
+                "second-class (contrary to fact)",
+                "third-class (future probability)",
+                "fourth-class (remote possibility)"
+              ],
+              note: "Second-class also uses εἰ + indicative but adds ἄν in the apodosis ('if he were, he would')." },
+            { form: "ἐὰν λύσῃ",
+              prompt: "Translate this protasis.",
+              answer: "'if he should untie' / 'if he unties'",
+              choices: [
+                "'if he should untie' / 'if he unties'",
+                "'because he untied'",
+                "'when he had untied'",
+                "'in order that he untie'"
+              ] }
           ]
         }
       ]
@@ -1188,7 +1278,27 @@
                 "only gender and number",
                 "only case",
                 "person and number"
-              ] }
+              ] },
+            { form: "participle features",
+              prompt: "Which two grammatical categories does a participle NOT have?",
+              answer: "person and mood",
+              choices: [
+                "person and mood",
+                "tense and voice",
+                "case and number",
+                "gender and number"
+              ],
+              note: "Person belongs to finite verbs; mood is signaled by the participle's own form-class rather than chosen separately." },
+            { form: "participle time",
+              prompt: "Within a clause, what does a participle's tense primarily encode?",
+              answer: "aspect — with time, when relevant, relative to the main verb",
+              choices: [
+                "aspect — with time, when relevant, relative to the main verb",
+                "absolute past, present, or future time",
+                "mood",
+                "person and number"
+              ],
+              note: "Present participle = action simultaneous with the main verb; aorist participle = action prior to it." }
           ]
         },
         {
@@ -1394,7 +1504,27 @@
                 "'someone wrote'",
                 "'they will write'",
                 "'while writing'"
-              ] }
+              ] },
+            { form: "perfect vs aorist",
+              prompt: "What chiefly distinguishes the perfect from the aorist?",
+              answer: "The aorist views the action as a complete whole; the perfect highlights the resulting state.",
+              choices: [
+                "The aorist views the action as a complete whole; the perfect highlights the resulting state.",
+                "The aorist is past, the perfect is future.",
+                "The aorist is indicative-only; the perfect can appear in any mood.",
+                "There is no real difference — they are interchangeable."
+              ],
+              note: "Both can describe past action, but the perfect adds that the result still stands." },
+            { form: "τετέλεσται",
+              prompt: "Best translation in 'τετέλεσται' (John 19:30)?",
+              answer: "'it is finished' (perfect: the work is complete and its results endure)",
+              choices: [
+                "'it is finished' (perfect: the work is complete and its results endure)",
+                "'he finishes' (present)",
+                "'he finished' (aorist)",
+                "'he will finish' (future)"
+              ],
+              note: "Perfect middle/passive 3rd sg. of τελέω." }
           ]
         },
         {
@@ -1506,7 +1636,27 @@
                 "a definite past — 'when (it happened)'",
                 "a purpose — 'in order that'",
                 "a result — 'so that'"
-              ] }
+              ] },
+            { form: "particle ἄν",
+              prompt: "What does the particle ἄν typically signal when added to a relative or temporal conjunction?",
+              answer: "indefiniteness / generality — 'whoever', 'whenever', etc.",
+              choices: [
+                "indefiniteness / generality — 'whoever', 'whenever', etc.",
+                "negation",
+                "interrogation",
+                "definite specificity"
+              ],
+              note: "ὅς + ἄν → 'whoever'; ὅπου + ἄν → 'wherever'; ὅτε + ἄν → ὅταν, 'whenever'." },
+            { form: "ἐάν τις",
+              prompt: "Translate this indefinite construction.",
+              answer: "'if anyone' / 'whoever'",
+              choices: [
+                "'if anyone' / 'whoever'",
+                "'if not'",
+                "'because someone'",
+                "'whenever it happens'"
+              ],
+              note: "ἐάν τις + subjunctive = a generalised conditional with an indefinite subject." }
           ]
         }
       ]
@@ -1541,7 +1691,26 @@
                 "perfect indicative of εἰμί",
                 "aorist passive"
               ],
-              note: "present of εἰμί + perfect participle = periphrastic perfect — frequent for stative passives." }
+              note: "present of εἰμί + perfect participle = periphrastic perfect — frequent for stative passives." },
+            { form: "ἐστὶν διδάσκων",
+              prompt: "What construction is this?",
+              answer: "periphrastic present ('he is teaching')",
+              choices: [
+                "periphrastic present ('he is teaching')",
+                "present indicative of διδάσκω",
+                "perfect periphrastic",
+                "future of εἰμί + present participle"
+              ],
+              note: "present of εἰμί + present participle = periphrastic present, emphasising ongoing aspect." },
+            { form: "periphrastic logic",
+              prompt: "Periphrastic forms combine which two elements?",
+              answer: "a form of εἰμί + a participle of the lexical verb",
+              choices: [
+                "a form of εἰμί + a participle of the lexical verb",
+                "an augmented stem + the perfect ending",
+                "a relative pronoun + an infinitive",
+                "two finite indicative verbs joined by καί"
+              ] }
           ]
         },
         {
@@ -1556,7 +1725,27 @@
             { form: "command: do X (one decisive act)",
               prompt: "Which tense of imperative typically presents the action as a single whole?",
               answer: "aorist (perfective aspect)",
-              choices: ["aorist (perfective aspect)", "present (imperfective aspect)", "perfect (stative)", "future indicative"] }
+              choices: ["aorist (perfective aspect)", "present (imperfective aspect)", "perfect (stative)", "future indicative"] },
+            { form: "outside the indicative",
+              prompt: "Outside the indicative (subjunctive, imperative, infinitive, participle), what does the choice of tense primarily encode?",
+              answer: "aspect, not time",
+              choices: [
+                "aspect, not time",
+                "absolute past, present, or future time",
+                "mood",
+                "person and number"
+              ],
+              note: "Only the indicative consistently anchors time. Elsewhere, present/aorist/perfect is about how the action is portrayed." },
+            { form: "perfect imperative",
+              prompt: "A perfect-tense imperative (rare) is best understood as expressing…",
+              answer: "a state to be maintained ('stay in this condition')",
+              choices: [
+                "a state to be maintained ('stay in this condition')",
+                "a single past command",
+                "a future-time command",
+                "a generic timeless command"
+              ],
+              note: "E.g. πεφίμωσο ('be still!', Mark 4:39) — stative force." }
           ]
         }
       ]
@@ -1819,7 +2008,27 @@
                 "present active indicative, 3rd pl.",
                 "future middle indicative, 3rd pl.",
                 "imperfect middle/passive indicative, 3rd pl."
-              ] }
+              ] },
+            { form: "deponent verbs",
+              prompt: "What is a deponent verb?",
+              answer: "a verb that is middle/passive in form but active in meaning",
+              choices: [
+                "a verb that is middle/passive in form but active in meaning",
+                "a verb that lacks a present tense",
+                "a verb that drops the augment in the past",
+                "a verb that is only attested in the perfect"
+              ],
+              note: "ἔρχομαι ('I come'), δέχομαι ('I receive'), γίνομαι ('I become') — middle in form, no active counterpart." },
+            { form: "ἐλυόμην",
+              prompt: "Parse this form.",
+              answer: "imperfect middle/passive indicative, 1st sg.",
+              choices: [
+                "imperfect middle/passive indicative, 1st sg.",
+                "present middle/passive indicative, 1st sg.",
+                "aorist middle indicative, 1st sg.",
+                "imperfect active indicative, 1st sg."
+              ],
+              note: "augment + present stem + middle/passive secondary endings = imperfect M/P." }
           ]
         },
         {
@@ -1860,7 +2069,17 @@
             { form: "ἡμῶν vs ὑμῶν",
               prompt: "Which means 'of us' (genitive of 'we')?",
               answer: "ἡμῶν",
-              choices: ["ἡμῶν", "ὑμῶν", "both — they are interchangeable", "neither — both are 3rd person"] }
+              choices: ["ἡμῶν", "ὑμῶν", "both — they are interchangeable", "neither — both are 3rd person"] },
+            { form: "ἐκεῖνος ὁ ἄνθρωπος",
+              prompt: "Translate.",
+              answer: "'that man'",
+              choices: ["'that man'", "'this man'", "'that man is human'", "'the same man'"],
+              note: "ἐκεῖνος = far demonstrative; like οὗτος, it stays outside the article phrase." },
+            { form: "ἐμοί vs μοί",
+              prompt: "Which form of the 1st-singular dative pronoun is the emphatic one?",
+              answer: "ἐμοί (accented form)",
+              choices: ["ἐμοί (accented form)", "μοί (enclitic form)", "both — interchangeable", "neither — they are 2nd person"],
+              note: "Greek 1st/2nd singular pronouns have an emphatic form (ἐμοῦ, ἐμοί, ἐμέ) and an unaccented enclitic (μου, μοι, με)." }
           ]
         }
       ]
@@ -1884,7 +2103,26 @@
                 "Relative pronouns always default to accusative.",
                 "It's a typo for ὁ ἀπόστολος."
               ],
-              note: "Gender + number from the antecedent; case from the relative's own clause." }
+              note: "Gender + number from the antecedent; case from the relative's own clause." },
+            { form: "ἡ ἀδελφὴ ἣ μένει",
+              prompt: "Why does ἥ have feminine form here?",
+              answer: "It agrees with its antecedent ἀδελφή in gender and number.",
+              choices: [
+                "It agrees with its antecedent ἀδελφή in gender and number.",
+                "Relative pronouns default to feminine when no neuter is present.",
+                "The feminine form is required by μένει.",
+                "It's actually the article ἡ, not a relative pronoun."
+              ] },
+            { form: "οὓς εἶδεν",
+              prompt: "What does this relative clause specify about its (unstated) antecedent?",
+              answer: "The antecedent is masculine plural; ὅς's case (acc.) marks it as the object of εἶδεν.",
+              choices: [
+                "The antecedent is masculine plural; ὅς's case (acc.) marks it as the object of εἶδεν.",
+                "The antecedent must be neuter plural.",
+                "The antecedent is genitive plural.",
+                "There must be no antecedent — οὕς cannot stand alone."
+              ],
+              note: "Even when the antecedent is omitted, gender/number of the relative reveals it." }
           ]
         },
         {
@@ -2113,7 +2351,22 @@
             { form: "ὅταν λύσῃ",
               prompt: "Translate.",
               answer: "'whenever he unties'",
-              choices: ["'whenever he unties'", "'when he untied'", "'because he unties'", "'in order that he untie'"] }
+              choices: ["'whenever he unties'", "'when he untied'", "'because he unties'", "'in order that he untie'"] },
+            { form: "ὅπου ἂν ᾖ",
+              prompt: "Translate.",
+              answer: "'wherever he is'",
+              choices: ["'wherever he is'", "'where he was'", "'when he is there'", "'because he is there'"],
+              note: "Indefinite local clause: ὅπου + ἄν + subjunctive." },
+            { form: "ἐάν τις ἀκούσῃ",
+              prompt: "Translate.",
+              answer: "'if anyone hears' / 'whoever hears'",
+              choices: [
+                "'if anyone hears' / 'whoever hears'",
+                "'if he heard'",
+                "'because someone hears'",
+                "'so that someone may hear'"
+              ],
+              note: "ἐάν τις = stock NT phrasing for 'whoever'." }
           ]
         },
         {
@@ -2149,7 +2402,27 @@
             { form: "πίστευε vs πίστευσον",
               prompt: "Which captures the imperfective ('keep on believing') sense?",
               answer: "πίστευε (present imperative)",
-              choices: ["πίστευε (present imperative)", "πίστευσον (aorist imperative)", "both equally", "neither — both are perfective"] }
+              choices: ["πίστευε (present imperative)", "πίστευσον (aorist imperative)", "both equally", "neither — both are perfective"] },
+            { form: "aspect, not time",
+              prompt: "In the imperative, what does the choice of present vs aorist primarily encode?",
+              answer: "aspect (how the action is portrayed), not time",
+              choices: [
+                "aspect (how the action is portrayed), not time",
+                "absolute time (present time vs past time)",
+                "voice (active vs middle)",
+                "person (2nd vs 3rd)"
+              ],
+              note: "All imperatives refer to action that has not yet happened. Tense form signals aspect only." },
+            { form: "μή + present vs μή + aorist subj.",
+              prompt: "Which combination forbids an ongoing action ('stop doing X') vs which forbids inception ('don't start')?",
+              answer: "μή + present imperative = 'stop doing'; μή + aorist subjunctive = 'don't start'",
+              choices: [
+                "μή + present imperative = 'stop doing'; μή + aorist subjunctive = 'don't start'",
+                "Reverse — μή + aorist subjunctive = 'stop doing'; μή + present imperative = 'don't start'",
+                "Both work identically.",
+                "Both are forbidden in koine Greek."
+              ],
+              note: "Aspect again: imperfective (present impv.) views the action as ongoing; perfective (aor. subj.) views it as a single whole, hence 'don't start'." }
           ]
         }
       ]
