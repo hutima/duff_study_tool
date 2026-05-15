@@ -1332,6 +1332,73 @@
     margin-top: 6px;
   }
 
+  .user-guide-changelog {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: 10px;
+    margin: 14px 0 18px;
+    padding: 10px 14px;
+  }
+
+  .user-guide-changelog > summary {
+    cursor: pointer;
+    list-style: none;
+    font-family: 'Cinzel', serif;
+    color: var(--gold-dim);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-size: 12px;
+  }
+
+  .user-guide-changelog > summary::-webkit-details-marker { display: none; }
+
+  .user-guide-changelog > summary::after {
+    content: ' \25BE';
+    color: var(--muted);
+  }
+
+  .user-guide-changelog[open] > summary::after {
+    content: ' \25B4';
+  }
+
+  .user-guide-changelog[open] > summary {
+    margin-bottom: 10px;
+  }
+
+  .user-guide-changelog-version {
+    border-top: 1px solid var(--border);
+    padding: 8px 0 4px;
+  }
+
+  .user-guide-changelog-version:first-of-type {
+    border-top: none;
+    padding-top: 4px;
+  }
+
+  .user-guide-changelog-version > summary {
+    cursor: pointer;
+    list-style: none;
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    letter-spacing: 1px;
+    color: var(--cream);
+  }
+
+  .user-guide-changelog-version > summary::-webkit-details-marker { display: none; }
+
+  .user-guide-changelog-version > summary::before {
+    content: '\25B8 ';
+    color: var(--gold-dim);
+  }
+
+  .user-guide-changelog-version[open] > summary::before {
+    content: '\25BE ';
+  }
+
+  .user-guide-changelog-version > .user-guide-list {
+    margin-top: 8px;
+  }
+
   .transfer-modal {
     max-width: 700px;
   }

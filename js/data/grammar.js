@@ -419,7 +419,7 @@
               choices: ["on, upon (location)", "onto (motion)", "on the basis of", "after"] },
             { form: "ἐπί + dative", prompt: "ἐπί + dative means…",
               answer: "on the basis of / at",
-              choices: ["on the basis of / at", "onto (motion)", "against", "through"],
+              choices: ["on the basis of / at", "onto (motion)", "on, upon (location)", "against"],
               note: "ἐπί is the most flexible preposition — context decides the case." }
           ]
         },
@@ -497,9 +497,9 @@
           ]
         },
         {
-          family: "Attributive position",
-          lemma: "attributive position",
-          gloss: "modifying a noun directly",
+          family: "Adjective position and use",
+          lemma: "ἀγαθός, ἀγαθή, ἀγαθόν",
+          gloss: "good",
           questions: [
             { form: "ὁ ἀγαθὸς λόγος",
               prompt: "What position is ἀγαθός in?",
@@ -523,9 +523,9 @@
           ]
         },
         {
-          family: "Predicate position",
-          lemma: "predicate position",
-          gloss: "asserting something about the noun",
+          family: "Adjective position and use",
+          lemma: "ἀγαθός, ἀγαθή, ἀγαθόν",
+          gloss: "good",
           questions: [
             { form: "ὁ λόγος ἀγαθός",
               prompt: "What position is ἀγαθός in, and how do you translate?",
@@ -544,9 +544,9 @@
           ]
         },
         {
-          family: "Substantive use",
-          lemma: "substantive adjective",
-          gloss: "adjective used as a noun",
+          family: "Adjective position and use",
+          lemma: "ἀγαθός, ἀγαθή, ἀγαθόν",
+          gloss: "good",
           questions: [
             { form: "ὁ ἀγαθός",
               prompt: "What does this likely mean (no noun expressed)?",
@@ -918,7 +918,7 @@
       notes: "Complex sentences — purpose, content, and conditional clauses",
       items: [
         {
-          family: "ἵνα + subjunctive",
+          family: "ἵνα clauses",
           lemma: "ἵνα",
           gloss: "in order that / that",
           questions: [
@@ -1095,7 +1095,7 @@
       notes: "Third declension Part 2 — σ-stem, ι-stem, ευ-stem",
       items: [
         {
-          family: "σ-stem neuters",
+          family: "Third-declension stem patterns",
           lemma: "γένος, γένους",
           gloss: "race, kind",
           questions: [
@@ -1116,7 +1116,7 @@
           ]
         },
         {
-          family: "ι-stems",
+          family: "Third-declension stem patterns",
           lemma: "πόλις, πόλεως",
           gloss: "city",
           questions: [
@@ -1143,7 +1143,7 @@
           ]
         },
         {
-          family: "ευ-stems",
+          family: "Third-declension stem patterns",
           lemma: "βασιλεύς, βασιλέως",
           gloss: "king",
           questions: [
@@ -1341,7 +1341,7 @@
       notes: "The perfect — reduplication, completed action with present results",
       items: [
         {
-          family: "Reduplication",
+          family: "Perfect-stem formation",
           lemma: "perfect stem formation",
           gloss: "the visual marker of the perfect",
           questions: [
@@ -1398,7 +1398,7 @@
           ]
         },
         {
-          family: "Pluperfect",
+          family: "Layered past-tense form",
           lemma: "ἐλελύκειν",
           gloss: "I had untied",
           questions: [
@@ -1423,8 +1423,8 @@
       notes: "The subjunctive — long-vowel marker and its main uses",
       items: [
         {
-          family: "Subjunctive form",
-          lemma: "λύω subjunctive",
+          family: "Long-vowel verb forms",
+          lemma: "λύω",
           gloss: "long-vowel theme marker",
           questions: [
             { form: "subjunctive marker",
@@ -1518,7 +1518,7 @@
       notes: "Using verbs — periphrastics and aspect choice",
       items: [
         {
-          family: "Periphrastic constructions",
+          family: "εἰμί + participle constructions",
           lemma: "εἰμί + participle",
           gloss: "verb-of-being plus participle",
           questions: [
@@ -1888,9 +1888,9 @@
           ]
         },
         {
-          family: "Second aorist recognition",
-          lemma: "suppletive 2nd aorists",
-          gloss: "different stem, secondary endings",
+          family: "Past-tense form parsing",
+          lemma: "λέγω / ἔρχομαι",
+          gloss: "suppletive past-tense stems",
           questions: [
             { form: "ἦλθον",
               prompt: "Parse this form (in isolation).",
@@ -1991,7 +1991,7 @@
       notes: "Passive endings · passive participles · perfect · pluperfect · square of stops",
       items: [
         {
-          family: "Aorist passive",
+          family: "Passive form parsing",
           lemma: "λύω passive",
           gloss: "θη marker",
           questions: [
@@ -2075,8 +2075,8 @@
       notes: "Subjunctive · indefinite constructions · 3rd-person imperative · aspect",
       items: [
         {
-          family: "Subjunctive recognition",
-          lemma: "λύω subjunctive",
+          family: "Long-vowel verb forms",
+          lemma: "λύω",
           gloss: "long-vowel marker",
           questions: [
             { form: "λύωμεν",
