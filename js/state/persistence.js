@@ -11,7 +11,7 @@ import { isPlainObject, shuffleArray } from '../utils/helpers.js';
 import { getStorage, isLikelyIOS } from '../utils/storage.js';
 import { sortSetKeys } from '../domain/deck/ordering.js';
 import { filterHardVocabCards } from '../domain/deck/filters.js';
-import { STATE_MIGRATIONS, summarizePersistedState, formatPersistedStateSummary, compactPersistedState } from './migrations.js';
+import { STATE_MIGRATIONS, summarizePersistedState, formatPersistedStateSummary, compactPersistedState, compactRuntimeStores } from './migrations.js';
 import {
   sanitizeGamificationState,
   STORAGE_KEY,
@@ -68,9 +68,12 @@ export function buildPersistedStatePayload() {
     };
   }
   const usage = host.ensureUsageStats();
-  // compactPersistedState builds fresh trimmed copies of the bulky stores, so
-  // runtime.* is left untouched — every save and JSON export stays as small as
-  // possible without mutating live state.
+  // Trim the live runtime stores first (in place, so references like
+  // runtime.marks stay valid): getWordProgress re-seeds a default entry for
+  // every card rendered, so the in-memory state must be compacted too or it
+  // regrows across a session. compactPersistedState then guarantees the
+  // serialized payload is compact regardless of how it was sourced.
+  compactRuntimeStores(runtime);
   return compactPersistedState({
     currentSessionId: runtime.currentSession ? runtime.currentSession.id : null,
     selectedKeys: [...runtime.selectedKeys],

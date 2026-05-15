@@ -278,6 +278,41 @@ export function compactPersistedState(state) {
   return next;
 }
 
+// In-place variant for the live runtime stores. compactPersistedState only
+// trims the save payload, but getWordProgress re-seeds a default entry into
+// the runtime store for every card the app renders, so without this the
+// in-memory state regrows across a session even though each save stays small.
+// Mutates the bucket objects rather than reassigning them so existing
+// references (e.g. runtime.marks, which aliases a marks bucket) stay valid.
+// These runtime stores are always in the nested g2e/e2g/morph shape by the
+// time this runs (ensureDirectionalStores has migrated any legacy flat data).
+function trimRuntimeDirectionalStore(store, keepValue) {
+  if (!isPlainObject(store)) return;
+  Object.keys(store).forEach(bucketKey => {
+    const bucket = store[bucketKey];
+    if (!isPlainObject(bucket)) return;
+    if (!KNOWN_DIRECTION_BUCKETS.includes(bucketKey)) {
+      // Stray unreachable bucket (e.g. legacy "morph_e2g") — drop once empty.
+      if (!Object.keys(bucket).length) delete store[bucketKey];
+      return;
+    }
+    Object.keys(bucket).forEach(id => {
+      if (!keepValue(bucket[id])) delete bucket[id];
+    });
+  });
+}
+
+export function compactRuntimeStores({ globalWordProgress, globalWordMarks, deckStates } = {}) {
+  trimRuntimeDirectionalStore(globalWordProgress, entry => !isEmptyProgressEntry(entry));
+  trimRuntimeDirectionalStore(globalWordMarks, mark => mark === 'known' || mark === 'unsure');
+  if (isPlainObject(deckStates)) {
+    const survivors = compactDeckStates(deckStates);
+    Object.keys(deckStates).forEach(key => {
+      if (!(key in survivors)) delete deckStates[key];
+    });
+  }
+}
+
 export const STATE_MIGRATIONS = [
   {
     name: 'card-ids-legacy-raw-to-indexed-stable',
