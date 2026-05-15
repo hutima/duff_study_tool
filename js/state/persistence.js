@@ -554,6 +554,34 @@ export function markActiveDeckRef() {
   };
 }
 
+// Obsolete localStorage keys from earlier save formats. restoreState reads
+// them once as a migration fallback (see the fallback chain below); left in
+// place afterwards they are pure dead weight against the small iOS Safari
+// quota, which is what eventually makes setItem throw.
+const LEGACY_STORAGE_KEYS = [
+  'greekFlashcardsStateV17',
+  'greekFlashcardsStateV15',
+  'greekFlashcardsStateV14',
+  'greekFlashcardsStateV12',
+  'greekFlashcardsStateV11',
+  'greekFlashcardsStateV10'
+];
+
+function clearLegacySaves(storage) {
+  let cleared = false;
+  for (const key of LEGACY_STORAGE_KEYS) {
+    try {
+      if (storage.getItem(key) !== null) {
+        storage.removeItem(key);
+        cleared = true;
+      }
+    } catch (err) {
+      // A removeItem failure just means we couldn't reclaim that one key.
+    }
+  }
+  return cleared;
+}
+
 export function saveCurrentDeckStateToBank() {
   const ref = runtime.activeDeckRef;
   if (!ref || !runtime.deck.length) return;
@@ -583,12 +611,20 @@ export function saveState() {
   try {
     storage.setItem(STORAGE_KEY, JSON.stringify(buildPersistedStatePayload()));
   } catch (err) {
+    // Almost always QuotaExceededError on iOS. Reclaim space by dropping
+    // obsolete legacy-format saves, then retry; if it still won't fit, drop
+    // the deck-state bank (a pure resume convenience) and try once more.
+    clearLegacySaves(storage);
     try {
-      const payload = buildPersistedStatePayload();
-      payload.deckStates = {};
-      storage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      storage.setItem(STORAGE_KEY, JSON.stringify(buildPersistedStatePayload()));
     } catch (err2) {
-      console.warn('saveState: unable to persist progress to localStorage.', err2);
+      try {
+        const payload = buildPersistedStatePayload();
+        payload.deckStates = {};
+        storage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      } catch (err3) {
+        console.warn('saveState: unable to persist progress to localStorage.', err3);
+      }
     }
   }
 }
@@ -667,6 +703,10 @@ export function restoreState() {
     // so an oversized legacy save shrinks on first load instead of repeatedly
     // failing to persist.
     saved = compactPersistedState(saved);
+    // Once the current-format save exists, the obsolete legacy-format keys are
+    // pure dead weight against the iOS quota — reclaim that space. Guarded so
+    // we never drop a legacy save still being used as the load source.
+    if (storage.getItem(STORAGE_KEY) !== null) clearLegacySaves(storage);
 
     runtime.selectedKeys = Array.isArray(saved.selectedKeys) ? sortSetKeys(saved.selectedKeys.map(String)) : [];
     runtime.requiredOnly = saved.requiredOnly !== false;
