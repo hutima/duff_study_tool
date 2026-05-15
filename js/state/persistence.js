@@ -11,7 +11,7 @@ import { isPlainObject, shuffleArray } from '../utils/helpers.js';
 import { getStorage, isLikelyIOS } from '../utils/storage.js';
 import { sortSetKeys } from '../domain/deck/ordering.js';
 import { filterHardVocabCards } from '../domain/deck/filters.js';
-import { STATE_MIGRATIONS, summarizePersistedState, formatPersistedStateSummary } from './migrations.js';
+import { STATE_MIGRATIONS, summarizePersistedState, formatPersistedStateSummary, compactPersistedState } from './migrations.js';
 import {
   sanitizeGamificationState,
   STORAGE_KEY,
@@ -68,7 +68,10 @@ export function buildPersistedStatePayload() {
     };
   }
   const usage = host.ensureUsageStats();
-  return {
+  // compactPersistedState builds fresh trimmed copies of the bulky stores, so
+  // runtime.* is left untouched — every save and JSON export stays as small as
+  // possible without mutating live state.
+  return compactPersistedState({
     currentSessionId: runtime.currentSession ? runtime.currentSession.id : null,
     selectedKeys: [...runtime.selectedKeys],
     splitSelection: runtime.splitSelection,
@@ -100,7 +103,7 @@ export function buildPersistedStatePayload() {
       lastStudyCountedAt: 0,
       currentStudySession: null
     }
-  };
+  });
 }
 
 function sanitizeImportedState(candidate) {
@@ -143,7 +146,10 @@ function sanitizeImportedState(candidate) {
     currentStudySession: null
   };
 
-  return state;
+  // Imported files (the committed bug-repro save is one) can be multi-megabyte
+  // legacy exports. Compact before it is written to localStorage so the import
+  // itself can't trip the iOS quota.
+  return compactPersistedState(state);
 }
 
 function applyImportedState(state, options = {}) {
@@ -153,7 +159,15 @@ function applyImportedState(state, options = {}) {
   const sanitized = sanitizeImportedState(state);
   if (!sanitized) return false;
 
-  storage.setItem(STORAGE_KEY, JSON.stringify(sanitized));
+  try {
+    storage.setItem(STORAGE_KEY, JSON.stringify(sanitized));
+  } catch (err) {
+    // sanitized is already compacted; if it still won't fit, persist without
+    // the deck-state bank (a pure resume convenience) rather than failing the
+    // whole import.
+    sanitized.deckStates = {};
+    storage.setItem(STORAGE_KEY, JSON.stringify(sanitized));
+  }
   if (options.disclaimerAccepted) {
     storage.setItem(CONSENT_STORAGE_KEY, 'accepted');
     runtime.hasAcceptedDisclaimer = true;
@@ -546,7 +560,10 @@ export function saveCurrentDeckStateToBank() {
     selectedKeys: ref.selectedKeys,
     deckIds: runtime.deck.map(card => card.id),
     currentIdx: runtime.currentIdx,
-    unspacedPendingRecycle: !runtime.spacedRepetition && !!runtime.unspacedPendingRecycle
+    unspacedPendingRecycle: !runtime.spacedRepetition && !!runtime.unspacedPendingRecycle,
+    // Recency stamp so compaction can keep the most recently used selections
+    // and evict stale ones instead of letting the bank grow unbounded.
+    savedAt: Date.now()
   };
 }
 
@@ -555,7 +572,22 @@ export function saveState() {
   if (!storage) return;
   maybeCelebrateLevelUp();
   maybeCelebrateAchievements();
-  storage.setItem(STORAGE_KEY, JSON.stringify(buildPersistedStatePayload()));
+  // saveState runs at the top of renderCard(): a throw here (iOS localStorage
+  // QuotaExceededError is the common one) would abort the re-render and leave
+  // the current card frozen. The payload is already compacted; if it still
+  // won't fit, retry without the deck-state bank, then give up silently —
+  // losing a resume cursor is far better than a frozen UI.
+  try {
+    storage.setItem(STORAGE_KEY, JSON.stringify(buildPersistedStatePayload()));
+  } catch (err) {
+    try {
+      const payload = buildPersistedStatePayload();
+      payload.deckStates = {};
+      storage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    } catch (err2) {
+      console.warn('saveState: unable to persist progress to localStorage.', err2);
+    }
+  }
 }
 
 export function clearSavedState() {
@@ -626,6 +658,12 @@ export function restoreState() {
         console.warn(`Migration "${migration.name}" failed:`, err);
       }
     }
+
+    // Drop legacy/default bloat (empty progress entries, dead direction
+    // buckets, an overgrown deck-state bank) before it is loaded into runtime,
+    // so an oversized legacy save shrinks on first load instead of repeatedly
+    // failing to persist.
+    saved = compactPersistedState(saved);
 
     runtime.selectedKeys = Array.isArray(saved.selectedKeys) ? sortSetKeys(saved.selectedKeys.map(String)) : [];
     runtime.requiredOnly = saved.requiredOnly !== false;
