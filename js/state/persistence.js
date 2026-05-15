@@ -60,7 +60,13 @@ export function configurePersistence(deps) {
 
 export function buildPersistedStatePayload() {
   saveCurrentDeckStateToBank();
-  pruneDeckStateBank();
+  // Compact on every save (not just at load) so the payload can never bloat
+  // back up to the quota mid-session — getWordProgress() keeps minting blank
+  // entries as decks are built, and those would otherwise pile up between
+  // loads. This is safe here: saveState always runs after a handler has
+  // finished its mutations, so any entry still at its defaults is genuinely
+  // untouched and is recreated identically on next access.
+  compactPersistedState();
   // Keep the active mode's selection snapshot fresh before persisting.
   if (runtime.splitSelection && (runtime.studyMode === 'vocab' || runtime.studyMode === 'morph')) {
     runtime.modeSelections[runtime.studyMode] = {
@@ -575,8 +581,9 @@ function isDefaultProgressEntry(p) {
 //   • drops malformed word-mark entries (anything but 'known' / 'unsure')
 //   • caps the deck-state bank — a regenerable per-selection cursor cache
 // Format migration is handled separately by STATE_MIGRATIONS in restoreState;
-// this operates on the already-migrated runtime.* stores. Safe to call any
-// time those stores are fully populated (load time, quota recovery).
+// this operates on the already-migrated runtime.* stores. Runs on every save
+// (via buildPersistedStatePayload) plus at load time and on quota recovery,
+// so the footprint stays minimal no matter how long a session runs.
 export function compactPersistedState() {
   let changed = false;
 
