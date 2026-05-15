@@ -11,7 +11,7 @@ import { isPlainObject, shuffleArray } from '../utils/helpers.js';
 import { getStorage, isLikelyIOS } from '../utils/storage.js';
 import { sortSetKeys } from '../domain/deck/ordering.js';
 import { filterHardVocabCards } from '../domain/deck/filters.js';
-import { STATE_MIGRATIONS, summarizePersistedState, formatPersistedStateSummary } from './migrations.js';
+import { STATE_MIGRATIONS, summarizePersistedState, formatPersistedStateSummary, compactPersistedState, compactRuntimeStores } from './migrations.js';
 import {
   sanitizeGamificationState,
   STORAGE_KEY,
@@ -68,7 +68,13 @@ export function buildPersistedStatePayload() {
     };
   }
   const usage = host.ensureUsageStats();
-  return {
+  // Trim the live runtime stores first (in place, so references like
+  // runtime.marks stay valid): getWordProgress re-seeds a default entry for
+  // every card rendered, so the in-memory state must be compacted too or it
+  // regrows across a session. compactPersistedState then guarantees the
+  // serialized payload is compact regardless of how it was sourced.
+  compactRuntimeStores(runtime);
+  return compactPersistedState({
     currentSessionId: runtime.currentSession ? runtime.currentSession.id : null,
     selectedKeys: [...runtime.selectedKeys],
     splitSelection: runtime.splitSelection,
@@ -100,7 +106,7 @@ export function buildPersistedStatePayload() {
       lastStudyCountedAt: 0,
       currentStudySession: null
     }
-  };
+  });
 }
 
 function sanitizeImportedState(candidate) {
@@ -143,7 +149,10 @@ function sanitizeImportedState(candidate) {
     currentStudySession: null
   };
 
-  return state;
+  // Imported files (the committed bug-repro save is one) can be multi-megabyte
+  // legacy exports. Compact before it is written to localStorage so the import
+  // itself can't trip the iOS quota.
+  return compactPersistedState(state);
 }
 
 function applyImportedState(state, options = {}) {
@@ -153,7 +162,15 @@ function applyImportedState(state, options = {}) {
   const sanitized = sanitizeImportedState(state);
   if (!sanitized) return false;
 
-  storage.setItem(STORAGE_KEY, JSON.stringify(sanitized));
+  try {
+    storage.setItem(STORAGE_KEY, JSON.stringify(sanitized));
+  } catch (err) {
+    // sanitized is already compacted; if it still won't fit, persist without
+    // the deck-state bank (a pure resume convenience) rather than failing the
+    // whole import.
+    sanitized.deckStates = {};
+    storage.setItem(STORAGE_KEY, JSON.stringify(sanitized));
+  }
   if (options.disclaimerAccepted) {
     storage.setItem(CONSENT_STORAGE_KEY, 'accepted');
     runtime.hasAcceptedDisclaimer = true;
@@ -537,6 +554,34 @@ export function markActiveDeckRef() {
   };
 }
 
+// Obsolete localStorage keys from earlier save formats. restoreState reads
+// them once as a migration fallback (see the fallback chain below); left in
+// place afterwards they are pure dead weight against the small iOS Safari
+// quota, which is what eventually makes setItem throw.
+const LEGACY_STORAGE_KEYS = [
+  'greekFlashcardsStateV17',
+  'greekFlashcardsStateV15',
+  'greekFlashcardsStateV14',
+  'greekFlashcardsStateV12',
+  'greekFlashcardsStateV11',
+  'greekFlashcardsStateV10'
+];
+
+function clearLegacySaves(storage) {
+  let cleared = false;
+  for (const key of LEGACY_STORAGE_KEYS) {
+    try {
+      if (storage.getItem(key) !== null) {
+        storage.removeItem(key);
+        cleared = true;
+      }
+    } catch (err) {
+      // A removeItem failure just means we couldn't reclaim that one key.
+    }
+  }
+  return cleared;
+}
+
 export function saveCurrentDeckStateToBank() {
   const ref = runtime.activeDeckRef;
   if (!ref || !runtime.deck.length) return;
@@ -546,7 +591,10 @@ export function saveCurrentDeckStateToBank() {
     selectedKeys: ref.selectedKeys,
     deckIds: runtime.deck.map(card => card.id),
     currentIdx: runtime.currentIdx,
-    unspacedPendingRecycle: !runtime.spacedRepetition && !!runtime.unspacedPendingRecycle
+    unspacedPendingRecycle: !runtime.spacedRepetition && !!runtime.unspacedPendingRecycle,
+    // Recency stamp so compaction can keep the most recently used selections
+    // and evict stale ones instead of letting the bank grow unbounded.
+    savedAt: Date.now()
   };
 }
 
@@ -555,7 +603,30 @@ export function saveState() {
   if (!storage) return;
   maybeCelebrateLevelUp();
   maybeCelebrateAchievements();
-  storage.setItem(STORAGE_KEY, JSON.stringify(buildPersistedStatePayload()));
+  // saveState runs at the top of renderCard(): a throw here (iOS localStorage
+  // QuotaExceededError is the common one) would abort the re-render and leave
+  // the current card frozen. The payload is already compacted; if it still
+  // won't fit, retry without the deck-state bank, then give up silently —
+  // losing a resume cursor is far better than a frozen UI.
+  try {
+    storage.setItem(STORAGE_KEY, JSON.stringify(buildPersistedStatePayload()));
+  } catch (err) {
+    // Almost always QuotaExceededError on iOS. Reclaim space by dropping
+    // obsolete legacy-format saves, then retry; if it still won't fit, drop
+    // the deck-state bank (a pure resume convenience) and try once more.
+    clearLegacySaves(storage);
+    try {
+      storage.setItem(STORAGE_KEY, JSON.stringify(buildPersistedStatePayload()));
+    } catch (err2) {
+      try {
+        const payload = buildPersistedStatePayload();
+        payload.deckStates = {};
+        storage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      } catch (err3) {
+        console.warn('saveState: unable to persist progress to localStorage.', err3);
+      }
+    }
+  }
 }
 
 export function clearSavedState() {
@@ -626,6 +697,16 @@ export function restoreState() {
         console.warn(`Migration "${migration.name}" failed:`, err);
       }
     }
+
+    // Drop legacy/default bloat (empty progress entries, dead direction
+    // buckets, an overgrown deck-state bank) before it is loaded into runtime,
+    // so an oversized legacy save shrinks on first load instead of repeatedly
+    // failing to persist.
+    saved = compactPersistedState(saved);
+    // Once the current-format save exists, the obsolete legacy-format keys are
+    // pure dead weight against the iOS quota — reclaim that space. Guarded so
+    // we never drop a legacy save still being used as the load source.
+    if (storage.getItem(STORAGE_KEY) !== null) clearLegacySaves(storage);
 
     runtime.selectedKeys = Array.isArray(saved.selectedKeys) ? sortSetKeys(saved.selectedKeys.map(String)) : [];
     runtime.requiredOnly = saved.requiredOnly !== false;
