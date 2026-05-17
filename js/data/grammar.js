@@ -196,7 +196,7 @@
               choices: [
                 "an equative (linking) verb — both sides are nominative",
                 "a transitive verb — takes a direct object in the accusative",
-                "a deponent — middle in form, active in meaning",
+                "an action verb — the subject performs an action on something",
                 "an impersonal verb"
               ],
               note: "After εἰμί the predicate noun stays in the nominative: ὁ θεὸς ἀγάπη ἐστίν." }
@@ -394,18 +394,18 @@
           gloss: "by, under / for, above",
           questions: [
             { form: "ὑπό + genitive", prompt: "ὑπό + genitive means…",
-              answer: "by (agent of a passive verb)",
-              choices: ["by (agent of a passive verb)", "under (location)", "above", "on behalf of"],
-              note: "Classic agent construction: ἐλύθη ὑπὸ τοῦ ἀνθρώπου = 'he was untied by the man'." },
+              answer: "by (marking the doer of the action)",
+              choices: ["by (marking the doer of the action)", "under (location)", "above", "on behalf of"],
+              note: "Marks the doer of the action; the construction will return when passive verbs are introduced later." },
             { form: "ὑπό + accusative", prompt: "ὑπό + accusative means…",
               answer: "under (motion or location)",
-              choices: ["under (motion or location)", "by (agent)", "above", "after"] },
+              choices: ["under (motion or location)", "by (the doer)", "above", "after"] },
             { form: "ὑπέρ + genitive", prompt: "ὑπέρ + genitive means…",
               answer: "on behalf of, for the sake of",
-              choices: ["on behalf of, for the sake of", "above (location)", "by (agent)", "under"] },
+              choices: ["on behalf of, for the sake of", "above (location)", "by (the doer)", "under"] },
             { form: "ὑπέρ + accusative", prompt: "ὑπέρ + accusative means…",
               answer: "above, beyond (rare)",
-              choices: ["above, beyond (rare)", "on behalf of", "by (agent)", "with"] }
+              choices: ["above, beyond (rare)", "on behalf of", "by (the doer)", "with"] }
           ]
         },
         {
@@ -632,7 +632,7 @@
             { form: "ἔλυσα",
               prompt: "What tense is this?",
               answer: "1st aorist (active indicative, 1st sg.)",
-              choices: ["1st aorist (active indicative, 1st sg.)", "imperfect (1st sg.)", "perfect (1st sg.)", "future (1st sg.)"],
+              choices: ["1st aorist (active indicative, 1st sg.)", "imperfect (1st sg.)", "present (1st sg.)", "future (1st sg.)"],
               note: "ε- augment + σα + secondary endings = 1st aorist." }
           ]
         },
@@ -678,9 +678,9 @@
               answer: "future or 1st aorist (with augment)",
               choices: [
                 "future or 1st aorist (with augment)",
-                "perfect",
+                "imperfect",
                 "present indicative",
-                "subjunctive mood"
+                "nothing — σ is just a stem letter"
               ] }
           ]
         }
@@ -710,8 +710,8 @@
               answer: "a contingent / potential action (often after ἵνα, ἐάν)",
               choices: [
                 "a contingent / potential action (often after ἵνα, ἐάν)",
-                "a completed action with present results",
-                "a simple fact",
+                "a plain statement of fact",
+                "a direct command",
                 "direct address"
               ] },
             { form: "infinitive",
@@ -815,8 +815,8 @@
               choices: [
                 "Liquid stems drop the σ and contract — the future looks like an ε-contract present.",
                 "μένω is irregular and has no future.",
-                "It uses second-aorist morphology.",
-                "It is built on a perfect stem."
+                "The future is identical to the present, with no change.",
+                "An iota replaces the σ between stem and ending."
               ],
               note: "μενῶ, μενεῖς, μενεῖ, μενοῦμεν, μενεῖτε, μενοῦσι(ν)." }
           ]
