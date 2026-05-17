@@ -2340,23 +2340,32 @@
 
     "W3O": {
       label: "Week 3 — Course Supplement Grammar",
-      notes: "Middle voice · εἰμί infinitive / participle · demonstratives · personal pronouns",
+      notes: "Middle voice indicative · complete εἰμί · demonstrative paradigms · personal pronouns",
       items: [
         {
-          family: "Middle voice meaning",
+          family: "Middle/passive indicative — λύομαι",
           lemma: "λύομαι",
-          gloss: "middle vs passive distinction",
+          gloss: "present and imperfect middle/passive paradigm",
           questions: [
             { form: "λύομαι",
-              prompt: "Without context, what voice meanings are possible?",
-              answer: "middle ('I untie for myself') or passive ('I am being untied')",
+              prompt: "Parse this form.",
+              answer: "present middle/passive indicative, 1st sg.",
               choices: [
-                "middle ('I untie for myself') or passive ('I am being untied')",
-                "active only ('I untie')",
-                "passive only ('I am being untied')",
-                "deponent only — no active sense"
+                "present middle/passive indicative, 1st sg.",
+                "present middle/passive indicative, 3rd sg.",
+                "imperfect middle/passive indicative, 1st sg.",
+                "future middle indicative, 1st sg."
+              ] },
+            { form: "λύῃ",
+              prompt: "Parse this form (M/P reading).",
+              answer: "present middle/passive indicative, 2nd sg.",
+              choices: [
+                "present middle/passive indicative, 2nd sg.",
+                "present active indicative, 3rd sg.",
+                "imperfect middle/passive indicative, 2nd sg.",
+                "future middle indicative, 2nd sg."
               ],
-              note: "In the present and imperfect, middle and passive share the same form. Context decides." },
+              note: "2nd-sg M/P ending -ῃ comes from σαι: λύεσαι → λύῃ." },
             { form: "λύονται",
               prompt: "Parse this form.",
               answer: "present middle/passive indicative, 3rd pl.",
@@ -2366,16 +2375,6 @@
                 "future middle indicative, 3rd pl.",
                 "imperfect middle/passive indicative, 3rd pl."
               ] },
-            { form: "deponent verbs",
-              prompt: "What is a deponent verb?",
-              answer: "a verb that is middle/passive in form but active in meaning",
-              choices: [
-                "a verb that is middle/passive in form but active in meaning",
-                "a verb that lacks a present tense",
-                "a verb that drops the augment in the past",
-                "a verb that is only attested in the perfect"
-              ],
-              note: "ἔρχομαι ('I come'), δέχομαι ('I receive'), γίνομαι ('I become') — middle in form, no active counterpart." },
             { form: "ἐλυόμην",
               prompt: "Parse this form.",
               answer: "imperfect middle/passive indicative, 1st sg.",
@@ -2385,7 +2384,89 @@
                 "aorist middle indicative, 1st sg.",
                 "imperfect active indicative, 1st sg."
               ],
-              note: "augment + present stem + middle/passive secondary endings = imperfect M/P." }
+              note: "augment + present stem + middle/passive secondary endings = imperfect M/P." },
+            { form: "ἐλύου",
+              prompt: "Parse this form.",
+              answer: "imperfect middle/passive indicative, 2nd sg.",
+              choices: [
+                "imperfect middle/passive indicative, 2nd sg.",
+                "imperfect middle/passive indicative, 3rd sg.",
+                "present middle/passive indicative, 2nd sg.",
+                "aorist middle indicative, 2nd sg."
+              ],
+              note: "Secondary 2nd-sg M/P -ου comes from -εσο (σ drops, ε + ο → ου)." }
+          ]
+        },
+        {
+          family: "Middle/passive future and aorist — λύομαι",
+          lemma: "λύσομαι / ἐλυσάμην",
+          gloss: "future middle and aorist middle paradigm",
+          questions: [
+            { form: "λύσομαι",
+              prompt: "Parse this form.",
+              answer: "future middle indicative, 1st sg.",
+              choices: [
+                "future middle indicative, 1st sg.",
+                "future active indicative, 1st sg.",
+                "present middle/passive indicative, 1st sg.",
+                "aorist middle indicative, 1st sg."
+              ],
+              note: "λύω stem + σ + middle endings = future middle. (Many active verbs have middle-form futures.)" },
+            { form: "λύσεται",
+              prompt: "Parse this form.",
+              answer: "future middle indicative, 3rd sg.",
+              choices: [
+                "future middle indicative, 3rd sg.",
+                "present middle/passive indicative, 3rd sg.",
+                "aorist middle indicative, 3rd sg.",
+                "future active indicative, 3rd sg."
+              ] },
+            { form: "ἐλυσάμην",
+              prompt: "Parse this form.",
+              answer: "aorist middle indicative, 1st sg.",
+              choices: [
+                "aorist middle indicative, 1st sg.",
+                "imperfect middle/passive indicative, 1st sg.",
+                "aorist active indicative, 1st sg.",
+                "future middle indicative, 1st sg."
+              ],
+              note: "ἐ-λυ-σα-μην: augment + stem + σα + 1st-sg middle ending." }
+          ]
+        },
+        {
+          family: "Complete εἰμί paradigm",
+          lemma: "εἰμί",
+          gloss: "present / future / imperfect",
+          questions: [
+            { form: "ἔσομαι",
+              prompt: "Parse this form of εἰμί.",
+              answer: "future indicative, 1st sg. ('I will be')",
+              choices: [
+                "future indicative, 1st sg. ('I will be')",
+                "present indicative, 1st sg.",
+                "imperfect indicative, 1st sg.",
+                "aorist middle indicative, 1st sg."
+              ],
+              note: "εἰμί has middle-form future endings: ἔσομαι, ἔσῃ, ἔσται, ἐσόμεθα, ἔσεσθε, ἔσονται." },
+            { form: "ἔσται",
+              prompt: "Parse this form of εἰμί.",
+              answer: "future indicative, 3rd sg. ('he/she/it will be')",
+              choices: [
+                "future indicative, 3rd sg. ('he/she/it will be')",
+                "present indicative, 3rd sg.",
+                "imperfect indicative, 3rd sg.",
+                "future indicative, 3rd pl."
+              ] },
+            { form: "ἤμεθα",
+              prompt: "Parse this form of εἰμί.",
+              answer: "imperfect indicative, 1st pl. ('we were')",
+              choices: [
+                "imperfect indicative, 1st pl. ('we were')",
+                "present indicative, 1st pl.",
+                "imperfect indicative, 2nd pl.",
+                "future indicative, 1st pl."
+              ],
+              note: "ἤμην, ἦς, ἦν, ἤμεθα (or ἦμεν), ἦτε, ἦσαν." }
           ]
         },
         {
@@ -2429,34 +2510,128 @@
           ]
         },
         {
-          family: "Demonstratives and personal pronouns",
-          lemma: "οὗτος / ἐκεῖνος / ἐγώ / σύ",
-          gloss: "near, far, 1st, 2nd person",
+          family: "Near demonstrative paradigm — οὗτος",
+          lemma: "οὗτος, αὕτη, τοῦτο",
+          gloss: "this",
           questions: [
-            { form: "οὗτος ὁ ἀπόστολος",
-              prompt: "Why is οὗτος in predicate position with the article on ἀπόστολος?",
-              answer: "Demonstratives normally take predicate position with their noun — translated attributively",
+            { form: "οὗτος",
+              prompt: "Parse this form.",
+              answer: "nominative singular masculine",
               choices: [
-                "Demonstratives normally take predicate position with their noun — translated attributively",
-                "It's a typo; οὗτος should follow ἀπόστολος",
-                "Predicate position changes the meaning to 'the apostle is this one'",
-                "οὗτος is here a relative pronoun"
+                "nominative singular masculine",
+                "nominative singular feminine",
+                "nominative plural masculine",
+                "accusative singular masculine"
+              ] },
+            { form: "αὕτη",
+              prompt: "Parse this form.",
+              answer: "nominative singular feminine ('this')",
+              choices: [
+                "nominative singular feminine ('this')",
+                "nominative singular feminine of αὐτός ('she herself')",
+                "nominative plural feminine of οὗτος",
+                "dative singular feminine"
               ],
-              note: "οὗτος ὁ ἀπόστολος = 'this apostle'; never *ὁ οὗτος ἀπόστολος." },
-            { form: "ἡμῶν vs ὑμῶν",
-              prompt: "Which means 'of us' (genitive of 'we')?",
-              answer: "ἡμῶν",
-              choices: ["ἡμῶν", "ὑμῶν", "both — they are interchangeable", "neither — both are 3rd person"] },
-            { form: "ἐκεῖνος ὁ ἄνθρωπος",
-              prompt: "Translate.",
-              answer: "'that man'",
-              choices: ["'that man'", "'this man'", "'that man is human'", "'the same man'"],
-              note: "ἐκεῖνος = far demonstrative; like οὗτος, it stays outside the article phrase." },
-            { form: "ἐμοί vs μοί",
-              prompt: "Which form of the 1st-singular dative pronoun is the emphatic one?",
-              answer: "ἐμοί (accented form)",
-              choices: ["ἐμοί (accented form)", "μοί (enclitic form)", "both — interchangeable", "neither — they are 2nd person"],
-              note: "Greek 1st/2nd singular pronouns have an emphatic form (ἐμοῦ, ἐμοί, ἐμέ) and an unaccented enclitic (μου, μοι, με)." }
+              note: "αὕτη (rough breathing) is the demonstrative; αὐτή (smooth) is αὐτός." },
+            { form: "τοῦτο",
+              prompt: "Parse this form.",
+              answer: "nominative or accusative singular neuter",
+              choices: [
+                "nominative or accusative singular neuter",
+                "nominative singular masculine",
+                "genitive singular neuter",
+                "nominative plural neuter"
+              ] },
+            { form: "τούτων",
+              prompt: "Parse this form.",
+              answer: "genitive plural (all genders)",
+              choices: [
+                "genitive plural (all genders)",
+                "dative plural (all genders)",
+                "genitive singular masculine/neuter",
+                "accusative plural masculine"
+              ] }
+          ]
+        },
+        {
+          family: "Far demonstrative paradigm — ἐκεῖνος",
+          lemma: "ἐκεῖνος, ἐκείνη, ἐκεῖνο",
+          gloss: "that",
+          questions: [
+            { form: "ἐκεῖνος",
+              prompt: "Parse this form.",
+              answer: "nominative singular masculine ('that one')",
+              choices: [
+                "nominative singular masculine ('that one')",
+                "nominative singular feminine",
+                "nominative plural masculine",
+                "accusative singular masculine"
+              ] },
+            { form: "ἐκείνῃ",
+              prompt: "Parse this form.",
+              answer: "dative singular feminine",
+              choices: [
+                "dative singular feminine",
+                "nominative singular feminine",
+                "dative singular masculine/neuter",
+                "dative plural feminine"
+              ] },
+            { form: "ἐκείνου",
+              prompt: "Parse this form.",
+              answer: "genitive singular masculine/neuter",
+              choices: [
+                "genitive singular masculine/neuter",
+                "accusative singular masculine",
+                "genitive plural masculine",
+                "dative singular masculine/neuter"
+              ],
+              note: "ἐκεῖνος declines just like αὐτός / 2-1-2 adjectives." }
+          ]
+        },
+        {
+          family: "First and second personal pronouns",
+          lemma: "ἐγώ / σύ",
+          gloss: "1st and 2nd person pronoun paradigm",
+          questions: [
+            { form: "ἐμοῦ",
+              prompt: "Parse this form.",
+              answer: "genitive singular ('of me') — emphatic 1st sg.",
+              choices: [
+                "genitive singular ('of me') — emphatic 1st sg.",
+                "dative singular — emphatic 1st sg.",
+                "accusative singular — emphatic 1st sg.",
+                "genitive plural ('of us')"
+              ],
+              note: "Emphatic forms: ἐμοῦ / ἐμοί / ἐμέ. Enclitic forms: μου / μοι / με." },
+            { form: "ἡμῶν",
+              prompt: "Parse this form.",
+              answer: "genitive plural ('of us')",
+              choices: [
+                "genitive plural ('of us')",
+                "genitive plural ('of you all')",
+                "dative plural ('to us')",
+                "accusative plural ('us')"
+              ],
+              note: "ἡμῶν (1pl) vs ὑμῶν (2pl) differ only by the breathing/accent — easy to confuse." },
+            { form: "ὑμῖν",
+              prompt: "Parse this form.",
+              answer: "dative plural ('to you all')",
+              choices: [
+                "dative plural ('to you all')",
+                "dative plural ('to us')",
+                "genitive plural ('of you all')",
+                "nominative plural ('you all')"
+              ] },
+            { form: "σέ",
+              prompt: "Parse this form.",
+              answer: "accusative singular ('you') — emphatic 2nd sg.",
+              choices: [
+                "accusative singular ('you') — emphatic 2nd sg.",
+                "accusative singular — enclitic 2nd sg.",
+                "nominative singular 2nd sg.",
+                "dative singular 2nd sg."
+              ],
+              note: "Emphatic σοῦ / σοί / σέ vs enclitic σου / σοι / σε." }
           ]
         }
       ]
@@ -2467,45 +2642,63 @@
       notes: "Relative pronouns · second aorist · liquid futures",
       items: [
         {
-          family: "Relative-pronoun agreement",
+          family: "Relative pronoun paradigm — ὅς, ἥ, ὅ",
           lemma: "ὅς, ἥ, ὅ",
-          gloss: "agreement with antecedent",
+          gloss: "who, which",
           questions: [
-            { form: "ὁ ἀπόστολος ὃν εἶδον",
-              prompt: "Why is the relative pronoun ὅν (acc.) when its antecedent ἀπόστολος is nominative?",
-              answer: "Case is set by the relative's role in its own clause (here, direct object of εἶδον).",
+            { form: "ὅς",
+              prompt: "Parse this relative pronoun.",
+              answer: "nominative singular masculine",
               choices: [
-                "Case is set by the relative's role in its own clause (here, direct object of εἶδον).",
-                "It's an error — should be ὅς to match the antecedent.",
-                "Relative pronouns always default to accusative.",
-                "It's a typo for ὁ ἀπόστολος."
-              ],
-              note: "Gender + number from the antecedent; case from the relative's own clause." },
-            { form: "ἡ ἀδελφὴ ἣ μένει",
-              prompt: "Why does ἥ have feminine form here?",
-              answer: "It agrees with its antecedent ἀδελφή in gender and number.",
-              choices: [
-                "It agrees with its antecedent ἀδελφή in gender and number.",
-                "Relative pronouns default to feminine when no neuter is present.",
-                "The feminine form is required by μένει.",
-                "It's actually the article ἡ, not a relative pronoun."
+                "nominative singular masculine",
+                "nominative singular feminine",
+                "accusative singular masculine",
+                "nominative plural masculine"
               ] },
-            { form: "οὓς εἶδεν",
-              prompt: "What does this relative clause specify about its (unstated) antecedent?",
-              answer: "The antecedent is masculine plural; ὅς's case (acc.) marks it as the object of εἶδεν.",
+            { form: "ἥν",
+              prompt: "Parse this relative pronoun.",
+              answer: "accusative singular feminine",
               choices: [
-                "The antecedent is masculine plural; ὅς's case (acc.) marks it as the object of εἶδεν.",
-                "The antecedent must be neuter plural.",
-                "The antecedent is genitive plural.",
-                "There must be no antecedent — οὕς cannot stand alone."
+                "accusative singular feminine",
+                "nominative singular feminine",
+                "accusative singular masculine",
+                "genitive singular feminine"
               ],
-              note: "Even when the antecedent is omitted, gender/number of the relative reveals it." }
+              note: "Distinguish from the article ἥν (acc. sg. fem. of ἡ) by accent: rel. ἥν (acute) vs the article context." },
+            { form: "ᾧ",
+              prompt: "Parse this relative pronoun.",
+              answer: "dative singular masculine/neuter",
+              choices: [
+                "dative singular masculine/neuter",
+                "dative singular feminine",
+                "genitive singular masculine/neuter",
+                "dative plural masculine/neuter"
+              ] },
+            { form: "οὕς",
+              prompt: "Parse this relative pronoun.",
+              answer: "accusative plural masculine",
+              choices: [
+                "accusative plural masculine",
+                "nominative plural masculine",
+                "genitive plural masculine",
+                "accusative plural feminine"
+              ] },
+            { form: "ὧν",
+              prompt: "Parse this relative pronoun.",
+              answer: "genitive plural (all genders)",
+              choices: [
+                "genitive plural (all genders)",
+                "dative plural (all genders)",
+                "genitive singular masculine/neuter",
+                "accusative plural masculine"
+              ],
+              note: "Like the article τῶν, ὧν is identical across all three genders in the genitive plural." }
           ]
         },
         {
-          family: "Past-tense form parsing",
-          lemma: "λέγω / ἔρχομαι",
-          gloss: "suppletive past-tense stems",
+          family: "Second aorist paradigm",
+          lemma: "λαμβάνω / ἔρχομαι / λέγω",
+          gloss: "2nd aorist active indicative across persons",
           questions: [
             { form: "ἦλθον",
               prompt: "Parse this form (in isolation).",
@@ -2535,7 +2728,26 @@
                 "present active indicative, 1st sg. of λαμβάνω",
                 "future active indicative, 1st sg. of λαμβάνω"
               ],
-              note: "λαμβάνω uses the 2nd-aorist stem λαβ-. Imperfect would be ἐλάμβανον (present stem)." }
+              note: "λαμβάνω uses the 2nd-aorist stem λαβ-. Imperfect would be ἐλάμβανον (present stem)." },
+            { form: "ἐλάβετε",
+              prompt: "Parse this form.",
+              answer: "aorist active indicative, 2nd pl. of λαμβάνω",
+              choices: [
+                "aorist active indicative, 2nd pl. of λαμβάνω",
+                "imperfect active indicative, 2nd pl. of λαμβάνω",
+                "present active indicative, 2nd pl. of λαμβάνω",
+                "future active indicative, 2nd pl. of λαμβάνω"
+              ],
+              note: "2nd-aorist endings are the same as imperfect: -ον, -ες, -ε(ν), -ομεν, -ετε, -ον." },
+            { form: "ἦλθες",
+              prompt: "Parse this form.",
+              answer: "aorist active indicative, 2nd sg. of ἔρχομαι ('you came')",
+              choices: [
+                "aorist active indicative, 2nd sg. of ἔρχομαι ('you came')",
+                "imperfect active indicative, 2nd sg. of ἔρχομαι",
+                "present active indicative, 2nd sg. of ἔρχομαι",
+                "future active indicative, 2nd sg. of ἔρχομαι"
+              ] }
           ]
         },
         {
