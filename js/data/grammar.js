@@ -749,7 +749,7 @@
     // ─────────────────────────────────────────────────────────────
     "8": {
       label: "Chapter 8 Grammar",
-      notes: "Contract verbs, contraction rules, and liquid stems",
+      notes: "Contract verbs and contraction rules",
       items: [
         {
           family: "Contract vowel rules — ε contracts",
@@ -798,27 +798,6 @@
               answer: "ου",
               choices: ["ου", "ω", "οι", "ει"],
               note: "πληρο-ομεν → πληροῦμεν." }
-          ]
-        },
-        {
-          family: "Liquid stems",
-          lemma: "μένω, κρίνω, ἀποστέλλω",
-          gloss: "verbs with stems ending in λ, μ, ν, ρ",
-          questions: [
-            { form: "liquid stem",
-              prompt: "What four consonants define the 'liquid' verb class?",
-              answer: "λ, μ, ν, ρ",
-              choices: ["λ, μ, ν, ρ", "π, β, φ", "κ, γ, χ", "τ, δ, θ"] },
-            { form: "future of μένω",
-              prompt: "Why does μένω form its future as μενῶ rather than *μενσω?",
-              answer: "Liquid stems drop the σ and contract — the future looks like an ε-contract present.",
-              choices: [
-                "Liquid stems drop the σ and contract — the future looks like an ε-contract present.",
-                "μένω is irregular and has no future.",
-                "The future is identical to the present, with no change.",
-                "An iota replaces the σ between stem and ending."
-              ],
-              note: "μενῶ, μενεῖς, μενεῖ, μενοῦμεν, μενεῖτε, μενοῦσι(ν)." }
           ]
         }
       ]
@@ -1102,6 +1081,27 @@
                 "future (with σ + primary endings)"
               ],
               note: "Stem reveals the tense; ending reveals person/number." }
+          ]
+        },
+        {
+          family: "Liquid stems",
+          lemma: "μένω, κρίνω, ἀποστέλλω",
+          gloss: "verbs with stems ending in λ, μ, ν, ρ",
+          questions: [
+            { form: "liquid stem",
+              prompt: "What four consonants define the 'liquid' verb class?",
+              answer: "λ, μ, ν, ρ",
+              choices: ["λ, μ, ν, ρ", "π, β, φ", "κ, γ, χ", "τ, δ, θ"] },
+            { form: "future of μένω",
+              prompt: "Why does μένω form its future as μενῶ rather than *μενσω?",
+              answer: "Liquid stems drop the σ and contract — the future looks like an ε-contract present.",
+              choices: [
+                "Liquid stems drop the σ and contract — the future looks like an ε-contract present.",
+                "μένω is irregular and has no future.",
+                "The future is identical to the present, with no change.",
+                "An iota replaces the σ between stem and ending."
+              ],
+              note: "μενῶ, μενεῖς, μενεῖ, μενοῦμεν, μενεῖτε, μενοῦσι(ν)." }
           ]
         },
         {
