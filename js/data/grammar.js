@@ -1018,7 +1018,17 @@
                 "present indicative, 3rd plural ('they come')",
                 "imperfect indicative, 3rd singular ('he was coming')"
               ],
-              note: "Middle/passive endings on a deponent verb: still translated actively." }
+              note: "Middle/passive endings on a deponent verb: still translated actively." },
+            { form: "λύομαι",
+              prompt: "Without context, what voice meanings are possible?",
+              answer: "middle ('I untie for myself') or passive ('I am being untied')",
+              choices: [
+                "middle ('I untie for myself') or passive ('I am being untied')",
+                "active only ('I untie')",
+                "passive only ('I am being untied')",
+                "middle only ('I untie for myself')"
+              ],
+              note: "In the present and imperfect, middle and passive share the same form. Context decides which sense is in play." }
           ]
         }
       ]
@@ -1066,7 +1076,22 @@
                 "'self' (intensive, nom.)",
                 "'them' (acc. pl.)",
                 "'to him' (dat. sg.)"
-              ] }
+              ] },
+            { form: "ἡμῶν vs ὑμῶν",
+              prompt: "Which means 'of us' (genitive of 'we')?",
+              answer: "ἡμῶν",
+              choices: ["ἡμῶν", "ὑμῶν", "both — they are interchangeable", "neither — both are 3rd person"],
+              note: "ἡμῶν (1pl, rough breathing) vs ὑμῶν (2pl, smooth breathing). The breathing is the diagnostic." },
+            { form: "ἐμοί vs μοί",
+              prompt: "Which form of the 1st-singular dative pronoun is the emphatic one?",
+              answer: "ἐμοί (accented form)",
+              choices: [
+                "ἐμοί (accented form)",
+                "μοί (enclitic form)",
+                "both — interchangeable",
+                "neither — they are 2nd person"
+              ],
+              note: "Greek 1st/2nd singular pronouns have an emphatic form (ἐμοῦ, ἐμοί, ἐμέ) and an unaccented enclitic (μου, μοι, με)." }
           ]
         },
         {
@@ -1091,7 +1116,27 @@
                 "'her' — αὐτή acc.",
                 "'the same' — αὐτός attributive"
               ],
-              note: "αὕτη (rough breathing, acute) vs αὐτή (smooth breathing, acute) — small marks, big difference." }
+              note: "αὕτη (rough breathing, acute) vs αὐτή (smooth breathing, acute) — small marks, big difference." },
+            { form: "οὗτος ὁ ἀπόστολος",
+              prompt: "Why is οὗτος in predicate position with the article on ἀπόστολος?",
+              answer: "Demonstratives normally take predicate position with their noun — but they are translated attributively.",
+              choices: [
+                "Demonstratives normally take predicate position with their noun — but they are translated attributively.",
+                "It's a typo; οὗτος should follow ἀπόστολος.",
+                "Predicate position changes the meaning to 'the apostle is this one'.",
+                "οὗτος is functioning here as a relative pronoun."
+              ],
+              note: "οὗτος ὁ ἀπόστολος = 'this apostle'; never *ὁ οὗτος ἀπόστολος." },
+            { form: "ἐκεῖνος ὁ ἄνθρωπος",
+              prompt: "Translate.",
+              answer: "'that man'",
+              choices: [
+                "'that man'",
+                "'this man'",
+                "'the man is that one'",
+                "'the same man'"
+              ],
+              note: "ἐκεῖνος sits outside the article phrase but renders attributively in English, just like οὗτος." }
           ]
         },
         {
@@ -1114,7 +1159,36 @@
               choices: ["nominative singular masculine", "nominative singular feminine", "nominative singular neuter", "accusative singular masculine"] },
             { form: "ᾧ", prompt: "Parse this relative pronoun.",
               answer: "dative singular masculine/neuter",
-              choices: ["dative singular masculine/neuter", "dative singular feminine", "genitive singular masculine/neuter", "dative plural masculine/neuter"] }
+              choices: ["dative singular masculine/neuter", "dative singular feminine", "genitive singular masculine/neuter", "dative plural masculine/neuter"] },
+            { form: "ὁ ἀπόστολος ὃν εἶδον",
+              prompt: "Why is the relative pronoun ὅν (acc.) when its antecedent ἀπόστολος is nominative?",
+              answer: "Case is set by the relative's role in its own clause (here, direct object of εἶδον).",
+              choices: [
+                "Case is set by the relative's role in its own clause (here, direct object of εἶδον).",
+                "It's an error — should be ὅς to match the antecedent.",
+                "Relative pronouns always default to accusative.",
+                "It's a typo for ὁ ἀπόστολος."
+              ],
+              note: "Gender + number come from the antecedent; case comes from the relative's own clause." },
+            { form: "ἡ ἀδελφὴ ἣ μένει",
+              prompt: "Why does ἥ have feminine form here?",
+              answer: "It agrees with its antecedent ἀδελφή in gender and number.",
+              choices: [
+                "It agrees with its antecedent ἀδελφή in gender and number.",
+                "Relative pronouns default to feminine when no neuter is present.",
+                "The feminine form is required by μένει.",
+                "It's actually the article ἡ, not a relative pronoun."
+              ] },
+            { form: "οὓς εἶδεν",
+              prompt: "What does this relative clause specify about its (unstated) antecedent?",
+              answer: "The antecedent is masculine plural; ὅς's case (acc.) marks it as the object of εἶδεν.",
+              choices: [
+                "The antecedent is masculine plural; ὅς's case (acc.) marks it as the object of εἶδεν.",
+                "The antecedent must be neuter plural.",
+                "The antecedent is genitive plural.",
+                "There must be no antecedent — οὕς cannot stand alone."
+              ],
+              note: "Even when the antecedent is omitted, gender/number of the relative reveals it." }
           ]
         },
         {
