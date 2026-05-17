@@ -180,7 +180,7 @@ export function renderCard() {
         <div class="${formClass}">${displayForm}</div>
         ${contextHtml}
         <div class="morph-hint">${card.lemma}</div>
-        <div class="morph-source">${card.sourceLabel}${card.family ? ` · ${card.family}` : ''}${runtime.morphSelfCheck ? ' · Self-check' : ''}</div>
+        <div class="morph-source">${card.sourceLabel}${runtime.morphSelfCheck ? ' · Self-check' : ''}</div>
         ${interactionHtml}
         ${resultHtml}
       </div>`;
