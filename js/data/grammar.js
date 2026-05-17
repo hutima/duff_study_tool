@@ -749,8 +749,92 @@
     // ─────────────────────────────────────────────────────────────
     "8": {
       label: "Chapter 8 Grammar",
-      notes: "Contract verbs and contraction rules",
+      notes: "Other patterns of nouns and verbs — 1st declension, contract verbs, εἰμί, deponent verbs",
       items: [
+        {
+          family: "First-declension feminine nouns",
+          lemma: "ἡμέρα / δόξα / γραφή",
+          gloss: "day / glory / writing",
+          questions: [
+            { form: "ἡμέρα",
+              prompt: "What sub-type of 1st-declension feminine is this?",
+              answer: "α-pure (keeps α throughout the singular)",
+              choices: [
+                "α-pure (keeps α throughout the singular)",
+                "α-impure (α in nom./acc., η in gen./dat.)",
+                "η-stem (η throughout the singular)",
+                "1st-declension masculine"
+              ],
+              note: "Stems ending in ε, ι, or ρ keep α in all four singular cases." },
+            { form: "δόξα",
+              prompt: "What sub-type of 1st-declension feminine is this?",
+              answer: "α-impure (α in nom./acc., η in gen./dat.)",
+              choices: [
+                "α-impure (α in nom./acc., η in gen./dat.)",
+                "α-pure (keeps α throughout the singular)",
+                "η-stem (η throughout the singular)",
+                "2nd-declension feminine"
+              ],
+              note: "δόξα, δόξης, δόξῃ, δόξαν." },
+            { form: "γραφή",
+              prompt: "What sub-type of 1st-declension feminine is this?",
+              answer: "η-stem (η throughout the singular)",
+              choices: [
+                "η-stem (η throughout the singular)",
+                "α-pure (keeps α throughout the singular)",
+                "α-impure (α in nom./acc., η in gen./dat.)",
+                "2nd-declension neuter"
+              ],
+              note: "γραφή, γραφῆς, γραφῇ, γραφήν — η runs through the whole singular." },
+            { form: "1st-decl. plural",
+              prompt: "What plural endings do ALL 1st-declension feminines share?",
+              answer: "-αι, -ῶν, -αις, -ας",
+              choices: [
+                "-αι, -ῶν, -αις, -ας",
+                "-οι, -ων, -οις, -ους",
+                "-α, -ων, -σι, -α",
+                "-ες, -ων, -σι, -ας"
+              ],
+              note: "Sub-type splits matter only in the singular; the plural is uniform." }
+          ]
+        },
+        {
+          family: "First-declension masculine nouns",
+          lemma: "προφήτης / νεανίας",
+          gloss: "prophet / young man",
+          questions: [
+            { form: "προφήτης",
+              prompt: "What declension and gender is προφήτης?",
+              answer: "1st declension, masculine",
+              choices: [
+                "1st declension, masculine",
+                "1st declension, feminine",
+                "2nd declension, masculine",
+                "2nd declension, neuter"
+              ],
+              note: "A handful of 1st-decl. nouns are masculine: they take -ης or -ας in the nom. sg." },
+            { form: "προφήτου",
+              prompt: "Why does the genitive sg. end in -ου instead of the usual feminine -ης?",
+              answer: "1st-decl. masculines borrow the 2nd-decl. masc. -ου in the gen. sg.",
+              choices: [
+                "1st-decl. masculines borrow the 2nd-decl. masc. -ου in the gen. sg.",
+                "It's a typo — it should be προφήτης.",
+                "All 1st-decl. nouns end in -ου in the gen. sg.",
+                "-ου marks the accusative."
+              ],
+              note: "προφήτης, προφήτου, προφήτῃ, προφήτην." },
+            { form: "νεανίας",
+              prompt: "What is unusual about this 1st-declension masculine?",
+              answer: "It keeps α throughout the singular (α-pure pattern).",
+              choices: [
+                "It keeps α throughout the singular (α-pure pattern).",
+                "It is actually neuter, despite appearances.",
+                "Its plural endings are 2nd-declension.",
+                "It has no genitive singular."
+              ],
+              note: "νεανίας, νεανίου, νεανίᾳ, νεανίαν — like ἡμέρα but masculine, with the masc. -ου gen." }
+          ]
+        },
         {
           family: "Contract vowel rules — ε contracts",
           lemma: "φιλέω",
@@ -798,6 +882,93 @@
               answer: "ου",
               choices: ["ου", "ω", "οι", "ει"],
               note: "πληρο-ομεν → πληροῦμεν." }
+          ]
+        },
+        {
+          family: "εἰμί imperfect",
+          lemma: "εἰμί",
+          gloss: "I was",
+          questions: [
+            { form: "ἤμην",
+              prompt: "Identify this form of εἰμί.",
+              answer: "imperfect, 1st singular ('I was')",
+              choices: [
+                "imperfect, 1st singular ('I was')",
+                "present, 1st singular ('I am')",
+                "imperfect, 3rd singular ('he was')",
+                "imperfect, 1st plural ('we were')"
+              ] },
+            { form: "ἦν",
+              prompt: "Identify this form of εἰμί.",
+              answer: "imperfect, 3rd singular ('he/she/it was')",
+              choices: [
+                "imperfect, 3rd singular ('he/she/it was')",
+                "imperfect, 1st singular ('I was')",
+                "present, 3rd plural ('they are')",
+                "imperfect, 3rd plural ('they were')"
+              ],
+              note: "ἦν is one of the most common verbs in NT narrative." },
+            { form: "ἦσαν",
+              prompt: "Identify this form of εἰμί.",
+              answer: "imperfect, 3rd plural ('they were')",
+              choices: [
+                "imperfect, 3rd plural ('they were')",
+                "imperfect, 3rd singular ('he was')",
+                "imperfect, 2nd plural ('you all were')",
+                "present, 3rd plural ('they are')"
+              ] },
+            { form: "εἰμί imperfect",
+              prompt: "Why does εἰμί's imperfect lack the usual ε- augment up front?",
+              answer: "εἰμί is irregular; its imperfect uses a fixed stem (ἠ-/ἤμ-) rather than the regular augment pattern.",
+              choices: [
+                "εἰμί is irregular; its imperfect uses a fixed stem (ἠ-/ἤμ-) rather than the regular augment pattern.",
+                "It does have an augment — the η is the augmented form of ε.",
+                "εἰμί has no imperfect; ἦν is actually a present form.",
+                "The augment dropped because εἰμί is enclitic."
+              ],
+              note: "Some grammarians do treat the η as a long-vowel augment of ε-; either way, just memorise the paradigm." }
+          ]
+        },
+        {
+          family: "Middle voice and deponent verbs",
+          lemma: "ἔρχομαι / δέχομαι",
+          gloss: "middle-form, active-meaning verbs",
+          questions: [
+            { form: "deponent",
+              prompt: "What is a deponent verb?",
+              answer: "a verb whose lexical (lemma) form ends in -ομαι and which is active in meaning despite its middle-looking form",
+              choices: [
+                "a verb whose lexical (lemma) form ends in -ομαι and which is active in meaning despite its middle-looking form",
+                "a verb that has lost its present-tense forms",
+                "a verb that drops the augment in the past",
+                "a verb that lacks a 3rd-person form"
+              ],
+              note: "Lemma test: if the dictionary form ends in -ομαι (not -ω), the verb is deponent." },
+            { form: "ἔρχομαι",
+              prompt: "Identify this form.",
+              answer: "1st singular ('I come / go') — a deponent verb",
+              choices: [
+                "1st singular ('I come / go') — a deponent verb",
+                "1st singular passive ('I am being come to')",
+                "3rd singular ('he comes')",
+                "infinitive ('to come')"
+              ],
+              note: "Middle/passive form, active meaning. The lemma itself ends in -ομαι, so it is deponent." },
+            { form: "δέχομαι vs δέχω",
+              prompt: "Which form is the dictionary (lemma) form?",
+              answer: "δέχομαι",
+              choices: ["δέχομαι", "δέχω", "either is acceptable", "δέξω"],
+              note: "δέχομαι is deponent; *δέχω is not a real form." },
+            { form: "ἔρχεται",
+              prompt: "Parse this form.",
+              answer: "present indicative, 3rd singular ('he/she/it comes')",
+              choices: [
+                "present indicative, 3rd singular ('he/she/it comes')",
+                "present indicative, 2nd singular ('you come')",
+                "present indicative, 3rd plural ('they come')",
+                "imperfect indicative, 3rd singular ('he was coming')"
+              ],
+              note: "Middle/passive endings on a deponent verb: still translated actively." }
           ]
         }
       ]
