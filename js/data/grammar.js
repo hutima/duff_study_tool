@@ -647,19 +647,20 @@
               choices: [
                 "the present (and the imperfect in past time)",
                 "the aorist",
-                "the perfect",
+                "the imperfect alone (never the present)",
                 "the future"
               ],
               note: "Imperfective aspect views the action from inside, as in progress." },
             { form: "aspect",
               prompt: "Which Greek tense is most strongly associated with perfective aspect (whole event as a single point)?",
               answer: "the aorist",
-              choices: ["the aorist", "the present", "the perfect", "the imperfect"],
+              choices: ["the aorist", "the present", "the future", "the imperfect"],
               note: "Perfective aspect views the action from outside as a complete whole — not necessarily 'punctiliar'." },
             { form: "aspect",
-              prompt: "Which Greek tense conveys completed action with continuing relevance?",
-              answer: "the perfect",
-              choices: ["the perfect", "the aorist", "the imperfect", "the present"] }
+              prompt: "Which Greek tense is aspectually neutral / underdetermined for aspect?",
+              answer: "the future",
+              choices: ["the future", "the aorist", "the imperfect", "the present"],
+              note: "The future locates an event in later time but does not commit to imperfective or perfective viewpoint." }
           ]
         },
         {
@@ -1097,8 +1098,8 @@
               choices: [
                 "imperfect (secondary endings on a different stem)",
                 "present (primary endings)",
-                "perfect (κα endings)",
-                "future (with σ)"
+                "1st aorist (σα + secondary endings)",
+                "future (with σ + primary endings)"
               ],
               note: "Stem reveals the tense; ending reveals person/number." }
           ]
@@ -1125,7 +1126,7 @@
                 "future active indicative, 1st sg. of ἀποστέλλω",
                 "present active indicative, 1st sg. of ἀποστέλλω",
                 "aorist active indicative, 1st sg.",
-                "perfect active indicative, 1st sg."
+                "imperfect active indicative, 1st sg."
               ] },
             { form: "liquid future endings",
               prompt: "Liquid future personal endings most resemble which present-tense pattern?",
@@ -2147,7 +2148,7 @@
                 "aorist active indicative, 3rd sg. of λέγω ('he said')",
                 "imperfect active indicative, 3rd sg. of λέγω",
                 "present active indicative, 3rd sg. of λέγω",
-                "perfect active indicative, 3rd sg. of λέγω"
+                "future active indicative, 3rd sg. of λέγω"
               ] }
           ]
         },
@@ -2163,7 +2164,7 @@
                 "future active indicative, 1st pl. of μένω",
                 "present active indicative, 1st pl. of μένω",
                 "aorist active indicative, 1st pl. of μένω",
-                "perfect active indicative, 1st pl. of μένω"
+                "imperfect active indicative, 1st pl. of μένω"
               ],
               note: "Looks like an ε-contract present, but the lemma μένω has no contract vowel — so the contraction signals the future." }
           ]
