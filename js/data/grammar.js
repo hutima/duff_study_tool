@@ -316,9 +316,9 @@
               answer: "usually as 'God' (without 'the') — Greek uses the article more freely than English",
               choices: [
                 "usually as 'God' (without 'the') — Greek uses the article more freely than English",
-                "always as 'the god', with the article",
-                "as 'a god', indefinitely",
-                "the article forces a different word entirely"
+                "always as 'the god', preserving the article like a common noun",
+                "as 'a god', indefinitely — Greek's article never marks a proper concept",
+                "the article forces a different word entirely, like θεοτής"
               ],
               note: "ὁ Παῦλος = 'Paul', ὁ Πέτρος = 'Peter' — Greek is happy to article-mark personal names." },
             { form: "ἡ ἀγάπη",
@@ -336,8 +336,8 @@
               choices: [
                 "'a human being / mankind' — generic / categorical use of the article",
                 "'the man' — referring to one specific person",
-                "'this man' — demonstrative",
-                "'his man' — possessive"
+                "'this man' — demonstrative force (ὁ as a near demonstrative)",
+                "'his man' — possessive force (ὁ standing in for αὐτοῦ)"
               ],
               note: "Greek often uses the article generically where English would drop it or use 'a'." },
             { form: "anarthrous noun",
@@ -378,12 +378,12 @@
           questions: [
             { form: "genitive", prompt: "Primary function of the genitive?",
               answer: "possession / source ('of')",
-              choices: ["possession / source ('of')", "direct object", "subject", "indirect object"] },
+              choices: ["possession / source ('of')", "direct object — the thing acted upon", "subject — the doer of the verb's action", "indirect object"] },
             { form: "dative", prompt: "Primary function of the dative?",
               answer: "indirect object / location / means",
               choices: [
                 "indirect object / location / means",
-                "subject", "direct object", "possession"
+                "subject — the doer of the verb's action", "direct object — the thing acted upon", "possession — 'X belongs to Y'"
               ] },
             { form: "ὁ λόγος τοῦ θεοῦ",
               prompt: "Translate this genitive phrase.",
@@ -435,9 +435,9 @@
               answer: "dative of means / instrument — 'by, with, by means of'",
               choices: [
                 "dative of means / instrument — 'by, with, by means of'",
-                "as the direct object",
-                "as a vocative of address",
-                "as a genitive of possession"
+                "as the direct object — the dative takes the role of the accusative",
+                "as a vocative of address — 'O thing, by which …!'",
+                "as a genitive of possession — the doer is the owner of the means"
               ],
               note: "λόγῳ = 'by a word'; πίστει = 'by faith'." },
             { form: "dative of location",
@@ -517,8 +517,8 @@
           questions: [
             { form: "vocative",
               prompt: "Function of the vocative?",
-              answer: "direct address",
-              choices: ["direct address", "subject", "direct object", "possession"] },
+              answer: "direct address — calling out to someone",
+              choices: ["direct address — calling out to someone", "subject — the doer of the verb's action", "direct object — the thing acted upon", "possession — 'X belongs to Y'"] },
             { form: "κύριε",
               prompt: "What is the form κύριε?",
               answer: "vocative singular ('Lord!') — from κύριος",
@@ -570,9 +570,9 @@
               answer: "it is a hellenised Hebrew name (Yeshua), so its cases don't follow the standard 2nd-decl pattern",
               choices: [
                 "it is a hellenised Hebrew name (Yeshua), so its cases don't follow the standard 2nd-decl pattern",
-                "it is a 3rd-declension noun like σάρξ",
-                "it never changes form — indeclinable",
-                "it follows the 1st-declension fem pattern"
+                "it is a 3rd-declension consonant-stem noun, declined like σάρξ, σαρκός",
+                "it never changes form — indeclinable like Ἀβραάμ or Δαυίδ",
+                "it follows the 1st-declension feminine pattern in -ας, like ἡμέρα"
               ] },
             { form: "Ἰησοῦν",
               prompt: "Parse this form of Ἰησοῦς.",
@@ -615,9 +615,9 @@
               answer: "as the 3rd-person pronoun ('he, she, it, they') in its oblique cases — gen., dat., acc.",
               choices: [
                 "as the 3rd-person pronoun ('he, she, it, they') in its oblique cases — gen., dat., acc.",
-                "always as the demonstrative 'this'",
-                "always as the relative pronoun 'who'",
-                "always as the article 'the'"
+                "always as the demonstrative 'this' — αὐτός is just another form of οὗτος",
+                "always as the relative pronoun 'who' — equivalent to ὅς, ἥ, ὅ",
+                "always as the article 'the' — αὐτός is a third form of the definite article"
               ],
               note: "Deeper uses (emphatic, identifying) are introduced in Ch 9." },
             { form: "αὐτοῦ",
@@ -643,9 +643,9 @@
               answer: "standard 2-1-2 (adjective) endings — like καλός, καλή, καλόν",
               choices: [
                 "standard 2-1-2 (adjective) endings — like καλός, καλή, καλόν",
-                "3rd-declension endings throughout",
-                "indeclinable",
-                "the same forms as the article"
+                "3rd-declension endings throughout — masc. / fem. / neut. all on a consonant stem",
+                "indeclinable — the feminine never changes form across cases",
+                "the same forms as the article — αὐτός is essentially a stressed form of ὁ, ἡ, τό"
               ] },
             { form: "βλέπει αὐτόν.",
               prompt: "Translate.",
@@ -720,7 +720,7 @@
               choices: ["with (in company with)", "after (in time)", "into", "by means of"] },
             { form: "μετά + accusative", prompt: "μετά + accusative means…",
               answer: "after (in time)",
-              choices: ["after (in time)", "with (in company with)", "before", "instead of"] },
+              choices: ["after (in time)", "with (in company with)", "before", "instead of (substitution — like ἀντί + gen.)"] },
             { form: "κατά + accusative", prompt: "κατά + accusative means…",
               answer: "according to",
               choices: ["according to", "down from", "with", "before"],
@@ -739,10 +739,10 @@
               choices: ["on the basis of / at", "onto (motion)", "on, upon (location)", "against"] },
             { form: "παρά + genitive", prompt: "παρά + genitive means…",
               answer: "from beside (source, often of a person)",
-              choices: ["from beside (source, often of a person)", "alongside (motion)", "beside (location)", "instead of"] },
+              choices: ["from beside (source, often of a person)", "alongside (motion toward, as with πρός + acc.)", "beside (static location, as with παρά + dat.)", "instead of (substitution — like ἀντί + gen.)"] },
             { form: "παρά + dative", prompt: "παρά + dative means…",
               answer: "beside, at (with a person)",
-              choices: ["beside, at (with a person)", "alongside (motion)", "from beside", "on behalf of"] },
+              choices: ["beside, at (with a person)", "alongside (motion toward, as with πρός + acc.)", "from beside", "on behalf of"] },
             { form: "περί + genitive", prompt: "περί + genitive means…",
               answer: "concerning, about (topic)",
               choices: ["concerning, about (topic)", "around (location)", "on behalf of", "through"],
@@ -792,9 +792,9 @@
               answer: "the bare dative — dative of means / instrument",
               choices: [
                 "the bare dative — dative of means / instrument",
-                "always ὑπό + gen.",
-                "always διά + acc.",
-                "the bare accusative"
+                "always ὑπό + gen. (the personal-agent construction, even for things)",
+                "always διά + acc. — 'because of' covers both means and cause",
+                "the bare accusative — Greek's all-purpose adverbial case"
               ],
               note: "λόγῳ ('by a word'), μαχαίρῃ ('with a sword'). Often reinforced with ἐν + dat." },
             { form: "agent vs instrument",
@@ -828,9 +828,9 @@
               answer: "a verb formed by prefixing a preposition onto a simple verb stem",
               choices: [
                 "a verb formed by prefixing a preposition onto a simple verb stem",
-                "a verb with two stems welded together",
-                "any irregular verb",
-                "a verb taking two direct objects"
+                "a verb with two distinct stems welded together at the boundary",
+                "any irregular verb — irregular forms are by definition compound",
+                "a verb taking two direct objects, like English 'give X to Y'"
               ],
               note: "ἐκβάλλω = ἐκ ('out') + βάλλω ('I throw') = 'I throw out / drive out'." },
             { form: "ἐκβάλλω",
@@ -856,9 +856,9 @@
               answer: "the final vowel of the prefix elides before the initial vowel of the stem (and rough breathing may aspirate the consonant)",
               choices: [
                 "the final vowel of the prefix elides before the initial vowel of the stem (and rough breathing may aspirate the consonant)",
-                "Greek hates double vowels and always drops the second one",
-                "κατά always loses its accent when prefixed",
-                "the spelling is irregular and must be memorised"
+                "Greek hates double vowels and drops the second one whenever they meet at a morpheme boundary",
+                "κατά always loses its accent when prefixed; only its first consonant survives",
+                "the spelling is irregular for every compound and must be memorised case by case"
               ],
               note: "κατά + οἰκέω → κατοικέω; ἀπό + ἔρχομαι → ἀπέρχομαι." },
             { form: "ἀπολύει τοὺς δούλους.",
@@ -928,9 +928,9 @@
               answer: "οὐ + cons.; οὐκ + smooth-breathing vowel; οὐχ + rough-breathing vowel",
               choices: [
                 "οὐ + cons.; οὐκ + smooth-breathing vowel; οὐχ + rough-breathing vowel",
-                "they are interchangeable — pick any",
-                "οὐ is singular; οὐκ is plural",
-                "οὐχ is for past tenses only"
+                "they are interchangeable — pick any of the three regardless of context",
+                "οὐ is the singular form; οὐκ is the plural form (and οὐχ the dual)",
+                "οὐχ is reserved for past-tense verbs; οὐ / οὐκ for present and future"
               ],
               note: "οὐ βλέπει / οὐκ ἀκούει / οὐχ ὁρᾷ — pick the form that matches what follows." },
             { form: "οὐ position",
@@ -992,9 +992,9 @@
               answer: "masculine = 2nd decl., feminine = 1st decl., neuter = 2nd decl. (e.g., καλός, καλή, καλόν)",
               choices: [
                 "masculine = 2nd decl., feminine = 1st decl., neuter = 2nd decl. (e.g., καλός, καλή, καλόν)",
-                "masc. = 2nd, fem. = 2nd, neut. = 1st",
-                "all three genders use the 1st declension",
-                "all three genders use the 3rd declension"
+                "masc. = 2nd decl., fem. = 2nd decl., neut. = 1st decl. (one mismatch)",
+                "all three genders use the 1st declension (every Greek adjective is feminine-like)",
+                "all three genders use the 3rd declension on a consonant stem"
               ] },
             { form: "agreement",
               prompt: "An adjective agrees with its noun in which categories?",
@@ -1175,9 +1175,9 @@
               answer: "'the good things' — neuter pl. substantive",
               choices: [
                 "'the good things' — neuter pl. substantive",
-                "'the good women'",
-                "'good is the …'",
-                "a vocative form"
+                "'the good women' — feminine plural substantive use",
+                "'good is the …' — a fragment with the noun omitted",
+                "a vocative form — 'O good ones!' in direct address"
               ],
               note: "Neuter plural substantives often refer to abstractions or 'things'." },
             { form: "οἱ πιστοί",
@@ -1212,9 +1212,9 @@
               answer: "'much, many' — short stem (πολυ-) in nom./acc. sg. masc./neut.; long stem (πολλ-) elsewhere",
               choices: [
                 "'much, many' — short stem (πολυ-) in nom./acc. sg. masc./neut.; long stem (πολλ-) elsewhere",
-                "fully regular 2-1-2 adjective like καλός",
-                "indeclinable — never changes form",
-                "uses 3rd-declension endings everywhere"
+                "'many' — fully regular 2-1-2 adjective like καλός, with no stem alternation",
+                "'many' — indeclinable, the same form πολύς for every case and gender",
+                "'many' — 3rd-declension endings everywhere, like a σ-stem adjective"
               ],
               note: "Memorise the three short forms: πολύς (nom. sg. m.), πολύ (nom./acc. sg. n.), πολύν (acc. sg. m.). Everything else uses πολλ-." },
             { form: "μέγας, μεγάλη, μέγα",
@@ -1222,9 +1222,9 @@
               answer: "'large, great' — short stem (μέγα-) in nom./acc. sg. masc./neut.; long stem (μεγαλ-) elsewhere",
               choices: [
                 "'large, great' — short stem (μέγα-) in nom./acc. sg. masc./neut.; long stem (μεγαλ-) elsewhere",
-                "fully regular 2-1-2 throughout",
-                "indeclinable in the singular",
-                "always uses 3rd-declension endings"
+                "'great' — fully regular 2-1-2 like καλός, καλή, καλόν, with no irregular stems",
+                "'great' — indeclinable in the singular; uses regular endings only in the plural",
+                "'great' — 3rd-declension endings throughout (σ-stem, like ἀληθής, -ές)"
               ],
               note: "Short forms: μέγας (m. nom. sg.), μέγαν (m. acc. sg.), μέγα (n. nom./acc. sg.). All other forms add -αλ-." },
             { form: "πολλὰ τέκνα",
@@ -1232,9 +1232,9 @@
               answer: "'many children' (πολλά agrees with the neuter plural τέκνα)",
               choices: [
                 "'many children' (πολλά agrees with the neuter plural τέκνα)",
-                "'great children' (μεγάλα)",
-                "'much, a child'",
-                "'the children are many'"
+                "'great children' (πολλά reads as μεγάλα by lexical substitution, like in 5.6.3)",
+                "'much, a child' (πολλά standing alone, with no noun to agree with)",
+                "'the children are many' (πολλά in predicate position, the verb ἐστιν understood)"
               ] },
             { form: "πολὺς ὄχλος βλέπει τὸν Ἰησοῦν.",
               prompt: "Translate.",
@@ -1371,9 +1371,9 @@
               answer: "present, imperfect, future, aorist, perfect (the perfect comes properly in Ch 16)",
               choices: [
                 "present, imperfect, future, aorist, perfect (the perfect comes properly in Ch 16)",
-                "only present and aorist",
-                "all six principal-part stems at once",
-                "future, perfect, pluperfect only"
+                "only present and aorist — Greek introduces other tenses much later",
+                "all six principal-part stems at once, including both middle/passive forms",
+                "future, perfect, and pluperfect only — the rare or compound tenses"
               ] },
             { form: "tense outside indicative",
               prompt: "What does tense convey OUTSIDE the indicative (e.g., subjunctive, infinitive, participle)?",
@@ -1382,7 +1382,7 @@
                 "aspect only — no time reference",
                 "both aspect and absolute time",
                 "voice only",
-                "person and number"
+                "person and number — the tense form encodes who/how many"
               ],
               note: "Present subj. = ongoing aspect, NOT 'present time'. Returns more fully in Chs 7, 14, 17." },
             { form: "ἔγραφον τὸν λόγον.",
@@ -1405,22 +1405,22 @@
             { form: "λύω",
               prompt: "What tense is this (in isolation)?",
               answer: "present (active indicative, 1st sg.)",
-              choices: ["present (active indicative, 1st sg.)", "future (active indicative, 1st sg.)", "imperfect (1st sg.)", "aorist (1st sg.)"],
+              choices: ["present (active indicative, 1st sg.)", "future (active indicative, 1st sg.)", "imperfect (1st sg.)", "aorist active indicative (1st sg., σα-morpheme between stem and ending)"],
               note: "Present and future 1st singular forms differ by the σ: λύω vs λύσω." },
             { form: "λύσω",
               prompt: "What tense is this?",
               answer: "future (active indicative, 1st sg.)",
-              choices: ["future (active indicative, 1st sg.)", "present (1st sg.)", "aorist subjunctive, 1st sg.", "imperfect (1st sg.)"],
+              choices: ["future (active indicative, 1st sg.)", "present active indicative (1st sg., primary endings, no augment)", "aorist subjunctive, 1st sg.", "imperfect (1st sg.)"],
               note: "σ before the personal ending = future (or 1st aorist with augment)." },
             { form: "ἔλυον",
               prompt: "What tense is this?",
               answer: "imperfect active indicative (1st sg. or 3rd pl.)",
-              choices: ["imperfect active indicative (1st sg. or 3rd pl.)", "aorist (1st sg.)", "present (1st sg.)", "future (1st sg.)"],
+              choices: ["imperfect active indicative (1st sg. or 3rd pl.)", "aorist active indicative (1st sg., σα-morpheme between stem and ending)", "present active indicative (1st sg., primary endings, no augment)", "future active indicative (1st sg., σ between stem and primary endings)"],
               note: "ε- augment + present stem + secondary endings = imperfect." },
             { form: "ἔλυσα",
               prompt: "What tense is this?",
               answer: "1st aorist (active indicative, 1st sg.)",
-              choices: ["1st aorist (active indicative, 1st sg.)", "imperfect (1st sg.)", "present (1st sg.)", "future (1st sg.)"],
+              choices: ["1st aorist (active indicative, 1st sg.)", "imperfect (1st sg.)", "present active indicative (1st sg., primary endings, no augment)", "future active indicative (1st sg., σ between stem and primary endings)"],
               note: "ε- augment + σα + secondary endings = 1st aorist." },
             { form: "ἔλυσα τὸν δοῦλον.",
               prompt: "Translate.",
@@ -1490,9 +1490,9 @@
               answer: "imperfect and aorist (past indicatives)",
               choices: [
                 "imperfect and aorist (past indicatives)",
-                "present and future",
-                "perfect only",
-                "subjunctive only"
+                "present and future — the primary (non-past) indicative endings",
+                "perfect only — distinct κ-α endings unique to the perfect",
+                "subjunctive only — the long thematic vowel goes with secondary endings"
               ],
               note: "Secondary endings appear with the augment in past-time indicatives." },
             { form: "ending tells",
@@ -1500,9 +1500,9 @@
               answer: "person and number",
               choices: [
                 "person and number",
-                "only tense",
-                "only mood",
-                "only gender"
+                "only tense — person is supplied by context",
+                "only mood — person comes from the subject pronoun",
+                "only gender — person/number are unmarked"
               ] },
             { form: "λύομεν τοὺς δούλους.",
               prompt: "Translate (mind the personal ending).",
@@ -1623,9 +1623,9 @@
               answer: "augment + (compound prefix if any) + verb stem + (σ if applicable) + personal ending",
               choices: [
                 "augment + (compound prefix if any) + verb stem + (σ if applicable) + personal ending",
-                "personal ending + augment + stem (always reversed)",
-                "no fixed order — it's free",
-                "stem + augment + ending"
+                "personal ending + augment + stem — the layers stack from right to left",
+                "no fixed order — Greek allows any arrangement of prefix, stem, and ending",
+                "stem + augment + ending — the augment sits between stem and ending"
               ],
               note: "Compound prefix comes BEFORE the augment in surface form, but the augment is conceptually 'inside': ἀπ-έ-λυσα = ἀπό + ε-augment + λυ + σ + α." },
             { form: "ἔλυσα",
@@ -1633,18 +1633,18 @@
               answer: "ε- (augment) + λυ- (stem) + σ (1st-aorist marker) + -α (1sg secondary ending)",
               choices: [
                 "ε- (augment) + λυ- (stem) + σ (1st-aorist marker) + -α (1sg secondary ending)",
-                "ε- (augment) + λυσ- (stem) + -α (ending)",
-                "ἔ- (lengthened stem) + -λυσα (ending)",
-                "no breakdown — irregular"
+                "ε- (augment) + λυσ- (stem) + -α (ending) — without splitting the σ off",
+                "ἔ- (lengthened stem) + -λυσα (one fused ending)",
+                "no breakdown — ἔλυσα is an irregular suppletive form"
               ] },
             { form: "parsing strategy",
               prompt: "What is the most efficient first question to ask when parsing an unfamiliar Greek verb form?",
               answer: "is there an augment (ε- or vowel-lengthening)? — that tells you it's a past-tense indicative",
               choices: [
                 "is there an augment (ε- or vowel-lengthening)? — that tells you it's a past-tense indicative",
-                "guess the verb meaning first, then worry about tense",
-                "look at the personal ending and ignore the stem",
-                "look at the accent first"
+                "guess the verb's English meaning first, then worry about tense afterward",
+                "look at the personal ending and ignore the stem — endings tell you everything",
+                "look at the accent first — the accent always pinpoints tense / mood"
               ] },
             { form: "ἀπέλυσα τὸν δοῦλον.",
               prompt: "Translate.",
@@ -1668,9 +1668,9 @@
               answer: "it lengthens to η (φιλέω → φιλήσω, ἐφίλησα, πεφίληκα)",
               choices: [
                 "it lengthens to η (φιλέω → φιλήσω, ἐφίλησα, πεφίληκα)",
-                "it drops out completely",
-                "it stays as ε in every tense",
-                "it turns into ι"
+                "it drops out completely (e.g., φιλέω → φιλσω, no contraction)",
+                "it stays as ε in every tense (e.g., φιλέσω, ἐφίλεσα)",
+                "it turns into ι, like α + ι in some other contracts"
               ],
               note: "This is one of the most reliable patterns of -έω verbs." },
             { form: "φιλήσω",
@@ -1721,7 +1721,7 @@
             { form: "indicative",
               prompt: "What does the indicative mood typically express?",
               answer: "a statement or question of fact",
-              choices: ["a statement or question of fact", "a command", "a wish", "a potential / contingent action"] },
+              choices: ["a statement or question of fact", "a command", "a wish — 'oh, that he might hear!'", "a potential / contingent action"] },
             { form: "imperative",
               prompt: "What does the imperative mood express?",
               answer: "a command or prohibition",
@@ -1732,8 +1732,8 @@
               choices: [
                 "a contingent / potential action",
                 "a plain statement of fact",
-                "a direct command",
-                "direct address"
+                "a direct command, like the imperative",
+                "direct address — 'in order, O hearer!'"
               ] },
             { form: "infinitive vs participle",
               prompt: "What's the categorical difference between an infinitive and a participle?",
@@ -1741,7 +1741,7 @@
               choices: [
                 "infinitive = verbal NOUN; participle = verbal ADJECTIVE",
                 "infinitive = verbal adjective; participle = verbal noun",
-                "they are interchangeable",
+                "they are interchangeable — Koine collapses the two tenses entirely",
                 "both are finite verbs"
               ] },
             { form: "θέλω ἀκούειν τὸν λόγον.",
@@ -1940,9 +1940,9 @@
               answer: "a verb whose lexical (lemma) form ends in -ομαι and which is active in meaning despite its middle-looking form",
               choices: [
                 "a verb whose lexical (lemma) form ends in -ομαι and which is active in meaning despite its middle-looking form",
-                "a verb that has lost its present-tense forms",
-                "a verb that drops the augment in the past",
-                "a verb that lacks a 3rd-person form"
+                "a verb that has lost its present-tense forms; the aorist replaces them entirely",
+                "a verb that drops the augment in past tenses; the present supplies the only finite forms",
+                "a verb that lacks a 3rd-person form; 1st and 2nd person only, in any tense"
               ],
               note: "Lemma test: if the dictionary form ends in -ομαι (not -ω), the verb is deponent." },
             { form: "ἔρχομαι",
@@ -2020,9 +2020,9 @@
               answer: "future 1st sg. ('I will be') — εἰμί's future is deponent",
               choices: [
                 "future 1st sg. ('I will be') — εἰμί's future is deponent",
-                "future, 3rd singular",
-                "present middle, 1st singular",
-                "imperfect, 1st singular"
+                "future active indicative, 3rd singular ('he will be')",
+                "present middle indicative, 1st singular ('I am for myself')",
+                "imperfect active indicative, 1st singular ('I was', but a different form)"
               ],
               note: "Future of εἰμί uses middle/passive endings (-ομαι series) on the stem ἐσ-." },
             { form: "εἰμί other moods",
@@ -2030,9 +2030,9 @@
               answer: "imperative, infinitive, participle, and subjunctive",
               choices: [
                 "imperative, infinitive, participle, and subjunctive",
-                "only the imperative",
-                "only the infinitive",
-                "εἰμί has no non-indicative forms"
+                "only the imperative — εἰμί lacks the other non-indicative forms",
+                "only the infinitive — εἰμί lacks imperative and participle",
+                "εἰμί has no non-indicative forms — only indicatives exist"
               ] },
             { form: "ἤμην ἐν τῷ ἱερῷ.",
               prompt: "Translate.",
@@ -2058,7 +2058,7 @@
                 "it is MASCULINE despite the -ης ending that usually flags 1st-declension feminine",
                 "it is neuter despite the masculine article",
                 "it is 2nd declension despite the 1st-declension ending",
-                "it is indeclinable"
+                "it is indeclinable — the same form οἶδα is used for every person and number"
               ],
               note: "A handful of 1st-decl nouns are masculine: προφήτης, μαθητής, βαπτιστής, νεανίας. The article ὁ is the giveaway." },
             { form: "προφήτου",
@@ -2121,7 +2121,7 @@
               answer: "standard 2-1-2 (adjective) endings: -ος, -η, -ο (like καλός, καλή, καλόν)",
               choices: [
                 "standard 2-1-2 (adjective) endings: -ος, -η, -ο (like καλός, καλή, καλόν)",
-                "3rd-declension endings throughout",
+                "3rd-declension endings throughout — masc. / fem. / neut. all on a consonant stem",
                 "unique endings used by no other word",
                 "the same forms as the definite article"
               ],
@@ -2131,9 +2131,9 @@
               answer: "the stem vowel echoes the article: ου- where the article has ο (ὁ, οἱ, τοῦ, τῷ…); αυ- where the article has α (ἡ, αἱ, τῆς, τῇ…)",
               choices: [
                 "the stem vowel echoes the article: ου- where the article has ο (ὁ, οἱ, τοῦ, τῷ…); αυ- where the article has α (ἡ, αἱ, τῆς, τῇ…)",
-                "ου- is singular, αυ- is plural — pure number distinction",
-                "ου- is masculine and αυ- is feminine in every case",
-                "they are random spelling variants with no rule"
+                "ου- forms are singular, αυ- forms are plural — pure number distinction, regardless of gender",
+                "ου- is masculine and αυ- is feminine in every case, including the neuter forms",
+                "they are random spelling variants with no rule, fixed only by repeated exposure"
               ],
               note: "οὗτος, αὕτη, τοῦτο / τούτου, ταύτης, τούτου …" },
             { form: "οὗτος — τ vs rough breathing",
@@ -2141,9 +2141,9 @@
               answer: "τ- where the article has τ (τοῦ → τούτου, τήν → ταύτην); rough-breathed vowel where the article has none (ὁ → οὗτος, ἡ → αὕτη, οἱ → οὗτοι, αἱ → αὗται)",
               choices: [
                 "τ- where the article has τ (τοῦ → τούτου, τήν → ταύτην); rough-breathed vowel where the article has none (ὁ → οὗτος, ἡ → αὕτη, οἱ → οὗτοι, αἱ → αὗται)",
-                "rough-breathed forms are masculine; τ- forms are feminine",
-                "τ- forms are singular; rough-breathed forms are plural",
-                "it is unpredictable and must be learned form by form"
+                "rough-breathed forms are masculine; τ- forms are feminine (with no other pattern)",
+                "τ- forms are singular throughout; rough-breathed forms are plural throughout",
+                "it is unpredictable — every case must be memorised individually, with no underlying rule"
               ],
               note: "Useful rule of thumb: 'οὗτος follows the article'." },
             { form: "αὕτη vs αὐτή",
@@ -2151,9 +2151,9 @@
               answer: "αὕτη (rough breathing) = 'this' (nom. sg. fem. of οὗτος); αὐτή (smooth breathing) = 'she / herself / same' (αὐτός)",
               choices: [
                 "αὕτη (rough breathing) = 'this' (nom. sg. fem. of οὗτος); αὐτή (smooth breathing) = 'she / herself / same' (αὐτός)",
-                "they are alternate spellings of the same word",
-                "αὕτη is 3rd person pronoun, αὐτή is the demonstrative",
-                "αὕτη is plural, αὐτή is singular"
+                "they are alternate spellings of the same word — accent / breathing optional",
+                "αὕτη is the 3rd-person pronoun; αὐτή is the demonstrative 'this' (fem. sg.)",
+                "αὕτη is the plural form; αὐτή is the singular form (no other distinction)"
               ],
               note: "Tiny breathing mark, very different meanings." },
             { form: "οὗτος ὁ ἀπόστολος",
@@ -2192,7 +2192,7 @@
               choices: [
                 "ἐκεῖνος = far ('that'); οὗτος = near ('this')",
                 "ἐκεῖνος = near; οὗτος = far",
-                "they are interchangeable",
+                "they are interchangeable — Koine collapses the two tenses entirely",
                 "ἐκεῖνος is singular; οὗτος is plural"
               ] },
             { form: "τοῦτο vs ἐκεῖνο",
@@ -2265,9 +2265,9 @@
               answer: "'other' / 'another'; its neuter nom./acc. singular is ἄλλο (no -ν), like the article τό",
               choices: [
                 "'other' / 'another'; its neuter nom./acc. singular is ἄλλο (no -ν), like the article τό",
-                "'self'; takes regular 2-1-2 endings throughout",
-                "'same'; declines like αὐτός",
-                "'this'; declines like οὗτος"
+                "'self'; takes regular 2-1-2 endings throughout, like αὐτός in shape",
+                "'same'; declines exactly like αὐτός, but the meaning shifts in attributive position",
+                "'this'; declines like οὗτος, with the τ-/breathing alternation"
               ],
               note: "Compare ἄλλο with English 'other' — the masc./fem. follow 2-1-2 endings normally (ἄλλος, ἄλλη)." },
             { form: "αὐτὴ ἡ γυνή",
@@ -2384,7 +2384,7 @@
               choices: [
                 "ἡμῶν = 'of us' (rough breathing); ὑμῶν = 'of you (pl)' (smooth breathing)",
                 "ἡμῶν = 'of you (pl)'; ὑμῶν = 'of us'",
-                "they are interchangeable",
+                "they are interchangeable — Koine collapses the two tenses entirely",
                 "ἡμῶν is reflexive, ὑμῶν is plain"
               ],
               note: "Breathing is the only visual difference — high-frequency confusion point." },
@@ -2393,9 +2393,9 @@
               answer: "ἐμαυτοῦ, -ῆς ('myself') and σεαυτοῦ, -ῆς ('yourself') — personal stem + αὐτο- stem, declined together; no nominative",
               choices: [
                 "ἐμαυτοῦ, -ῆς ('myself') and σεαυτοῦ, -ῆς ('yourself') — personal stem + αὐτο- stem, declined together; no nominative",
-                "ἐγώ and σύ themselves serve as the reflexive forms",
-                "by adding αὐ- as a prefix to the regular pronoun",
-                "by using ὅς as a reflexive marker"
+                "ἐγώ and σύ themselves serve as the reflexive — Greek has no separate reflexive forms",
+                "by adding αὐ- as a prefix to the regular pronoun (αὐεγώ, αὐσύ)",
+                "by using ὅς as a reflexive marker — the relative doubles as a reflexive"
               ],
               note: "Reflexives lack a nominative — by definition the subject can't 'reflex' onto itself in the nom." },
             { form: "reflexive — 3rd sg / plural",
@@ -2403,9 +2403,9 @@
               answer: "ἑαυτοῦ, -ῆς, -οῦ — used for 3rd sg AND, in the plural ἑαυτῶν, for all three persons of the plural reflexive",
               choices: [
                 "ἑαυτοῦ, -ῆς, -οῦ — used for 3rd sg AND, in the plural ἑαυτῶν, for all three persons of the plural reflexive",
-                "αὐτός alone serves as the 3rd-person reflexive",
-                "the relative ὅς doubles as the reflexive",
-                "there is no 3rd-person reflexive in Koine"
+                "αὐτός alone serves as the 3rd-person reflexive — context tells whether reflexive",
+                "the relative ὅς doubles as the reflexive when it refers to the subject",
+                "there is no 3rd-person reflexive in Koine — periphrasis is required"
               ],
               note: "Koine collapses 1pl/2pl/3pl reflexives into the single form ἑαυτῶν." },
             { form: "possessive adjectives",
@@ -2496,9 +2496,9 @@
               answer: "it cannot stand first in its clause — it 'hides' in second (or later) position",
               choices: [
                 "it cannot stand first in its clause — it 'hides' in second (or later) position",
-                "it is a particle of negation",
-                "it always carries an enclitic accent",
-                "it must take a rough breathing"
+                "it is a particle of negation — it always negates the verb that follows it",
+                "it always carries an enclitic accent — it leans phonetically on the previous word",
+                "it must take a rough breathing whenever it starts with a vowel"
               ],
               note: "δέ, γάρ, οὖν, μέν are the classic timid (postpositive) connectors. In English we put them first ('but…', 'for…'); in Greek, never." },
             { form: "δέ — first or second?",
@@ -2506,9 +2506,9 @@
               answer: "δέ stands second (or later) in Greek, but is translated FIRST in English ('But …' / 'And …')",
               choices: [
                 "δέ stands second (or later) in Greek, but is translated FIRST in English ('But …' / 'And …')",
-                "δέ stands first in Greek as in English",
-                "δέ always stands at the end of the clause",
-                "δέ may stand anywhere; word order is free"
+                "δέ stands first in Greek as in English — its position is identical in both languages",
+                "δέ always stands at the end of the clause, like a tag particle",
+                "δέ may stand anywhere; Greek word order is fully free even for postpositives"
               ] },
             { form: "μέν … δέ",
               prompt: "What pair of ideas does μέν … δέ set up?",
@@ -2535,18 +2535,18 @@
               answer: "as the connective 'and', joining words, phrases, or clauses",
               choices: [
                 "as the connective 'and', joining words, phrases, or clauses",
-                "as the adversative 'but'",
-                "as the inferential 'therefore'",
-                "as the causal 'because'"
+                "as the adversative 'but', equivalent to ἀλλά in force",
+                "as the inferential 'therefore', equivalent to οὖν",
+                "as the causal 'because', equivalent to γάρ"
               ] },
             { form: "καί — adverbial",
               prompt: "Besides 'and', what does καί commonly mean when it sits BEFORE a single word it highlights?",
               answer: "'also' or 'even' — adverbial / ascensive καί",
               choices: [
                 "'also' or 'even' — adverbial / ascensive καί",
-                "'but' — adversative",
-                "'or' — disjunctive",
-                "'because' — causal"
+                "'but' — adversative καί, where context demands contrast",
+                "'or' — disjunctive καί, joining a list of alternatives",
+                "'because' — causal καί, introducing a reason"
               ],
               note: "καὶ σύ = 'you too / even you', not 'and you'. Position tells you which sense." },
             { form: "καί vs δέ",
@@ -2563,18 +2563,18 @@
               answer: "καί — it stands first like English 'and'",
               choices: [
                 "καί — it stands first like English 'and'",
-                "δέ — postpositive",
-                "γάρ — postpositive",
-                "οὖν — postpositive"
+                "δέ — postpositive, like its English gloss 'but'",
+                "γάρ — postpositive, like its English gloss 'for'",
+                "οὖν — postpositive, like its English gloss 'therefore'"
               ] },
             { form: "translating timid words",
               prompt: "When you translate a timid (postpositive) Greek connector into English, where does it go?",
               answer: "FIRST in the English clause — even though it was second (or later) in Greek",
               choices: [
                 "FIRST in the English clause — even though it was second (or later) in Greek",
-                "Wherever it was in Greek — preserve the order",
-                "Last in the English clause",
-                "It is dropped entirely"
+                "Wherever it was in Greek — English preserves the Greek order verbatim",
+                "Last in the English clause — like sentence-final adverbs",
+                "It is dropped entirely — postpositives carry no English-rendering value"
               ],
               note: "ὁ δὲ Ἰησοῦς εἶπεν = 'But Jesus said …', not 'Jesus but said …'." },
             { form: "ὁ μὲν Πέτρος … ὁ δὲ Ἰωάννης …",
@@ -2601,18 +2601,18 @@
               answer: "'and' or 'now' — a soft, transitional connective; reserve 'but' for stronger contrasts",
               choices: [
                 "'and' or 'now' — a soft, transitional connective; reserve 'but' for stronger contrasts",
-                "always 'but' — strong adversative",
-                "always 'because' — causal",
-                "always 'therefore' — inferential"
+                "always 'but' — a strong adversative, like ἀλλά in force every time",
+                "always 'because' — a causal conjunction like γάρ in every context",
+                "always 'therefore' — an inferential conjunction like οὖν everywhere"
               ] },
             { form: "καὶ σύ",
               prompt: "How is the καί best translated in καὶ σύ;?",
               answer: "'you also' / 'even you' — ascensive / adverbial καί before a single word",
               choices: [
                 "'you also' / 'even you' — ascensive / adverbial καί before a single word",
-                "'and you' — connective καί",
-                "'but you' — adversative καί",
-                "'because you' — causal καί"
+                "'and you' — straight connective καί, joining clauses or items",
+                "'but you' — adversative καί, used like ἀλλά in contrast",
+                "'because you' — causal καί, introducing a reason clause"
               ] },
             { form: "ὁ μὲν ἄνθρωπος ἀκούει, ὁ δὲ θεὸς λέγει.",
               prompt: "Translate.",
@@ -2654,9 +2654,9 @@
               answer: "the noun (or pronoun) in the main clause that the relative pronoun refers back to",
               choices: [
                 "the noun (or pronoun) in the main clause that the relative pronoun refers back to",
-                "the verb of the relative clause",
-                "the conjunction introducing the clause",
-                "the subject of the relative clause"
+                "the verb of the relative clause, since it carries the action",
+                "the conjunction introducing the clause — like ὅτι or ἵνα",
+                "the subject of the relative clause — usually a noun"
               ] },
             { form: "agreement",
               prompt: "A relative pronoun agrees with its antecedent in which categories?",
@@ -2673,9 +2673,9 @@
               answer: "the relative takes its case from its function in the relative clause — here it is the direct object of βλέπω",
               choices: [
                 "the relative takes its case from its function in the relative clause — here it is the direct object of βλέπω",
-                "the relative always matches its antecedent in case",
-                "ὅν is actually nominative; it just looks like an accusative",
-                "Greek relatives are always accusative"
+                "the relative always matches its antecedent in case, gender, AND number",
+                "ὅν is actually nominative; the -ν ending is a relative-pronoun quirk",
+                "Greek relatives are always accusative, regardless of clause role"
               ] },
             { form: "ὁ ἄνθρωπος ὃν βλέπω ἀκούει.",
               prompt: "Translate.",
@@ -2699,9 +2699,9 @@
               answer: "nom. sg. masculine of the relative pronoun ('who / which')",
               choices: [
                 "nom. sg. masculine of the relative pronoun ('who / which')",
-                "the masculine article ὁ with an accent",
-                "nom. sg. feminine",
-                "acc. sg. masculine"
+                "the masculine article ὁ with an accent — accented forms of the article are relatives",
+                "nom. sg. feminine of the relative pronoun ('she who')",
+                "acc. sg. masculine of the relative pronoun ('whom')"
               ],
               note: "Rough breathing + acute accent distinguishes ὅς from the article ὁ." },
             { form: "ἥ vs ἡ",
@@ -2738,7 +2738,7 @@
               answer: "ὅ is one syllable (relative); ὅτι is two syllables (conjunction)",
               choices: [
                 "ὅ is one syllable (relative); ὅτι is two syllables (conjunction)",
-                "they are interchangeable",
+                "they are interchangeable — Koine collapses the two tenses entirely",
                 "ὅ is the conjunction, ὅτι the pronoun",
                 "both are relative pronouns in different cases"
               ] },
@@ -2894,9 +2894,9 @@
               answer: "the following words use 1st/2nd person and present-time perspective of the original speaker (often signalled by capitalisation or ·)",
               choices: [
                 "the following words use 1st/2nd person and present-time perspective of the original speaker (often signalled by capitalisation or ·)",
-                "ὅτι is recitative whenever the main verb is in the present tense",
-                "ὅτι is recitative whenever followed by an aorist",
-                "there is no way to tell — both are translated the same"
+                "ὅτι is recitative whenever the main verb is in the present tense, regardless of what follows",
+                "ὅτι is recitative whenever followed by an aorist verb in the embedded clause",
+                "there is no way to tell — direct and indirect ὅτι are translated identically in English"
               ] },
             { form: "ὅτι (causal)",
               prompt: "A third use of ὅτι, distinct from direct and indirect statement, is…",
@@ -3126,9 +3126,9 @@
               answer: "no difference in meaning — only in form. Some verbs use σα (1st aor.), others use a different stem (2nd aor.).",
               choices: [
                 "no difference in meaning — only in form. Some verbs use σα (1st aor.), others use a different stem (2nd aor.).",
-                "1st aorist is simple past; 2nd aorist is ongoing past",
-                "1st aorist is active; 2nd aorist is middle/passive",
-                "2nd aorist is for compound verbs only"
+                "1st aorist is simple past tense; 2nd aorist marks ongoing past, like the imperfect",
+                "1st aorist is for active voice; 2nd aorist is for middle / passive voice",
+                "2nd aorist is for compound verbs only — bare verbs always use 1st aorist"
               ] },
             { form: "εἶπεν ὁ Ἰησοῦς τὸν λόγον.",
               prompt: "Translate.",
@@ -3186,9 +3186,9 @@
               answer: "the accent: circumflex on μενῶ marks the contraction (future); μένω is a plain present.",
               choices: [
                 "the accent: circumflex on μενῶ marks the contraction (future); μένω is a plain present.",
-                "the breathing changes from smooth to rough.",
-                "the future adds a σ before the ending.",
-                "the future has an ε- augment."
+                "the breathing changes from smooth to rough in the future tense.",
+                "the future adds a σ before the ending (μένσω), like a stop-stem verb.",
+                "the future has an ε- augment, just like the imperfect or aorist."
               ],
               note: "Liquid futures look like ε-contract presents — accent is the diagnostic." },
             { form: "aorist of μένω",
@@ -3331,9 +3331,9 @@
               answer: "neuter nom. and acc. are ALWAYS identical (singular and plural)",
               choices: [
                 "neuter nom. and acc. are ALWAYS identical (singular and plural)",
-                "neuters have no plural",
-                "neuters never take the article",
-                "neuters are always 3rd declension"
+                "neuters have no plural in the third declension at all",
+                "neuters never take the article — that's reserved for masc. and fem.",
+                "neuters are always 3rd declension, never 1st or 2nd"
               ] },
             { form: "neuter plural",
               prompt: "What ending characterises the nom./acc. plural of 3rd-declension neuters?",
@@ -3362,9 +3362,9 @@
               answer: "all genders use 3rd-decl. consonant-stem endings; masc. and fem. share forms",
               choices: [
                 "all genders use 3rd-decl. consonant-stem endings; masc. and fem. share forms",
-                "it never declines — indeclinable",
-                "it uses 1st-decl endings throughout",
-                "it has no neuter form"
+                "it never declines — indeclinable, like Hebrew names such as Ἀβραάμ",
+                "it uses 1st-decl endings throughout, like a feminine noun",
+                "it has no neuter form — masc. and fem. only, like an animate adjective"
               ] },
             { form: "ἀληθής",
               prompt: "Parse this form (paired with a masc. noun like λόγος).",
@@ -3426,9 +3426,9 @@
               answer: "the accent — τίς keeps a fixed acute on the first syllable; τις is enclitic and usually unaccented",
               choices: [
                 "the accent — τίς keeps a fixed acute on the first syllable; τις is enclitic and usually unaccented",
-                "their form differs completely",
-                "they appear in different cases only",
-                "τίς is always plural; τις is always singular"
+                "their form differs completely — they are unrelated words with no shared declension",
+                "they appear in different cases only — τίς is nominative-only, τις is oblique-only",
+                "τίς is always plural; τις is always singular — the accent marks number, not function"
               ] },
             { form: "τις declension",
               prompt: "What declension do τίς and τις follow?",
@@ -3436,8 +3436,8 @@
               choices: [
                 "3rd declension",
                 "1st declension",
-                "2nd declension",
-                "indeclinable"
+                "2nd declension — like a masculine 2nd-decl. noun, with -ος endings",
+                "indeclinable — the feminine never changes form across cases"
               ] },
             { form: "ἄνθρωπός τις ἔρχεται.",
               prompt: "Translate.",
@@ -3554,18 +3554,18 @@
               answer: "3-1-3 — masc./neut. 3rd-decl., fem. 1st-decl.",
               choices: [
                 "3-1-3 — masc./neut. 3rd-decl., fem. 1st-decl.",
-                "fully 2-1-2 like καλός",
+                "fully 2-1-2 like καλός — all three genders use adjective endings",
                 "fully 3rd declension throughout",
-                "indeclinable"
+                "indeclinable — the feminine never changes form across cases"
               ] },
             { form: "πᾶς vs ὁ πᾶς",
               prompt: "How do πᾶς ὁ ἄνθρωπος and ὁ πᾶς ἄνθρωπος typically differ in nuance?",
               answer: "predicate πᾶς = 'every / all' (distributive); attributive ὁ πᾶς = 'the whole' (collective)",
               choices: [
                 "predicate πᾶς = 'every / all' (distributive); attributive ὁ πᾶς = 'the whole' (collective)",
-                "they are interchangeable",
-                "ὁ πᾶς is a typo — only πᾶς ὁ exists",
-                "πᾶς only means 'every'; ὁ πᾶς only means 'all'"
+                "they are interchangeable — Koine collapses the two tenses entirely",
+                "ὁ πᾶς is unattested — only πᾶς ὁ ἄνθρωπος is grammatical",
+                "πᾶς is restricted to 'every' (singular); ὁ πᾶς to 'all' (plural)"
               ],
               note: "Bare πᾶς + noun is also common: πᾶς ἄνθρωπος = 'every man'." },
             { form: "πάντα",
@@ -3573,9 +3573,9 @@
               answer: "acc. sg. masc. OR nom./acc. pl. neuter",
               choices: [
                 "acc. sg. masc. OR nom./acc. pl. neuter",
-                "only acc. sg. masc.",
-                "only nom. pl. neuter",
-                "only dat. pl."
+                "only acc. sg. masc. — '(every / all) thing'",
+                "only nom. pl. neuter — 'all things' as subject only",
+                "only dat. pl. — 'to / for all', regardless of gender"
               ],
               note: "Context decides. πάντα ποιεῖ = 'he does all things'." },
             { form: "πᾶς ἄνθρωπος ἀκούει τὸν λόγον.",
@@ -3600,9 +3600,9 @@
               answer: "3-1-3 — masc./neut. are 3rd-declension (εἷς, ἕν), fem. is 1st-declension (μία)",
               choices: [
                 "3-1-3 — masc./neut. are 3rd-declension (εἷς, ἕν), fem. is 1st-declension (μία)",
-                "fully 2-1-2 like καλός",
-                "indeclinable — used for all genders",
-                "uses 2nd-decl endings throughout"
+                "fully 2-1-2 like καλός — all three genders use adjective endings",
+                "indeclinable — εἷς never changes form across cases or genders",
+                "uses 2nd-decl endings throughout — masc., fem., and neut. share -ος / -ου / -ῳ / -ον"
               ] },
             { form: "εἷς, μία, ἕν",
               prompt: "Translate.",
@@ -3619,9 +3619,9 @@
               answer: "the rough breathing and accent on εἷς; εἰς is unaccented and smooth-breathing",
               choices: [
                 "the rough breathing and accent on εἷς; εἰς is unaccented and smooth-breathing",
-                "they are the same word and context decides",
-                "εἷς is plural; εἰς is singular",
-                "one is a noun, the other a verb"
+                "they are the same word — context decides 'one' vs 'into' each time",
+                "εἷς is the plural form; εἰς is the singular (an accent-only contrast)",
+                "one is a noun, the other a verb — they belong to different word classes"
               ] },
             { form: "εἷς ἐστιν ὁ θεός.",
               prompt: "Translate.",
@@ -3653,9 +3653,9 @@
               answer: "-ντ- (added to the stem before the case ending; e.g., λυ-ο-ντ → λύων, λύοντος)",
               choices: [
                 "-ντ- (added to the stem before the case ending; e.g., λυ-ο-ντ → λύων, λύοντος)",
-                "-μεν- (used for middle/passive)",
-                "-θη- (aorist passive)",
-                "no marker — the participle is just the stem"
+                "-μεν- (the middle/passive participial marker, e.g., λυόμενος)",
+                "-θη- (the aorist passive marker, used for participles and finite forms)",
+                "no marker — the participle is just the stem with adjective endings glued on"
               ] },
             { form: "present middle/passive participle marker",
               prompt: "What is the participial marker for the present MIDDLE/PASSIVE participle?",
@@ -3672,9 +3672,9 @@
               answer: "-σαντ- (with no augment; e.g., λύ-σαντ → λύσας, λύσαντος)",
               choices: [
                 "-σαντ- (with no augment; e.g., λύ-σαντ → λύσας, λύσαντος)",
-                "ε- (augment) + -σαντ-",
-                "-μεν- (middle marker)",
-                "-θεντ- (aorist passive)"
+                "ε- (augment) + -σαντ- — the augment carries past time",
+                "-μεν- (the middle/passive participial marker, used regardless of tense)",
+                "-θεντ- (the marker used for the aorist active in 1st-aorist verbs)"
               ],
               note: "NO AUGMENT on the participle — augment is for indicative only. Same for subjunctive, infinitive." },
             { form: "ὁ λύων τὸν δοῦλον λέγει.",
@@ -3701,16 +3701,16 @@
                 "3rd declension (on the -ντ- or -θεντ- stem)",
                 "2nd declension throughout",
                 "1st declension throughout",
-                "indeclinable"
+                "indeclinable — the feminine never changes form across cases"
               ] },
             { form: "active fem decl.",
               prompt: "What declension do active and aorist-passive participles use in the feminine?",
               answer: "1st declension — using -ουσα / -σασα / -θεῖσα",
               choices: [
                 "1st declension — using -ουσα / -σασα / -θεῖσα",
-                "3rd declension like the masc.",
-                "2nd declension",
-                "indeclinable"
+                "3rd declension like the masculine — same -ντ-/-θεντ- stem",
+                "2nd declension — like a masculine 2nd-decl. noun, with -ος endings",
+                "indeclinable — the feminine never changes form across cases"
               ],
               note: "So active participles are 3-1-3, exactly like πᾶς." },
             { form: "middle/passive decl.",
@@ -3745,9 +3745,9 @@
               answer: "aspect — with relative time",
               choices: [
                 "aspect — with relative time",
-                "absolute past, present, or future time",
+                "absolute past, present, or future time, just like the indicative",
                 "mood",
-                "person and number"
+                "person and number — the tense form encodes who/how many"
               ],
               note: "Present participle = action simultaneous with the main verb; aorist participle = action prior to it." },
             { form: "λύων (when?)",
@@ -3801,7 +3801,7 @@
               choices: [
                 "attributive — 'the man who is untying'",
                 "adverbial (circumstantial) — 'while untying, the man …'",
-                "substantive — 'the one untying'",
+                "substantive — used as a noun, 'the one untying (the slave)'",
                 "predicate — 'the man is untying'"
               ],
               note: "Article–participle–noun = attributive position." },
@@ -3819,9 +3819,9 @@
               answer: "adverbial (circumstantial) — 'after / while untying the slave, he went away'",
               choices: [
                 "adverbial (circumstantial) — 'after / while untying the slave, he went away'",
-                "attributive — modifying the subject",
-                "substantive — 'the one untying'",
-                "imperative — 'untie!'"
+                "attributive — the participle agrees with and modifies the subject",
+                "substantive — used as a noun, 'the one untying (the slave)'",
+                "imperative — a command directed at the subject, 'untie the slave!'"
               ],
               note: "An anarthrous participle agreeing with the subject is normally circumstantial." },
             { form: "λύσαντος τοῦ ἀνθρώπου τὸν δοῦλον, ἀπῆλθον.",
@@ -3873,18 +3873,18 @@
               answer: "active: 'the master unties the slave'; passive: 'the slave is untied by the master'",
               choices: [
                 "active: 'the master unties the slave'; passive: 'the slave is untied by the master'",
-                "they mean entirely different things",
-                "only the passive describes a real event",
-                "they differ in tense, not in voice"
+                "they mean entirely different things — the events described are unrelated",
+                "only the passive describes a real event; the active is a hypothetical",
+                "they differ in tense, not in voice — the action is the same in both cases"
               ] },
             { form: "why a passive",
               prompt: "Why does Greek (and English) bother with a passive voice?",
               answer: "to bring the patient (the thing affected) to the subject position when that's what the speaker wants to focus on",
               choices: [
                 "to bring the patient (the thing affected) to the subject position when that's what the speaker wants to focus on",
-                "because the passive can express things the active cannot",
-                "passive is grammatically required after certain verbs",
-                "passive is purely decorative"
+                "because the passive can express ideas (like depersonalised action) that the active cannot reach",
+                "passive is grammatically required after certain verbs (verbs of motion, perception, etc.)",
+                "passive is purely decorative — it adds no syntactic or pragmatic information"
               ] },
             { form: "ὁ δοῦλος λύεται.",
               prompt: "Translate.",
@@ -3956,14 +3956,14 @@
                 "an extra σ before the endings",
                 "the augment becomes η-, not ε-"
               ] },
-            { form: "aorist passive",
+            { form: "aorist passive — a simple completed event in the past",
               prompt: "What feature distinguishes the AORIST PASSIVE from the aorist middle and active?",
               answer: "the θη morpheme between the stem and the personal endings (with ACTIVE endings, not middle)",
               choices: [
                 "the θη morpheme between the stem and the personal endings (with ACTIVE endings, not middle)",
-                "the σα morpheme like the 1st aorist active",
-                "the middle endings -μαι, -σαι, -ται",
-                "nothing — context is the only clue"
+                "the σα morpheme — the same shape as the 1st aorist active, but with middle endings",
+                "the middle endings -μαι, -σαι, -ται on a plain aorist stem",
+                "nothing in the form — only the surrounding ὑπό + gen. tells you it is passive"
               ],
               note: "ἐ-λύ-θη-ν. The aorist passive uses ACTIVE-style secondary endings on the θη stem." },
             { form: "future passive",
@@ -3971,9 +3971,9 @@
               answer: "the θη morpheme plus a σ, then middle/passive endings: -θησ-ομαι, -θησ-ῃ, -θησ-εται…",
               choices: [
                 "the θη morpheme plus a σ, then middle/passive endings: -θησ-ομαι, -θησ-ῃ, -θησ-εται…",
-                "nothing — future middle and passive are identical",
-                "the σ alone — future middle has no σ",
-                "an augment ε- on the future"
+                "nothing — future middle and passive use identical endings throughout",
+                "the σ alone — future middle drops the σ between vowels",
+                "an augment ε- on the future, like a past indicative ε-prefix"
               ] },
             { form: "ἐλύθη ὁ δοῦλος.",
               prompt: "Translate.",
@@ -4001,8 +4001,8 @@
               answer: "bare dative — or ἐν + dat.",
               choices: [
                 "bare dative — or ἐν + dat.",
-                "always ὑπό + gen.",
-                "the bare accusative",
+                "always ὑπό + gen. (the personal-agent construction, even for things)",
+                "the bare accusative — Greek's all-purpose adverbial case",
                 "διά + acc."
               ],
               note: "Same logic introduced in Ch 4.3 — personal agent vs impersonal instrument." },
@@ -4046,9 +4046,9 @@
               answer: "the θ + η (θη morpheme) before the personal ending",
               choices: [
                 "the θ + η (θη morpheme) before the personal ending",
-                "the augment ε- alone",
-                "the σ before the ending",
-                "the κ before the ending"
+                "the augment ε- alone, since passives always carry past time",
+                "the σ before the ending, like the future or aorist active",
+                "the κ before the ending, like the perfect active"
               ],
               note: "ἐ-λύ-θη: augment + stem + θη + ending. Same θη appears in the future passive (-θησ-)." },
             { form: "λυθήσομαι",
@@ -4191,9 +4191,9 @@
               answer: "aorist = the event happened; perfect = the event happened AND the result stands",
               choices: [
                 "aorist = the event happened; perfect = the event happened AND the result stands",
-                "aorist = past, perfect = future",
-                "aorist = ongoing, perfect = simple",
-                "they are interchangeable"
+                "aorist refers to past events; perfect points to future fulfilment",
+                "aorist describes ongoing action; perfect describes a one-off event",
+                "they are interchangeable — Koine collapses the two tenses entirely"
               ],
               note: "English 'I have done' often catches the perfect well, but it's not a perfect equivalent." },
             { form: "English perfect translation",
@@ -4201,9 +4201,9 @@
               answer: "'I have ___' or 'I ___' (present state)",
               choices: [
                 "'I have ___' or 'I ___' (present state)",
-                "'I am ___ing'",
-                "'I shall ___'",
-                "'I would have ___ed'"
+                "'I am ___ing' — the same form as the English present continuous",
+                "'I shall ___' — the same form as the English simple future",
+                "'I would have ___ed' — English conditional perfect (counterfactual past)"
               ] },
             { form: "γέγραπται ὁ λόγος.",
               prompt: "Translate.",
@@ -4269,18 +4269,18 @@
               answer: "'it stands written' / 'it is written'",
               choices: [
                 "'it stands written' / 'it is written'",
-                "'someone wrote'",
-                "'they will write'",
-                "'while writing'"
+                "'someone wrote' (aorist, simple past — no abiding state)",
+                "'they will write' (future indicative, action lying ahead)",
+                "'while writing' (present participle, an ongoing action)"
               ] },
             { form: "τετέλεσται",
               prompt: "Best translation in 'τετέλεσται' (John 19:30)?",
               answer: "'it is finished' (the work is done and its results stand)",
               choices: [
                 "'it is finished' (the work is done and its results stand)",
-                "'he finishes' (present)",
-                "'he finished' (aorist)",
-                "'he will finish' (future)"
+                "'he finishes' (present) — ongoing action with no past reference",
+                "'he finished' (aorist) — a simple past event with no present relevance",
+                "'he will finish' (future) — completion lying in the future, after the speaker"
               ],
               note: "Perfect middle/passive 3rd sg. of τελέω." },
             { form: "perfect with present force",
@@ -4288,9 +4288,9 @@
               answer: "their resulting state IS the present-time meaning — οἶδα ('I know') = 'I have come to know' = 'I know now'",
               choices: [
                 "their resulting state IS the present-time meaning — οἶδα ('I know') = 'I have come to know' = 'I know now'",
-                "they are mistranslated and really mean 'I have known'",
-                "the perfect always = English present",
-                "οἶδα is actually a present, not a perfect"
+                "they are mistranslated and really mean 'I have known' — the perfect always wins out over the present",
+                "the perfect always = English present — οἶδα and γέγραπται are no exception",
+                "οἶδα is actually a present, not a perfect — its κ + α-endings are just a coincidence"
               ],
               note: "ἕστηκα ('I stand') and οἶδα ('I know') are the classic 'present-meaning' perfects." },
             { form: "πεπίστευκα εἰς αὐτόν.",
@@ -4370,8 +4370,8 @@
               answer: "a contingent / potential / non-factual action",
               choices: [
                 "a contingent / potential / non-factual action",
-                "a flat statement of fact",
-                "a direct command",
+                "a flat statement of fact, like the indicative",
+                "a direct command, like the imperative",
                 "direct address (vocative)"
               ] },
             { form: "subjunctive time",
@@ -4379,9 +4379,9 @@
               answer: "aspect only — no absolute time outside the indicative",
               choices: [
                 "aspect only — no absolute time outside the indicative",
-                "absolute past, present, or future time",
-                "voice",
-                "person and number"
+                "absolute past, present, or future time, just like the indicative",
+                "voice — present subj = active, aorist subj = passive",
+                "person and number — the tense form encodes who/how many"
               ] },
             { form: "where it appears",
               prompt: "In what kinds of clauses does the subjunctive most often appear in NT Greek?",
@@ -4414,8 +4414,8 @@
               answer: "long thematic vowel (ω/η)",
               choices: [
                 "long thematic vowel (ω/η)",
-                "the augment ε-",
-                "reduplication",
+                "the augment ε- (the past-time marker)",
+                "reduplication (the perfect-stem marker)",
                 "the θη morpheme"
               ],
               note: "λύομεν (ind.) vs λύωμεν (subj.); λύετε (ind.) vs λύητε (subj.)." },
@@ -4471,9 +4471,9 @@
               answer: "purpose / content ('in order that' / 'that')",
               choices: [
                 "purpose / content ('in order that' / 'that')",
-                "a simple statement of fact",
-                "a wish",
-                "direct address"
+                "a simple statement of fact ('in order that he hears')",
+                "a wish — 'oh, that he might hear!'",
+                "direct address — 'in order, O hearer!'"
               ] },
             { form: "λύσωμεν",
               prompt: "1st-person plural subjunctive in a main clause is the…",
@@ -4589,18 +4589,18 @@
               answer: "perfect in form, present in meaning ('I have come to know' = 'I know')",
               choices: [
                 "perfect in form, present in meaning ('I have come to know' = 'I know')",
-                "it is an irregular aorist",
-                "it is a regular present-tense verb",
-                "it is indeclinable"
+                "it is an irregular aorist that translates as a present in English idiom",
+                "it is a regular present-tense verb formed on the stem οἰδ-/εἰδ-",
+                "it is indeclinable — the same form οἶδα is used for every person and number"
               ] },
             { form: "ᾔδειν",
               prompt: "Parse this form of οἶδα.",
               answer: "pluperfect with imperfect force — 'I knew'",
               choices: [
                 "pluperfect with imperfect force — 'I knew'",
-                "future, 1st sg.",
-                "present, 1st sg.",
-                "aorist, 1st sg."
+                "future active indicative, 1st sg. — 'I will know'",
+                "present active indicative, 1st sg. — 'I am knowing'",
+                "aorist active indicative, 1st sg. — 'I came to know'"
               ],
               note: "Because οἶδα is a present-meaning perfect, its pluperfect form ᾔδειν has imperfect meaning ('I knew')." },
             { form: "κεῖμαι, κάθημαι",
@@ -4608,9 +4608,9 @@
               answer: "stative posture — 'I lie' / 'I sit' (middle-form)",
               choices: [
                 "stative posture — 'I lie' / 'I sit' (middle-form)",
-                "verbs of motion",
-                "verbs of speech",
-                "transitive action verbs"
+                "verbs of motion — 'I run' / 'I walk' (active-form motion verbs)",
+                "verbs of speech — 'I say' / 'I shout' (active-form speech verbs)",
+                "transitive action verbs — 'I throw' / 'I take' (active-form transitives)"
               ] },
             { form: "οἶδα τὸν θεόν.",
               prompt: "Translate.",
@@ -4634,18 +4634,18 @@
               answer: "complementary — completing the idea of θέλω: 'I want TO LOOSE'",
               choices: [
                 "complementary — completing the idea of θέλω: 'I want TO LOOSE'",
-                "purpose — 'in order to loose'",
-                "result — 'so as to loose'",
-                "imperative — 'loose!'"
+                "purpose — 'in order to loose' (an end-goal, with ἵνα implied)",
+                "result — 'so as to loose' (a consequence, with ὥστε implied)",
+                "imperative — 'loose!' (a direct command in infinitival shape)"
               ] },
             { form: "articular infinitive",
               prompt: "What is an 'articular infinitive'?",
               answer: "an infinitive preceded by the neuter article (τό, τοῦ, τῷ) — letting the infinitive be governed like a noun",
               choices: [
                 "an infinitive preceded by the neuter article (τό, τοῦ, τῷ) — letting the infinitive be governed like a noun",
-                "an infinitive followed by an article",
-                "any infinitive used as a noun (no article needed)",
-                "an infinitive standing alone as a main verb"
+                "an infinitive followed by an article that points to its complement",
+                "any infinitive used as a noun (no article needed); Greek infinitives are inherently substantival",
+                "an infinitive standing alone as a main verb, replacing the finite indicative"
               ],
               note: "διὰ τὸ λέγειν = 'because of the speaking / because he speaks/spoke'." },
             { form: "ὥστε + infinitive",
@@ -4783,9 +4783,9 @@
               answer: "aspect, not time",
               choices: [
                 "aspect, not time",
-                "absolute past, present, or future time",
+                "absolute past, present, or future time, just like the indicative",
                 "mood",
-                "person and number"
+                "person and number — the tense form encodes who/how many"
               ],
               note: "Only the indicative consistently anchors time. Elsewhere, present/aorist/perfect is about how the action is portrayed." },
             { form: "command: keep doing X",
@@ -4801,9 +4801,9 @@
               answer: "a state to be maintained ('stay in this condition')",
               choices: [
                 "a state to be maintained ('stay in this condition')",
-                "a single past command",
-                "a future-time command",
-                "a generic timeless command"
+                "a single past command — issued retroactively in the perfect",
+                "a future-time command — perfect imperatives anticipate completion",
+                "a generic timeless command — the perfect carries no temporal force"
               ],
               note: "E.g. πεφίμωσο ('be still!', Mark 4:39) — stative force." },
             { form: "μὴ λύε τὸν δοῦλον.",
@@ -4932,9 +4932,9 @@
               answer: "ο + ω → ω (the long vowel wins; circumflex marks contraction)",
               choices: [
                 "ο + ω → ω (the long vowel wins; circumflex marks contraction)",
-                "the ο is silent",
-                "ο + ω → οω (no contraction)",
-                "ο changes to ε before the ending"
+                "the ο is silent — it is dropped in writing before the personal ending",
+                "ο + ω → οω (no contraction, just kept side by side)",
+                "ο changes to ε before the ending, like an ε-contract verb"
               ] },
             { form: "ο + ε / ο + ο",
               prompt: "What does ο + ε (or ο + ο) contract to in ο-contract verbs?",
@@ -4983,7 +4983,7 @@
                 "εἰ + indicative (protasis) — the speaker treats the protasis as TRUE for the sake of argument",
                 "ἐάν + subjunctive — 'if he should …'",
                 "εἰ + past indicative + ἄν in apodosis — contrary to fact",
-                "no specific form — only context distinguishes"
+                "no specific form — only context distinguishes contrary-to-fact from real conditions"
               ],
               note: "εἰ υἱὸς εἶ τοῦ θεοῦ … = 'If you ARE the Son of God …' (assumed true for argument)." },
             { form: "2nd class condition",
@@ -4991,9 +4991,9 @@
               answer: "εἰ + secondary-tense INDICATIVE in the protasis, ἄν + secondary-tense indicative in the apodosis",
               choices: [
                 "εἰ + secondary-tense INDICATIVE in the protasis, ἄν + secondary-tense indicative in the apodosis",
-                "εἰ + subjunctive in the protasis",
-                "ἐάν + subjunctive in the protasis",
-                "no specific form — only context distinguishes"
+                "εἰ + subjunctive in the protasis — used for hypothetical past events",
+                "ἐάν + subjunctive in the protasis — the standard form for any past condition",
+                "no specific form — only context distinguishes contrary-to-fact from real conditions"
               ],
               note: "'If you WERE (but you're not), you WOULD ___': εἰ ἤμην … ἄν ἤμην …" },
             { form: "3rd class condition",
@@ -5001,9 +5001,9 @@
               answer: "ἐάν + subjunctive protasis + future/indicative apodosis",
               choices: [
                 "ἐάν + subjunctive protasis + future/indicative apodosis",
-                "εἰ + indicative — 1st class",
-                "εἴθε + optative — 4th class",
-                "no specific form"
+                "εἰ + indicative — that's actually the 1st-class condition (assumed true)",
+                "εἴθε + optative — that's the 4th-class (future-less-vivid) condition",
+                "no specific form — context decides which class of condition it is"
               ],
               note: "'If he should ___, he will ___' / 'Whenever he ___s, he ___s'." },
             { form: "ἐὰν λύσῃ",
@@ -5037,9 +5037,9 @@
               answer: "a noun/pronoun + a participle, BOTH in the genitive, grammatically detached from the main clause",
               choices: [
                 "a noun/pronoun + a participle, BOTH in the genitive, grammatically detached from the main clause",
-                "a noun in the genitive with NO participle",
-                "a participle alone in the genitive",
-                "a finite verb in the genitive"
+                "a noun in the genitive with NO participle — the genitive itself carries the adverbial sense",
+                "a participle alone in the genitive — its subject is supplied from the main clause",
+                "a finite verb in the genitive — Greek's substitute for a subordinating conjunction"
               ] },
             { form: "λύσαντος τοῦ ἀνθρώπου τὸν δοῦλον, ἀπῆλθον.",
               prompt: "What construction is λύσαντος τοῦ ἀνθρώπου?",
@@ -5102,9 +5102,9 @@
               answer: "periphrastic perfect ('it has been / is written')",
               choices: [
                 "periphrastic perfect ('it has been / is written')",
-                "present indicative of γράφω",
-                "perfect indicative of εἰμί",
-                "aorist passive"
+                "present indicative of γράφω ('he writes' — no perfect force)",
+                "perfect indicative of εἰμί ('he has been', as a stand-alone)",
+                "aorist passive — a simple completed event in the past"
               ],
               note: "present of εἰμί + perfect participle = periphrastic perfect — frequent for stative passives." },
             { form: "periphrastic logic",
@@ -5184,9 +5184,9 @@
               answer: "replace the genitive plural -ων ending with -ως (e.g., καλός → καλῶς 'well')",
               choices: [
                 "replace the genitive plural -ων ending with -ως (e.g., καλός → καλῶς 'well')",
-                "add -τατος to the stem",
-                "add the article + the adjective",
-                "adverbs are unrelated to adjectives in Greek"
+                "add -τατος to the stem — that's actually the superlative suffix",
+                "add the article + the adjective — that gives a substantive, not an adverb",
+                "adverbs are unrelated to adjectives in Greek — adverbs have their own stems"
               ] },
             { form: "μείζων ὁ Χριστὸς τοῦ Ἀβραάμ.",
               prompt: "Translate.",
@@ -5210,9 +5210,9 @@
               answer: "a wish — especially μὴ γένοιτο ('may it not be!')",
               choices: [
                 "a wish — especially μὴ γένοιτο ('may it not be!')",
-                "a flat statement of fact",
-                "a direct command",
-                "a strict logical inference"
+                "a flat statement of fact, like the indicative",
+                "a direct command, like the imperative",
+                "a strict logical inference, like a deductive conclusion"
               ],
               note: "Paul uses μὴ γένοιτο 15× in Romans / Galatians for emphatic denial." },
             { form: "optative form marker",
@@ -5220,9 +5220,9 @@
               answer: "-ι- (or -οι-, -αι-) before the ending",
               choices: [
                 "-ι- (or -οι-, -αι-) before the ending",
-                "an -η- (subjunctive)",
-                "the augment ε-",
-                "reduplication"
+                "an -η- (subjunctive marker, replacing the short ε)",
+                "the augment ε- (the past-time marker)",
+                "reduplication (the perfect-stem marker)"
               ],
               note: "λύοιμι, λύοις, λύοι, λύοιμεν, λύοιτε, λύοιεν — present optative of λύω." },
             { form: "optative rarity",
@@ -5230,9 +5230,9 @@
               answer: "much rarer — only ~67× in the NT, and largely confined to set phrases or Lukan style",
               choices: [
                 "much rarer — only ~67× in the NT, and largely confined to set phrases or Lukan style",
-                "more common in the NT than the subjunctive",
-                "equally common in both",
-                "not attested in the NT at all"
+                "more common in the NT than the subjunctive, especially in Pauline argument",
+                "equally common in both periods — Koine preserves classical frequency",
+                "not attested in the NT at all — it disappears entirely in Koine prose"
               ] },
             { form: "μὴ γένοιτο.",
               prompt: "Translate.",
