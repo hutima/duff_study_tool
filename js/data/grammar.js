@@ -1037,183 +1037,481 @@
     // ─────────────────────────────────────────────────────────────
     "9": {
       label: "Chapter 9 Grammar",
-      notes: "Personal, demonstrative, and relative pronouns; conjunctions",
+      notes: "Demonstratives (οὗτος, ἐκεῖνος); third-person pronouns (αὐτός, ἄλλος); 1st/2nd person pronouns with reflexives & possessives; conjunctions (timid words, μέν…δέ, καί)",
       items: [
         {
-          family: "Personal pronouns",
-          lemma: "ἐγώ / σύ / αὐτός",
-          gloss: "1st, 2nd, 3rd person",
+          family: "9.1 Formation of ἐκεῖνος and οὗτος",
+          lemma: "ἐκεῖνος / οὗτος",
+          gloss: "that / this",
           questions: [
-            { form: "ἐγώ", prompt: "Identify this pronoun.",
-              answer: "1st person singular nominative ('I')",
+            { form: "ἐκεῖνος endings",
+              prompt: "What endings does ἐκεῖνος use?",
+              answer: "standard 2-1-2 (adjective) endings: -ος, -η, -ο (like καλός, καλή, καλόν)",
               choices: [
-                "1st person singular nominative ('I')",
-                "2nd person singular nominative ('you')",
-                "1st person plural nominative ('we')",
-                "3rd person singular masculine ('he')"
-              ] },
-            { form: "ἡμεῖς", prompt: "Identify this pronoun.",
-              answer: "1st person plural nominative ('we')",
-              choices: [
-                "1st person plural nominative ('we')",
-                "2nd person plural nominative ('you all')",
-                "1st person singular nominative ('I')",
-                "3rd person plural nominative ('they')"
-              ] },
-            { form: "ὑμεῖς", prompt: "Identify this pronoun.",
-              answer: "2nd person plural nominative ('you all')",
-              choices: [
-                "2nd person plural nominative ('you all')",
-                "1st person plural nominative ('we')",
-                "2nd person singular nominative ('you')",
-                "3rd person plural masculine ('they')"
+                "standard 2-1-2 (adjective) endings: -ος, -η, -ο (like καλός, καλή, καλόν)",
+                "3rd-declension endings throughout",
+                "unique endings used by no other word",
+                "the same forms as the definite article"
               ],
-              note: "ἡμεῖς (1pl) vs ὑμεῖς (2pl) differ only in their breathing and accent — easy to confuse." },
-            { form: "αὐτοῦ", prompt: "What is one likely meaning of αὐτοῦ?",
-              answer: "'his / of him' (gen. sg. masc.) — possession",
+              note: "ἐκεῖνος is fully regular — stem ἐκεινο- + adjective endings." },
+            { form: "οὗτος — two stems",
+              prompt: "Why does οὗτος have forms beginning with both ου- and αυ-?",
+              answer: "the stem vowel echoes the article: ου- where the article has ο (ὁ, οἱ, τοῦ, τῷ…); αυ- where the article has α (ἡ, αἱ, τῆς, τῇ…)",
               choices: [
-                "'his / of him' (gen. sg. masc.) — possession",
-                "'self' (intensive, nom.)",
-                "'them' (acc. pl.)",
-                "'to him' (dat. sg.)"
-              ] },
-            { form: "ἡμῶν vs ὑμῶν",
-              prompt: "Which means 'of us' (genitive of 'we')?",
-              answer: "ἡμῶν",
-              choices: ["ἡμῶν", "ὑμῶν", "both — they are interchangeable", "neither — both are 3rd person"],
-              note: "ἡμῶν (1pl, rough breathing) vs ὑμῶν (2pl, smooth breathing). The breathing is the diagnostic." },
-            { form: "ἐμοί vs μοί",
-              prompt: "Which form of the 1st-singular dative pronoun is the emphatic one?",
-              answer: "ἐμοί (accented form)",
-              choices: [
-                "ἐμοί (accented form)",
-                "μοί (enclitic form)",
-                "both — interchangeable",
-                "neither — they are 2nd person"
+                "the stem vowel echoes the article: ου- where the article has ο (ὁ, οἱ, τοῦ, τῷ…); αυ- where the article has α (ἡ, αἱ, τῆς, τῇ…)",
+                "ου- is singular, αυ- is plural — pure number distinction",
+                "ου- is masculine and αυ- is feminine in every case",
+                "they are random spelling variants with no rule"
               ],
-              note: "Greek 1st/2nd singular pronouns have an emphatic form (ἐμοῦ, ἐμοί, ἐμέ) and an unaccented enclitic (μου, μοι, με)." }
-          ]
-        },
-        {
-          family: "Demonstratives — near and far",
-          lemma: "οὗτος / ἐκεῖνος",
-          gloss: "this / that",
-          questions: [
-            { form: "οὗτος",
-              prompt: "Near or far demonstrative?",
-              answer: "near ('this')",
-              choices: ["near ('this')", "far ('that')", "neither — it's a relative pronoun", "neither — it's an article"] },
-            { form: "ἐκεῖνος",
-              prompt: "Near or far demonstrative?",
-              answer: "far ('that')",
-              choices: ["far ('that')", "near ('this')", "neither — it's a relative pronoun", "neither — it's an article"] },
-            { form: "αὕτη",
-              prompt: "Identify this form.",
-              answer: "'this' — nom. sg. fem. of οὗτος",
+              note: "οὗτος, αὕτη, τοῦτο / τούτου, ταύτης, τούτου …" },
+            { form: "οὗτος — τ vs rough breathing",
+              prompt: "Which forms of οὗτος start with τ- and which with a rough-breathed vowel?",
+              answer: "τ- where the article has τ (τοῦ → τούτου, τήν → ταύτην); rough-breathed vowel where the article has none (ὁ → οὗτος, ἡ → αὕτη, οἱ → οὗτοι, αἱ → αὗται)",
               choices: [
-                "'this' — nom. sg. fem. of οὗτος",
-                "'she herself' — αὐτός intensive",
-                "'her' — αὐτή acc.",
-                "'the same' — αὐτός attributive"
+                "τ- where the article has τ (τοῦ → τούτου, τήν → ταύτην); rough-breathed vowel where the article has none (ὁ → οὗτος, ἡ → αὕτη, οἱ → οὗτοι, αἱ → αὗται)",
+                "rough-breathed forms are masculine; τ- forms are feminine",
+                "τ- forms are singular; rough-breathed forms are plural",
+                "it is unpredictable and must be learned form by form"
               ],
-              note: "αὕτη (rough breathing, acute) vs αὐτή (smooth breathing, acute) — small marks, big difference." },
+              note: "Useful rule of thumb: 'οὗτος follows the article'." },
+            { form: "αὕτη vs αὐτή",
+              prompt: "Distinguish αὕτη from αὐτή.",
+              answer: "αὕτη (rough breathing) = 'this' (nom. sg. fem. of οὗτος); αὐτή (smooth breathing) = 'she / herself / same' (αὐτός)",
+              choices: [
+                "αὕτη (rough breathing) = 'this' (nom. sg. fem. of οὗτος); αὐτή (smooth breathing) = 'she / herself / same' (αὐτός)",
+                "they are alternate spellings of the same word",
+                "αὕτη is 3rd person pronoun, αὐτή is the demonstrative",
+                "αὕτη is plural, αὐτή is singular"
+              ],
+              note: "Tiny breathing mark, very different meanings." },
             { form: "οὗτος ὁ ἀπόστολος",
-              prompt: "Why is οὗτος in predicate position with the article on ἀπόστολος?",
-              answer: "Demonstratives normally take predicate position with their noun — but they are translated attributively.",
+              prompt: "Why is οὗτος in predicate position even though it is translated attributively?",
+              answer: "Greek demonstratives always sit OUTSIDE the article-noun phrase (predicate position), yet are translated attributively ('this apostle')",
               choices: [
-                "Demonstratives normally take predicate position with their noun — but they are translated attributively.",
-                "It's a typo; οὗτος should follow ἀπόστολος.",
-                "Predicate position changes the meaning to 'the apostle is this one'.",
-                "οὗτος is functioning here as a relative pronoun."
+                "Greek demonstratives always sit OUTSIDE the article-noun phrase (predicate position), yet are translated attributively ('this apostle')",
+                "It is a typo; οὗτος belongs between the article and the noun",
+                "It means 'the apostle is this one' — a predicate sentence",
+                "Demonstratives normally take attributive position; this is an exception"
               ],
-              note: "οὗτος ὁ ἀπόστολος = 'this apostle'; never *ὁ οὗτος ἀπόστολος." },
+              note: "Allowed: οὗτος ὁ ἀπόστολος / ὁ ἀπόστολος οὗτος. Forbidden: *ὁ οὗτος ἀπόστολος." },
+            { form: "ἐκείνη",
+              prompt: "Parse this form.",
+              answer: "nom. sg. fem. of ἐκεῖνος — 'that (one)'",
+              choices: [
+                "nom. sg. fem. of ἐκεῖνος — 'that (one)'",
+                "nom. sg. masc. of ἐκεῖνος",
+                "nom. sg. fem. of οὗτος — 'this'",
+                "dat. sg. fem. of the article"
+              ],
+              note: "ἐκεῖνος is fully regular 2-1-2: ἐκεῖνος, ἐκείνη, ἐκεῖνο." },
             { form: "ἐκεῖνος ὁ ἄνθρωπος",
               prompt: "Translate.",
-              answer: "'that man'",
+              answer: "'that man' — ἐκεῖνος in predicate position, rendered attributively",
               choices: [
-                "'that man'",
-                "'this man'",
-                "'the man is that one'",
-                "'the same man'"
+                "'that man' — ἐκεῖνος in predicate position, rendered attributively",
+                "'this man' (near demonstrative)",
+                "'the man is that one' (predicate sentence)",
+                "'the same man' (αὐτός attributive)"
               ],
-              note: "ἐκεῖνος sits outside the article phrase but renders attributively in English, just like οὗτος." }
-          ]
-        },
-        {
-          family: "Relative pronouns",
-          lemma: "ὅς, ἥ, ὅ",
-          gloss: "who, which",
-          questions: [
-            { form: "agreement",
-              prompt: "A relative pronoun agrees with its antecedent in which categories?",
-              answer: "gender and number (its case is set by its own clause)",
+              note: "Like οὗτος, ἐκεῖνος always sits outside the article–noun phrase but translates attributively." },
+            { form: "ἐκεῖνος vs οὗτος",
+              prompt: "What is the contrast between ἐκεῖνος and οὗτος?",
+              answer: "ἐκεῖνος = far demonstrative ('that, yonder'); οὗτος = near demonstrative ('this, here')",
               choices: [
-                "gender and number (its case is set by its own clause)",
-                "case, gender, and number",
-                "case and number only",
-                "person and number only"
-              ],
-              note: "Compare: 'the man whom I saw' — 'whom' is acc. (object of 'saw') even though 'man' is nom." },
-            { form: "ὅς", prompt: "Parse this relative pronoun.",
-              answer: "nominative singular masculine",
-              choices: ["nominative singular masculine", "nominative singular feminine", "nominative singular neuter", "accusative singular masculine"] },
-            { form: "ᾧ", prompt: "Parse this relative pronoun.",
-              answer: "dative singular masculine/neuter",
-              choices: ["dative singular masculine/neuter", "dative singular feminine", "genitive singular masculine/neuter", "dative plural masculine/neuter"] },
-            { form: "ὁ ἀπόστολος ὃν εἶδον",
-              prompt: "Why is the relative pronoun ὅν (acc.) when its antecedent ἀπόστολος is nominative?",
-              answer: "Case is set by the relative's role in its own clause (here, direct object of εἶδον).",
-              choices: [
-                "Case is set by the relative's role in its own clause (here, direct object of εἶδον).",
-                "It's an error — should be ὅς to match the antecedent.",
-                "Relative pronouns always default to accusative.",
-                "It's a typo for ὁ ἀπόστολος."
-              ],
-              note: "Gender + number come from the antecedent; case comes from the relative's own clause." },
-            { form: "ἡ ἀδελφὴ ἣ μένει",
-              prompt: "Why does ἥ have feminine form here?",
-              answer: "It agrees with its antecedent ἀδελφή in gender and number.",
-              choices: [
-                "It agrees with its antecedent ἀδελφή in gender and number.",
-                "Relative pronouns default to feminine when no neuter is present.",
-                "The feminine form is required by μένει.",
-                "It's actually the article ἡ, not a relative pronoun."
+                "ἐκεῖνος = far demonstrative ('that, yonder'); οὗτος = near demonstrative ('this, here')",
+                "ἐκεῖνος = near; οὗτος = far",
+                "they are interchangeable",
+                "ἐκεῖνος is singular; οὗτος is plural"
               ] },
-            { form: "οὓς εἶδεν",
-              prompt: "What does this relative clause specify about its (unstated) antecedent?",
-              answer: "The antecedent is masculine plural; ὅς's case (acc.) marks it as the object of εἶδεν.",
+            { form: "τοῦτο vs ἐκεῖνο",
+              prompt: "Identify the neuter nominative/accusative singular of each demonstrative.",
+              answer: "τοῦτο (this) for οὗτος; ἐκεῖνο (that) for ἐκεῖνος — both end in -ο like the article τό",
               choices: [
-                "The antecedent is masculine plural; ὅς's case (acc.) marks it as the object of εἶδεν.",
-                "The antecedent must be neuter plural.",
-                "The antecedent is genitive plural.",
-                "There must be no antecedent — οὕς cannot stand alone."
-              ],
-              note: "Even when the antecedent is omitted, gender/number of the relative reveals it." }
+                "τοῦτο (this) for οὗτος; ἐκεῖνο (that) for ἐκεῖνος — both end in -ο like the article τό",
+                "τοῦτον / ἐκεῖνον — both take -ν",
+                "ταῦτα / ἐκεῖνα — these are the singular forms",
+                "τοῦτος / ἐκεῖνος — neuter is identical to masculine"
+              ] }
           ]
         },
         {
-          family: "Conjunctions",
-          lemma: "καί, δέ, γάρ, οὖν, ἀλλά",
+          family: "9.2 Third-person pronouns — αὐτός & ἄλλος",
+          lemma: "αὐτός / ἄλλος",
+          gloss: "he-she-it / self / same / other",
+          questions: [
+            { form: "αὐτός — three uses",
+              prompt: "What are the three main uses of αὐτός?",
+              answer: "(1) third-person pronoun in oblique cases ('him, her, it'); (2) emphatic / intensive adjective in predicate position ('himself'); (3) identifying adjective in attributive position ('the same')",
+              choices: [
+                "(1) third-person pronoun in oblique cases ('him, her, it'); (2) emphatic / intensive adjective in predicate position ('himself'); (3) identifying adjective in attributive position ('the same')",
+                "only as a third-person pronoun — never adjectival",
+                "only as the demonstrative 'this'",
+                "as a relative pronoun and as an article"
+              ] },
+            { form: "αὐτὸς ὁ ἀπόστολος",
+              prompt: "Translate (predicate position).",
+              answer: "'the apostle himself' — αὐτός emphatic / intensive",
+              choices: [
+                "'the apostle himself' — αὐτός emphatic / intensive",
+                "'the same apostle' — αὐτός identifying",
+                "'this apostle' — demonstrative",
+                "'his apostle' — possessive"
+              ],
+              note: "Predicate position (outside article-noun) = 'self'." },
+            { form: "ὁ αὐτὸς ἀπόστολος",
+              prompt: "Translate (attributive position).",
+              answer: "'the same apostle' — αὐτός identifying",
+              choices: [
+                "'the same apostle' — αὐτός identifying",
+                "'the apostle himself' — αὐτός emphatic",
+                "'this apostle' — demonstrative",
+                "'his apostle' — possessive"
+              ],
+              note: "Inside the article-noun bracket (attributive) = 'same'." },
+            { form: "αὐτοῦ",
+              prompt: "What is the most common force of αὐτοῦ in NT Greek?",
+              answer: "third-person pronoun, gen. sg. masc. — 'of him / his'",
+              choices: [
+                "third-person pronoun, gen. sg. masc. — 'of him / his'",
+                "'self' (emphatic nominative)",
+                "'the same' (attributive)",
+                "'that one' (far demonstrative)"
+              ],
+              note: "Oblique cases of αὐτός — gen./dat./acc. — are the normal way to say 'him, of him, to him' etc." },
+            { form: "ἄλλος",
+              prompt: "What does ἄλλος mean, and what is unusual about it?",
+              answer: "'other' / 'another'; its neuter nom./acc. singular is ἄλλο (no -ν), like the article τό",
+              choices: [
+                "'other' / 'another'; its neuter nom./acc. singular is ἄλλο (no -ν), like the article τό",
+                "'self'; takes regular 2-1-2 endings throughout",
+                "'same'; declines like αὐτός",
+                "'this'; declines like οὗτος"
+              ],
+              note: "Compare ἄλλο with English 'other' — the masc./fem. follow 2-1-2 endings normally (ἄλλος, ἄλλη)." },
+            { form: "αὐτὴ ἡ γυνή",
+              prompt: "Translate (αὐτή in predicate position).",
+              answer: "'the woman herself' — emphatic / intensive αὐτός",
+              choices: [
+                "'the woman herself' — emphatic / intensive αὐτός",
+                "'the same woman' — attributive αὐτός",
+                "'this woman' — demonstrative",
+                "'her woman' — possessive"
+              ],
+              note: "Outside the article–noun bracket = 'self'." },
+            { form: "αὐτός — position rule (emphatic)",
+              prompt: "Where must αὐτός sit when it means 'self / himself / etc.'?",
+              answer: "in predicate position — OUTSIDE the article–noun phrase",
+              choices: [
+                "in predicate position — OUTSIDE the article–noun phrase",
+                "in attributive position — between article and noun",
+                "always immediately after the verb",
+                "always sentence-initial"
+              ] },
+            { form: "αὐτὸς ὁ Ἰησοῦς εἶπεν",
+              prompt: "Translate.",
+              answer: "'Jesus himself said …' — emphatic αὐτός",
+              choices: [
+                "'Jesus himself said …' — emphatic αὐτός",
+                "'The same Jesus said …' — identifying αὐτός",
+                "'This Jesus said …' — demonstrative",
+                "'His Jesus said …' — possessive"
+              ] },
+            { form: "ὁ αὐτὸς κύριος",
+              prompt: "Translate (αὐτός in attributive position).",
+              answer: "'the same Lord' — identifying αὐτός",
+              choices: [
+                "'the same Lord' — identifying αὐτός",
+                "'the Lord himself' — emphatic αὐτός",
+                "'this Lord' — demonstrative",
+                "'his Lord' — possessive"
+              ] },
+            { form: "αὐτός — position rule (identifying)",
+              prompt: "Where must αὐτός sit when it means 'the same'?",
+              answer: "in attributive position — between the article and the noun (or with article repeated, e.g., ὁ λόγος ὁ αὐτός)",
+              choices: [
+                "in attributive position — between the article and the noun (or with article repeated, e.g., ὁ λόγος ὁ αὐτός)",
+                "in predicate position — outside the article–noun phrase",
+                "always sentence-initial",
+                "always after the verb"
+              ] },
+            { form: "αὐτῷ",
+              prompt: "What is the most likely force of αὐτῷ?",
+              answer: "'to / for him' — dat. sg. masc. of αὐτός (3rd-person pronoun)",
+              choices: [
+                "'to / for him' — dat. sg. masc. of αὐτός (3rd-person pronoun)",
+                "'self' — nom. sg. masc.",
+                "'of his own' — reflexive",
+                "'them' — acc. pl."
+              ] },
+            { form: "αὐτούς",
+              prompt: "Parse and translate.",
+              answer: "acc. pl. masc. of αὐτός — 'them' (direct object)",
+              choices: [
+                "acc. pl. masc. of αὐτός — 'them' (direct object)",
+                "gen. pl. masc. — 'of them'",
+                "nom. pl. masc. — 'they themselves'",
+                "dat. pl. masc. — 'to them'"
+              ] },
+            { form: "ἄλλο",
+              prompt: "Why does ἄλλο not have a final -ν, unlike καλόν?",
+              answer: "ἄλλος follows the article pattern: neuter nom./acc. sg. ends in -ο (like τό), not -ον",
+              choices: [
+                "ἄλλος follows the article pattern: neuter nom./acc. sg. ends in -ο (like τό), not -ον",
+                "it is a typo for ἄλλον",
+                "the -ν always drops before a consonant",
+                "ἄλλο is dat. sg., not acc. sg."
+              ] },
+            { form: "οἱ ἄλλοι",
+              prompt: "Translate.",
+              answer: "'the others' / 'the other ones'",
+              choices: [
+                "'the others' / 'the other ones'",
+                "'each one'",
+                "'this one'",
+                "'they themselves'"
+              ] }
+          ]
+        },
+        {
+          family: "9.3 1st & 2nd person pronouns — reflexives and possessives",
+          lemma: "ἐγώ / σύ / ἐμαυτοῦ / ἐμός",
+          gloss: "I, you, myself, my",
+          questions: [
+            { form: "ἐγώ / σύ — emphatic vs enclitic",
+              prompt: "Greek 1st/2nd-singular pronouns have two oblique forms. What is the difference?",
+              answer: "emphatic (accented) forms ἐμοῦ, ἐμοί, ἐμέ / σοῦ, σοί, σέ are used for emphasis or after prepositions; enclitic forms μου, μοι, με / σου, σοι, σε are unaccented and used when no emphasis is needed",
+              choices: [
+                "emphatic (accented) forms ἐμοῦ, ἐμοί, ἐμέ / σοῦ, σοί, σέ are used for emphasis or after prepositions; enclitic forms μου, μοι, με / σου, σοι, σε are unaccented and used when no emphasis is needed",
+                "the emphatic forms are singular, the enclitic forms plural",
+                "they are dialectal variants of the same meaning",
+                "the enclitic forms are reflexive, the emphatic forms are not"
+              ] },
+            { form: "ἡμῶν vs ὑμῶν",
+              prompt: "How are 'of us' and 'of you (pl)' distinguished?",
+              answer: "ἡμῶν = 'of us' (rough breathing); ὑμῶν = 'of you (pl)' (smooth breathing)",
+              choices: [
+                "ἡμῶν = 'of us' (rough breathing); ὑμῶν = 'of you (pl)' (smooth breathing)",
+                "ἡμῶν = 'of you (pl)'; ὑμῶν = 'of us'",
+                "they are interchangeable",
+                "ἡμῶν is reflexive, ὑμῶν is plain"
+              ],
+              note: "Breathing is the only visual difference — high-frequency confusion point." },
+            { form: "reflexive — 1st & 2nd sg",
+              prompt: "How are the singular reflexive pronouns 'myself' and 'yourself' formed?",
+              answer: "ἐμαυτοῦ, -ῆς ('myself') and σεαυτοῦ, -ῆς ('yourself') — personal stem + αὐτο- stem, declined together; no nominative",
+              choices: [
+                "ἐμαυτοῦ, -ῆς ('myself') and σεαυτοῦ, -ῆς ('yourself') — personal stem + αὐτο- stem, declined together; no nominative",
+                "ἐγώ and σύ themselves serve as the reflexive forms",
+                "by adding αὐ- as a prefix to the regular pronoun",
+                "by using ὅς as a reflexive marker"
+              ],
+              note: "Reflexives lack a nominative — by definition the subject can't 'reflex' onto itself in the nom." },
+            { form: "reflexive — 3rd sg / plural",
+              prompt: "What is the 3rd-person reflexive ('himself / herself / themselves')?",
+              answer: "ἑαυτοῦ, -ῆς, -οῦ — used for 3rd sg AND, in the plural ἑαυτῶν, for all three persons of the plural reflexive",
+              choices: [
+                "ἑαυτοῦ, -ῆς, -οῦ — used for 3rd sg AND, in the plural ἑαυτῶν, for all three persons of the plural reflexive",
+                "αὐτός alone serves as the 3rd-person reflexive",
+                "the relative ὅς doubles as the reflexive",
+                "there is no 3rd-person reflexive in Koine"
+              ],
+              note: "Koine collapses 1pl/2pl/3pl reflexives into the single form ἑαυτῶν." },
+            { form: "possessive adjectives",
+              prompt: "What are the 1st/2nd-person possessive adjectives, and how do they differ from the genitive pronoun?",
+              answer: "ἐμός, -ή, -όν ('my'); σός, -ή, -όν ('your sg'); ἡμέτερος ('our'); ὑμέτερος ('your pl') — they are declined adjectives that agree with the noun, unlike the gen. forms μου / σου / ἡμῶν / ὑμῶν which simply follow the noun",
+              choices: [
+                "ἐμός, -ή, -όν ('my'); σός, -ή, -όν ('your sg'); ἡμέτερος ('our'); ὑμέτερος ('your pl') — they are declined adjectives that agree with the noun, unlike the gen. forms μου / σου / ἡμῶν / ὑμῶν which simply follow the noun",
+                "they are identical to the personal pronouns in form and use",
+                "they are adverbs, not adjectives",
+                "they are unique 3rd-declension forms"
+              ],
+              note: "ὁ ἐμὸς λόγος ≈ ὁ λόγος μου — both 'my word', but the adjective is more emphatic." },
+            { form: "ἐμέ vs με",
+              prompt: "Which is the emphatic accusative of 'I / me'?",
+              answer: "ἐμέ (accented, with prothetic ε-)",
+              choices: [
+                "ἐμέ (accented, with prothetic ε-)",
+                "με (unaccented enclitic)",
+                "both — they are interchangeable in every context",
+                "neither — these are 2nd-person forms"
+              ],
+              note: "Use ἐμέ for emphasis and after prepositions (πρὸς ἐμέ); use the enclitic με when no emphasis is needed." },
+            { form: "after prepositions",
+              prompt: "Which form follows a preposition: ἐμοῦ / μου?",
+              answer: "ἐμοῦ — prepositions take the emphatic form",
+              choices: [
+                "ἐμοῦ — prepositions take the emphatic form",
+                "μου — prepositions take the enclitic",
+                "either — there is no rule",
+                "neither — prepositions never govern personal pronouns"
+              ] },
+            { form: "ἐμαυτόν",
+              prompt: "Parse and translate.",
+              answer: "acc. sg. masc. of ἐμαυτοῦ — 'myself' (1st-sg. reflexive)",
+              choices: [
+                "acc. sg. masc. of ἐμαυτοῦ — 'myself' (1st-sg. reflexive)",
+                "nom. sg. masc. — 'I myself' (emphatic)",
+                "gen. sg. — 'of my own'",
+                "acc. sg. — 'me' (regular pronoun)"
+              ],
+              note: "Reflexive: subject and object refer to the same person." },
+            { form: "no nominative",
+              prompt: "Why do reflexive pronouns lack a nominative form?",
+              answer: "A subject cannot 'reflex' onto itself in the nominative — reflexives only describe an object/oblique referring back to the subject",
+              choices: [
+                "A subject cannot 'reflex' onto itself in the nominative — reflexives only describe an object/oblique referring back to the subject",
+                "Greek reflexives DO have a nominative — it's just rare",
+                "The nominative is supplied by ἐγώ / σύ themselves",
+                "Reflexives are indeclinable"
+              ] },
+            { form: "ὁ ἐμὸς λόγος",
+              prompt: "Translate.",
+              answer: "'my word' — possessive adjective ἐμός in attributive position",
+              choices: [
+                "'my word' — possessive adjective ἐμός in attributive position",
+                "'the word is mine' — predicate sentence",
+                "'his own word' — reflexive",
+                "'the same word' — αὐτός"
+              ] },
+            { form: "ἡμέτερος",
+              prompt: "Translate and parse 'ἡμέτερος'.",
+              answer: "'our' — 1st-person plural possessive adjective, declined like καλός, -ή, -όν",
+              choices: [
+                "'our' — 1st-person plural possessive adjective, declined like καλός, -ή, -όν",
+                "'your (pl.)' — 2nd-person plural possessive",
+                "'ourselves' — 1st-person plural reflexive",
+                "'of us' — gen. pl. of the personal pronoun"
+              ] }
+          ]
+        },
+        {
+          family: "9.4 Conjunctions — timid words, μέν…δέ, δέ, καί",
+          lemma: "μέν / δέ / καί",
           gloss: "common connectors",
           questions: [
-            { form: "καί", prompt: "Which connective conjunction is this?",
-              answer: "'and' / 'also' (additive)",
-              choices: ["'and' / 'also' (additive)", "'but' (adversative)", "'for' (causal)", "'therefore' (inferential)"] },
-            { form: "δέ", prompt: "Which type of conjunction is δέ?",
-              answer: "'but' / 'and' — mild adversative or transitional, postpositive",
+            { form: "timid (postpositive) words",
+              prompt: "What does it mean to call a word 'timid' (postpositive)?",
+              answer: "it cannot stand first in its clause — it 'hides' in second (or later) position",
               choices: [
-                "'but' / 'and' — mild adversative or transitional, postpositive",
-                "'for' — strong causal",
-                "'therefore' — inferential",
-                "'because' — subordinating"
+                "it cannot stand first in its clause — it 'hides' in second (or later) position",
+                "it is a particle of negation",
+                "it always carries an enclitic accent",
+                "it must take a rough breathing"
               ],
-              note: "Postpositive: never appears first in its clause." },
-            { form: "γάρ", prompt: "What does γάρ signal?",
-              answer: "'for' — explanatory / causal, postpositive",
-              choices: ["'for' — explanatory / causal, postpositive", "'and' — additive", "'but' — adversative", "'in order that' — purpose"] },
-            { form: "οὖν", prompt: "What does οὖν signal?",
-              answer: "'therefore' / 'so' — inferential, postpositive",
-              choices: ["'therefore' / 'so' — inferential, postpositive", "'because' — causal", "'and' — additive", "'until' — temporal"] }
+              note: "δέ, γάρ, οὖν, μέν are the classic timid (postpositive) connectors. In English we put them first ('but…', 'for…'); in Greek, never." },
+            { form: "δέ — first or second?",
+              prompt: "Where does δέ appear in its clause, and how is it translated to English position?",
+              answer: "δέ stands second (or later) in Greek, but is translated FIRST in English ('But …' / 'And …')",
+              choices: [
+                "δέ stands second (or later) in Greek, but is translated FIRST in English ('But …' / 'And …')",
+                "δέ stands first in Greek as in English",
+                "δέ always stands at the end of the clause",
+                "δέ may stand anywhere; word order is free"
+              ] },
+            { form: "μέν … δέ",
+              prompt: "What pair of ideas does μέν … δέ set up?",
+              answer: "a balance: 'on the one hand … on the other hand' / 'X …, but Y …'",
+              choices: [
+                "a balance: 'on the one hand … on the other hand' / 'X …, but Y …'",
+                "a strong adversative: 'not X but rather Y'",
+                "a causal pair: 'because X, therefore Y'",
+                "a temporal pair: 'when X, then Y'"
+              ],
+              note: "Both are postpositive: e.g. ὁ μὲν Πέτρος … ὁ δὲ Ἰωάννης …" },
+            { form: "δέ alone",
+              prompt: "When δέ appears without a preceding μέν, what does it most often signal?",
+              answer: "a mild continuation or transition — 'and / but / now' — moving the narrative along without strong contrast",
+              choices: [
+                "a mild continuation or transition — 'and / but / now' — moving the narrative along without strong contrast",
+                "always a strong adversative — 'but rather, in fact'",
+                "always a causal — 'because'",
+                "always an inferential — 'therefore'"
+              ],
+              note: "Solo δέ is the workhorse connective of NT narrative — often weaker than English 'but'." },
+            { form: "καί — connective",
+              prompt: "What is the most common use of καί?",
+              answer: "as the connective 'and', joining words, phrases, or clauses",
+              choices: [
+                "as the connective 'and', joining words, phrases, or clauses",
+                "as the adversative 'but'",
+                "as the inferential 'therefore'",
+                "as the causal 'because'"
+              ] },
+            { form: "καί — adverbial",
+              prompt: "Besides 'and', what does καί commonly mean when it sits BEFORE a single word it highlights?",
+              answer: "'also' or 'even' — adverbial / ascensive καί",
+              choices: [
+                "'also' or 'even' — adverbial / ascensive καί",
+                "'but' — adversative",
+                "'or' — disjunctive",
+                "'because' — causal"
+              ],
+              note: "καὶ σύ = 'you too / even you', not 'and you'. Position tells you which sense." },
+            { form: "καί vs δέ",
+              prompt: "Which is postpositive: καί or δέ?",
+              answer: "δέ is postpositive (timid); καί is not — καί stands first like English 'and'",
+              choices: [
+                "δέ is postpositive (timid); καί is not — καί stands first like English 'and'",
+                "both are postpositive",
+                "neither is postpositive",
+                "καί is postpositive; δέ is not"
+              ] },
+            { form: "which is NOT postpositive?",
+              prompt: "Which of the following words is NOT timid (postpositive)?",
+              answer: "καί — it stands first in its clause like English 'and'",
+              choices: [
+                "καί — it stands first in its clause like English 'and'",
+                "δέ — postpositive",
+                "γάρ — postpositive",
+                "οὖν — postpositive"
+              ] },
+            { form: "translating timid words",
+              prompt: "When you translate a timid (postpositive) Greek connector into English, where does it go?",
+              answer: "FIRST in the English clause — even though it was second (or later) in Greek",
+              choices: [
+                "FIRST in the English clause — even though it was second (or later) in Greek",
+                "Wherever it was in Greek — preserve the order",
+                "Last in the English clause",
+                "It is dropped entirely"
+              ],
+              note: "ὁ δὲ Ἰησοῦς εἶπεν = 'But Jesus said …', not 'Jesus but said …'." },
+            { form: "ὁ μὲν Πέτρος … ὁ δὲ Ἰωάννης …",
+              prompt: "Translate the structure.",
+              answer: "'Peter on the one hand … John on the other hand …' (or 'Peter …, but John …')",
+              choices: [
+                "'Peter on the one hand … John on the other hand …' (or 'Peter …, but John …')",
+                "'Both Peter and John …'",
+                "'Either Peter or John …'",
+                "'Peter and John together …'"
+              ] },
+            { form: "μέν alone",
+              prompt: "What does μέν do when it appears WITHOUT a following δέ?",
+              answer: "still signals 'on the one hand' — the contrast may be implicit, or μέν simply flags the topic",
+              choices: [
+                "still signals 'on the one hand' — the contrast may be implicit, or μέν simply flags the topic",
+                "becomes the negative particle 'not'",
+                "becomes a causal — 'because'",
+                "is identical to δέ in solo use"
+              ],
+              note: "In Koine narrative the implied 'δέ' clause sometimes just doesn't arrive." },
+            { form: "δέ — narrative tone",
+              prompt: "In NT narrative, which English rendering best captures plain solo δέ?",
+              answer: "'and' or 'now' — a soft, transitional connective; reserve 'but' for stronger contrasts",
+              choices: [
+                "'and' or 'now' — a soft, transitional connective; reserve 'but' for stronger contrasts",
+                "always 'but' — strong adversative",
+                "always 'because' — causal",
+                "always 'therefore' — inferential"
+              ] },
+            { form: "καὶ σύ",
+              prompt: "How is the καί best translated in καὶ σύ;?",
+              answer: "'you also' / 'even you' — ascensive / adverbial καί before a single word",
+              choices: [
+                "'you also' / 'even you' — ascensive / adverbial καί before a single word",
+                "'and you' — connective καί",
+                "'but you' — adversative καί",
+                "'because you' — causal καί"
+              ] }
           ]
         }
       ]
@@ -1222,122 +1520,407 @@
     // ─────────────────────────────────────────────────────────────
     "10": {
       label: "Chapter 10 Grammar",
-      notes: "Complex sentences — purpose, content, and conditional clauses",
+      notes: "Basic complex sentences — relative clauses, leading questions with μή/οὐ, ὅτι for direct & indirect statement, and time expressions by case",
       items: [
         {
-          family: "ἵνα clauses",
-          lemma: "ἵνα",
-          gloss: "in order that / that",
+          family: "Relative clauses — overview",
+          lemma: "relative clause",
+          gloss: "subordinate clause modifying a noun",
           questions: [
-            { form: "ἵνα",
-              prompt: "What mood normally follows ἵνα?",
-              answer: "subjunctive",
-              choices: ["subjunctive", "indicative", "imperative", "infinitive"],
-              note: "Standard purpose / content clause: ἵνα + subjunctive." },
-            { form: "ἵνα λύσῃ",
-              prompt: "What does this most likely express?",
-              answer: "purpose: 'in order that he might untie'",
+            { form: "definition",
+              prompt: "What is a relative clause?",
+              answer: "a subordinate clause that modifies a noun (its antecedent), introduced by a relative pronoun",
               choices: [
-                "purpose: 'in order that he might untie'",
-                "fact: 'that he untied'",
-                "command: 'untie!'",
-                "hope: 'may he untie!'"
+                "a subordinate clause that modifies a noun (its antecedent), introduced by a relative pronoun",
+                "a main clause that states the central idea of the sentence",
+                "any clause introduced by ὅτι",
+                "a clause expressing purpose, introduced by ἵνα"
+              ],
+              note: "E.g. ὁ ἀπόστολος ὃν βλέπω = 'the apostle whom I see' — ὃν βλέπω is the relative clause modifying ἀπόστολος." },
+            { form: "antecedent",
+              prompt: "What is the 'antecedent' of a relative clause?",
+              answer: "the noun (or pronoun) in the main clause that the relative pronoun refers back to",
+              choices: [
+                "the noun (or pronoun) in the main clause that the relative pronoun refers back to",
+                "the verb of the relative clause",
+                "the conjunction introducing the clause",
+                "the subject of the relative clause"
               ] },
-            { form: "ἵνα content",
-              prompt: "Besides pure purpose, what other use of ἵνα is common in the NT?",
-              answer: "a content clause spelling out what was said, asked, or commanded ('that …')",
+            { form: "agreement",
+              prompt: "A relative pronoun agrees with its antecedent in which categories?",
+              answer: "gender and number (its case is determined by its role in its own clause)",
               choices: [
-                "a content clause spelling out what was said, asked, or commanded ('that …')",
-                "a causal clause ('because …')",
-                "a temporal clause ('when …')",
-                "a conditional clause ('if …')"
+                "gender and number (its case is determined by its role in its own clause)",
+                "case, gender, and number — all three",
+                "case and number only",
+                "case only"
               ],
-              note: "Especially after verbs of asking, telling, or wishing: αἰτῶ ἵνα = 'I ask that …'." },
-            { form: "ἵνα + subjunctive vs indicative",
-              prompt: "What aspect distinction does the choice of present or aorist subjunctive after ἵνα carry?",
-              answer: "Aspect, not time — present = ongoing action; aorist = action as a single whole.",
+              note: "Antecedent fixes gender + number; the relative's own clause fixes its case." },
+            { form: "ὁ ἀπόστολος ὃν βλέπω",
+              prompt: "Why is the relative pronoun ὅν (accusative) here, even though ἀπόστολος is nominative?",
+              answer: "the relative takes its case from its function in the relative clause — here it is the direct object of βλέπω",
               choices: [
-                "Aspect, not time — present = ongoing action; aorist = action as a single whole.",
-                "Time — present = present time, aorist = past time.",
-                "Mood — present subjunctive is stronger than aorist.",
-                "Nothing — they are interchangeable."
-              ],
-              note: "The subjunctive itself carries no time reference outside the indicative." }
+                "the relative takes its case from its function in the relative clause — here it is the direct object of βλέπω",
+                "the relative always matches its antecedent in case",
+                "ὅν is actually nominative; it just looks like an accusative",
+                "Greek relatives are always accusative"
+              ] }
           ]
         },
         {
-          family: "ὅτι",
+          family: "Relative pronoun — formation of ὅς, ἥ, ὅ",
+          lemma: "ὅς, ἥ, ὅ",
+          gloss: "who, which, that",
+          questions: [
+            { form: "ὅς",
+              prompt: "Identify this form.",
+              answer: "nom. sg. masculine of the relative pronoun ('who / which')",
+              choices: [
+                "nom. sg. masculine of the relative pronoun ('who / which')",
+                "the masculine article ὁ with an accent",
+                "nom. sg. feminine",
+                "acc. sg. masculine"
+              ],
+              note: "Rough breathing + acute accent distinguishes ὅς from the article ὁ." },
+            { form: "ἥ vs ἡ",
+              prompt: "How do you tell the relative pronoun ἥ (fem. sg. nom.) from the feminine article ἡ?",
+              answer: "the relative ἥ carries an accent; the article ἡ is unaccented (proclitic)",
+              choices: [
+                "the relative ἥ carries an accent; the article ἡ is unaccented (proclitic)",
+                "the breathing — relative is smooth, article is rough",
+                "they are identical and only context distinguishes them",
+                "the relative is always capitalised"
+              ],
+              note: "Both have rough breathing. Accent is the diagnostic." },
+            { form: "endings",
+              prompt: "The relative pronoun ὅς, ἥ, ὅ uses which set of endings?",
+              answer: "the standard 2-1-2 (adjective) endings, like καλός, καλή, καλόν",
+              choices: [
+                "the standard 2-1-2 (adjective) endings, like καλός, καλή, καλόν",
+                "the 3rd-declension endings used by πᾶς",
+                "a unique set found nowhere else",
+                "the same endings as the article (τοῦ, τῇ, τόν...)"
+              ],
+              note: "Masc./neut. follow the 2nd declension, fem. follows the 1st — all with rough breathing on the stem." },
+            { form: "οὗ / ᾧ / ὅν",
+              prompt: "Match these three forms (masc. sg.) to their cases.",
+              answer: "οὗ = gen., ᾧ = dat., ὅν = acc.",
+              choices: [
+                "οὗ = gen., ᾧ = dat., ὅν = acc.",
+                "οὗ = dat., ᾧ = gen., ὅν = nom.",
+                "οὗ = acc., ᾧ = gen., ὅν = dat.",
+                "οὗ = nom., ᾧ = acc., ὅν = gen."
+              ] },
+            { form: "neuter ὅ vs ὅτι",
+              prompt: "How is the neuter relative ὅ distinguished from the conjunction ὅτι?",
+              answer: "ὅ is a single syllable (relative pronoun, neut. sg.); ὅτι is two syllables and is the conjunction 'that / because'",
+              choices: [
+                "ὅ is a single syllable (relative pronoun, neut. sg.); ὅτι is two syllables and is the conjunction 'that / because'",
+                "they are interchangeable",
+                "ὅ is the conjunction, ὅτι the pronoun",
+                "both are relative pronouns in different cases"
+              ] }
+          ]
+        },
+        {
+          family: "Leading questions — μή vs οὐ",
+          lemma: "μή / οὐ in questions",
+          gloss: "questions that 'slant' toward a yes or no answer",
+          questions: [
+            { form: "οὐ + question",
+              prompt: "A question introduced by οὐ (or οὐχ / οὐκ) expects what answer?",
+              answer: "'yes' — the questioner assumes a positive answer",
+              choices: [
+                "'yes' — the questioner assumes a positive answer",
+                "'no' — the questioner assumes a negative answer",
+                "neither — it is a neutral question",
+                "either, depending on tone"
+              ],
+              note: "οὐκ οἴδατε; = 'You know, don't you?' (expecting 'yes')." },
+            { form: "μή + question",
+              prompt: "A question introduced by μή expects what answer?",
+              answer: "'no' — the questioner expects (or hopes for) a negative answer",
+              choices: [
+                "'no' — the questioner expects (or hopes for) a negative answer",
+                "'yes' — the questioner expects a positive answer",
+                "neither — it is a neutral question",
+                "always 'yes', regardless of context"
+              ],
+              note: "μὴ σὺ μείζων εἶ; = 'You're not greater, are you?' (expecting 'no')." },
+            { form: "neutral question",
+              prompt: "How is a neutral yes-or-no question (with no slant) marked in Greek?",
+              answer: "by intonation and the Greek question mark (·;·) alone, with no introductory particle",
+              choices: [
+                "by intonation and the Greek question mark (·;·) alone, with no introductory particle",
+                "always by ἆρα at the head of the clause",
+                "by οὐ at the head, like a leading 'yes' question",
+                "by μή at the head, like a leading 'no' question"
+              ] },
+            { form: "οὐχ οὗτός ἐστιν ὁ υἱός;",
+              prompt: "Translate, capturing the slant.",
+              answer: "'This is the son, isn't it?' / 'Isn't this the son?' (expecting 'yes')",
+              choices: [
+                "'This is the son, isn't it?' / 'Isn't this the son?' (expecting 'yes')",
+                "'This isn't the son, is it?' (expecting 'no')",
+                "'Is this the son?' (neutral)",
+                "'This is not the son.' (statement, not a question)"
+              ] },
+            { form: "οὐκ οἴδατε;",
+              prompt: "Translate, capturing the slant.",
+              answer: "'You know, don't you?' / 'Don't you know?' (expecting 'yes')",
+              choices: [
+                "'You know, don't you?' / 'Don't you know?' (expecting 'yes')",
+                "'You don't know, do you?' (expecting 'no')",
+                "'Do you know?' (neutral)",
+                "'You do not know.' (statement)"
+              ] },
+            { form: "οὐ slant — speaker's attitude",
+              prompt: "If a speaker uses an οὐ-question, what is their attitude toward the answer?",
+              answer: "confident — they expect the answer to be 'yes'",
+              choices: [
+                "confident — they expect the answer to be 'yes'",
+                "tentative or doubtful — they expect 'no'",
+                "neutral — they have no expectation",
+                "demanding — they want an immediate command response"
+              ] },
+            { form: "μὴ σὺ μείζων εἶ τοῦ πατρός;",
+              prompt: "Translate, capturing the slant.",
+              answer: "'You are not greater than the father, are you?' (expecting 'no')",
+              choices: [
+                "'You are not greater than the father, are you?' (expecting 'no')",
+                "'Aren't you greater than the father?' (expecting 'yes')",
+                "'Are you greater than the father?' (neutral)",
+                "'You are not greater than the father.' (statement)"
+              ] },
+            { form: "μή slant — speaker's attitude",
+              prompt: "If a speaker uses a μή-question, what is their attitude toward the answer?",
+              answer: "tentative or doubtful — they suspect / hope the answer is 'no'",
+              choices: [
+                "tentative or doubtful — they suspect / hope the answer is 'no'",
+                "confident that the answer is 'yes'",
+                "neutral and open to either answer",
+                "demanding an immediate command response"
+              ] },
+            { form: "μή τι …;",
+              prompt: "μή τι (with the indefinite τι) at the head of a question slants it how?",
+              answer: "still 'no' — a tentative question; the τι softens it even further ('he hasn't, has he…?')",
+              choices: [
+                "still 'no' — a tentative question; the τι softens it even further ('he hasn't, has he…?')",
+                "'yes' — confident affirmation",
+                "neutral — pure information question",
+                "command — 'don't do it!'"
+              ] }
+          ]
+        },
+        {
+          family: "ὅτι — direct and indirect statement",
           lemma: "ὅτι",
           gloss: "that / because",
           questions: [
-            { form: "ὅτι (content)",
-              prompt: "After verbs of saying or thinking, ὅτι typically introduces…",
-              answer: "an indirect statement — 'that …'",
+            { form: "indirect statement",
+              prompt: "After verbs of saying, thinking, or knowing, ὅτι + indicative most often introduces…",
+              answer: "an indirect statement ('he said that …')",
               choices: [
-                "an indirect statement — 'that …'",
-                "a purpose clause — 'in order that …'",
-                "a result clause — 'so that …'",
-                "a temporal clause — 'when …'"
+                "an indirect statement ('he said that …')",
+                "a purpose clause ('in order that …')",
+                "a result clause ('so that …')",
+                "a temporal clause ('when …')"
+              ],
+              note: "λέγει ὅτι ὁ κύριος ἔρχεται = 'he says that the Lord is coming.'" },
+            { form: "tense in indirect statement",
+              prompt: "In Greek indirect statement with ὅτι, the verb tense matches…",
+              answer: "the tense the original speaker used (Greek keeps the direct-speech tense)",
+              choices: [
+                "the tense the original speaker used (Greek keeps the direct-speech tense)",
+                "the tense of the main verb (backshifted, as in English)",
+                "always the aorist, regardless of original",
+                "always the present, regardless of original"
+              ],
+              note: "Greek does NOT backshift like English: εἶπεν ὅτι ἔρχεται = 'he said that he was coming' (lit. 'is coming')." },
+            { form: "direct statement (ὅτι recitativum)",
+              prompt: "ὅτι is sometimes used to mark direct speech. In that case it is rendered…",
+              answer: "left untranslated — it functions like opening quotation marks",
+              choices: [
+                "left untranslated — it functions like opening quotation marks",
+                "as 'because' — direct speech is always causal",
+                "as 'so that' — direct speech is always result",
+                "as 'whether' — direct speech is always interrogative"
+              ],
+              note: "λέγει ὅτι· Ἐγώ εἰμι = 'he says, “I am.”'" },
+            { form: "indirect vs direct test",
+              prompt: "Which clue most reliably marks ὅτι as recitative (direct) rather than introducing indirect statement?",
+              answer: "the following words use 1st/2nd person and present-time perspective of the original speaker (often signalled by capitalisation or ·)",
+              choices: [
+                "the following words use 1st/2nd person and present-time perspective of the original speaker (often signalled by capitalisation or ·)",
+                "ὅτι is recitative whenever the main verb is in the present tense",
+                "ὅτι is recitative whenever followed by an aorist",
+                "there is no way to tell — both are translated the same"
               ] },
             { form: "ὅτι (causal)",
-              prompt: "ὅτι can also be causal, meaning…",
-              answer: "'because'",
-              choices: ["'because'", "'although'", "'when'", "'unless'"] },
-            { form: "ὅτι (recitative)",
-              prompt: "In Mark/John, ὅτι sometimes simply introduces a direct quotation. How is it then translated?",
-              answer: "usually left untranslated (it functions like opening quotation marks)",
+              prompt: "A third use of ὅτι, distinct from direct and indirect statement, is…",
+              answer: "causal — 'because'",
+              choices: ["causal — 'because'", "conditional — 'if'", "concessive — 'although'", "final — 'in order that'"] },
+            { form: "ἀπεκρίθη ὅτι Ἐγὼ οὐκ εἰμὶ ὁ Χριστός",
+              prompt: "Translate, recognising ὅτι recitative.",
+              answer: "'He answered, “I am not the Christ.”' — ὅτι is left untranslated (opening quotation marks)",
               choices: [
-                "usually left untranslated (it functions like opening quotation marks)",
-                "always 'because' — direct speech is causal",
-                "always 'so that' — direct speech is result",
-                "always 'although' — direct speech is concessive"
+                "'He answered, “I am not the Christ.”' — ὅτι is left untranslated (opening quotation marks)",
+                "'He answered that I am not the Christ.' — indirect statement",
+                "'He answered because I am not the Christ.' — causal",
+                "'He answered in order that I might not be the Christ.' — purpose"
               ],
-              note: "Called 'ὅτι recitativum'. Compare λέγει ὅτι Ἐγώ εἰμι = 'he says, “I am”'." },
-            { form: "ὅτι vs ἵνα content",
-              prompt: "What mood typically follows ὅτι in a content clause (vs ἵνα)?",
-              answer: "indicative — ὅτι asserts a fact, while ἵνα + subjunctive is contingent",
+              note: "Tell-tale: the embedded clause uses 1st-person 'I' — that's the original speaker, not the narrator." },
+            { form: "direct vs indirect signal",
+              prompt: "Which feature most reliably signals a ὅτι-clause is DIRECT (recitative), not indirect?",
+              answer: "the embedded clause keeps the original speaker's 1st-/2nd-person pronouns and tense ('I am…'), as if quoting verbatim",
               choices: [
-                "indicative — ὅτι asserts a fact, while ἵνα + subjunctive is contingent",
-                "subjunctive, like ἵνα",
-                "imperative",
-                "infinitive"
+                "the embedded clause keeps the original speaker's 1st-/2nd-person pronouns and tense ('I am…'), as if quoting verbatim",
+                "the embedded clause uses ὅτι in second position",
+                "the main verb is in the aorist tense",
+                "the embedded clause is a question"
+              ] },
+            { form: "λέγει ὅτι Ἐγώ εἰμι",
+              prompt: "Translate.",
+              answer: "'He says, “I am.”' — ὅτι recitativum",
+              choices: [
+                "'He says, “I am.”' — ὅτι recitativum",
+                "'He says that I am.' — indirect statement (he says about me)",
+                "'He says because I am.' — causal",
+                "'He says, “He is.”' — backshifted indirect"
+              ] },
+            { form: "οἶδα ὅτι ὁ θεὸς ἀγαθός ἐστιν",
+              prompt: "Translate (indirect statement with ὅτι).",
+              answer: "'I know that God is good.'",
+              choices: [
+                "'I know that God is good.'",
+                "'I know, because God is good.'",
+                "'I know, in order that God may be good.'",
+                "'I know, “God is good”' (direct quote)"
+              ],
+              note: "Indirect statement after verbs of knowing / saying / thinking." },
+            { form: "εἶπεν ὅτι ἔρχεται",
+              prompt: "Translate (indirect statement; mind Greek tense usage).",
+              answer: "'He said that he was coming' — Greek keeps the present tense of direct speech; English back-shifts to past",
+              choices: [
+                "'He said that he was coming' — Greek keeps the present tense of direct speech; English back-shifts to past",
+                "'He said that he is coming' — Greek and English match in tense always",
+                "'He said because he is coming' — causal",
+                "'He says that he came' — Greek backshifts aorist"
               ] }
           ]
         },
         {
-          family: "εἰ and ἐάν",
-          lemma: "εἰ / ἐάν",
-          gloss: "if",
+          family: "Time expressions by case",
+          lemma: "accusative / genitive / dative of time",
+          gloss: "case marks the kind of time reference",
           questions: [
-            { form: "εἰ",
-              prompt: "What mood normally follows εἰ in a simple/first-class condition?",
-              answer: "indicative",
-              choices: ["indicative", "subjunctive", "imperative", "infinitive"],
-              note: "First-class condition assumes the protasis true for argument's sake." },
-            { form: "ἐάν",
-              prompt: "What mood normally follows ἐάν?",
-              answer: "subjunctive",
-              choices: ["subjunctive", "indicative", "imperative", "optative"],
-              note: "Third-class condition: ἐάν + subjunctive — future/general probability." },
-            { form: "εἰ + indicative",
-              prompt: "Which class of condition does εἰ + a present/past indicative protasis introduce?",
-              answer: "first-class (assumed true for argument's sake)",
+            { form: "duration",
+              prompt: "Which case expresses duration of time ('for how long')?",
+              answer: "accusative",
+              choices: ["accusative", "genitive", "dative", "nominative"],
+              note: "δύο ἡμέρας = 'for two days'." },
+            { form: "time within which",
+              prompt: "Which case expresses the time within which something happens ('during', 'in the course of')?",
+              answer: "genitive",
+              choices: ["genitive", "accusative", "dative", "nominative"],
+              note: "νυκτός = 'during the night' / 'by night'." },
+            { form: "point in time",
+              prompt: "Which case expresses a point in time ('at when', 'on what day')?",
+              answer: "dative",
+              choices: ["dative", "accusative", "genitive", "vocative"],
+              note: "τῇ τρίτῃ ἡμέρᾳ = 'on the third day'." },
+            { form: "δύο ἡμέρας",
+              prompt: "Translate this time expression.",
+              answer: "'for two days' (duration — accusative)",
               choices: [
-                "first-class (assumed true for argument's sake)",
-                "second-class (contrary to fact)",
-                "third-class (future probability)",
-                "fourth-class (remote possibility)"
+                "'for two days' (duration — accusative)",
+                "'on the second day' (point — dative)",
+                "'within two days' (during — genitive)",
+                "'two days are…' (subject — nominative)"
+              ] },
+            { form: "τῇ ἡμέρᾳ",
+              prompt: "Translate this time expression.",
+              answer: "'on the day' (point in time — dative)",
+              choices: [
+                "'on the day' (point in time — dative)",
+                "'for the day' (duration — accusative)",
+                "'during the day' (within which — genitive)",
+                "'the day is…' (subject — nominative)"
+              ] },
+            { form: "νυκτός",
+              prompt: "Translate this time expression.",
+              answer: "'by night' / 'during the night' (genitive — time within which)",
+              choices: [
+                "'by night' / 'during the night' (genitive — time within which)",
+                "'for the night' (accusative — duration)",
+                "'on the night' (dative — point in time)",
+                "'the night' (nominative — subject)"
+              ] },
+            { form: "case summary",
+              prompt: "Match the case to the time idea: accusative / genitive / dative.",
+              answer: "acc. = duration ('for'); gen. = time within which ('during'); dat. = point ('at / on')",
+              choices: [
+                "acc. = duration ('for'); gen. = time within which ('during'); dat. = point ('at / on')",
+                "acc. = point; gen. = duration; dat. = within which",
+                "acc. = within which; gen. = point; dat. = duration",
+                "all three cases mean the same thing — case is purely stylistic"
+              ] },
+            { form: "τρεῖς ἡμέρας",
+              prompt: "Translate this time expression.",
+              answer: "'for three days' — accusative of duration",
+              choices: [
+                "'for three days' — accusative of duration",
+                "'on the third day' — dative point",
+                "'within three days' — genitive 'within which'",
+                "'three days are…' — nominative subject"
+              ] },
+            { form: "ὅλην τὴν νύκτα",
+              prompt: "Translate this time expression.",
+              answer: "'all night long' / 'for the whole night' — accusative of duration",
+              choices: [
+                "'all night long' / 'for the whole night' — accusative of duration",
+                "'at the whole night' — dative point",
+                "'during the whole night' — genitive within which",
+                "'the whole night is…' — nominative"
               ],
-              note: "Second-class also uses εἰ + indicative but adds ἄν in the apodosis ('if he were, he would')." },
-            { form: "ἐὰν λύσῃ",
-              prompt: "Translate this protasis.",
-              answer: "'if he should untie' / 'if he unties'",
+              note: "Whenever the question is 'for how long?', look for the accusative." },
+            { form: "ἡμέρας καὶ νυκτός",
+              prompt: "Translate this paired time expression.",
+              answer: "'by day and by night' / 'during day and night' — genitive of time within which",
               choices: [
-                "'if he should untie' / 'if he unties'",
-                "'because he untied'",
-                "'when he had untied'",
-                "'in order that he untie'"
-              ] }
+                "'by day and by night' / 'during day and night' — genitive of time within which",
+                "'for a day and a night' — accusative duration",
+                "'on day and night' — dative point",
+                "'the day and night' — nominative subjects"
+              ] },
+            { form: "νυκτὸς καὶ ἡμέρας",
+              prompt: "Which case is being used here for time, and why?",
+              answer: "genitive — the time within which the action takes place ('during day and night')",
+              choices: [
+                "genitive — the time within which the action takes place ('during day and night')",
+                "accusative — duration ('for a day and a night')",
+                "dative — point in time ('at day and night')",
+                "nominative — subject of the verb"
+              ] },
+            { form: "τῷ σαββάτῳ",
+              prompt: "Translate this time expression.",
+              answer: "'on the sabbath' — dative of time (point in time)",
+              choices: [
+                "'on the sabbath' — dative of time (point in time)",
+                "'for the sabbath' — accusative duration",
+                "'during the sabbath' — genitive within which",
+                "'with the sabbath' — dative of accompaniment"
+              ] },
+            { form: "ἐν ἐκείνῃ τῇ ἡμέρᾳ",
+              prompt: "Translate.",
+              answer: "'on that day' — dative of time (often reinforced by ἐν in Koine)",
+              choices: [
+                "'on that day' — dative of time (often reinforced by ἐν in Koine)",
+                "'for that day' — accusative duration",
+                "'during that day' — genitive within which",
+                "'with that day' — dative of accompaniment"
+              ],
+              note: "Koine often adds ἐν + dative to express point in time, alongside the bare dative." }
           ]
         }
       ]
