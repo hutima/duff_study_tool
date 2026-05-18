@@ -254,10 +254,6 @@
               answer: "accusative",
               choices: ["accusative", "nominative", "genitive", "dative"],
               note: "ὁ ἀπόστολος ἀκούει τὸν λόγον = 'The apostle hears the word' — τὸν λόγον is accusative." },
-            { form: "Greek word order",
-              prompt: "How rigid is Greek word order compared to English?",
-              answer: "much freer — case endings carry the syntax",
-              choices: ["much freer — case endings carry the syntax", "identical to English (SVO)", "always verb-final", "always verb-first"] },
             { form: "ὁ δοῦλος βλέπει τὸν κύριον.",
               prompt: "Translate.",
               answer: "the slave sees the lord",
@@ -4144,9 +4140,9 @@
               note: "ἀπο- + ε-augment + κριθ + ending. ἀποκρίνομαι is deponent in form but uses θη-style aorists ('passive deponents')." },
             { form: "ἐφοβήθη",
               prompt: "Parse this form (φοβέομαι).",
-              answer: "aorist passive indicative, 3rd sg. of φοβέομαι — 'he/she/it was afraid'",
+              answer: "aorist passive indicative, 3rd sg. of φοβέομαι",
               choices: [
-                "aorist passive indicative, 3rd sg. of φοβέομαι — 'he/she/it was afraid'",
+                "aorist passive indicative, 3rd sg. of φοβέομαι",
                 "imperfect middle indicative, 3rd sg.",
                 "aorist active indicative, 3rd sg.",
                 "future passive indicative, 3rd sg."
@@ -4707,9 +4703,9 @@
               note: "3rd-plural imperative ending -τωσαν." },
             { form: "ἁγιασθήτω",
               prompt: "Identify this famous form (Matt 6:9).",
-              answer: "aorist passive imperative, 3rd sg. — 'let (it) be hallowed / made holy!'",
+              answer: "aorist passive imperative, 3rd sg.",
               choices: [
-                "aorist passive imperative, 3rd sg. — 'let (it) be hallowed / made holy!'",
+                "aorist passive imperative, 3rd sg.",
                 "future passive indicative, 3rd sg.",
                 "present passive imperative, 3rd sg.",
                 "aorist passive indicative, 3rd sg."
