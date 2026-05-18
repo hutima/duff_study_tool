@@ -478,6 +478,23 @@ export function resetCurrentDeck() {
   openResetUnspacedModal();
 }
 
+// Shortcut entry point: opens the same reset modal as `resetCurrentDeck`
+// but pre-checks the "Required cards only" scope so the action only touches
+// graded vocabulary in the current selection. The user still chooses
+// between "Set all to now" and "Reset progress" inside the spaced modal.
+export function resetRequiredOnly() {
+  if (!runtime.selectedKeys.length) return;
+  const overlayId = runtime.spacedRepetition ? 'resetSpacedOverlay' : 'resetUnspacedOverlay';
+  if (runtime.spacedRepetition) {
+    openResetSpacedModal();
+  } else {
+    openResetUnspacedModal();
+  }
+  const overlay = document.getElementById(overlayId);
+  const checkbox = overlay && overlay.querySelector('input[type="checkbox"][data-reset-required-only]');
+  if (checkbox) checkbox.checked = true;
+}
+
 // Returns true when a card should be touched by the reset operation,
 // given the "Required cards only" scope toggle in the reset modal.
 function shouldResetCard(card, requiredOnly) {
