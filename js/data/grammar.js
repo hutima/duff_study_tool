@@ -4265,9 +4265,9 @@
               answer: "stops reduplicate as the unaspirated form of the same class: π → πε-, β → βε-, φ → πε-",
               choices: [
                 "stops reduplicate as the unaspirated form of the same class: π → πε-, β → βε-, φ → πε-",
-                "stops reduplicate by doubling: ππε-, ββε-, φφε-",
-                "stops always reduplicate as ε- with no consonant",
-                "stops reduplicate as the aspirated form: π → φε-, κ → χε-, τ → θε-"
+                "stops reduplicate by doubling the full consonant: ππε-, ββε-, φφε- across all three labials",
+                "stops always reduplicate as plain ε-, with no consonant carried over from the verb stem",
+                "stops reduplicate as the aspirated form of the class: π → φε-, κ → χε-, τ → θε-"
               ],
               note: "Labial class (π, β, φ): all reduplicate as πε-." },
             { form: "φιλέω → πεφίληκα",
@@ -4763,9 +4763,9 @@
               answer: "contemporaneous time — 'while / when …'",
               choices: [
                 "contemporaneous time — 'while / when …'",
-                "cause — 'because …'",
-                "purpose — 'in order that …'",
-                "time after — 'after …'"
+                "cause — 'because …' (the action gives the reason)",
+                "purpose — 'in order that …' (the action is the goal)",
+                "time after — 'after …' (the action precedes the main verb)"
               ],
               note: "ἐν τῷ σπείρειν αὐτόν = 'while he was sowing' (Mark 4:4). Note dative τῷ — point in time." },
             { form: "μετὰ τό + inf.",
@@ -4793,9 +4793,9 @@
               answer: "purpose — 'in order that …' (overlaps with εἰς τό)",
               choices: [
                 "purpose — 'in order that …' (overlaps with εἰς τό)",
-                "time after — 'after …'",
-                "time before — 'before …'",
-                "comparison — 'compared to …'"
+                "time after — 'after …' (the action precedes the main verb)",
+                "time before — 'before …' (the action follows the main verb)",
+                "comparison — 'compared to …' (πρός governs comparison generally)"
               ],
               note: "πρὸς τὸ θεαθῆναι αὐτοῖς = 'in order to be seen by them' (Matt 6:1)." },
             { form: "case of subject of articular infinitive",
@@ -5062,9 +5062,9 @@
               answer: "they reduplicate the initial stem letter and separate the reduplicated consonant with iota",
               choices: [
                 "they reduplicate the initial stem letter and separate the reduplicated consonant with iota",
-                "they prefix an augment ε- to the stem",
-                "they use a long thematic vowel ω/η like the subjunctive",
-                "they add an extra σ before the personal endings"
+                "they prefix an augment ε- to the stem, carrying past-time force into the present",
+                "they use a long thematic vowel ω/η like the subjunctive, marking potential / contingent mood",
+                "they add an extra σ before the personal endings, just like the future and 1st aorist"
               ],
               note: "*do → di-d-o → δίδω-; *qe → ti-q-e → τίθε-; *sta → si-st-a → ἵστα-. Only the present and imperfect show this reduplication." },
             { form: "Rule 2 — no connecting vowel",
@@ -5072,9 +5072,9 @@
               answer: "they do NOT use a connecting (thematic) vowel in the indicative — the personal ending attaches directly to the stem",
               choices: [
                 "they do NOT use a connecting (thematic) vowel in the indicative — the personal ending attaches directly to the stem",
-                "they always insert ε before the personal ending",
-                "they use ο before active endings and α before middle endings",
-                "they always insert ι before plural endings"
+                "they always insert ε before the personal ending, replacing the ο/ε alternation seen in -ω verbs",
+                "they use ο before active endings and α before middle endings, swapping vowel by voice rather than person",
+                "they always insert ι before plural endings, mirroring the present-stem reduplication vowel"
               ],
               note: "Compare λύ-ο-μεν (with ο) vs δί-δο-μεν (no separate connecting vowel — the ο is part of the stem)." },
             { form: "Rule 3 — three sets of personal endings",
@@ -5102,9 +5102,9 @@
               answer: "most -μι verbs use κα as their tense formative in the aorist (a 'κ-aorist')",
               choices: [
                 "most -μι verbs use κα as their tense formative in the aorist (a 'κ-aorist')",
-                "they use σα like ordinary 1st aorists",
-                "they have no aorist — they substitute the perfect",
-                "they always use a 2nd aorist on a different stem"
+                "they use σα like ordinary 1st aorists, with the σ standing between stem and α",
+                "they have no aorist tense at all — the perfect indicative substitutes for past completed action",
+                "they always use a 2nd aorist on a different stem, like λέγω → εἶπον in the indicative"
               ],
               note: "ἔδωκα (cf. ἔλυσα), ἔθηκα, ἀφῆκα. The κα is unusual — it looks perfect-ish but the augment + secondary endings give it away as aorist." },
             { form: "διδόασι(ν)",
@@ -5112,9 +5112,9 @@
               answer: "Rule 3 (special endings: -ασι in 3 pl) + Rule 4 (short vowel ο in the plural — ablaut)",
               choices: [
                 "Rule 3 (special endings: -ασι in 3 pl) + Rule 4 (short vowel ο in the plural — ablaut)",
-                "Rule 1 (present reduplication only)",
-                "Rule 2 (no connecting vowel — but that's the same as -ω plurals)",
-                "Rule 5 (κ-aorist — but this is a present)"
+                "Rule 1 (present reduplication only — the iota reduplication explains the ending)",
+                "Rule 2 (no connecting vowel — but absence of a thematic vowel applies equally to -ω plurals)",
+                "Rule 5 (κ-aorist — but this is a present indicative, so Rule 5 cannot be in play)"
               ],
               note: "-μι plurals show the short-vowel grade of the stem; the 3 pl ending is -ασι, not -ουσι." },
             { form: "ἔδωκα vs δέδωκα",
@@ -5122,9 +5122,9 @@
               answer: "ἔδωκα has the augment ἐ-; δέδωκα has the perfect reduplication δε-",
               choices: [
                 "ἔδωκα has the augment ἐ-; δέδωκα has the perfect reduplication δε-",
-                "the κα ending is unique to one of them",
-                "they are interchangeable forms",
-                "the aorist has primary endings, the perfect secondary"
+                "the κα ending is unique to one of them — only one of the two forms takes κ before α",
+                "they are interchangeable forms — Koine collapses the aorist and perfect of δίδωμι",
+                "the aorist has primary endings, the perfect secondary — the prefix is identical in both"
               ],
               note: "Both look κα-shaped, but the prefix decides: ἐ- = aorist, δε- = perfect. The aorist takes secondary endings; the perfect, primary." }
           ]
