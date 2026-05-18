@@ -1283,6 +1283,27 @@
     min-width: 140px;
   }
 
+  .reset-scope-row {
+    margin-top: 4px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .reset-scope-row label {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+    font-weight: 400;
+  }
+
+  .reset-scope-row input[type="checkbox"] {
+    margin-top: 3px;
+    flex-shrink: 0;
+  }
+
   .consent-primary {
     min-width: 180px;
     color: var(--gold-light);

@@ -213,7 +213,7 @@ export function markCard(outcome) {
   } else {
     // Non-SRS cards still write to the same shared schedule used by spaced review.
     // Deck behaviour:
-    // - 'again' (wrong)    → immediately moved to back of active pile for same-pass retry.
+    // - 'again' (wrong)    → deferred to a separate queue at the END of the current pass; reappears next cycle.
     // - 'pass' (uncertain) → deferred until the end of the pile; reappears next cycle.
     // - 'easy' (known)     → pushed out of active pile as usual.
     const mark = outcome === 'easy' ? 'known' : 'unsure';
@@ -224,23 +224,15 @@ export function markCard(outcome) {
     host.getDirectionalMarksStore()[currentCard.id] = mark;
     runtime.marks = host.getDirectionalMarksStore();
 
-    if (outcome === 'again') {
-      // Remove from current position; remaining cards shift down by 1,
-      // so currentIdx now points to what was the next card.
-      const cardToReturn = currentCard;
-      runtime.deck.splice(runtime.currentIdx, 1);
-      // Find the last non-known, non-deferred card that comes after currentIdx.
-      let lastActiveIdx = -1;
-      for (let i = runtime.currentIdx; i < runtime.deck.length; i++) {
-        if (runtime.marks[runtime.deck[i].id] !== 'known' && !runtime.unspacedDeferredIds.has(runtime.deck[i].id)) lastActiveIdx = i;
-      }
-      runtime.deck.splice(lastActiveIdx >= 0 ? lastActiveIdx + 1 : runtime.deck.length, 0, cardToReturn);
-      // currentIdx already points to the correct next card (or loops if it was the last).
-      renderCard();
-    } else {
-      if (outcome === 'pass') runtime.unspacedDeferredIds.add(currentCard.id);
-      navigate(1);
+    if (outcome === 'again' || outcome === 'pass') {
+      // Both 'again' and 'pass' defer the card until the next cycle, so the
+      // current pass finishes before the learner sees the missed cards
+      // again. ('again' used to insert at the back of the active pile, which
+      // could repeat the same card almost immediately when few cards
+      // remained.)
+      runtime.unspacedDeferredIds.add(currentCard.id);
     }
+    navigate(1);
   }
   renderReview();
   renderProgress();
@@ -483,21 +475,26 @@ export function resetCurrentDeck() {
     return;
   }
 
-  const confirmed = window.confirm(
-    'Reset unspaced marks for this deck only? This keeps your spaced-review scheduling and intervals.'
-  );
-  if (!confirmed) return;
-
-  host.clearSpacedUndoSnapshot();
-  performUnspacedDeckReset();
+  openResetUnspacedModal();
 }
 
-function performUnspacedDeckReset() {
-  const deckKey = host.getDeckStateKey(runtime.selectedKeys, runtime.requiredOnly, runtime.spacedRepetition);
-  delete runtime.deckStates[deckKey];
+// Returns true when a card should be touched by the reset operation,
+// given the "Required cards only" scope toggle in the reset modal.
+function shouldResetCard(card, requiredOnly) {
+  if (!requiredOnly) return true;
+  return !!(card && card.required);
+}
+
+function performUnspacedDeckReset(requiredOnly) {
+  if (!requiredOnly) {
+    // Whole-deck reset still clears the saved deck-state for this combo.
+    const deckKey = host.getDeckStateKey(runtime.selectedKeys, runtime.requiredOnly, runtime.spacedRepetition);
+    delete runtime.deckStates[deckKey];
+  }
   const directionalMarks = host.getDirectionalMarksStore();
 
   runtime.originalDeck.forEach(card => {
+    if (!shouldResetCard(card, requiredOnly)) return;
     delete directionalMarks[card.id];
   });
 
@@ -515,12 +512,15 @@ function performUnspacedDeckReset() {
   host.saveState();
 }
 
-function performSpacedProgressReset() {
-  const deckKey = host.getDeckStateKey(runtime.selectedKeys, runtime.requiredOnly, runtime.spacedRepetition);
-  delete runtime.deckStates[deckKey];
+function performSpacedProgressReset(requiredOnly) {
+  if (!requiredOnly) {
+    const deckKey = host.getDeckStateKey(runtime.selectedKeys, runtime.requiredOnly, runtime.spacedRepetition);
+    delete runtime.deckStates[deckKey];
+  }
   const directionalProgress = host.getDirectionalProgressStore();
 
   runtime.originalDeck.forEach(card => {
+    if (!shouldResetCard(card, requiredOnly)) return;
     const p = directionalProgress[card.id];
     if (p && typeof p === 'object') {
       p.dueAt = 0;
@@ -550,10 +550,11 @@ function performSpacedProgressReset() {
   host.saveState();
 }
 
-function performSpacedTimingReset() {
+function performSpacedTimingReset(requiredOnly) {
   const directionalProgress = host.getDirectionalProgressStore();
 
   runtime.originalDeck.forEach(card => {
+    if (!shouldResetCard(card, requiredOnly)) return;
     const p = directionalProgress[card.id];
     if (p && typeof p === 'object') {
       p.dueAt = 0;
@@ -573,16 +574,28 @@ function performSpacedTimingReset() {
   host.saveState();
 }
 
+// True if the reset-scope toggle in the given modal is checked.
+function isResetScopeRequiredOnly(modalId) {
+  const overlay = document.getElementById(modalId);
+  if (!overlay) return false;
+  const checkbox = overlay.querySelector('input[type="checkbox"][data-reset-required-only]');
+  return !!(checkbox && checkbox.checked);
+}
+
 function openResetSpacedModal() {
   const overlay = document.getElementById('resetSpacedOverlay');
   if (!overlay) {
     // Fall back to legacy confirm if the modal markup isn't present.
     if (window.confirm('Reset spaced-review scheduling for this deck only? This keeps your unspaced marks and pass history.')) {
       host.clearSpacedUndoSnapshot();
-      performSpacedProgressReset();
+      performSpacedProgressReset(false);
     }
     return;
   }
+  // Reset the scope toggle to off whenever the modal opens, so the
+  // default behaviour ("reset the whole deck") is unambiguous.
+  const checkbox = overlay.querySelector('input[type="checkbox"][data-reset-required-only]');
+  if (checkbox) checkbox.checked = false;
   overlay.classList.add('show');
   overlay.setAttribute('aria-hidden', 'false');
   document.body.classList.add('modal-open');
@@ -600,17 +613,53 @@ export function closeResetSpacedModal() {
 }
 
 export function confirmResetSpacedTimingOnly() {
+  const requiredOnly = isResetScopeRequiredOnly('resetSpacedOverlay');
   closeResetSpacedModal();
   if (!runtime.selectedKeys.length || !runtime.spacedRepetition) return;
   host.clearSpacedUndoSnapshot();
-  performSpacedTimingReset();
+  performSpacedTimingReset(requiredOnly);
 }
 
 export function confirmResetSpacedProgress() {
+  const requiredOnly = isResetScopeRequiredOnly('resetSpacedOverlay');
   closeResetSpacedModal();
   if (!runtime.selectedKeys.length || !runtime.spacedRepetition) return;
   host.clearSpacedUndoSnapshot();
-  performSpacedProgressReset();
+  performSpacedProgressReset(requiredOnly);
+}
+
+function openResetUnspacedModal() {
+  const overlay = document.getElementById('resetUnspacedOverlay');
+  if (!overlay) {
+    // Fall back to legacy confirm if the modal markup isn't present.
+    if (window.confirm('Reset unspaced marks for this deck only? This keeps your spaced-review scheduling and intervals.')) {
+      host.clearSpacedUndoSnapshot();
+      performUnspacedDeckReset(false);
+    }
+    return;
+  }
+  const checkbox = overlay.querySelector('input[type="checkbox"][data-reset-required-only]');
+  if (checkbox) checkbox.checked = false;
+  overlay.classList.add('show');
+  overlay.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('modal-open');
+}
+
+export function closeResetUnspacedModal() {
+  const overlay = document.getElementById('resetUnspacedOverlay');
+  if (!overlay) return;
+  overlay.classList.remove('show');
+  overlay.setAttribute('aria-hidden', 'true');
+  const anyOtherOpen = document.querySelector('.consent-overlay.show');
+  if (!anyOtherOpen) document.body.classList.remove('modal-open');
+}
+
+export function confirmResetUnspacedMarks() {
+  const requiredOnly = isResetScopeRequiredOnly('resetUnspacedOverlay');
+  closeResetUnspacedModal();
+  if (!runtime.selectedKeys.length || runtime.spacedRepetition) return;
+  host.clearSpacedUndoSnapshot();
+  performUnspacedDeckReset(requiredOnly);
 }
 
 export function resetAllStats() {
