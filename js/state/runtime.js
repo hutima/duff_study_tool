@@ -76,8 +76,9 @@ export const runtime = {
   activeDeckCount: 0,
   unspacedPendingRecycle: false,
   unspacedCycleState: {},
-  unspacedDeferredIds: new Set(), // 'pass' cards excluded from current pass
-  flipsSinceReshuffle: 0,         // forward navigations since last periodic reshuffle
+  unspacedDeferredIds: new Set(), // 'pass' and 'again' cards excluded from current pass; reappear in next cycle
+  flipsSinceReshuffle: 0,         // forward navigations since last periodic reshuffle (legacy; see lastPeriodicReshuffleAt)
+  lastPeriodicReshuffleAt: 0,     // timestamp (ms) of the last periodic reshuffle; throttled to ≥ 1 hour
   spacedUndoSnapshot: null,
 
   // ── Per-direction mark store for the active study mode ──────────────

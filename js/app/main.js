@@ -251,6 +251,8 @@ import {
   closeResetSpacedModal,
   confirmResetSpacedTimingOnly,
   confirmResetSpacedProgress,
+  closeResetUnspacedModal,
+  confirmResetUnspacedMarks,
   resetAllStats
 } from '../ui/navigation.js';
 import {
@@ -832,6 +834,7 @@ function resetUnspacedCycleState() {
   runtime.unspacedCycleState = {};
   runtime.unspacedDeferredIds = new Set();
   runtime.flipsSinceReshuffle = 0;
+  runtime.lastPeriodicReshuffleAt = 0;
 }
 
 function getUnspacedCycleEntry(cardId) {
@@ -1378,13 +1381,29 @@ function moveCardToBackOfActivePile(card) {
   return true;
 }
 
+// Periodic reshuffle is throttled to once per hour. The old behaviour
+// (every 10 flips) shuffled cards out from under the learner mid-session,
+// which made it hard to predict when an "again" card would resurface. The
+// hourly cap means within a single study session the order stays stable
+// after the initial shuffle.
+const PERIODIC_RESHUFFLE_MIN_MS = 60 * 60 * 1000;
+
 function maybePeriodicReshuffle() {
   if (!runtime.shuffled) return;
   runtime.flipsSinceReshuffle++;
-  if (runtime.flipsSinceReshuffle >= 10) {
-    runtime.flipsSinceReshuffle = 0;
-    reshuffleUpcomingCards();
+  const now = Date.now();
+  const lastAt = Number(runtime.lastPeriodicReshuffleAt) || 0;
+  // Seed lastPeriodicReshuffleAt on the first navigation so the first hour
+  // measures from when the user actually started navigating, not from the
+  // epoch.
+  if (!lastAt) {
+    runtime.lastPeriodicReshuffleAt = now;
+    return;
   }
+  if (now - lastAt < PERIODIC_RESHUFFLE_MIN_MS) return;
+  runtime.lastPeriodicReshuffleAt = now;
+  runtime.flipsSinceReshuffle = 0;
+  reshuffleUpcomingCards();
 }
 
 // Per-flip ~1/50 (2%) chance to bring one high-confidence (>75%) deferred card
@@ -1448,6 +1467,9 @@ function maybeReturnKnownCardToActivePile() {
 function startNextCycle(mode = 'remaining') {
   runtime.unspacedDeferredIds = new Set();
   runtime.flipsSinceReshuffle = 0;
+  // A new cycle is a fresh shuffle anchor — reset the hourly timer so the
+  // next periodic reshuffle counts from now.
+  runtime.lastPeriodicReshuffleAt = Date.now();
   if (mode === 'full') {
     const directionalMarks = getDirectionalMarksStore();
     (runtime.originalDeck || []).forEach(card => {
@@ -1531,6 +1553,7 @@ const GLOBAL_CLICK_HANDLERS = {
   openShortcutsModal, openStudySelector,
   openAnalyticsOverlay, resetAllStats, resetCurrentDeck,
   closeResetSpacedModal, confirmResetSpacedTimingOnly, confirmResetSpacedProgress,
+  closeResetUnspacedModal, confirmResetUnspacedMarks,
   reshuffleEligible,
   fastForwardOneDay, fastForwardOneWeek,
   restoreSpacedUndo, setAppProfile, setStudyMode, setThemeMode,

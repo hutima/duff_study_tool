@@ -368,11 +368,37 @@
     <div class="consent-copy">
       <p><strong>Set all to now</strong> keeps your SRS progress (streaks, intervals, ease) but makes every card in this deck due immediately, so you can review them all right away.</p>
       <p><strong>Reset progress</strong> clears all SRS scheduling and progress for this deck. Pass history and unspaced marks are kept.</p>
+      <p class="reset-scope-row">
+        <label>
+          <input type="checkbox" data-reset-required-only id="resetSpacedRequiredOnly">
+          <strong>Required cards only</strong> — apply just to graded vocabulary in the current selection (useful for quiz prep).
+        </label>
+      </p>
     </div>
     <div class="consent-actions reset-spaced-actions">
       <button class="ctrl-btn" type="button" onclick="closeResetSpacedModal()">Cancel</button>
       <button class="ctrl-btn" type="button" onclick="confirmResetSpacedTimingOnly()">Set all to now</button>
       <button class="ctrl-btn consent-primary" type="button" onclick="confirmResetSpacedProgress()">Reset progress</button>
+    </div>
+  </div>
+</div>
+
+<div class="consent-overlay" id="resetUnspacedOverlay" aria-hidden="true">
+  <div class="consent-modal reset-spaced-modal" role="dialog" aria-modal="true" aria-labelledby="resetUnspacedTitle">
+    <div class="consent-label">Reset unspaced marks</div>
+    <h2 id="resetUnspacedTitle">Reset unspaced marks for this deck?</h2>
+    <div class="consent-copy">
+      <p>This clears the <strong>known / unsure</strong> marks for the cards in this deck. Spaced-review scheduling, intervals, and pass history are kept.</p>
+      <p class="reset-scope-row">
+        <label>
+          <input type="checkbox" data-reset-required-only id="resetUnspacedRequiredOnly">
+          <strong>Required cards only</strong> — apply just to graded vocabulary in the current selection (useful for quiz prep).
+        </label>
+      </p>
+    </div>
+    <div class="consent-actions reset-spaced-actions">
+      <button class="ctrl-btn" type="button" onclick="closeResetUnspacedModal()">Cancel</button>
+      <button class="ctrl-btn consent-primary" type="button" onclick="confirmResetUnspacedMarks()">Reset marks</button>
     </div>
   </div>
 </div>
