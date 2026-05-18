@@ -4256,6 +4256,63 @@
           ]
         },
         {
+          family: "16.2b Reduplication of stops",
+          lemma: "reduplication rules",
+          gloss: "what consonants reduplicate as",
+          questions: [
+            { form: "πιστεύω → πεπίστευκα",
+              prompt: "Why does π reduplicate as πε-, not ππε- or φε-?",
+              answer: "stops reduplicate as the unaspirated form of the same class: π → πε-, β → βε-, φ → πε-",
+              choices: [
+                "stops reduplicate as the unaspirated form of the same class: π → πε-, β → βε-, φ → πε-",
+                "stops reduplicate by doubling: ππε-, ββε-, φφε-",
+                "stops always reduplicate as ε- with no consonant",
+                "stops reduplicate as the aspirated form: π → φε-, κ → χε-, τ → θε-"
+              ],
+              note: "Labial class (π, β, φ): all reduplicate as πε-." },
+            { form: "φιλέω → πεφίληκα",
+              prompt: "Why does φ reduplicate as πε- rather than φε-?",
+              answer: "aspirates de-aspirate when reduplicated: φ → πε-, χ → κε-, θ → τε-",
+              choices: [
+                "aspirates de-aspirate when reduplicated: φ → πε-, χ → κε-, θ → τε-",
+                "φ reduplicates as φε- — aspiration is preserved",
+                "φ is a labial like π/β, so reduplicates randomly",
+                "φιλέω is irregular — most aspirates do reduplicate as themselves"
+              ],
+              note: "Grassmann's law: two aspirates in adjacent syllables are forbidden, so the first dissimilates." },
+            { form: "χωρέω → κεχώρηκα",
+              prompt: "What is the reduplication of χ?",
+              answer: "κε- (velar aspirate de-aspirates: χ → κε-)",
+              choices: [
+                "κε- (velar aspirate de-aspirates: χ → κε-)",
+                "χε- (aspiration is preserved)",
+                "χχε- (consonant is doubled)",
+                "ἐ- (just the augment, no consonant)"
+              ],
+              note: "Velar class (κ, γ, χ): all reduplicate as κε-." },
+            { form: "θύω → τέθυκα",
+              prompt: "What is the reduplication of θ?",
+              answer: "τε- (dental aspirate de-aspirates: θ → τε-)",
+              choices: [
+                "τε- (dental aspirate de-aspirates: θ → τε-)",
+                "θε- (aspiration is preserved)",
+                "θθε- (consonant is doubled)",
+                "ἐ- (just the augment, no consonant)"
+              ],
+              note: "Dental class (τ, δ, θ): all reduplicate as τε-." },
+            { form: "verb stem starts with ρ or two consonants",
+              prompt: "How do verbs whose stem starts with ρ, or with two consonants (e.g., γνωρίζω, στρατεύω), form the perfect?",
+              answer: "they use a plain ἐ- (like an augment), not consonant reduplication",
+              choices: [
+                "they use a plain ἐ- (like an augment), not consonant reduplication",
+                "they double the consonant cluster in full",
+                "they have no perfect — only an aorist substitutes",
+                "they always use Attic reduplication (vowel + consonant + vowel)"
+              ],
+              note: "γνωρίζω → ἐγνώρικα; ζητέω → ἐζήτηκα (initial ζ counts as two consonants)." }
+          ]
+        },
+        {
           family: "16.3 More on the Meaning of the Perfect",
           lemma: "perfect in context",
           gloss: "translation choices",
@@ -4677,6 +4734,103 @@
           ]
         },
         {
+          family: "18.2b Articular infinitive with a preposition",
+          lemma: "διά / εἰς / ἐν / μετά / πρό / πρός + τό + infinitive",
+          gloss: "infinitive used inside a prepositional phrase",
+          questions: [
+            { form: "διὰ τό + inf.",
+              prompt: "What does διά + τό + infinitive express?",
+              answer: "cause — 'because (he/they/etc.) …'",
+              choices: [
+                "cause — 'because (he/they/etc.) …'",
+                "purpose — 'in order that …'",
+                "time after — 'after …'",
+                "time before — 'before …'"
+              ],
+              note: "διὰ τὸ μὴ ἔχειν ῥίζαν = 'because it had no root' (Mark 4:6)." },
+            { form: "εἰς τό + inf.",
+              prompt: "What does εἰς + τό + infinitive most often express?",
+              answer: "purpose — 'in order that …'",
+              choices: [
+                "purpose — 'in order that …'",
+                "cause — 'because …'",
+                "time when — 'when …'",
+                "time after — 'after …'"
+              ],
+              note: "εἰς τὸ εἶναι αὐτὸν πατέρα = 'in order for him to be a father' (Rom 4:11). Occasionally εἰς τό marks result." },
+            { form: "ἐν τῷ + inf.",
+              prompt: "What does ἐν + τῷ + infinitive express?",
+              answer: "contemporaneous time — 'while / when …'",
+              choices: [
+                "contemporaneous time — 'while / when …'",
+                "cause — 'because …'",
+                "purpose — 'in order that …'",
+                "time after — 'after …'"
+              ],
+              note: "ἐν τῷ σπείρειν αὐτόν = 'while he was sowing' (Mark 4:4). Note dative τῷ — point in time." },
+            { form: "μετὰ τό + inf.",
+              prompt: "What does μετά + τό + infinitive express?",
+              answer: "time after — 'after …'",
+              choices: [
+                "time after — 'after …'",
+                "time before — 'before …'",
+                "purpose — 'in order that …'",
+                "cause — 'because …'"
+              ],
+              note: "μετὰ τὸ ἐγερθῆναί με = 'after I have been raised' (Matt 26:32)." },
+            { form: "πρὸ τοῦ + inf.",
+              prompt: "What does πρό + τοῦ + infinitive express?",
+              answer: "time before — 'before …'",
+              choices: [
+                "time before — 'before …'",
+                "time after — 'after …'",
+                "cause — 'because …'",
+                "purpose — 'in order that …'"
+              ],
+              note: "πρὸ τοῦ ὑμᾶς αἰτῆσαι αὐτόν = 'before you ask him' (Matt 6:8). Note genitive τοῦ after πρό." },
+            { form: "πρὸς τό + inf.",
+              prompt: "What does πρός + τό + infinitive most often express?",
+              answer: "purpose — 'in order that …' (overlaps with εἰς τό)",
+              choices: [
+                "purpose — 'in order that …' (overlaps with εἰς τό)",
+                "time after — 'after …'",
+                "time before — 'before …'",
+                "comparison — 'compared to …'"
+              ],
+              note: "πρὸς τὸ θεαθῆναι αὐτοῖς = 'in order to be seen by them' (Matt 6:1)." },
+            { form: "case of subject of articular infinitive",
+              prompt: "When διὰ τό + infinitive has its own subject expressed, what case is it in?",
+              answer: "accusative — accusative subject of the infinitive",
+              choices: [
+                "accusative — accusative subject of the infinitive",
+                "nominative — same as a finite verb's subject",
+                "genitive — to match διά's normal case",
+                "dative — to match the article τό in the construction"
+              ],
+              note: "διὰ τὸ μὴ ἔχειν αὐτοὺς γῆν = 'because they had no soil'. The article τό stays accusative (governed by διά); the subject αὐτούς is also accusative." },
+            { form: "διὰ τὸ μὴ εἶναι ῥίζαν",
+              prompt: "Translate.",
+              answer: "'because there is no root' / 'because it has no root'",
+              choices: [
+                "'because there is no root' / 'because it has no root'",
+                "'in order to have no root' (purpose)",
+                "'while there is no root' (time)",
+                "'after the root is gone' (time after)"
+              ],
+              note: "διά + τό + inf. = cause. The bare infinitive can stand alone as the verb." },
+            { form: "ἐν τῷ ὑποστρέφειν",
+              prompt: "Translate.",
+              answer: "'while returning' / 'when (he/they) return(ed)'",
+              choices: [
+                "'while returning' / 'when (he/they) return(ed)'",
+                "'in order to return' (purpose)",
+                "'after returning' (time after)",
+                "'because of returning' (cause)"
+              ],
+              note: "ἐν + τῷ + inf. = simultaneous time. Tense gives aspect, not absolute time." }
+          ]
+        },
+        {
           family: "18.3 Third-Person Imperatives",
           lemma: "λυέτω, λυέτωσαν",
           gloss: "'let him untie!'",
@@ -4896,6 +5050,83 @@
                 "the child's bread is given"
               ],
               note: "δίδωμι is athematic: personal endings attach directly to the (reduplicated) stem." }
+          ]
+        },
+        {
+          family: "19.1b Five diagnostic rules for -μι verbs",
+          lemma: "δίδωμι, τίθημι, ἵστημι, δείκνυμι",
+          gloss: "the five rules that distinguish -μι verbs from -ω verbs",
+          questions: [
+            { form: "Rule 1 — present reduplication",
+              prompt: "What does Rule 1 say about -μι verbs in the PRESENT?",
+              answer: "they reduplicate the initial stem letter and separate the reduplicated consonant with iota",
+              choices: [
+                "they reduplicate the initial stem letter and separate the reduplicated consonant with iota",
+                "they prefix an augment ε- to the stem",
+                "they use a long thematic vowel ω/η like the subjunctive",
+                "they add an extra σ before the personal endings"
+              ],
+              note: "*do → di-d-o → δίδω-; *qe → ti-q-e → τίθε-; *sta → si-st-a → ἵστα-. Only the present and imperfect show this reduplication." },
+            { form: "Rule 2 — no connecting vowel",
+              prompt: "What does Rule 2 say about how -μι verbs attach their endings?",
+              answer: "they do NOT use a connecting (thematic) vowel in the indicative — the personal ending attaches directly to the stem",
+              choices: [
+                "they do NOT use a connecting (thematic) vowel in the indicative — the personal ending attaches directly to the stem",
+                "they always insert ε before the personal ending",
+                "they use ο before active endings and α before middle endings",
+                "they always insert ι before plural endings"
+              ],
+              note: "Compare λύ-ο-μεν (with ο) vs δί-δο-μεν (no separate connecting vowel — the ο is part of the stem)." },
+            { form: "Rule 3 — three sets of personal endings",
+              prompt: "What does Rule 3 say about the personal endings of -μι verbs in the PRESENT ACTIVE?",
+              answer: "they use three endings different from the -ω conjugation: -μι (1 sg), -σι (3 sg), -ασι (3 pl)",
+              choices: [
+                "they use three endings different from the -ω conjugation: -μι (1 sg), -σι (3 sg), -ασι (3 pl)",
+                "they use exactly the same endings as -ω verbs in every person and number",
+                "they use middle/passive endings throughout the active",
+                "they have no personal endings at all — only stem alternations"
+              ],
+              note: "δίδωμι, δίδως, δίδωσι(ν); δίδομεν, δίδοτε, διδόασι(ν). The 2 sg (-ς) and 1 pl/2 pl endings (-μεν/-τε) match -ω verbs." },
+            { form: "Rule 4 — stem-vowel ablaut",
+              prompt: "What does Rule 4 say about the stem vowel of -μι verbs?",
+              answer: "the stem vowel can lengthen, shorten, or drop out (ablaut)",
+              choices: [
+                "the stem vowel can lengthen, shorten, or drop out (ablaut)",
+                "the stem vowel is fixed and never changes across the paradigm",
+                "the stem vowel always lengthens in the plural",
+                "the stem vowel always shortens in the singular"
+              ],
+              note: "δίδωμι (long ω, sg.) vs δίδομεν (short ο, pl.). Same alternation in τίθημι/τίθεμεν, ἵστημι/ἵσταμεν." },
+            { form: "Rule 5 — κ-aorist",
+              prompt: "What does Rule 5 say about the AORIST of most -μι verbs?",
+              answer: "most -μι verbs use κα as their tense formative in the aorist (a 'κ-aorist')",
+              choices: [
+                "most -μι verbs use κα as their tense formative in the aorist (a 'κ-aorist')",
+                "they use σα like ordinary 1st aorists",
+                "they have no aorist — they substitute the perfect",
+                "they always use a 2nd aorist on a different stem"
+              ],
+              note: "ἔδωκα (cf. ἔλυσα), ἔθηκα, ἀφῆκα. The κα is unusual — it looks perfect-ish but the augment + secondary endings give it away as aorist." },
+            { form: "διδόασι(ν)",
+              prompt: "Which rules explain why the 3rd-pl present-active form is διδόασι(ν) rather than *διδονσι?",
+              answer: "Rule 3 (special endings: -ασι in 3 pl) + Rule 4 (short vowel ο in the plural — ablaut)",
+              choices: [
+                "Rule 3 (special endings: -ασι in 3 pl) + Rule 4 (short vowel ο in the plural — ablaut)",
+                "Rule 1 (present reduplication only)",
+                "Rule 2 (no connecting vowel — but that's the same as -ω plurals)",
+                "Rule 5 (κ-aorist — but this is a present)"
+              ],
+              note: "-μι plurals show the short-vowel grade of the stem; the 3 pl ending is -ασι, not -ουσι." },
+            { form: "ἔδωκα vs δέδωκα",
+              prompt: "How do you tell ἔδωκα (aorist) from δέδωκα (perfect)?",
+              answer: "ἔδωκα has the augment ἐ-; δέδωκα has the perfect reduplication δε-",
+              choices: [
+                "ἔδωκα has the augment ἐ-; δέδωκα has the perfect reduplication δε-",
+                "the κα ending is unique to one of them",
+                "they are interchangeable forms",
+                "the aorist has primary endings, the perfect secondary"
+              ],
+              note: "Both look κα-shaped, but the prefix decides: ἐ- = aorist, δε- = perfect. The aorist takes secondary endings; the perfect, primary." }
           ]
         },
         {
