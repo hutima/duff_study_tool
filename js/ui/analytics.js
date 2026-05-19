@@ -756,16 +756,23 @@ function computeStubbornCards(cards, progressStore) {
       if (!p) return null;
       const fails = Number(p.failCount) || 0;
       const passes = Number(p.passCount) || 0;
-      const seen = Number(p.seenCount) || 0;
-      if (fails < 2 || seen < 3) return null;
-      const total = fails + passes;
-      const failRate = total ? fails / total : 0;
+      const total = passes + fails;
+      // Need at least 3 guesses before a card counts as stubborn — a single
+      // missed flip isn't a pattern yet.
+      if (total < 3) return null;
+      // Smoothed confidence with a 1-pass / 0-fail pseudocount: (1+passes)/(1+total).
+      // Stops low-sample cards (e.g. 1/5 = 20%) from sorting above
+      // longer-history cards with a similar streak; the same value drives the
+      // 50% cutoff so the two stay consistent.
+      const smoothed = (passes + 1) / (total + 1);
+      if (smoothed > 0.5) return null;
       const confidence = getConfidencePct(p);
-      return { card, fails, passes, seen, failRate, confidence };
+      const seen = Number(p.seenCount) || 0;
+      const failRate = fails / total;
+      return { card, fails, passes, seen, failRate, confidence, smoothed };
     })
     .filter(Boolean)
-    .sort((a, b) => (b.fails - a.fails) || (b.failRate - a.failRate))
-    .slice(0, 5);
+    .sort((a, b) => (a.smoothed - b.smoothed) || (b.fails - a.fails));
 }
 
 function buildStubbornListHtml(rows, kind) {
@@ -844,7 +851,9 @@ function computeMostImprovedCards(cards, progressStore, limit = 5) {
     const recentAvg = recent.reduce((s, v) => s + v, 0) / recent.length;
     const delta = recentAvg - olderAvg;
     if (delta < 0.15) return; // at least ~15% bump to surface
-    improved.push({ card, delta, recentAvg, olderAvg });
+    const passes = Number(p.passCount) || 0;
+    const fails = Number(p.failCount) || 0;
+    improved.push({ card, delta, recentAvg, olderAvg, passes, fails, total: passes + fails });
   });
   return improved.sort((a, b) => b.delta - a.delta).slice(0, limit);
 }
@@ -906,7 +915,7 @@ function buildStubbornCollapseHtml(rows, kind, collapseKey) {
         </div>
       </summary>
       <div class="analytics-collapse-body">
-        <ol class="analytics-word-list">
+        <ol class="analytics-word-list analytics-word-list-scrollable">
           ${rows.map(r => renderCardListRow(r, kind, statFor(r))).join('')}
         </ol>
       </div>
@@ -917,6 +926,7 @@ function buildStubbornCollapseHtml(rows, kind, collapseKey) {
 function buildImprovedCollapseHtml(improved, kind, collapseKey) {
   if (!improved.length) return '';
   const title = kind === 'grammar' ? 'Most improved drills' : 'Most improved words';
+  const statFor = (i) => `+${Math.round(i.delta * 100)}% · ${i.total} guess${i.total === 1 ? '' : 'es'}`;
   return `
     <details class="analytics-collapse analytics-sub-collapse" data-collapse-key="${escapeHtml(collapseKey)}">
       <summary class="analytics-collapse-summary">
@@ -927,7 +937,7 @@ function buildImprovedCollapseHtml(improved, kind, collapseKey) {
       </summary>
       <div class="analytics-collapse-body">
         <ol class="analytics-word-list">
-          ${improved.map(i => renderCardListRow(i, kind, `+${Math.round(i.delta * 100)}%`)).join('')}
+          ${improved.map(i => renderCardListRow(i, kind, statFor(i))).join('')}
         </ol>
       </div>
     </details>
