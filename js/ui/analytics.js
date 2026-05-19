@@ -760,7 +760,8 @@ function computeStubbornCards(cards, progressStore) {
       if (fails < 2 || seen < 3) return null;
       const total = fails + passes;
       const failRate = total ? fails / total : 0;
-      return { card, fails, passes, seen, failRate };
+      const confidence = getConfidencePct(p);
+      return { card, fails, passes, seen, failRate, confidence };
     })
     .filter(Boolean)
     .sort((a, b) => (b.fails - a.fails) || (b.failRate - a.failRate))
@@ -803,6 +804,8 @@ function computeAtRiskCount(cards, progressStore) {
 // Cards that have been confirmed at least once but whose rolling
 // confidence has dropped under 70% — these are the "slipping" entries.
 // Sorted weakest-first so the top of the list is what to drill next.
+// Filters out cards with fewer than 4 successful passes so a card that
+// just barely confirmed once and then dipped doesn't dominate the list.
 function computeSlippingCards(cards, progressStore, limit = 8) {
   if (!cards?.length) return [];
   const now = Date.now();
@@ -812,6 +815,7 @@ function computeSlippingCards(cards, progressStore, limit = 8) {
     if (!p) return;
     if (!p.dueAt || !p.firstConfirmedAt) return;
     if (p.dueAt > now) return;
+    if ((Number(p.passCount) || 0) <= 3) return;
     const pct = getConfidencePct(p);
     if (pct === null || pct < 70) slipping.push({ card, progress: p, confidence: pct });
   });
@@ -820,9 +824,10 @@ function computeSlippingCards(cards, progressStore, limit = 8) {
     .slice(0, limit);
 }
 
-// "Most improved": cards whose recent confidence samples beat the older
-// ones in the same rolling history (capped at last 10 by recordConfidenceSample).
-// Halves are mid-split so a short history still yields a comparison.
+// "Most improved": rolling confidence buffer (capped at last 10 samples by
+// recordConfidenceSample) split into the last 5 vs the prior 5. Requires
+// 10 samples so we always compare apples-to-apples; cards with shorter
+// histories don't qualify.
 function computeMostImprovedCards(cards, progressStore, limit = 5) {
   if (!cards?.length) return [];
   const improved = [];
@@ -832,10 +837,9 @@ function computeMostImprovedCards(cards, progressStore, limit = 5) {
     const hist = Array.isArray(p.confidenceHistory)
       ? p.confidenceHistory.filter(v => Number.isFinite(v))
       : [];
-    if (hist.length < 4) return;
-    const mid = Math.ceil(hist.length / 2);
-    const older = hist.slice(0, mid);
-    const recent = hist.slice(mid);
+    if (hist.length < 10) return;
+    const older = hist.slice(-10, -5);
+    const recent = hist.slice(-5);
     const olderAvg = older.reduce((s, v) => s + v, 0) / older.length;
     const recentAvg = recent.reduce((s, v) => s + v, 0) / recent.length;
     const delta = recentAvg - olderAvg;
@@ -888,6 +892,11 @@ function buildSlippingCollapseHtml(slipping, kind, collapseKey) {
 function buildStubbornCollapseHtml(rows, kind, collapseKey) {
   if (!rows.length) return '';
   const heading = kind === 'grammar' ? 'Most stubborn grammar' : 'Most stubborn vocabulary';
+  const statFor = (r) => {
+    const missesPart = `${r.fails} miss${r.fails === 1 ? '' : 'es'}`;
+    const confPart = r.confidence != null ? `${r.confidence}% conf` : '— conf';
+    return `${missesPart} · ${confPart}`;
+  };
   return `
     <details class="analytics-collapse analytics-sub-collapse" data-collapse-key="${escapeHtml(collapseKey)}">
       <summary class="analytics-collapse-summary">
@@ -898,7 +907,7 @@ function buildStubbornCollapseHtml(rows, kind, collapseKey) {
       </summary>
       <div class="analytics-collapse-body">
         <ol class="analytics-word-list">
-          ${rows.map(r => renderCardListRow(r, kind, `${r.fails} miss${r.fails === 1 ? '' : 'es'}`)).join('')}
+          ${rows.map(r => renderCardListRow(r, kind, statFor(r))).join('')}
         </ol>
       </div>
     </details>
@@ -925,15 +934,16 @@ function buildImprovedCollapseHtml(improved, kind, collapseKey) {
   `;
 }
 
-// Builds the inner content of a "Vocabulary/Grammar progress" collapse: a
-// breakdown histogram, slipping count + collapsible list, cumulative line
-// chart, projected finish, stubborn collapsible, and a most-improved list.
+// Builds the inner content of a "Vocabulary/Grammar progress" collapse:
+// slipping count + collapsible list, cumulative line chart, projected
+// finish, stubborn collapsible, and a most-improved collapsible. The
+// per-band histogram is intentionally NOT repeated here — it already lives
+// at the top of each Total/Selected section.
 function buildProgressInnerHtml(opts) {
-  const { cards, progressStore, marksStore, kind, scopeKey, breakdownTitle, emptyMessage } = opts;
+  const { cards, progressStore, marksStore, kind, scopeKey, emptyMessage } = opts;
   if (!cards || !cards.length) {
     return `<div class="analytics-empty">${escapeHtml(emptyMessage || 'No data for this view yet.')}</div>`;
   }
-  const buckets = buildConfirmationHistogram(cards, progressStore);
   const series = buildCumulativeConfirmationSeries(cards, marksStore, progressStore);
   const projection = getRegressionProjection(series.series, series.currentConfirmed, series.total);
   const slipping = computeSlippingCards(cards, progressStore);
@@ -948,21 +958,10 @@ function buildProgressInnerHtml(opts) {
     : 'Needs more recent progress data';
 
   return `
-    <div class="analytics-chart-card">
-      <div class="analytics-chart-title">${escapeHtml(breakdownTitle)}</div>
-      ${buildHistogramSvg(buckets, { title: breakdownTitle })}
-    </div>
-    <div class="analytics-metrics-grid analytics-metrics-grid-compact">
-      <div class="analytics-metric-card">
-        <div class="analytics-metric-label">Slipping now</div>
-        <div class="analytics-metric-value">${slipping.length}</div>
-        <div class="analytics-metric-note">Confirmed before but accuracy now &lt; 70%</div>
-      </div>
-      <div class="analytics-metric-card">
-        <div class="analytics-metric-label">Projected finish</div>
-        <div class="analytics-metric-value">${escapeHtml(projectedValue)}</div>
-        <div class="analytics-metric-note">${escapeHtml(projectedNote)}</div>
-      </div>
+    <div class="analytics-metric-card analytics-progress-metric">
+      <div class="analytics-metric-label">Slipping now</div>
+      <div class="analytics-metric-value">${slipping.length}</div>
+      <div class="analytics-metric-note">Confirmed 4+ times but rolling accuracy now &lt; 70%</div>
     </div>
     ${buildSlippingCollapseHtml(slipping, kind, `${scopeKey}SlippingList`)}
     <div class="analytics-chart-card">
@@ -970,6 +969,11 @@ function buildProgressInnerHtml(opts) {
       ${series.series.length
         ? buildLineChartSvg(series.series, { title: 'Cumulative confirmation', percent: true, maxValue: 1 })
         : '<div class="analytics-empty">No confirmation history yet for this view.</div>'}
+    </div>
+    <div class="analytics-metric-card analytics-progress-metric">
+      <div class="analytics-metric-label">Projected finish</div>
+      <div class="analytics-metric-value">${escapeHtml(projectedValue)}</div>
+      <div class="analytics-metric-note">${escapeHtml(projectedNote)}</div>
     </div>
     ${buildStubbornCollapseHtml(stubborn, kind, `${scopeKey}Stubborn`)}
     ${buildImprovedCollapseHtml(improved, kind, `${scopeKey}Improved`)}
@@ -1136,7 +1140,6 @@ export function renderAnalyticsOverlay() {
       marksStore: vocabMarks,
       kind: 'vocab',
       scopeKey: 'totalVocab',
-      breakdownTitle: `Total vocabulary breakdown — ${scopeLabel}`
     });
   }
   const totalVocabProgressStatus = document.getElementById('analyticsTotalVocabProgressStatus');
@@ -1166,7 +1169,6 @@ export function renderAnalyticsOverlay() {
         marksStore: vocabMarks,
         kind: 'vocab',
         scopeKey: 'selectedVocab',
-        breakdownTitle: `Selected sets breakdown — ${scopeLabel}`
       });
     }
     if (selectedVocabSummary) {
@@ -1211,7 +1213,6 @@ export function renderAnalyticsOverlay() {
       marksStore: grammarMarks,
       kind: 'grammar',
       scopeKey: 'totalGrammar',
-      breakdownTitle: 'Total grammar breakdown',
       emptyMessage: showGrammar ? 'No grammar drills available yet.' : 'Grammar is not available in this profile.'
     });
   }
@@ -1250,7 +1251,6 @@ export function renderAnalyticsOverlay() {
         marksStore: grammarMarks,
         kind: 'grammar',
         scopeKey: 'selectedGrammar',
-        breakdownTitle: 'Selected grammar breakdown'
       });
     }
     if (selectedGrammarSummary) {

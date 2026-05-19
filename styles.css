@@ -1989,6 +1989,11 @@
   .analytics-metrics-grid-compact .analytics-metric-card {
     padding: 10px 12px;
   }
+  /* Standalone metric cards inside a progress collapse (no grid wrapper)
+     need explicit top/bottom spacing to match the grid-mediated rhythm. */
+  .analytics-progress-metric {
+    margin: 12px 0;
+  }
 
   /* ── Hero grid ── */
   .hero-grid {
