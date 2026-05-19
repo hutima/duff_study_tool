@@ -851,7 +851,9 @@ function computeMostImprovedCards(cards, progressStore, limit = 5) {
     const recentAvg = recent.reduce((s, v) => s + v, 0) / recent.length;
     const delta = recentAvg - olderAvg;
     if (delta < 0.15) return; // at least ~15% bump to surface
-    improved.push({ card, delta, recentAvg, olderAvg });
+    const passes = Number(p.passCount) || 0;
+    const fails = Number(p.failCount) || 0;
+    improved.push({ card, delta, recentAvg, olderAvg, passes, fails, total: passes + fails });
   });
   return improved.sort((a, b) => b.delta - a.delta).slice(0, limit);
 }
@@ -924,6 +926,7 @@ function buildStubbornCollapseHtml(rows, kind, collapseKey) {
 function buildImprovedCollapseHtml(improved, kind, collapseKey) {
   if (!improved.length) return '';
   const title = kind === 'grammar' ? 'Most improved drills' : 'Most improved words';
+  const statFor = (i) => `+${Math.round(i.delta * 100)}% · ${i.total} guess${i.total === 1 ? '' : 'es'}`;
   return `
     <details class="analytics-collapse analytics-sub-collapse" data-collapse-key="${escapeHtml(collapseKey)}">
       <summary class="analytics-collapse-summary">
@@ -934,7 +937,7 @@ function buildImprovedCollapseHtml(improved, kind, collapseKey) {
       </summary>
       <div class="analytics-collapse-body">
         <ol class="analytics-word-list">
-          ${improved.map(i => renderCardListRow(i, kind, `+${Math.round(i.delta * 100)}%`)).join('')}
+          ${improved.map(i => renderCardListRow(i, kind, statFor(i))).join('')}
         </ol>
       </div>
     </details>
