@@ -1837,6 +1837,108 @@
     margin: 24px 0 8px;
   }
 
+  /* ── Analytics collapsibles ───────────────────────────────
+     Native <details>/<summary> with a custom summary row so the
+     header still looks like an analytics-section-head. The default
+     caret marker is hidden in favor of the rotating ▾ span we
+     control from JS-free CSS. ── */
+  .analytics-collapse {
+    border-top: 1px solid var(--border);
+    margin: 24px 0 8px;
+    padding-top: 16px;
+  }
+  .analytics-collapse.analytics-sub-collapse {
+    border-top: none;
+    margin: 12px 0;
+    padding-top: 0;
+    padding-left: 6px;
+    border-left: 2px solid rgba(201, 168, 76, 0.18);
+  }
+  .analytics-collapse > summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 4px 0;
+  }
+  .analytics-collapse > summary::-webkit-details-marker { display: none; }
+  .analytics-collapse > summary::marker { content: ''; }
+  .analytics-collapse-caret {
+    color: var(--gold);
+    font-size: 14px;
+    line-height: 1.6;
+    transition: transform 0.15s ease;
+    transform: rotate(-90deg);
+    width: 12px;
+    flex-shrink: 0;
+  }
+  .analytics-collapse[open] > summary > .analytics-collapse-caret {
+    transform: rotate(0deg);
+  }
+  .analytics-collapse-title-wrap { flex: 1; min-width: 0; }
+  .analytics-collapse-title-wrap h3 {
+    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    font-size: 18px;
+    margin: 0 0 2px;
+  }
+  .analytics-collapse-title-wrap h4 {
+    font-family: 'Cinzel', serif;
+    color: var(--gold-light);
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    margin: 0;
+  }
+  .analytics-collapse-title-wrap p {
+    color: var(--muted);
+    font-size: 12px;
+    margin: 0;
+  }
+  .analytics-collapse-summary-status {
+    color: var(--gold-light);
+    font-size: 12px;
+    letter-spacing: 0.3px;
+  }
+  .analytics-collapse-body {
+    margin-top: 8px;
+  }
+
+  /* ── Analytics vocab-view toggle bar (Direction + Scope) ── */
+  .analytics-vocab-view-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 24px;
+    align-items: center;
+    margin: 4px 0 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: rgba(255,255,255,0.02);
+  }
+  .analytics-view-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .analytics-view-toggle-label {
+    color: var(--muted);
+    font-family: 'Cinzel', serif;
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: 1px;
+  }
+  .analytics-view-toggle-group {
+    display: inline-flex;
+    gap: 4px;
+  }
+  .analytics-selection-subtitle {
+    color: var(--muted);
+    font-size: 12px;
+    margin: 12px 0 0;
+  }
+
   /* ── Hero grid ── */
   .hero-grid {
     display: grid;

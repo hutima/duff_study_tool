@@ -50,11 +50,28 @@ import { showLevelToast, showBadgeToast } from './toast.js';
 let host = {
   ensureUsageStats: () => runtime.appUsageStats,
   accumulateActiveStudyTime: () => {},
-  canAccessGrammarUi: () => true
+  canAccessGrammarUi: () => true,
+  saveState: () => {}
 };
 
 export function configureAnalytics(deps) {
   host = { ...host, ...deps };
+}
+
+// ── Analytics-page-local vocab view state (direction + scope) ─────────
+// Independent of the study deck's runtime.directionToGreek / requiredOnly so
+// flipping the analytics view does not rebuild the deck the user is studying.
+function getAnalyticsVocabDirection() {
+  return runtime.analyticsVocabDirection === 'e2g' ? 'e2g' : 'g2e';
+}
+function isAnalyticsVocabRequiredOnly() {
+  return runtime.analyticsVocabScope !== 'all';
+}
+function getAnalyticsVocabProgressStore() {
+  return runtime.globalWordProgress[getAnalyticsVocabDirection()] || {};
+}
+function getAnalyticsVocabMarksStore() {
+  return runtime.globalWordMarks[getAnalyticsVocabDirection()] || {};
 }
 
 // ── Pure wrappers around xp.js that bind runtime stores ────────────────
@@ -204,7 +221,7 @@ function computeCourseWideData() {
   };
 }
 
-function computeChapterMastery(progressStore, marksStore) {
+function computeChapterMastery(progressStore, marksStore, requiredOnly = false) {
   const marksMap = marksStore || runtime.globalWordMarks.g2e || {};
   const store = progressStore || runtime.globalWordProgress.g2e || {};
   const isConfirmed = (card) => {
@@ -213,7 +230,7 @@ function computeChapterMastery(progressStore, marksStore) {
     return pct !== null && pct >= 70;
   };
   return getAllChapterKeys().map(chKey => {
-    const cards = getChapterVocabCards(chKey, false);
+    const cards = getChapterVocabCards(chKey, !!requiredOnly);
     const total = cards.length;
     const confirmed = cards.filter(isConfirmed).length;
     return { chapterKey: chKey, total, confirmed, pct: total ? confirmed / total : 0 };
@@ -258,15 +275,16 @@ function buildChapterGridHtml(mastery) {
 }
 
 // ── Per-chapter word breakdown (shown when a chapter tile is tapped) ──
-// Reads the same g2e marks/progress as the chapter map so the headline %
-// and the per-word % match. Sorted weakest → strongest so it doubles as
+// Reads the analytics-page direction + scope so the per-word percentages
+// match the chapter map above. Sorted weakest → strongest so it doubles as
 // a "what to drill next" list.
 function buildChapterDetailHtml(chapterKey) {
   if (!chapterKey) return '';
-  const cards = getChapterVocabCards(String(chapterKey), false);
-  if (!cards.length) return `<div class="analytics-empty">No vocabulary for Ch. ${escapeHtml(String(chapterKey))} yet.</div>`;
-  const marksMap = runtime.globalWordMarks.g2e || {};
-  const store = runtime.globalWordProgress.g2e || {};
+  const requiredOnly = isAnalyticsVocabRequiredOnly();
+  const cards = getChapterVocabCards(String(chapterKey), requiredOnly);
+  if (!cards.length) return `<div class="analytics-empty">No ${requiredOnly ? 'required ' : ''}vocabulary for Ch. ${escapeHtml(String(chapterKey))} yet.</div>`;
+  const marksMap = getAnalyticsVocabMarksStore();
+  const store = getAnalyticsVocabProgressStore();
   const required = cards.filter(c => c.required).length;
   const headwordOf = (card) => typeof window !== 'undefined' && typeof window.formatGreekHeadword === 'function'
     ? window.formatGreekHeadword(card.g)
@@ -746,9 +764,9 @@ function computeStubbornCards(cards, progressStore) {
     .slice(0, 5);
 }
 
-function buildStubbornListHtml(vocabRows, grammarRows) {
-  if (!vocabRows.length && !grammarRows.length) return '';
-  const renderRow = (row, kind) => {
+function buildStubbornListHtml(rows, kind) {
+  if (!rows.length) return '';
+  const renderRow = (row) => {
     const card = row.card;
     const headword = kind === 'grammar'
       ? `${card.form || card.lemma || '—'}${card.lemma && card.form && card.form !== card.lemma ? ` <span class="stubborn-lemma">(${escapeHtml(card.lemma)})</span>` : ''}`
@@ -762,26 +780,15 @@ function buildStubbornListHtml(vocabRows, grammarRows) {
       </li>
     `;
   };
-
-  const vocabSection = vocabRows.length ? `
-    <div class="stubborn-group">
-      <div class="stubborn-group-label">Stubborn vocabulary</div>
-      <ol class="stubborn-list">${vocabRows.map(r => renderRow(r, 'vocab')).join('')}</ol>
-    </div>
-  ` : '';
-  const grammarSection = grammarRows.length ? `
-    <div class="stubborn-group">
-      <div class="stubborn-group-label">Stubborn grammar</div>
-      <ol class="stubborn-list">${grammarRows.map(r => renderRow(r, 'grammar')).join('')}</ol>
-    </div>
-  ` : '';
-
+  const title = kind === 'grammar' ? 'Most stubborn grammar' : 'Most stubborn vocabulary';
+  const subtitle = kind === 'grammar'
+    ? 'Grammar drills you\'ve missed most in this selection — worth a focused pass.'
+    : 'Words you\'ve missed most in this selection — worth a focused pass.';
   return `
     <div class="analytics-chart-card stubborn-card">
-      <div class="analytics-chart-title">Most stubborn in this selection</div>
-      <div class="stubborn-subtitle">Cards you've missed most — worth a focused pass.</div>
-      ${vocabSection}
-      ${grammarSection}
+      <div class="analytics-chart-title">${escapeHtml(title)}</div>
+      <div class="stubborn-subtitle">${escapeHtml(subtitle)}</div>
+      <ol class="stubborn-list">${rows.map(renderRow).join('')}</ol>
     </div>
   `;
 }
@@ -815,15 +822,19 @@ export function renderAnalyticsOverlay() {
   //    from the g2e/e2g store and grammar progress from the morph store
   //    regardless of the current studyMode, otherwise getWordProgress()
   //    (which is keyed on the active mode) reports every off-mode card as
-  //    "Unseen". ──
+  //    "Unseen". The analytics page has its own direction + scope toggles
+  //    (runtime.analyticsVocabDirection / runtime.analyticsVocabScope) so
+  //    flipping the view never disturbs the study deck. ──
   const g2eProgressStore = runtime.globalWordProgress.g2e || {};
   const e2gProgressStore = runtime.globalWordProgress.e2g || {};
   const morphProgressStore = runtime.globalWordProgress.morph || {};
-  const vocabProgressStore = runtime.directionToGreek ? e2gProgressStore : g2eProgressStore;
+  const analyticsDirection = getAnalyticsVocabDirection();
+  const analyticsRequiredOnly = isAnalyticsVocabRequiredOnly();
+  const vocabProgressStore = getAnalyticsVocabProgressStore();
+  const vocabMarks = getAnalyticsVocabMarksStore();
 
   // ── Vocab & Grammar data (used by both gamification and section renders) ──
-  const vocabCards = runtime.selectedKeys.length ? getSelectedVocabCards(runtime.selectedKeys, runtime.requiredOnly) : [];
-  const vocabMarks = runtime.directionToGreek ? runtime.globalWordMarks.e2g : runtime.globalWordMarks.g2e;
+  const vocabCards = runtime.selectedKeys.length ? getSelectedVocabCards(runtime.selectedKeys, analyticsRequiredOnly) : [];
   const vocabProgress = buildCumulativeConfirmationSeries(vocabCards, vocabMarks, vocabProgressStore);
   const vocabProjection = getRegressionProjection(vocabProgress.series, vocabProgress.currentConfirmed, vocabProgress.total);
   const vocabBuckets = buildConfirmationHistogram(vocabCards, vocabProgressStore);
@@ -898,33 +909,54 @@ export function renderAnalyticsOverlay() {
     titlesEl.innerHTML = buildTitleLadderHtml(xpData);
   }
 
-  // ── Course completion stacked bars (always course-wide) ──
-  const courseEl = document.getElementById('analyticsCourseCompletion');
-  if (courseEl) {
-    const courseVocabBuckets = buildConfirmationHistogram(courseData.allVocabCards, g2eProgressStore);
-    const showGrammar = host.canAccessGrammarUi();
-    let courseGrammarHtml = '';
-    if (showGrammar) {
-      const courseGrammarBuckets = buildConfirmationHistogram(courseData.allGrammarCards, morphProgressStore);
-      courseGrammarHtml = `
-        <div class="analytics-chart-card" style="margin-top:10px">
-          <div class="analytics-chart-title">Grammar — ${courseData.allGrammarConfirmed} / ${courseData.allGrammarTotal} confirmed</div>
-          ${buildHistogramSvg(courseGrammarBuckets, { title: 'Course grammar confirmation %' })}
-        </div>`;
-    }
-    courseEl.innerHTML = `
+  // ── Vocab view toggle bar (direction + scope) ──
+  renderVocabViewToggles();
+
+  // ── Vocabulary course completion histogram (analytics-direction + scope) ──
+  const vocabCourseEl = document.getElementById('analyticsCourseCompletionVocab');
+  if (vocabCourseEl) {
+    const allCourseVocab = getAllVocabCards(false);
+    const reqCourseVocab = getAllVocabCards(true);
+    const courseVocabCards = analyticsRequiredOnly ? reqCourseVocab : allCourseVocab;
+    const dirStore = vocabProgressStore;
+    const dirMarks = vocabMarks;
+    const isConfirmed = (card) => {
+      if (dirMarks[card.id] === 'known') return true;
+      const pct = getConfidencePct(dirStore[card.id]);
+      return pct !== null && pct >= 70;
+    };
+    const scopedConfirmed = courseVocabCards.filter(isConfirmed).length;
+    const courseVocabBuckets = buildConfirmationHistogram(courseVocabCards, dirStore);
+    const dirLabel = analyticsDirection === 'e2g' ? 'English → Greek' : 'Greek → English';
+    const scopeLabel = analyticsRequiredOnly ? 'required' : 'all';
+    vocabCourseEl.innerHTML = `
       <div class="analytics-chart-card">
-        <div class="analytics-chart-title">Vocabulary — ${courseData.allVocabConfirmed} / ${courseData.allVocabTotal} confirmed (${courseData.reqVocabConfirmed} / ${courseData.reqVocabTotal} required)</div>
+        <div class="analytics-chart-title">Vocabulary — ${scopedConfirmed} / ${courseVocabCards.length} ${escapeHtml(scopeLabel)} confirmed (${escapeHtml(dirLabel)})</div>
         ${buildHistogramSvg(courseVocabBuckets, { title: 'Course vocabulary confirmation %' })}
       </div>
-      ${courseGrammarHtml}
     `;
   }
 
-  // ── Chapter mastery grid (course-wide) ──
+  // ── Grammar course completion histogram (course-wide, morph direction) ──
+  const grammarCourseEl = document.getElementById('analyticsCourseCompletionGrammar');
+  if (grammarCourseEl) {
+    if (!host.canAccessGrammarUi()) {
+      grammarCourseEl.innerHTML = '';
+    } else {
+      const courseGrammarBuckets = buildConfirmationHistogram(courseData.allGrammarCards, morphProgressStore);
+      grammarCourseEl.innerHTML = `
+        <div class="analytics-chart-card">
+          <div class="analytics-chart-title">Grammar — ${courseData.allGrammarConfirmed} / ${courseData.allGrammarTotal} confirmed</div>
+          ${buildHistogramSvg(courseGrammarBuckets, { title: 'Course grammar confirmation %' })}
+        </div>
+      `;
+    }
+  }
+
+  // ── Chapter mastery grid (course-wide, follows analytics direction + scope) ──
   const chapterGridEl = document.getElementById('analyticsChapterGrid');
   if (chapterGridEl) {
-    const mastery = computeChapterMastery(g2eProgressStore, runtime.globalWordMarks.g2e || {});
+    const mastery = computeChapterMastery(vocabProgressStore, vocabMarks, analyticsRequiredOnly);
     if (mastery.length) {
       // Drop the expanded chapter if it's no longer in the mastery list (e.g.
       // sets were removed) so we don't try to render a phantom panel.
@@ -972,41 +1004,50 @@ export function renderAnalyticsOverlay() {
       : '';
   }
 
-  // ── Achievements (grouped: milestones + chapters) ──
+  // ── Achievements (sub-collapsibles for daily / milestones / chapters) ──
   const achieveEl = document.getElementById('analyticsAchievements');
   if (achieveEl) {
-    const dailyHtml = dailyAwards.length ? `
-      <div class="achieve-group-label">Daily <span class="achieve-counter">${earnedDaily} / ${dailyAwards.length}</span></div>
-      <div class="achieve-grid">${dailyAwards.map(a => `
+    const badgeGrid = (group, extraClass = '') => `
+      <div class="achieve-grid ${extraClass}">${group.map(a => `
         <div class="achieve-badge ${a.earned ? 'earned' : 'locked'}" title="${escapeHtml(a.desc)}">
           <div class="achieve-icon">${a.icon}</div>
           <div class="achieve-name">${escapeHtml(a.name)}</div>
         </div>
       `).join('')}</div>
-    ` : '';
-    const chapterHtml = chapterAwards.length ? `
-      <div class="achieve-group-label">Chapters <span class="achieve-counter">${earnedChapters} / ${chapterAwards.length}</span></div>
-      <div class="achieve-grid achieve-grid-chapters">${chapterAwards.map(a => `
-        <div class="achieve-badge ${a.earned ? 'earned' : 'locked'}" title="${escapeHtml(a.desc)}">
-          <div class="achieve-icon">${a.icon}</div>
-          <div class="achieve-name">${escapeHtml(a.name)}</div>
-        </div>
-      `).join('')}</div>
-    ` : '';
+    `;
+    const subSection = (key, label, group, gridClass = '') => {
+      if (!group.length) return '';
+      const earnedCount = group.filter(a => a.earned).length;
+      return `
+        <details class="analytics-collapse analytics-sub-collapse" data-collapse-key="${escapeHtml(key)}">
+          <summary class="analytics-collapse-summary">
+            <span class="analytics-collapse-caret" aria-hidden="true">▾</span>
+            <div class="analytics-collapse-title-wrap">
+              <h4>${escapeHtml(label)} <span class="achieve-counter">${earnedCount} / ${group.length}</span></h4>
+            </div>
+          </summary>
+          <div class="analytics-collapse-body">${badgeGrid(group, gridClass)}</div>
+        </details>
+      `;
+    };
     achieveEl.innerHTML = `
       <div class="analytics-chart-card achieve-card">
-        <div class="analytics-chart-title">Achievements</div>
-        ${dailyHtml}
-        <div class="achieve-group-label">Milestones <span class="achieve-counter">${earnedMilestones} / ${milestones.length}</span></div>
-        <div class="achieve-grid">${milestones.map(a => `
-          <div class="achieve-badge ${a.earned ? 'earned' : 'locked'}" title="${escapeHtml(a.desc)}">
-            <div class="achieve-icon">${a.icon}</div>
-            <div class="achieve-name">${escapeHtml(a.name)}</div>
-          </div>
-        `).join('')}</div>
-        ${chapterHtml}
+        ${subSection('achievementsDaily', 'Daily', dailyAwards)}
+        ${subSection('achievementsMilestones', 'Milestones', milestones)}
+        ${subSection('achievementsChapters', 'Chapters', chapterAwards, 'achieve-grid-chapters')}
       </div>
     `;
+  }
+
+  // ── Status text inside top-level Achievements + Titles summaries ──
+  const totalEarned = achievements.filter(a => a.earned).length;
+  const achievementsStatusEl = document.getElementById('analyticsAchievementsSummaryStatus');
+  if (achievementsStatusEl) {
+    achievementsStatusEl.textContent = `${totalEarned} / ${achievements.length} badges earned`;
+  }
+  const titlesStatusEl = document.getElementById('analyticsTitlesSummaryStatus');
+  if (titlesStatusEl) {
+    titlesStatusEl.textContent = `Lv. ${xpData.currentLevel.level} — ${xpData.currentLevel.title} · ${xpData.totalXp.toLocaleString()} XP`;
   }
 
   // ── Overall time metrics (existing, reorganized) ──
@@ -1021,25 +1062,35 @@ export function renderAnalyticsOverlay() {
   if (overallChartEl) overallChartEl.innerHTML = usageSeries.length ? buildLineChartSvg(usageSeries, { title: 'Cumulative active study time' }) : `<div class="analytics-empty">Start studying and this cumulative time chart will wake up.</div>`;
   if (sessionEl) sessionEl.textContent = latestSession ? `Latest session: ${formatAnalyticsDateTime(latestSession.startedAt)} → ${formatAnalyticsDateTime(latestSession.endedAt)} · ${formatUsageDuration(latestSession.durationMs)} · ${latestSession.interactionCount || 0} study actions` : 'No study session history yet.';
 
-  // ── Current-selection subtitle (frames the section below) ──
-  const selectionSubtitleEl = document.getElementById('analyticsSelectionSubtitle');
-  if (selectionSubtitleEl) {
+  // ── Current-selection subtitles (one per section) ──
+  const vocabSubtitleEl = document.getElementById('analyticsSelectionSubtitleVocab');
+  if (vocabSubtitleEl) {
     if (!runtime.selectedKeys.length) {
-      selectionSubtitleEl.textContent = 'Pick a session or chapter on the home screen to populate these stats.';
+      vocabSubtitleEl.textContent = 'Pick a session or chapter on the home screen to populate the current-selection stats below.';
     } else {
-      const scopeBit = runtime.requiredOnly ? 'Required-only (graded) vocabulary' : 'All vocabulary, graded + nice-to-haves';
-      const grammarBit = host.canAccessGrammarUi() ? ' plus the matching grammar drills' : '';
-      selectionSubtitleEl.textContent = `${scopeBit}${grammarBit} across ${runtime.selectedKeys.length} set${runtime.selectedKeys.length === 1 ? '' : 's'}.`;
+      const scopeBit = analyticsRequiredOnly ? 'Required-only (graded) vocabulary' : 'All vocabulary, graded + nice-to-haves';
+      const dirBit = analyticsDirection === 'e2g' ? 'English → Greek' : 'Greek → English';
+      vocabSubtitleEl.textContent = `Current selection: ${scopeBit} · ${dirBit} · ${runtime.selectedKeys.length} set${runtime.selectedKeys.length === 1 ? '' : 's'}.`;
+    }
+  }
+  const grammarSubtitleEl = document.getElementById('analyticsSelectionSubtitleGrammar');
+  if (grammarSubtitleEl) {
+    if (!runtime.selectedKeys.length) {
+      grammarSubtitleEl.textContent = 'Pick a session or chapter on the home screen to populate the current-selection stats below.';
+    } else if (!host.canAccessGrammarUi()) {
+      grammarSubtitleEl.textContent = '';
+    } else {
+      grammarSubtitleEl.textContent = `Current selection: morphology and grammar drills across ${runtime.selectedKeys.length} set${runtime.selectedKeys.length === 1 ? '' : 's'}.`;
     }
   }
 
-  // ── Vocab section (selection-scoped). Required-only IS the graded subset,
-  //    so the toggle is a real lever — surface it in the subtitle, not as a metric. ──
-  const vocabAtRisk = computeAtRiskCount(vocabCards, runtime.directionToGreek ? e2gProgressStore : g2eProgressStore);
+  // ── Vocab section (selection-scoped). Uses the analytics direction +
+  //    scope toggles — independent of the study deck's directionToGreek. ──
+  const vocabAtRisk = computeAtRiskCount(vocabCards, vocabProgressStore);
   renderAnalyticsSection('analyticsVocabSection', {
     title: 'Vocabulary progress',
     subtitle: runtime.selectedKeys.length
-      ? `${runtime.requiredOnly ? 'Required-only (graded) vocabulary' : 'All vocabulary, graded + nice-to-haves'} in the current selection`
+      ? `${analyticsRequiredOnly ? 'Required-only (graded) vocabulary' : 'All vocabulary, graded + nice-to-haves'} · ${analyticsDirection === 'e2g' ? 'English → Greek' : 'Greek → English'}`
       : 'Choose one or more vocabulary sets to populate this view.',
     total: vocabProgress.total,
     metrics: [
@@ -1054,8 +1105,9 @@ export function renderAnalyticsOverlay() {
     barSvg: buildHistogramSvg(vocabBuckets, { title: 'Vocabulary confirmation' })
   });
 
-  // ── Grammar section (selection-scoped). All paradigms are required, so the
-  //    required-only toggle does not apply here — the 'Required toggle' pseudo-metric is gone. ──
+  // ── Grammar section (selection-scoped). All paradigms are required, so
+  //    the analytics vocab toggles do NOT apply here — grammar progress is
+  //    direction-agnostic via the morph store. ──
   const grammarAtRisk = computeAtRiskCount(grammarCards, morphProgressStore);
   renderAnalyticsSection('analyticsGrammarSection', {
     title: 'Grammar progress',
@@ -1073,11 +1125,115 @@ export function renderAnalyticsOverlay() {
     barSvg: buildHistogramSvg(grammarBuckets, { title: 'Grammar confirmation' })
   });
 
-  // ── Stubborn cards (selection-scoped, vocab + grammar) ──
-  const stubbornEl = document.getElementById('analyticsStubbornWords');
-  if (stubbornEl) {
-    const vocabStubborn = computeStubbornCards(vocabCards, runtime.directionToGreek ? e2gProgressStore : g2eProgressStore);
-    const grammarStubborn = host.canAccessGrammarUi() ? computeStubbornCards(grammarCards, morphProgressStore) : [];
-    stubbornEl.innerHTML = runtime.selectedKeys.length ? buildStubbornListHtml(vocabStubborn, grammarStubborn) : '';
+  // ── Stubborn cards split into per-section containers ──
+  const stubbornVocabEl = document.getElementById('analyticsStubbornVocab');
+  if (stubbornVocabEl) {
+    const vocabStubborn = computeStubbornCards(vocabCards, vocabProgressStore);
+    stubbornVocabEl.innerHTML = runtime.selectedKeys.length ? buildStubbornListHtml(vocabStubborn, 'vocab') : '';
   }
+  const stubbornGrammarEl = document.getElementById('analyticsStubbornGrammar');
+  if (stubbornGrammarEl) {
+    const grammarStubborn = host.canAccessGrammarUi() ? computeStubbornCards(grammarCards, morphProgressStore) : [];
+    stubbornGrammarEl.innerHTML = runtime.selectedKeys.length ? buildStubbornListHtml(grammarStubborn, 'grammar') : '';
+  }
+
+  // ── Apply persisted collapse state to every <details> and wire handlers ──
+  applyAnalyticsCollapsedState(overlay);
+  setupAnalyticsCollapseHandlers(overlay);
+}
+
+// ── Vocab view toggle bar (direction + scope) ──────────────────────────
+// Renders into #analyticsVocabViewBar and binds click handlers once. Toggle
+// changes write runtime state, persist, and re-render the analytics overlay.
+function renderVocabViewToggles() {
+  const bar = document.getElementById('analyticsVocabViewBar');
+  if (!bar) return;
+  const dir = getAnalyticsVocabDirection();
+  const requiredOnly = isAnalyticsVocabRequiredOnly();
+  const dirBtn = (value, label) => {
+    const active = dir === value;
+    return `<button type="button" class="ctrl-btn chapter-detail-sort-btn${active ? ' active-toggle' : ''}" data-analytics-vocab-direction="${value}" aria-pressed="${active ? 'true' : 'false'}">${escapeHtml(label)}</button>`;
+  };
+  const scopeBtn = (value, label) => {
+    const active = (requiredOnly && value === 'required') || (!requiredOnly && value === 'all');
+    return `<button type="button" class="ctrl-btn chapter-detail-sort-btn${active ? ' active-toggle' : ''}" data-analytics-vocab-scope="${value}" aria-pressed="${active ? 'true' : 'false'}">${escapeHtml(label)}</button>`;
+  };
+  bar.innerHTML = `
+    <div class="analytics-view-toggle">
+      <span class="analytics-view-toggle-label">Direction</span>
+      <div class="analytics-view-toggle-group" role="group" aria-label="Vocabulary direction">
+        ${dirBtn('g2e', 'Greek → English')}
+        ${dirBtn('e2g', 'English → Greek')}
+      </div>
+    </div>
+    <div class="analytics-view-toggle">
+      <span class="analytics-view-toggle-label">Scope</span>
+      <div class="analytics-view-toggle-group" role="group" aria-label="Vocabulary scope">
+        ${scopeBtn('required', 'Required only')}
+        ${scopeBtn('all', 'All vocab')}
+      </div>
+    </div>
+  `;
+  if (bar.dataset.vocabViewBound === '1') return;
+  bar.dataset.vocabViewBound = '1';
+  bar.addEventListener('click', (event) => {
+    const dirTarget = event.target.closest('[data-analytics-vocab-direction]');
+    if (dirTarget && bar.contains(dirTarget)) {
+      const next = dirTarget.dataset.analyticsVocabDirection === 'e2g' ? 'e2g' : 'g2e';
+      if (runtime.analyticsVocabDirection === next) return;
+      runtime.analyticsVocabDirection = next;
+      // A different store may not have the currently-expanded word at all;
+      // clear it so we don't paint a phantom row on the next render.
+      runtime.analyticsExpandedWord = null;
+      host.saveState();
+      renderAnalyticsOverlay();
+      return;
+    }
+    const scopeTarget = event.target.closest('[data-analytics-vocab-scope]');
+    if (scopeTarget && bar.contains(scopeTarget)) {
+      const next = scopeTarget.dataset.analyticsVocabScope === 'all' ? 'all' : 'required';
+      if (runtime.analyticsVocabScope === next) return;
+      runtime.analyticsVocabScope = next;
+      // Switching scope can shrink a chapter to zero cards; an expanded row
+      // referencing a non-required card would render as a phantom otherwise.
+      runtime.analyticsExpandedWord = null;
+      host.saveState();
+      renderAnalyticsOverlay();
+    }
+  });
+}
+
+// ── Collapse-state plumbing ────────────────────────────────────────────
+// Mirrors runtime.analyticsCollapsed onto the open/closed attribute of every
+// <details data-collapse-key="..."> inside the analytics overlay. Native
+// <details> toggles bubble a `toggle` event which we listen for once via
+// delegation; each toggle persists state through host.saveState.
+function applyAnalyticsCollapsedState(rootEl) {
+  if (!rootEl) return;
+  const collapsed = runtime.analyticsCollapsed || {};
+  rootEl.querySelectorAll('details[data-collapse-key]').forEach(node => {
+    const key = node.dataset.collapseKey;
+    // Default to open when the runtime flag is missing — new keys added later
+    // shouldn't hide content just because old saves don't list them.
+    const shouldBeOpen = collapsed[key] !== true;
+    if (node.open !== shouldBeOpen) node.open = shouldBeOpen;
+  });
+}
+
+function setupAnalyticsCollapseHandlers(rootEl) {
+  if (!rootEl || rootEl.dataset.collapseHandlersBound === '1') return;
+  rootEl.dataset.collapseHandlersBound = '1';
+  // <details> bubbles `toggle` only if we listen in the capture phase, since
+  // the event does not bubble by default in some browsers.
+  rootEl.addEventListener('toggle', (event) => {
+    const node = event.target;
+    if (!(node instanceof HTMLDetailsElement)) return;
+    const key = node.dataset.collapseKey;
+    if (!key) return;
+    if (!runtime.analyticsCollapsed || typeof runtime.analyticsCollapsed !== 'object') {
+      runtime.analyticsCollapsed = {};
+    }
+    runtime.analyticsCollapsed[key] = !node.open;
+    host.saveState();
+  }, true);
 }
