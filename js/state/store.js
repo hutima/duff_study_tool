@@ -42,7 +42,7 @@ export const ANALYTICS_COLLAPSED_DEFAULTS = {
   totalVocabStubborn: true,
   totalVocabImproved: true,
   // Selected Vocabulary sub-sections
-  selectedVocabBar: true,
+  selectedVocabBar: false,
   selectedVocabProgress: true,
   selectedVocabSlippingList: true,
   selectedVocabStubborn: true,
@@ -53,7 +53,7 @@ export const ANALYTICS_COLLAPSED_DEFAULTS = {
   totalGrammarStubborn: true,
   totalGrammarImproved: true,
   // Selected Grammar sub-sections
-  selectedGrammarBar: true,
+  selectedGrammarBar: false,
   selectedGrammarProgress: true,
   selectedGrammarStubborn: true,
   selectedGrammarImproved: true,
