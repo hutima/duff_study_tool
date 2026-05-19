@@ -383,20 +383,20 @@
               ] },
             { form: "ὁ λόγος τοῦ θεοῦ",
               prompt: "Translate this genitive phrase.",
-              answer: "'the word of God' — genitive of possession / source",
+              answer: "'the word of God' — possession / source",
               choices: [
-                "'the word of God' — genitive of possession / source",
+                "'the word of God' — possession / source",
                 "'the word, God' — apposition",
                 "'God's word is…' — predicate sentence",
-                "'word, O God' — vocative"
+                "'word, O God' — direct address"
               ] },
             { form: "λέγω τῷ ἀδελφῷ",
               prompt: "Translate this dative phrase.",
-              answer: "'I speak to the brother' — dative as indirect object",
+              answer: "'I speak to the brother' — indirect object",
               choices: [
-                "'I speak to the brother' — dative as indirect object",
+                "'I speak to the brother' — indirect object",
                 "'I speak the brother' — direct object",
-                "'I speak about the brother' — genitive",
+                "'I speak about the brother' — source / about",
                 "'the brother speaks' — subject"
               ] },
             { form: "ὁ λόγος τοῦ θεοῦ.",
@@ -537,12 +537,12 @@
               note: "Plural vocative is always identical to plural nominative." },
             { form: "ἀδελφοί",
               prompt: "Translate this vocative form.",
-              answer: "'Brothers!' — vocative plural (identical to nominative plural)",
+              answer: "'Brothers!' — direct address (form identical to the nominative plural)",
               choices: [
-                "'Brothers!' — vocative plural (identical to nominative plural)",
-                "'of the brothers' — genitive plural",
-                "'to the brothers' — dative plural",
-                "'the brothers' — accusative plural"
+                "'Brothers!' — direct address (form identical to the nominative plural)",
+                "'of the brothers' — possession",
+                "'to the brothers' — indirect object",
+                "'the brothers' — direct object"
               ] },
             { form: "κύριε, ἀκούεις τὸν λόγον.",
               prompt: "Translate.",
@@ -2979,30 +2979,30 @@
               note: "τῇ τρίτῃ ἡμέρᾳ = 'on the third day'." },
             { form: "δύο ἡμέρας",
               prompt: "Translate this time expression.",
-              answer: "'for two days' (duration — accusative)",
+              answer: "'for two days' — duration",
               choices: [
-                "'for two days' (duration — accusative)",
-                "'on the second day' (point — dative)",
-                "'within two days' (during — genitive)",
-                "'two days are…' (subject — nominative)"
+                "'for two days' — duration",
+                "'on the second day' — point in time",
+                "'within two days' — time within which",
+                "'two days are…' — subject"
               ] },
             { form: "τῇ ἡμέρᾳ",
               prompt: "Translate this time expression.",
-              answer: "'on the day' (point in time — dative)",
+              answer: "'on the day' — point in time",
               choices: [
-                "'on the day' (point in time — dative)",
-                "'for the day' (duration — accusative)",
-                "'during the day' (within which — genitive)",
-                "'the day is…' (subject — nominative)"
+                "'on the day' — point in time",
+                "'for the day' — duration",
+                "'during the day' — time within which",
+                "'the day is…' — subject"
               ] },
             { form: "νυκτός",
               prompt: "Translate this time expression.",
-              answer: "'by night' / 'during the night' (genitive — time within which)",
+              answer: "'by night' / 'during the night' — time within which",
               choices: [
-                "'by night' / 'during the night' (genitive — time within which)",
-                "'for the night' (accusative — duration)",
-                "'on the night' (dative — point in time)",
-                "'the night' (nominative — subject)"
+                "'by night' / 'during the night' — time within which",
+                "'for the night' — duration",
+                "'on the night' — point in time",
+                "'the night' — subject"
               ] },
             { form: "case summary",
               prompt: "Match the case to the time idea: accusative / genitive / dative.",
@@ -3015,31 +3015,31 @@
               ] },
             { form: "τρεῖς ἡμέρας",
               prompt: "Translate this time expression.",
-              answer: "'for three days' — accusative of duration",
+              answer: "'for three days' — duration",
               choices: [
-                "'for three days' — accusative of duration",
-                "'on the third day' — dative point",
-                "'within three days' — genitive 'within which'",
-                "'three days are…' — nominative subject"
+                "'for three days' — duration",
+                "'on the third day' — point in time",
+                "'within three days' — time within which",
+                "'three days are…' — subject"
               ] },
             { form: "ὅλην τὴν νύκτα",
               prompt: "Translate this time expression.",
-              answer: "'all night long' / 'for the whole night' — accusative of duration",
+              answer: "'all night long' / 'for the whole night' — duration",
               choices: [
-                "'all night long' / 'for the whole night' — accusative of duration",
-                "'at the whole night' — dative point",
-                "'during the whole night' — genitive within which",
-                "'the whole night is…' — nominative"
+                "'all night long' / 'for the whole night' — duration",
+                "'at the whole night' — point in time",
+                "'during the whole night' — time within which",
+                "'the whole night is…' — subject"
               ],
               note: "Whenever the question is 'for how long?', look for the accusative." },
             { form: "ἡμέρας καὶ νυκτός",
               prompt: "Translate this paired time expression.",
-              answer: "'by day and by night' / 'during day and night' — genitive of time within which",
+              answer: "'by day and by night' / 'during day and night' — time within which",
               choices: [
-                "'by day and by night' / 'during day and night' — genitive of time within which",
-                "'for a day and a night' — accusative duration",
-                "'on day and night' — dative point",
-                "'the day and night' — nominative subjects"
+                "'by day and by night' / 'during day and night' — time within which",
+                "'for a day and a night' — duration",
+                "'on day and night' — point in time",
+                "'the day and night' — subjects"
               ] },
             { form: "νυκτὸς καὶ ἡμέρας",
               prompt: "Which case is being used here for time, and why?",
@@ -3052,12 +3052,12 @@
               ] },
             { form: "τῷ σαββάτῳ",
               prompt: "Translate this time expression.",
-              answer: "'on the sabbath' — dative of time (point in time)",
+              answer: "'on the sabbath' — point in time",
               choices: [
-                "'on the sabbath' — dative of time (point in time)",
-                "'for the sabbath' — accusative duration",
-                "'during the sabbath' — genitive within which",
-                "'with the sabbath' — dative of accompaniment"
+                "'on the sabbath' — point in time",
+                "'for the sabbath' — duration",
+                "'during the sabbath' — time within which",
+                "'with the sabbath' — accompaniment"
               ] },
             { form: "ἐν ἐκείνῃ τῇ ἡμέρᾳ",
               prompt: "Translate.",
