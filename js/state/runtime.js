@@ -43,16 +43,36 @@ export const runtime = {
   // top-level vocab and grammar sections start open. Reset/cleared by
   // resetAllStats.
   analyticsCollapsed: {
-    vocab: false,
-    grammar: false,
-    vocabChapterMap: true,
-    vocabProgress: true,
-    grammarChapterMap: true,
+    // Top-level
+    totalVocab: false,
+    selectedVocab: true,
+    totalGrammar: false,
+    selectedGrammar: true,
+    studyActivity: true,
     achievements: true,
+    titles: true,
+    // Total Vocabulary sub-sections
+    totalVocabChapterMap: true,
+    totalVocabProgress: true,
+    totalVocabSlippingList: true,
+    totalVocabStubborn: true,
+    // Selected Vocabulary sub-sections
+    selectedVocabBar: true,
+    selectedVocabProgress: true,
+    selectedVocabSlippingList: true,
+    selectedVocabStubborn: true,
+    // Total Grammar sub-sections
+    totalGrammarChapterMap: true,
+    totalGrammarProgress: true,
+    totalGrammarStubborn: true,
+    // Selected Grammar sub-sections
+    selectedGrammarBar: true,
+    selectedGrammarProgress: true,
+    selectedGrammarStubborn: true,
+    // Achievements sub-collapsibles
     achievementsDaily: true,
     achievementsMilestones: true,
-    achievementsChapters: true,
-    titles: true
+    achievementsChapters: true
   },
 
   // ── Modal / disclaimer / transfer / theme ───────────────────────────
