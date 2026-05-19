@@ -225,10 +225,11 @@ function computeCourseWideData() {
 }
 
 // Chapter map percentage = average rolling confidence across the chapter's
-// cards. Marked-known cards count as 100% (the user has affirmed they know
-// them); unseen cards count as 0% so an untouched chapter reads as 0%
-// instead of disappearing into "no data". `confirmed` is still surfaced for
-// the tooltip / chapter-detail headline alongside the average.
+// cards. Unseen cards count as 0% so an untouched chapter reads as 0%
+// instead of disappearing into "no data". The manual "marked known" override
+// is intentionally ignored — the % is purely the recall signal so it can't
+// be inflated by a toggle. `confirmed` still surfaces marks for the
+// tooltip / chapter-detail headline alongside the average.
 function computeChapterMastery(progressStore, marksStore, requiredOnly = false) {
   const marksMap = marksStore || runtime.globalWordMarks.g2e || {};
   const store = progressStore || runtime.globalWordProgress.g2e || {};
@@ -238,14 +239,9 @@ function computeChapterMastery(progressStore, marksStore, requiredOnly = false) 
     let sum = 0;
     let confirmed = 0;
     cards.forEach(card => {
-      if (marksMap[card.id] === 'known') {
-        sum += 100;
-        confirmed++;
-        return;
-      }
       const pct = getConfidencePct(store?.[card.id]);
       sum += (pct !== null) ? pct : 0;
-      if (pct !== null && pct >= 70) confirmed++;
+      if (marksMap[card.id] === 'known' || (pct !== null && pct >= 70)) confirmed++;
     });
     const avgPct = total ? sum / total : 0;
     return { chapterKey: chKey, total, confirmed, pct: avgPct / 100, avgPct };
@@ -347,10 +343,10 @@ function buildChapterDetailHtml(chapterKey) {
   }
   const confirmedCount = rows.filter(r => r.isConfirmed).length;
   // Headline matches the chapter tile: average rolling confidence across the
-  // chapter, with marked-known cards at 100% and unseen cards at 0%.
+  // chapter, with unseen cards at 0%. The marked-known toggle is intentionally
+  // not counted here — % is purely the recall signal.
   let sumPct = 0;
   rows.forEach(r => {
-    if (marksMap[r.card.id] === 'known') { sumPct += 100; return; }
     sumPct += r.sortPct === -1 ? 0 : r.sortPct;
   });
   const headlinePct = cards.length ? Math.round(sumPct / cards.length) : 0;
@@ -488,9 +484,8 @@ function setupChapterGridInteractivity(rootEl) {
 // grid; tapping a tile expands a panel that breaks the chapter down by
 // concept (card.family). Chapter % = average of concept averages, where
 // each concept's average is the mean rolling confidence across its cards
-// (marked-known = 100%, unseen = 0%). This stays consistent with the vocab
-// chapter map but the "average of averages" structure prevents a concept
-// with many cards from drowning out smaller concepts in the chapter score.
+// (unseen = 0%, marked-known ignored). The "average of averages" structure
+// prevents a concept with many cards from drowning out smaller concepts.
 function computeGrammarChapterMastery() {
   const marksMap = runtime.globalWordMarks.morph || {};
   const store = runtime.globalWordProgress.morph || {};
@@ -504,16 +499,14 @@ function computeGrammarChapterMastery() {
       const family = card.family || 'Other';
       if (!byFamily.has(family)) byFamily.set(family, []);
       byFamily.get(family).push(card);
-      if (marksMap[card.id] === 'known') { confirmed++; return; }
       const pct = getConfidencePct(store[card.id]);
-      if (pct !== null && pct >= 70) confirmed++;
+      if (marksMap[card.id] === 'known' || (pct !== null && pct >= 70)) confirmed++;
     });
 
     const conceptAvgs = [];
     byFamily.forEach(familyCards => {
       let sum = 0;
       familyCards.forEach(card => {
-        if (marksMap[card.id] === 'known') { sum += 100; return; }
         const pct = getConfidencePct(store[card.id]);
         sum += (pct !== null) ? pct : 0;
       });
@@ -549,7 +542,8 @@ function computeGrammarChapterConcepts(chapterKey) {
     let pctSum = 0;
     let pctCount = 0;
     // Concept avg confidence (matches chapter avg's per-concept term):
-    // marked-known = 100%, unseen = 0%, otherwise rolling last-10-flips.
+    // unseen = 0%, otherwise rolling last-10-flips. Marked-known is
+    // ignored — the % is purely the recall signal.
     let confidenceSum = 0;
     familyCards.forEach(card => {
       const p = store[card.id];
@@ -559,8 +553,7 @@ function computeGrammarChapterConcepts(chapterKey) {
       misses += Number(p?.failCount) || 0;
       if (pct !== null) { pctSum += pct; pctCount++; }
       if (marksMap[card.id] === 'known' || (pct !== null && pct >= 70)) confirmed++;
-      if (marksMap[card.id] === 'known') confidenceSum += 100;
-      else confidenceSum += (pct !== null) ? pct : 0;
+      confidenceSum += (pct !== null) ? pct : 0;
     });
     const total = familyCards.length;
     const avgPct = pctCount ? Math.round(pctSum / pctCount) : null;
