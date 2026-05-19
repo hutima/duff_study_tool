@@ -33,6 +33,26 @@ export const runtime = {
   analyticsChapterSort: 'confidence', // 'confidence' | 'alphabetical'
   analyticsGrammarExpandedChapter: null,
   analyticsGrammarConceptSort: 'confidence', // 'confidence' | 'alphabetical'
+  // Analytics-page-local vocab view (separate from the study deck's
+  // directionToGreek / requiredOnly so analyzing one direction doesn't force
+  // a deck rebuild).
+  analyticsVocabDirection: 'g2e',     // 'g2e' | 'e2g'
+  analyticsVocabScope: 'required',    // 'required' | 'all'
+  // Per-section open/closed state for the analytics overlay's collapsibles.
+  // Chapter maps and the achievements/titles sections start closed; the
+  // top-level vocab and grammar sections start open. Reset/cleared by
+  // resetAllStats.
+  analyticsCollapsed: {
+    vocab: false,
+    grammar: false,
+    vocabChapterMap: true,
+    grammarChapterMap: true,
+    achievements: true,
+    achievementsDaily: true,
+    achievementsMilestones: true,
+    achievementsChapters: true,
+    titles: true
+  },
 
   // ── Modal / disclaimer / transfer / theme ───────────────────────────
   hasAcceptedDisclaimer: false,
