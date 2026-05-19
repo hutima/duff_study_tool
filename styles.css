@@ -1948,6 +1948,16 @@
     flex-direction: column;
     gap: 4px;
   }
+  /* Stubborn lists can now be uncapped — keep them inside a fixed-height
+     scrollable box so they don't push the rest of the progress collapse
+     off-screen. scrollbar-gutter reserves room so toggling between short
+     and long lists doesn't reflow the surrounding rows. */
+  .analytics-word-list-scrollable {
+    max-height: 320px;
+    overflow-y: auto;
+    padding-right: 4px;
+    scrollbar-gutter: stable;
+  }
   .analytics-word-list-row {
     display: grid;
     grid-template-columns: minmax(0, 1.2fr) minmax(0, 2fr) auto;
