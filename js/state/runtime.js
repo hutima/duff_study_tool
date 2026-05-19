@@ -56,19 +56,23 @@ export const runtime = {
     totalVocabProgress: true,
     totalVocabSlippingList: true,
     totalVocabStubborn: true,
+    totalVocabImproved: true,
     // Selected Vocabulary sub-sections
     selectedVocabBar: true,
     selectedVocabProgress: true,
     selectedVocabSlippingList: true,
     selectedVocabStubborn: true,
+    selectedVocabImproved: true,
     // Total Grammar sub-sections
     totalGrammarChapterMap: true,
     totalGrammarProgress: true,
     totalGrammarStubborn: true,
+    totalGrammarImproved: true,
     // Selected Grammar sub-sections
     selectedGrammarBar: true,
     selectedGrammarProgress: true,
     selectedGrammarStubborn: true,
+    selectedGrammarImproved: true,
     // Achievements sub-collapsibles
     achievementsDaily: true,
     achievementsMilestones: true,

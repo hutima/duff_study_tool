@@ -905,23 +905,23 @@ function buildStubbornCollapseHtml(rows, kind, collapseKey) {
   `;
 }
 
-function buildImprovedCardHtml(improved, kind) {
+function buildImprovedCollapseHtml(improved, kind, collapseKey) {
+  if (!improved.length) return '';
   const title = kind === 'grammar' ? 'Most improved drills' : 'Most improved words';
-  if (!improved.length) {
-    return `
-      <div class="analytics-chart-card">
-        <div class="analytics-chart-title">${escapeHtml(title)}</div>
-        <div class="analytics-empty">Not enough recent reviews yet — the biggest jumps will appear here once cards have 4+ samples.</div>
-      </div>
-    `;
-  }
   return `
-    <div class="analytics-chart-card">
-      <div class="analytics-chart-title">${escapeHtml(title)}</div>
-      <ol class="analytics-word-list">
-        ${improved.map(i => renderCardListRow(i, kind, `+${Math.round(i.delta * 100)}%`)).join('')}
-      </ol>
-    </div>
+    <details class="analytics-collapse analytics-sub-collapse" data-collapse-key="${escapeHtml(collapseKey)}">
+      <summary class="analytics-collapse-summary">
+        <span class="analytics-collapse-caret" aria-hidden="true">▾</span>
+        <div class="analytics-collapse-title-wrap">
+          <h4>${escapeHtml(title)} <span class="analytics-collapse-meta">${improved.length}</span></h4>
+        </div>
+      </summary>
+      <div class="analytics-collapse-body">
+        <ol class="analytics-word-list">
+          ${improved.map(i => renderCardListRow(i, kind, `+${Math.round(i.delta * 100)}%`)).join('')}
+        </ol>
+      </div>
+    </details>
   `;
 }
 
@@ -972,7 +972,7 @@ function buildProgressInnerHtml(opts) {
         : '<div class="analytics-empty">No confirmation history yet for this view.</div>'}
     </div>
     ${buildStubbornCollapseHtml(stubborn, kind, `${scopeKey}Stubborn`)}
-    ${buildImprovedCardHtml(improved, kind)}
+    ${buildImprovedCollapseHtml(improved, kind, `${scopeKey}Improved`)}
   `;
 }
 
