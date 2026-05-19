@@ -93,9 +93,12 @@ function renderAnalyticsSection(containerId, config) {
   if (!el) return;
   if (!config || !config.total) { el.innerHTML = `<div class="analytics-section"><div class="analytics-empty">Select a study set to see this chart.</div></div>`; return; }
   const metrics = config.metrics || [];
+  // hideHead skips the H3/subtitle row when the surrounding wrapper (e.g. a
+  // collapsible <summary>) already provides those, so we don't double-print.
+  const head = config.hideHead ? '' : `<div class="analytics-section-head"><div><h3>${escapeHtml(config.title || 'Analytics')}</h3><p>${escapeHtml(config.subtitle || '')}</p></div></div>`;
   el.innerHTML = `
     <section class="analytics-section">
-      <div class="analytics-section-head"><div><h3>${escapeHtml(config.title || 'Analytics')}</h3><p>${escapeHtml(config.subtitle || '')}</p></div></div>
+      ${head}
       <div class="analytics-chart-card"><div class="analytics-chart-title">${escapeHtml(config.barTitle)}</div>${config.barSvg}</div>
       <div class="analytics-metrics-grid">${metrics.map(metric => `
           <div class="analytics-metric-card">
@@ -1085,13 +1088,13 @@ export function renderAnalyticsOverlay() {
   }
 
   // ── Vocab section (selection-scoped). Uses the analytics direction +
-  //    scope toggles — independent of the study deck's directionToGreek. ──
+  //    scope toggles — independent of the study deck's directionToGreek.
+  //    Lives inside the collapsible <details data-collapse-key="vocabProgress">,
+  //    so we suppress the inner section-head and surface the summary text on
+  //    the collapsible itself. ──
   const vocabAtRisk = computeAtRiskCount(vocabCards, vocabProgressStore);
   renderAnalyticsSection('analyticsVocabSection', {
-    title: 'Vocabulary progress',
-    subtitle: runtime.selectedKeys.length
-      ? `${analyticsRequiredOnly ? 'Required-only (graded) vocabulary' : 'All vocabulary, graded + nice-to-haves'} · ${analyticsDirection === 'e2g' ? 'English → Greek' : 'Greek → English'}`
-      : 'Choose one or more vocabulary sets to populate this view.',
+    hideHead: true,
     total: vocabProgress.total,
     metrics: [
       { label: 'Confirmed now',     value: `${vocabProgress.currentConfirmed} / ${vocabProgress.total || 0}`, note: 'Marked known or ≥70% recent accuracy' },
@@ -1104,6 +1107,16 @@ export function renderAnalyticsOverlay() {
     barTitle: 'Vocabulary confirmation breakdown',
     barSvg: buildHistogramSvg(vocabBuckets, { title: 'Vocabulary confirmation' })
   });
+  const vocabProgressStatusEl = document.getElementById('analyticsVocabProgressSummaryStatus');
+  if (vocabProgressStatusEl) {
+    if (!runtime.selectedKeys.length) {
+      vocabProgressStatusEl.textContent = 'Choose one or more vocabulary sets to populate this view.';
+    } else {
+      const scopeBit = analyticsRequiredOnly ? 'Required only' : 'All vocab';
+      const dirBit = analyticsDirection === 'e2g' ? 'English → Greek' : 'Greek → English';
+      vocabProgressStatusEl.textContent = `${vocabProgress.currentConfirmed} / ${vocabProgress.total || 0} confirmed · ${dirBit} · ${scopeBit}`;
+    }
+  }
 
   // ── Grammar section (selection-scoped). All paradigms are required, so
   //    the analytics vocab toggles do NOT apply here — grammar progress is

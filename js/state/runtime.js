@@ -46,6 +46,7 @@ export const runtime = {
     vocab: false,
     grammar: false,
     vocabChapterMap: true,
+    vocabProgress: true,
     grammarChapterMap: true,
     achievements: true,
     achievementsDaily: true,
