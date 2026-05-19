@@ -9,6 +9,8 @@
 // be reset later (resetAllStats, restoreState) reassigns runtime.foo just
 // like main.js used to reassign the bare `foo`.
 
+import { ANALYTICS_COLLAPSED_DEFAULTS } from './store.js';
+
 export const runtime = {
   // ── Usage / gamification ────────────────────────────────────────────
   appUsageStats: {
@@ -39,20 +41,9 @@ export const runtime = {
   analyticsVocabDirection: 'g2e',     // 'g2e' | 'e2g'
   analyticsVocabScope: 'required',    // 'required' | 'all'
   // Per-section open/closed state for the analytics overlay's collapsibles.
-  // Chapter maps and the achievements/titles sections start closed; the
-  // top-level vocab and grammar sections start open. Reset/cleared by
-  // resetAllStats.
-  analyticsCollapsed: {
-    vocab: false,
-    grammar: false,
-    vocabChapterMap: true,
-    grammarChapterMap: true,
-    achievements: true,
-    achievementsDaily: true,
-    achievementsMilestones: true,
-    achievementsChapters: true,
-    titles: true
-  },
+  // Defaults live in ANALYTICS_COLLAPSED_DEFAULTS (store.js) so migrations
+  // and compaction can share the canonical key list.
+  analyticsCollapsed: { ...ANALYTICS_COLLAPSED_DEFAULTS },
 
   // ── Modal / disclaimer / transfer / theme ───────────────────────────
   hasAcceptedDisclaimer: false,

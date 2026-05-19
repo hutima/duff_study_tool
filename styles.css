@@ -1939,6 +1939,57 @@
     margin: 12px 0 0;
   }
 
+  /* ── Word/drill list rows (slipping, stubborn, most improved) ── */
+  .analytics-word-list {
+    list-style: none;
+    margin: 6px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .analytics-word-list-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 2fr) auto;
+    gap: 8px;
+    align-items: baseline;
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: rgba(255,255,255,0.02);
+  }
+  .analytics-word-list-headword {
+    color: var(--cream);
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .analytics-word-list-gloss {
+    color: var(--muted);
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .analytics-word-list-pct {
+    color: var(--gold-light);
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+  .analytics-collapse-meta {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: normal;
+    letter-spacing: 0;
+    margin-left: 6px;
+  }
+  .analytics-metrics-grid-compact .analytics-metric-card {
+    padding: 10px 12px;
+  }
+
   /* ── Hero grid ── */
   .hero-grid {
     display: grid;
@@ -2086,8 +2137,15 @@
     margin: 8px 0 6px;
   }
 
+  /* Heatmap viewBox is ~270 units wide, so the global 22px axis label
+     becomes oversized when scaled into a ~400px column. Scope the axis
+     text inside the heatmap to a unit size that reads cleanly at every
+     screen width. */
+  .heatmap-svg .analytics-axis-text {
+    font-size: 10px;
+  }
   .heatmap-day-label {
-    font-size: 11px !important;
+    font-size: 9px !important;
   }
 
   .heatmap-legend {

@@ -93,9 +93,12 @@ function renderAnalyticsSection(containerId, config) {
   if (!el) return;
   if (!config || !config.total) { el.innerHTML = `<div class="analytics-section"><div class="analytics-empty">Select a study set to see this chart.</div></div>`; return; }
   const metrics = config.metrics || [];
+  // hideHead skips the H3/subtitle row when the surrounding wrapper (e.g. a
+  // collapsible <summary>) already provides those, so we don't double-print.
+  const head = config.hideHead ? '' : `<div class="analytics-section-head"><div><h3>${escapeHtml(config.title || 'Analytics')}</h3><p>${escapeHtml(config.subtitle || '')}</p></div></div>`;
   el.innerHTML = `
     <section class="analytics-section">
-      <div class="analytics-section-head"><div><h3>${escapeHtml(config.title || 'Analytics')}</h3><p>${escapeHtml(config.subtitle || '')}</p></div></div>
+      ${head}
       <div class="analytics-chart-card"><div class="analytics-chart-title">${escapeHtml(config.barTitle)}</div>${config.barSvg}</div>
       <div class="analytics-metrics-grid">${metrics.map(metric => `
           <div class="analytics-metric-card">
@@ -794,18 +797,183 @@ function buildStubbornListHtml(rows, kind) {
 }
 
 function computeAtRiskCount(cards, progressStore) {
-  if (!cards?.length) return 0;
+  return computeSlippingCards(cards, progressStore, Infinity).length;
+}
+
+// Cards that have been confirmed at least once but whose rolling
+// confidence has dropped under 70% — these are the "slipping" entries.
+// Sorted weakest-first so the top of the list is what to drill next.
+function computeSlippingCards(cards, progressStore, limit = 8) {
+  if (!cards?.length) return [];
   const now = Date.now();
-  let count = 0;
+  const slipping = [];
   cards.forEach(card => {
     const p = progressStore?.[card.id];
     if (!p) return;
     if (!p.dueAt || !p.firstConfirmedAt) return;
     if (p.dueAt > now) return;
     const pct = getConfidencePct(p);
-    if (pct === null || pct < 70) count++;
+    if (pct === null || pct < 70) slipping.push({ card, progress: p, confidence: pct });
   });
-  return count;
+  return slipping
+    .sort((a, b) => (a.confidence ?? 0) - (b.confidence ?? 0))
+    .slice(0, limit);
+}
+
+// "Most improved": cards whose recent confidence samples beat the older
+// ones in the same rolling history (capped at last 10 by recordConfidenceSample).
+// Halves are mid-split so a short history still yields a comparison.
+function computeMostImprovedCards(cards, progressStore, limit = 5) {
+  if (!cards?.length) return [];
+  const improved = [];
+  cards.forEach(card => {
+    const p = progressStore?.[card.id];
+    if (!p) return;
+    const hist = Array.isArray(p.confidenceHistory)
+      ? p.confidenceHistory.filter(v => Number.isFinite(v))
+      : [];
+    if (hist.length < 4) return;
+    const mid = Math.ceil(hist.length / 2);
+    const older = hist.slice(0, mid);
+    const recent = hist.slice(mid);
+    const olderAvg = older.reduce((s, v) => s + v, 0) / older.length;
+    const recentAvg = recent.reduce((s, v) => s + v, 0) / recent.length;
+    const delta = recentAvg - olderAvg;
+    if (delta < 0.15) return; // at least ~15% bump to surface
+    improved.push({ card, delta, recentAvg, olderAvg });
+  });
+  return improved.sort((a, b) => b.delta - a.delta).slice(0, limit);
+}
+
+// ── Word-list row + collapsible builders ──────────────────────────────
+// Shared by slipping / stubborn / most-improved lists inside the Total &
+// Selected progress collapses. `primaryDisplay` is the right-most stat
+// (a percent, a delta, a fails-count …).
+function renderCardListRow(item, kind, primaryDisplay) {
+  const card = item.card;
+  const headword = kind === 'grammar'
+    ? `${escapeHtml(card.form || card.lemma || '—')}${card.lemma && card.form && card.form !== card.lemma ? ` <span class="stubborn-lemma">(${escapeHtml(card.lemma)})</span>` : ''}`
+    : (typeof window !== 'undefined' && typeof window.formatGreekHeadword === 'function'
+        ? window.formatGreekHeadword(card.g)
+        : escapeHtml(card.g || '—'));
+  const gloss = kind === 'grammar' ? (card.answer || card.gloss || '') : (card.e || '');
+  return `
+    <li class="analytics-word-list-row">
+      <span class="analytics-word-list-headword">${headword}</span>
+      <span class="analytics-word-list-gloss">${escapeHtml(gloss)}</span>
+      <span class="analytics-word-list-pct">${escapeHtml(primaryDisplay)}</span>
+    </li>
+  `;
+}
+
+function buildSlippingCollapseHtml(slipping, kind, collapseKey) {
+  if (!slipping.length) return '';
+  return `
+    <details class="analytics-collapse analytics-sub-collapse" data-collapse-key="${escapeHtml(collapseKey)}">
+      <summary class="analytics-collapse-summary">
+        <span class="analytics-collapse-caret" aria-hidden="true">▾</span>
+        <div class="analytics-collapse-title-wrap">
+          <h4>Slipping list <span class="analytics-collapse-meta">${slipping.length}</span></h4>
+        </div>
+      </summary>
+      <div class="analytics-collapse-body">
+        <ol class="analytics-word-list">
+          ${slipping.map(s => renderCardListRow(s, kind, s.confidence != null ? `${s.confidence}%` : '—')).join('')}
+        </ol>
+      </div>
+    </details>
+  `;
+}
+
+function buildStubbornCollapseHtml(rows, kind, collapseKey) {
+  if (!rows.length) return '';
+  const heading = kind === 'grammar' ? 'Most stubborn grammar' : 'Most stubborn vocabulary';
+  return `
+    <details class="analytics-collapse analytics-sub-collapse" data-collapse-key="${escapeHtml(collapseKey)}">
+      <summary class="analytics-collapse-summary">
+        <span class="analytics-collapse-caret" aria-hidden="true">▾</span>
+        <div class="analytics-collapse-title-wrap">
+          <h4>${escapeHtml(heading)} <span class="analytics-collapse-meta">${rows.length}</span></h4>
+        </div>
+      </summary>
+      <div class="analytics-collapse-body">
+        <ol class="analytics-word-list">
+          ${rows.map(r => renderCardListRow(r, kind, `${r.fails} miss${r.fails === 1 ? '' : 'es'}`)).join('')}
+        </ol>
+      </div>
+    </details>
+  `;
+}
+
+function buildImprovedCollapseHtml(improved, kind, collapseKey) {
+  if (!improved.length) return '';
+  const title = kind === 'grammar' ? 'Most improved drills' : 'Most improved words';
+  return `
+    <details class="analytics-collapse analytics-sub-collapse" data-collapse-key="${escapeHtml(collapseKey)}">
+      <summary class="analytics-collapse-summary">
+        <span class="analytics-collapse-caret" aria-hidden="true">▾</span>
+        <div class="analytics-collapse-title-wrap">
+          <h4>${escapeHtml(title)} <span class="analytics-collapse-meta">${improved.length}</span></h4>
+        </div>
+      </summary>
+      <div class="analytics-collapse-body">
+        <ol class="analytics-word-list">
+          ${improved.map(i => renderCardListRow(i, kind, `+${Math.round(i.delta * 100)}%`)).join('')}
+        </ol>
+      </div>
+    </details>
+  `;
+}
+
+// Builds the inner content of a "Vocabulary/Grammar progress" collapse: a
+// breakdown histogram, slipping count + collapsible list, cumulative line
+// chart, projected finish, stubborn collapsible, and a most-improved list.
+function buildProgressInnerHtml(opts) {
+  const { cards, progressStore, marksStore, kind, scopeKey, breakdownTitle, emptyMessage } = opts;
+  if (!cards || !cards.length) {
+    return `<div class="analytics-empty">${escapeHtml(emptyMessage || 'No data for this view yet.')}</div>`;
+  }
+  const buckets = buildConfirmationHistogram(cards, progressStore);
+  const series = buildCumulativeConfirmationSeries(cards, marksStore, progressStore);
+  const projection = getRegressionProjection(series.series, series.currentConfirmed, series.total);
+  const slipping = computeSlippingCards(cards, progressStore);
+  const stubborn = computeStubbornCards(cards, progressStore);
+  const improved = computeMostImprovedCards(cards, progressStore);
+
+  const projectedValue = series.currentConfirmed >= series.total && series.total
+    ? 'Complete'
+    : (projection ? formatAnalyticsDate(projection.projectedTs) : '—');
+  const projectedNote = projection
+    ? `${projection.cardsPerDay.toFixed(2)} ${kind === 'grammar' ? 'items' : 'words'}/day regression`
+    : 'Needs more recent progress data';
+
+  return `
+    <div class="analytics-chart-card">
+      <div class="analytics-chart-title">${escapeHtml(breakdownTitle)}</div>
+      ${buildHistogramSvg(buckets, { title: breakdownTitle })}
+    </div>
+    <div class="analytics-metrics-grid analytics-metrics-grid-compact">
+      <div class="analytics-metric-card">
+        <div class="analytics-metric-label">Slipping now</div>
+        <div class="analytics-metric-value">${slipping.length}</div>
+        <div class="analytics-metric-note">Confirmed before but accuracy now &lt; 70%</div>
+      </div>
+      <div class="analytics-metric-card">
+        <div class="analytics-metric-label">Projected finish</div>
+        <div class="analytics-metric-value">${escapeHtml(projectedValue)}</div>
+        <div class="analytics-metric-note">${escapeHtml(projectedNote)}</div>
+      </div>
+    </div>
+    ${buildSlippingCollapseHtml(slipping, kind, `${scopeKey}SlippingList`)}
+    <div class="analytics-chart-card">
+      <div class="analytics-chart-title">Cumulative confirmed fraction</div>
+      ${series.series.length
+        ? buildLineChartSvg(series.series, { title: 'Cumulative confirmation', percent: true, maxValue: 1 })
+        : '<div class="analytics-empty">No confirmation history yet for this view.</div>'}
+    </div>
+    ${buildStubbornCollapseHtml(stubborn, kind, `${scopeKey}Stubborn`)}
+    ${buildImprovedCollapseHtml(improved, kind, `${scopeKey}Improved`)}
+  `;
 }
 
 export function renderAnalyticsOverlay() {
@@ -912,54 +1080,41 @@ export function renderAnalyticsOverlay() {
   // ── Vocab view toggle bar (direction + scope) ──
   renderVocabViewToggles();
 
-  // ── Vocabulary course completion histogram (analytics-direction + scope) ──
-  const vocabCourseEl = document.getElementById('analyticsCourseCompletionVocab');
-  if (vocabCourseEl) {
-    const allCourseVocab = getAllVocabCards(false);
-    const reqCourseVocab = getAllVocabCards(true);
-    const courseVocabCards = analyticsRequiredOnly ? reqCourseVocab : allCourseVocab;
-    const dirStore = vocabProgressStore;
-    const dirMarks = vocabMarks;
-    const isConfirmed = (card) => {
-      if (dirMarks[card.id] === 'known') return true;
-      const pct = getConfidencePct(dirStore[card.id]);
-      return pct !== null && pct >= 70;
-    };
-    const scopedConfirmed = courseVocabCards.filter(isConfirmed).length;
-    const courseVocabBuckets = buildConfirmationHistogram(courseVocabCards, dirStore);
-    const dirLabel = analyticsDirection === 'e2g' ? 'English → Greek' : 'Greek → English';
-    const scopeLabel = analyticsRequiredOnly ? 'required' : 'all';
-    vocabCourseEl.innerHTML = `
+  // ── Direction + scope labels reused across the vocab sections ──
+  const dirLabel = analyticsDirection === 'e2g' ? 'English → Greek' : 'Greek → English';
+  const scopeLabel = analyticsRequiredOnly ? 'Required only' : 'All vocab';
+  const isConfirmedFor = (store, marks) => (card) => {
+    if (marks[card.id] === 'known') return true;
+    const pct = getConfidencePct(store[card.id]);
+    return pct !== null && pct >= 70;
+  };
+
+  // ── Total Vocabulary: top histogram, chapter map, progress inner ──
+  const allCourseVocab = getAllVocabCards(false);
+  const reqCourseVocab = getAllVocabCards(true);
+  const totalVocabCards = analyticsRequiredOnly ? reqCourseVocab : allCourseVocab;
+  const totalVocabConfirmed = totalVocabCards.filter(isConfirmedFor(vocabProgressStore, vocabMarks)).length;
+
+  const totalVocabBarEl = document.getElementById('analyticsTotalVocabBar');
+  if (totalVocabBarEl) {
+    const buckets = buildConfirmationHistogram(totalVocabCards, vocabProgressStore);
+    totalVocabBarEl.innerHTML = `
       <div class="analytics-chart-card">
-        <div class="analytics-chart-title">Vocabulary — ${scopedConfirmed} / ${courseVocabCards.length} ${escapeHtml(scopeLabel)} confirmed (${escapeHtml(dirLabel)})</div>
-        ${buildHistogramSvg(courseVocabBuckets, { title: 'Course vocabulary confirmation %' })}
+        <div class="analytics-chart-title">${totalVocabConfirmed} / ${totalVocabCards.length} confirmed · ${escapeHtml(scopeLabel)} · ${escapeHtml(dirLabel)}</div>
+        ${buildHistogramSvg(buckets, { title: 'Course vocabulary confirmation' })}
       </div>
     `;
   }
-
-  // ── Grammar course completion histogram (course-wide, morph direction) ──
-  const grammarCourseEl = document.getElementById('analyticsCourseCompletionGrammar');
-  if (grammarCourseEl) {
-    if (!host.canAccessGrammarUi()) {
-      grammarCourseEl.innerHTML = '';
-    } else {
-      const courseGrammarBuckets = buildConfirmationHistogram(courseData.allGrammarCards, morphProgressStore);
-      grammarCourseEl.innerHTML = `
-        <div class="analytics-chart-card">
-          <div class="analytics-chart-title">Grammar — ${courseData.allGrammarConfirmed} / ${courseData.allGrammarTotal} confirmed</div>
-          ${buildHistogramSvg(courseGrammarBuckets, { title: 'Course grammar confirmation %' })}
-        </div>
-      `;
-    }
+  const totalVocabStatusEl = document.getElementById('analyticsTotalVocabSummaryStatus');
+  if (totalVocabStatusEl) {
+    totalVocabStatusEl.textContent = `${totalVocabConfirmed} / ${totalVocabCards.length} confirmed · ${dirLabel} · ${scopeLabel}`;
   }
 
-  // ── Chapter mastery grid (course-wide, follows analytics direction + scope) ──
+  // Chapter mastery grid lives inside Total Vocab > Chapter map collapse
   const chapterGridEl = document.getElementById('analyticsChapterGrid');
   if (chapterGridEl) {
     const mastery = computeChapterMastery(vocabProgressStore, vocabMarks, analyticsRequiredOnly);
     if (mastery.length) {
-      // Drop the expanded chapter if it's no longer in the mastery list (e.g.
-      // sets were removed) so we don't try to render a phantom panel.
       if (runtime.analyticsExpandedChapter && !mastery.some(m => String(m.chapterKey) === runtime.analyticsExpandedChapter)) {
         runtime.analyticsExpandedChapter = null;
         runtime.analyticsExpandedWord = null;
@@ -973,17 +1128,157 @@ export function renderAnalyticsOverlay() {
     }
   }
 
-  // ── Grammar concepts to review (course-wide report) ──
-  renderGrammarReviewSection();
+  const totalVocabProgressBody = document.getElementById('analyticsTotalVocabProgressBody');
+  if (totalVocabProgressBody) {
+    totalVocabProgressBody.innerHTML = buildProgressInnerHtml({
+      cards: totalVocabCards,
+      progressStore: vocabProgressStore,
+      marksStore: vocabMarks,
+      kind: 'vocab',
+      scopeKey: 'totalVocab',
+      breakdownTitle: `Total vocabulary breakdown — ${scopeLabel}`
+    });
+  }
+  const totalVocabProgressStatus = document.getElementById('analyticsTotalVocabProgressStatus');
+  if (totalVocabProgressStatus) {
+    totalVocabProgressStatus.textContent = `${totalVocabConfirmed} / ${totalVocabCards.length} confirmed · ${dirLabel}`;
+  }
 
-  // ── Personal records (course-wide) ──
+  // ── Selected Vocabulary: bar + progress inner, both collapsed by default ──
+  const selectedVocabBarEl = document.getElementById('analyticsSelectedVocabBar');
+  const selectedVocabBody = document.getElementById('analyticsSelectedVocabProgressBody');
+  const selectedVocabSummary = document.getElementById('analyticsSelectedVocabSummaryStatus');
+  const selectedVocabProgressStatus = document.getElementById('analyticsSelectedVocabProgressStatus');
+  if (vocabCards.length) {
+    if (selectedVocabBarEl) {
+      const buckets = buildConfirmationHistogram(vocabCards, vocabProgressStore);
+      selectedVocabBarEl.innerHTML = `
+        <div class="analytics-chart-card">
+          <div class="analytics-chart-title">Selected sets — ${vocabProgress.currentConfirmed} / ${vocabProgress.total || 0} confirmed (${escapeHtml(dirLabel)})</div>
+          ${buildHistogramSvg(buckets, { title: 'Selected vocabulary confirmation' })}
+        </div>
+      `;
+    }
+    if (selectedVocabBody) {
+      selectedVocabBody.innerHTML = buildProgressInnerHtml({
+        cards: vocabCards,
+        progressStore: vocabProgressStore,
+        marksStore: vocabMarks,
+        kind: 'vocab',
+        scopeKey: 'selectedVocab',
+        breakdownTitle: `Selected sets breakdown — ${scopeLabel}`
+      });
+    }
+    if (selectedVocabSummary) {
+      selectedVocabSummary.textContent = `${vocabProgress.currentConfirmed} / ${vocabProgress.total || 0} confirmed · ${dirLabel} · ${runtime.selectedKeys.length} set${runtime.selectedKeys.length === 1 ? '' : 's'}`;
+    }
+    if (selectedVocabProgressStatus) {
+      selectedVocabProgressStatus.textContent = `${vocabProgress.currentConfirmed} / ${vocabProgress.total || 0} confirmed · ${scopeLabel}`;
+    }
+  } else {
+    const emptyMsg = '<div class="analytics-empty">Choose a session or chapter on the home screen to populate this view.</div>';
+    if (selectedVocabBarEl) selectedVocabBarEl.innerHTML = emptyMsg;
+    if (selectedVocabBody) selectedVocabBody.innerHTML = emptyMsg;
+    if (selectedVocabSummary) selectedVocabSummary.textContent = 'Pick a session or chapter on the home screen to populate.';
+    if (selectedVocabProgressStatus) selectedVocabProgressStatus.textContent = '';
+  }
+
+  // ── Total Grammar: top histogram, chapter mastery, progress inner ──
+  const showGrammar = host.canAccessGrammarUi();
+  const totalGrammarCards = showGrammar ? courseData.allGrammarCards : [];
+  const totalGrammarBarEl = document.getElementById('analyticsTotalGrammarBar');
+  if (totalGrammarBarEl) {
+    if (!showGrammar || !totalGrammarCards.length) {
+      totalGrammarBarEl.innerHTML = '';
+    } else {
+      const buckets = buildConfirmationHistogram(totalGrammarCards, morphProgressStore);
+      totalGrammarBarEl.innerHTML = `
+        <div class="analytics-chart-card">
+          <div class="analytics-chart-title">${courseData.allGrammarConfirmed} / ${courseData.allGrammarTotal} confirmed</div>
+          ${buildHistogramSvg(buckets, { title: 'Course grammar confirmation' })}
+        </div>
+      `;
+    }
+  }
+  // Grammar review (chapter mastery grid) renders into #analyticsGrammarReview
+  // which lives inside the Total Grammar > Chapter mastery collapse.
+  renderGrammarReviewSection();
+  const totalGrammarBody = document.getElementById('analyticsTotalGrammarProgressBody');
+  if (totalGrammarBody) {
+    totalGrammarBody.innerHTML = buildProgressInnerHtml({
+      cards: totalGrammarCards,
+      progressStore: morphProgressStore,
+      marksStore: grammarMarks,
+      kind: 'grammar',
+      scopeKey: 'totalGrammar',
+      breakdownTitle: 'Total grammar breakdown',
+      emptyMessage: showGrammar ? 'No grammar drills available yet.' : 'Grammar is not available in this profile.'
+    });
+  }
+  const totalGrammarStatusEl = document.getElementById('analyticsTotalGrammarSummaryStatus');
+  if (totalGrammarStatusEl) {
+    totalGrammarStatusEl.textContent = showGrammar
+      ? `${courseData.allGrammarConfirmed} / ${courseData.allGrammarTotal} confirmed`
+      : 'Grammar not available in this profile.';
+  }
+  const totalGrammarProgressStatus = document.getElementById('analyticsTotalGrammarProgressStatus');
+  if (totalGrammarProgressStatus) {
+    totalGrammarProgressStatus.textContent = showGrammar
+      ? `${courseData.allGrammarConfirmed} / ${courseData.allGrammarTotal} confirmed`
+      : '';
+  }
+
+  // ── Selected Grammar: bar + progress inner, all collapsed by default ──
+  const selectedGrammarBarEl = document.getElementById('analyticsSelectedGrammarBar');
+  const selectedGrammarBody = document.getElementById('analyticsSelectedGrammarProgressBody');
+  const selectedGrammarSummary = document.getElementById('analyticsSelectedGrammarSummaryStatus');
+  const selectedGrammarProgressStatus = document.getElementById('analyticsSelectedGrammarProgressStatus');
+  if (showGrammar && grammarCards.length) {
+    if (selectedGrammarBarEl) {
+      const buckets = buildConfirmationHistogram(grammarCards, morphProgressStore);
+      selectedGrammarBarEl.innerHTML = `
+        <div class="analytics-chart-card">
+          <div class="analytics-chart-title">Selected sets — ${grammarProgress.currentConfirmed} / ${grammarProgress.total || 0} confirmed</div>
+          ${buildHistogramSvg(buckets, { title: 'Selected grammar confirmation' })}
+        </div>
+      `;
+    }
+    if (selectedGrammarBody) {
+      selectedGrammarBody.innerHTML = buildProgressInnerHtml({
+        cards: grammarCards,
+        progressStore: morphProgressStore,
+        marksStore: grammarMarks,
+        kind: 'grammar',
+        scopeKey: 'selectedGrammar',
+        breakdownTitle: 'Selected grammar breakdown'
+      });
+    }
+    if (selectedGrammarSummary) {
+      selectedGrammarSummary.textContent = `${grammarProgress.currentConfirmed} / ${grammarProgress.total || 0} confirmed · ${runtime.selectedKeys.length} set${runtime.selectedKeys.length === 1 ? '' : 's'}`;
+    }
+    if (selectedGrammarProgressStatus) {
+      selectedGrammarProgressStatus.textContent = `${grammarProgress.currentConfirmed} / ${grammarProgress.total || 0} confirmed`;
+    }
+  } else {
+    const emptyMsg = showGrammar
+      ? '<div class="analytics-empty">Choose a session or chapter on the home screen to populate this view.</div>'
+      : '';
+    if (selectedGrammarBarEl) selectedGrammarBarEl.innerHTML = emptyMsg;
+    if (selectedGrammarBody) selectedGrammarBody.innerHTML = emptyMsg;
+    if (selectedGrammarSummary) {
+      selectedGrammarSummary.textContent = showGrammar
+        ? 'Pick a session or chapter on the home screen to populate.'
+        : 'Grammar not available in this profile.';
+    }
+    if (selectedGrammarProgressStatus) selectedGrammarProgressStatus.textContent = '';
+  }
+
+  // ── Study activity (records, heatmap, time metrics, cumulative chart) ──
   const recordsEl = document.getElementById('analyticsRecords');
   if (recordsEl) {
     const records = computePersonalRecords(usage, sessionHistory, streaks, courseData);
     recordsEl.innerHTML = buildRecordsHtml(records);
   }
-
-  // ── Heatmap ──
   const heatmapEl = document.getElementById('analyticsHeatmap');
   if (heatmapEl) {
     const hasData = Object.keys(usage.activeDailyMs || {}).some(k => usage.activeDailyMs[k] > 0);
@@ -1002,6 +1297,21 @@ export function renderAnalyticsOverlay() {
            </div>
          </div>`
       : '';
+  }
+  const overallMetricsEl = document.getElementById('analyticsOverallMetrics');
+  const overallChartEl = document.getElementById('analyticsTimeChart');
+  const sessionEl = document.getElementById('analyticsSessionSummary');
+  if (overallMetricsEl) overallMetricsEl.innerHTML = `
+      <div class="analytics-metric-card"><div class="analytics-metric-label">Active study time</div><div class="analytics-metric-value">${escapeHtml(formatUsageDuration(usage.activeStudyMs))}</div><div class="analytics-metric-note">Stricter interaction-based timer</div></div>
+      <div class="analytics-metric-card"><div class="analytics-metric-label">Foreground time</div><div class="analytics-metric-value">${escapeHtml(formatUsageDuration(usage.totalMs))}</div><div class="analytics-metric-note">App visible on screen</div></div>
+      <div class="analytics-metric-card"><div class="analytics-metric-label">Study sessions logged</div><div class="analytics-metric-value">${sessionHistory.length}</div><div class="analytics-metric-note">${latestSession ? `Latest ${formatAnalyticsDateTime(latestSession.startedAt)}` : 'No completed sessions yet'}</div></div>
+      <div class="analytics-metric-card"><div class="analytics-metric-label">Average session length</div><div class="analytics-metric-value">${escapeHtml(formatUsageDuration(sessionHistory.length ? sessionHistory.reduce((sum, entry) => sum + (entry.durationMs || 0), 0) / sessionHistory.length : 0))}</div><div class="analytics-metric-note">Across saved study sessions</div></div>`;
+  if (overallChartEl) overallChartEl.innerHTML = usageSeries.length ? buildLineChartSvg(usageSeries, { title: 'Cumulative active study time' }) : `<div class="analytics-empty">Start studying and this cumulative time chart will wake up.</div>`;
+  if (sessionEl) sessionEl.textContent = latestSession ? `Latest session: ${formatAnalyticsDateTime(latestSession.startedAt)} → ${formatAnalyticsDateTime(latestSession.endedAt)} · ${formatUsageDuration(latestSession.durationMs)} · ${latestSession.interactionCount || 0} study actions` : 'No study session history yet.';
+  const studyActivityStatus = document.getElementById('analyticsStudyActivitySummaryStatus');
+  if (studyActivityStatus) {
+    const totalActive = formatUsageDuration(usage.activeStudyMs);
+    studyActivityStatus.textContent = `${totalActive} active · ${sessionHistory.length} session${sessionHistory.length === 1 ? '' : 's'}`;
   }
 
   // ── Achievements (sub-collapsibles for daily / milestones / chapters) ──
@@ -1039,7 +1349,7 @@ export function renderAnalyticsOverlay() {
     `;
   }
 
-  // ── Status text inside top-level Achievements + Titles summaries ──
+  // ── Top-level Achievements + Titles summary status text ──
   const totalEarned = achievements.filter(a => a.earned).length;
   const achievementsStatusEl = document.getElementById('analyticsAchievementsSummaryStatus');
   if (achievementsStatusEl) {
@@ -1048,93 +1358,6 @@ export function renderAnalyticsOverlay() {
   const titlesStatusEl = document.getElementById('analyticsTitlesSummaryStatus');
   if (titlesStatusEl) {
     titlesStatusEl.textContent = `Lv. ${xpData.currentLevel.level} — ${xpData.currentLevel.title} · ${xpData.totalXp.toLocaleString()} XP`;
-  }
-
-  // ── Overall time metrics (existing, reorganized) ──
-  const overallMetricsEl = document.getElementById('analyticsOverallMetrics');
-  const overallChartEl = document.getElementById('analyticsTimeChart');
-  const sessionEl = document.getElementById('analyticsSessionSummary');
-  if (overallMetricsEl) overallMetricsEl.innerHTML = `
-      <div class="analytics-metric-card"><div class="analytics-metric-label">Active study time</div><div class="analytics-metric-value">${escapeHtml(formatUsageDuration(usage.activeStudyMs))}</div><div class="analytics-metric-note">Stricter interaction-based timer</div></div>
-      <div class="analytics-metric-card"><div class="analytics-metric-label">Foreground time</div><div class="analytics-metric-value">${escapeHtml(formatUsageDuration(usage.totalMs))}</div><div class="analytics-metric-note">App visible on screen</div></div>
-      <div class="analytics-metric-card"><div class="analytics-metric-label">Study sessions logged</div><div class="analytics-metric-value">${sessionHistory.length}</div><div class="analytics-metric-note">${latestSession ? `Latest ${formatAnalyticsDateTime(latestSession.startedAt)}` : 'No completed sessions yet'}</div></div>
-      <div class="analytics-metric-card"><div class="analytics-metric-label">Average session length</div><div class="analytics-metric-value">${escapeHtml(formatUsageDuration(sessionHistory.length ? sessionHistory.reduce((sum, entry) => sum + (entry.durationMs || 0), 0) / sessionHistory.length : 0))}</div><div class="analytics-metric-note">Across saved study sessions</div></div>`;
-  if (overallChartEl) overallChartEl.innerHTML = usageSeries.length ? buildLineChartSvg(usageSeries, { title: 'Cumulative active study time' }) : `<div class="analytics-empty">Start studying and this cumulative time chart will wake up.</div>`;
-  if (sessionEl) sessionEl.textContent = latestSession ? `Latest session: ${formatAnalyticsDateTime(latestSession.startedAt)} → ${formatAnalyticsDateTime(latestSession.endedAt)} · ${formatUsageDuration(latestSession.durationMs)} · ${latestSession.interactionCount || 0} study actions` : 'No study session history yet.';
-
-  // ── Current-selection subtitles (one per section) ──
-  const vocabSubtitleEl = document.getElementById('analyticsSelectionSubtitleVocab');
-  if (vocabSubtitleEl) {
-    if (!runtime.selectedKeys.length) {
-      vocabSubtitleEl.textContent = 'Pick a session or chapter on the home screen to populate the current-selection stats below.';
-    } else {
-      const scopeBit = analyticsRequiredOnly ? 'Required-only (graded) vocabulary' : 'All vocabulary, graded + nice-to-haves';
-      const dirBit = analyticsDirection === 'e2g' ? 'English → Greek' : 'Greek → English';
-      vocabSubtitleEl.textContent = `Current selection: ${scopeBit} · ${dirBit} · ${runtime.selectedKeys.length} set${runtime.selectedKeys.length === 1 ? '' : 's'}.`;
-    }
-  }
-  const grammarSubtitleEl = document.getElementById('analyticsSelectionSubtitleGrammar');
-  if (grammarSubtitleEl) {
-    if (!runtime.selectedKeys.length) {
-      grammarSubtitleEl.textContent = 'Pick a session or chapter on the home screen to populate the current-selection stats below.';
-    } else if (!host.canAccessGrammarUi()) {
-      grammarSubtitleEl.textContent = '';
-    } else {
-      grammarSubtitleEl.textContent = `Current selection: morphology and grammar drills across ${runtime.selectedKeys.length} set${runtime.selectedKeys.length === 1 ? '' : 's'}.`;
-    }
-  }
-
-  // ── Vocab section (selection-scoped). Uses the analytics direction +
-  //    scope toggles — independent of the study deck's directionToGreek. ──
-  const vocabAtRisk = computeAtRiskCount(vocabCards, vocabProgressStore);
-  renderAnalyticsSection('analyticsVocabSection', {
-    title: 'Vocabulary progress',
-    subtitle: runtime.selectedKeys.length
-      ? `${analyticsRequiredOnly ? 'Required-only (graded) vocabulary' : 'All vocabulary, graded + nice-to-haves'} · ${analyticsDirection === 'e2g' ? 'English → Greek' : 'Greek → English'}`
-      : 'Choose one or more vocabulary sets to populate this view.',
-    total: vocabProgress.total,
-    metrics: [
-      { label: 'Confirmed now',     value: `${vocabProgress.currentConfirmed} / ${vocabProgress.total || 0}`, note: 'Marked known or ≥70% recent accuracy' },
-      { label: 'New this week',     value: `${vocabProgress.weeklyPct.toFixed(1)}%`, note: 'Share first confirmed in the last 7 days' },
-      { label: 'Slipping now',      value: `${vocabAtRisk}`, note: 'Confirmed before but accuracy now < 70%' },
-      { label: 'Projected finish',  value: vocabProgress.currentConfirmed >= vocabProgress.total && vocabProgress.total ? 'Complete' : (vocabProjection ? formatAnalyticsDate(vocabProjection.projectedTs) : '—'), note: vocabProjection ? `${vocabProjection.cardsPerDay.toFixed(2)} words/day regression` : 'Needs more recent progress data' }
-    ],
-    lineTitle: 'Cumulative confirmed vocabulary fraction',
-    lineSvg: vocabProgress.series.length ? buildLineChartSvg(vocabProgress.series, { title: 'Vocabulary progress', percent: true, maxValue: 1 }) : `<div class="analytics-empty">No confirmed vocabulary history yet for this selection.</div>`,
-    barTitle: 'Vocabulary confirmation breakdown',
-    barSvg: buildHistogramSvg(vocabBuckets, { title: 'Vocabulary confirmation' })
-  });
-
-  // ── Grammar section (selection-scoped). All paradigms are required, so
-  //    the analytics vocab toggles do NOT apply here — grammar progress is
-  //    direction-agnostic via the morph store. ──
-  const grammarAtRisk = computeAtRiskCount(grammarCards, morphProgressStore);
-  renderAnalyticsSection('analyticsGrammarSection', {
-    title: 'Grammar progress',
-    subtitle: host.canAccessGrammarUi() ? 'Morphology and grammar drills in the current selection. Paradigms are all required.' : 'Switch to the full vocabulary + grammar layout to track grammar progress here.',
-    total: grammarProgress.total,
-    metrics: [
-      { label: 'Confirmed now',    value: `${grammarProgress.currentConfirmed} / ${grammarProgress.total || 0}`, note: 'Marked known or ≥70% recent accuracy' },
-      { label: 'New this week',    value: `${grammarProgress.weeklyPct.toFixed(1)}%`, note: 'Share first confirmed in the last 7 days' },
-      { label: 'Slipping now',     value: `${grammarAtRisk}`, note: 'Confirmed before but accuracy now < 70%' },
-      { label: 'Projected finish', value: grammarProgress.currentConfirmed >= grammarProgress.total && grammarProgress.total ? 'Complete' : (grammarProjection ? formatAnalyticsDate(grammarProjection.projectedTs) : '—'), note: grammarProjection ? `${grammarProjection.cardsPerDay.toFixed(2)} items/day regression` : 'Needs more recent progress data' }
-    ],
-    lineTitle: 'Cumulative confirmed grammar fraction',
-    lineSvg: grammarProgress.series.length ? buildLineChartSvg(grammarProgress.series, { title: 'Grammar progress', percent: true, maxValue: 1 }) : `<div class="analytics-empty">No confirmed grammar history yet for this selection.</div>`,
-    barTitle: 'Grammar confirmation breakdown',
-    barSvg: buildHistogramSvg(grammarBuckets, { title: 'Grammar confirmation' })
-  });
-
-  // ── Stubborn cards split into per-section containers ──
-  const stubbornVocabEl = document.getElementById('analyticsStubbornVocab');
-  if (stubbornVocabEl) {
-    const vocabStubborn = computeStubbornCards(vocabCards, vocabProgressStore);
-    stubbornVocabEl.innerHTML = runtime.selectedKeys.length ? buildStubbornListHtml(vocabStubborn, 'vocab') : '';
-  }
-  const stubbornGrammarEl = document.getElementById('analyticsStubbornGrammar');
-  if (stubbornGrammarEl) {
-    const grammarStubborn = host.canAccessGrammarUi() ? computeStubbornCards(grammarCards, morphProgressStore) : [];
-    stubbornGrammarEl.innerHTML = runtime.selectedKeys.length ? buildStubbornListHtml(grammarStubborn, 'grammar') : '';
   }
 
   // ── Apply persisted collapse state to every <details> and wire handlers ──
