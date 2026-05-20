@@ -7,11 +7,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Greek Cards">
-<link rel="manifest" href="manifest.json?v=90">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=90">
-<link rel="icon" type="image/svg+xml" href="favicon.svg?v=90">
+<link rel="manifest" href="manifest.json?v=91">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=91">
+<link rel="icon" type="image/svg+xml" href="favicon.svg?v=91">
 <title>Elementary NT Greek — Flashcards</title>
-<link rel="stylesheet" href="styles.css?v=90">
+<link rel="stylesheet" href="styles.css?v=91">
 <script>
 (function(){
   try {
@@ -27,7 +27,7 @@
     if (fontFamily === "sans") document.documentElement.setAttribute("data-font-family", "sans");
     else document.documentElement.setAttribute("data-font-family", "serif");
     var textSize = localStorage.getItem("greekFlashcardsTextSize");
-    var allowed = { small: 1, medium: 1, large: 1, "x-large": 1 };
+    var allowed = { medium: 1, large: 1, "x-large": 1 };
     document.documentElement.setAttribute("data-text-size", allowed[textSize] ? textSize : "medium");
   } catch (err) {
     document.documentElement.setAttribute("data-font-family", "serif");
@@ -83,20 +83,19 @@
   <details class="utility-section" id="advancedSettingsDetails">
     <summary>Advanced review settings</summary>
     <div class="display-prefs" role="group" aria-label="Display preferences">
-      <div class="display-pref-row">
-        <span class="display-pref-label">Font</span>
-        <div class="pref-switcher" role="group" aria-label="Font family">
-          <button class="pref-btn" id="fontSerifBtn" type="button" onclick="setFontFamily('serif')">Serif</button>
-          <button class="pref-btn" id="fontSansBtn" type="button" onclick="setFontFamily('sans')">Sans</button>
+      <div class="display-prefs-row">
+        <span class="display-prefs-label">Font</span>
+        <div class="theme-switcher" role="group" aria-label="Font family">
+          <button class="theme-btn" id="fontSerifBtn" type="button" onclick="setFontFamily('serif')">Serif</button>
+          <button class="theme-btn" id="fontSansBtn" type="button" onclick="setFontFamily('sans')">Sans</button>
         </div>
       </div>
-      <div class="display-pref-row">
-        <span class="display-pref-label">Text size</span>
-        <div class="pref-switcher" role="group" aria-label="Text size">
-          <button class="pref-btn" id="textSizeSmallBtn" type="button" onclick="setTextSize('small')">Small</button>
-          <button class="pref-btn" id="textSizeMediumBtn" type="button" onclick="setTextSize('medium')">Medium</button>
-          <button class="pref-btn" id="textSizeLargeBtn" type="button" onclick="setTextSize('large')">Large</button>
-          <button class="pref-btn" id="textSizeXLargeBtn" type="button" onclick="setTextSize('x-large')">X-Large</button>
+      <div class="display-prefs-row">
+        <span class="display-prefs-label">Text size</span>
+        <div class="theme-switcher" role="group" aria-label="Text size">
+          <button class="theme-btn" id="textSizeMediumBtn" type="button" onclick="setTextSize('medium')">Medium</button>
+          <button class="theme-btn" id="textSizeLargeBtn" type="button" onclick="setTextSize('large')">Large</button>
+          <button class="theme-btn" id="textSizeXLargeBtn" type="button" onclick="setTextSize('x-large')">X-Large</button>
         </div>
       </div>
     </div>
@@ -606,54 +605,54 @@
   </div>
 </div>
 
-<script defer src="js/data/words.js?v=90"></script>
-<script defer src="js/data/morphology.js?v=90"></script>
-<script defer src="js/data/supplemental.js?v=90"></script>
-<script defer src="js/data/grammar.js?v=90"></script>
-<script defer src="js/data/supplementals/week_1_supplemental.js?v=90"></script>
-<script defer src="js/data/supplementals/week_1_paradigms.js?v=90"></script>
-<script defer src="js/data/supplementals/week_2_paradigms.js?v=90"></script>
-<script defer src="js/data/supplementals/week_3_paradigms.js?v=90"></script>
-<script defer src="js/data/supplementals/week_4_paradigms.js?v=90"></script>
-<script defer src="js/data/supplementals/week_5_paradigms.js?v=90"></script>
-<script defer src="js/data/supplementals/week_6_paradigms.js?v=90"></script>
-<script defer src="js/data/supplementals/week_7_paradigms.js?v=90"></script>
-<script defer src="js/data/supplementals/week_8_paradigms.js?v=90"></script>
-<script defer src="js/data/supplementals/adj_paradigms.js?v=90"></script>
-<script defer src="js/data/supplementals/w3o_supplemental.js?v=90"></script>
-<script defer src="js/data/supplementals/w6o_supplemental.js?v=90"></script>
-<script defer src="js/data/supplementals/w7o_supplemental.js?v=90"></script>
-<script defer src="js/data/supplementals/w8o_supplemental.js?v=90"></script>
-<script defer src="js/data/supplementals/paradigm_morphology.js?v=90"></script>
-<script defer src="js/data/advanced/advanced_01.js?v=90"></script>
-<script defer src="js/data/advanced/advanced_02.js?v=90"></script>
-<script defer src="js/data/advanced/advanced_03.js?v=90"></script>
-<script defer src="js/data/advanced/advanced_04.js?v=90"></script>
-<script defer src="js/data/advanced/advanced_05.js?v=90"></script>
-<script defer src="js/data/advanced/advanced_06.js?v=90"></script>
-<script defer src="js/data/advanced/advanced_07.js?v=90"></script>
-<script defer src="js/data/advanced/advanced_08.js?v=90"></script>
-<script defer src="js/data/advanced/advanced_09.js?v=90"></script>
-<script defer src="js/data/advanced/advanced_10.js?v=90"></script>
-<script defer src="js/data/advanced/advanced_11.js?v=90"></script>
-<script defer src="js/data/advanced/advanced_12.js?v=90"></script>
-<script defer src="js/data/advanced/advanced_13.js?v=90"></script>
-<script defer src="js/data/advanced/advanced_14.js?v=90"></script>
-<script defer src="js/data/advanced/advanced_15.js?v=90"></script>
-<script defer src="js/data/advanced/advanced_16.js?v=90"></script>
-<script defer src="js/data/advanced/advanced_17.js?v=90"></script>
-<script defer src="js/data/advanced/advanced_18.js?v=90"></script>
-<script defer src="js/data/advanced/advanced_19.js?v=90"></script>
-<script defer src="js/data/advanced/advanced_20.js?v=90"></script>
-<script defer src="js/data/advanced/advanced_21.js?v=90"></script>
-<script defer src="js/data/advanced/advanced_22.js?v=90"></script>
-<script defer src="js/data/advanced/advanced_23.js?v=90"></script>
-<script defer src="js/data/advanced/advanced_24.js?v=90"></script>
-<script defer src="js/data/advanced/advanced_25.js?v=90"></script>
-<script defer src="js/data/reader.js?v=90"></script>
-<script defer src="js/data/reader_verse_literals.js?v=90"></script>
-<script defer src="js/data/reader_translations.js?v=90"></script>
-<script defer src="js/logic/pos_logic.js?v=90"></script>
-<script type="module" src="js/app/main.js?v=90"></script>
+<script defer src="js/data/words.js?v=91"></script>
+<script defer src="js/data/morphology.js?v=91"></script>
+<script defer src="js/data/supplemental.js?v=91"></script>
+<script defer src="js/data/grammar.js?v=91"></script>
+<script defer src="js/data/supplementals/week_1_supplemental.js?v=91"></script>
+<script defer src="js/data/supplementals/week_1_paradigms.js?v=91"></script>
+<script defer src="js/data/supplementals/week_2_paradigms.js?v=91"></script>
+<script defer src="js/data/supplementals/week_3_paradigms.js?v=91"></script>
+<script defer src="js/data/supplementals/week_4_paradigms.js?v=91"></script>
+<script defer src="js/data/supplementals/week_5_paradigms.js?v=91"></script>
+<script defer src="js/data/supplementals/week_6_paradigms.js?v=91"></script>
+<script defer src="js/data/supplementals/week_7_paradigms.js?v=91"></script>
+<script defer src="js/data/supplementals/week_8_paradigms.js?v=91"></script>
+<script defer src="js/data/supplementals/adj_paradigms.js?v=91"></script>
+<script defer src="js/data/supplementals/w3o_supplemental.js?v=91"></script>
+<script defer src="js/data/supplementals/w6o_supplemental.js?v=91"></script>
+<script defer src="js/data/supplementals/w7o_supplemental.js?v=91"></script>
+<script defer src="js/data/supplementals/w8o_supplemental.js?v=91"></script>
+<script defer src="js/data/supplementals/paradigm_morphology.js?v=91"></script>
+<script defer src="js/data/advanced/advanced_01.js?v=91"></script>
+<script defer src="js/data/advanced/advanced_02.js?v=91"></script>
+<script defer src="js/data/advanced/advanced_03.js?v=91"></script>
+<script defer src="js/data/advanced/advanced_04.js?v=91"></script>
+<script defer src="js/data/advanced/advanced_05.js?v=91"></script>
+<script defer src="js/data/advanced/advanced_06.js?v=91"></script>
+<script defer src="js/data/advanced/advanced_07.js?v=91"></script>
+<script defer src="js/data/advanced/advanced_08.js?v=91"></script>
+<script defer src="js/data/advanced/advanced_09.js?v=91"></script>
+<script defer src="js/data/advanced/advanced_10.js?v=91"></script>
+<script defer src="js/data/advanced/advanced_11.js?v=91"></script>
+<script defer src="js/data/advanced/advanced_12.js?v=91"></script>
+<script defer src="js/data/advanced/advanced_13.js?v=91"></script>
+<script defer src="js/data/advanced/advanced_14.js?v=91"></script>
+<script defer src="js/data/advanced/advanced_15.js?v=91"></script>
+<script defer src="js/data/advanced/advanced_16.js?v=91"></script>
+<script defer src="js/data/advanced/advanced_17.js?v=91"></script>
+<script defer src="js/data/advanced/advanced_18.js?v=91"></script>
+<script defer src="js/data/advanced/advanced_19.js?v=91"></script>
+<script defer src="js/data/advanced/advanced_20.js?v=91"></script>
+<script defer src="js/data/advanced/advanced_21.js?v=91"></script>
+<script defer src="js/data/advanced/advanced_22.js?v=91"></script>
+<script defer src="js/data/advanced/advanced_23.js?v=91"></script>
+<script defer src="js/data/advanced/advanced_24.js?v=91"></script>
+<script defer src="js/data/advanced/advanced_25.js?v=91"></script>
+<script defer src="js/data/reader.js?v=91"></script>
+<script defer src="js/data/reader_verse_literals.js?v=91"></script>
+<script defer src="js/data/reader_translations.js?v=91"></script>
+<script defer src="js/logic/pos_logic.js?v=91"></script>
+<script type="module" src="js/app/main.js?v=91"></script>
 </body>
 </html>
