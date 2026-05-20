@@ -22,6 +22,17 @@
   } catch (err) {
     document.documentElement.setAttribute("data-theme", "dark");
   }
+  try {
+    var fontFamily = localStorage.getItem("greekFlashcardsFontFamily");
+    if (fontFamily === "sans") document.documentElement.setAttribute("data-font-family", "sans");
+    else document.documentElement.setAttribute("data-font-family", "serif");
+    var textSize = localStorage.getItem("greekFlashcardsTextSize");
+    var allowed = { small: 1, medium: 1, large: 1, "x-large": 1 };
+    document.documentElement.setAttribute("data-text-size", allowed[textSize] ? textSize : "medium");
+  } catch (err) {
+    document.documentElement.setAttribute("data-font-family", "serif");
+    document.documentElement.setAttribute("data-text-size", "medium");
+  }
 })();
 </script>
 </head>
@@ -55,7 +66,7 @@
       <button class="mode-btn active" id="modeShortcutVocabBtn" type="button" onclick="setStudyMode('vocab')">Vocab</button>
       <button class="mode-btn" id="modeShortcutMorphBtn" type="button" onclick="setStudyMode('morph')">Grammar</button>
       <button class="mode-btn" id="modeShortcutReaderBtn" type="button" onclick="openReaderTab()">Reader</button>
-      <a class="mode-btn" id="modeShortcutMemorizationBtn" href="pages/memorization.html">Memorization</a>
+      <a class="mode-btn" id="modeShortcutMemorizationBtn" href="pages/memorization.html">Paradigms</a>
     </div>
     <button class="quick-btn" type="button" onclick="openAnalyticsOverlay()">Progress</button>
     <button class="quick-btn" type="button" onclick="openShortcutsModal()">User guide</button>
@@ -71,6 +82,24 @@
 
   <details class="utility-section" id="advancedSettingsDetails">
     <summary>Advanced review settings</summary>
+    <div class="display-prefs" role="group" aria-label="Display preferences">
+      <div class="display-pref-row">
+        <span class="display-pref-label">Font</span>
+        <div class="pref-switcher" role="group" aria-label="Font family">
+          <button class="pref-btn" id="fontSerifBtn" type="button" onclick="setFontFamily('serif')">Serif</button>
+          <button class="pref-btn" id="fontSansBtn" type="button" onclick="setFontFamily('sans')">Sans</button>
+        </div>
+      </div>
+      <div class="display-pref-row">
+        <span class="display-pref-label">Text size</span>
+        <div class="pref-switcher" role="group" aria-label="Text size">
+          <button class="pref-btn" id="textSizeSmallBtn" type="button" onclick="setTextSize('small')">Small</button>
+          <button class="pref-btn" id="textSizeMediumBtn" type="button" onclick="setTextSize('medium')">Medium</button>
+          <button class="pref-btn" id="textSizeLargeBtn" type="button" onclick="setTextSize('large')">Large</button>
+          <button class="pref-btn" id="textSizeXLargeBtn" type="button" onclick="setTextSize('x-large')">X-Large</button>
+        </div>
+      </div>
+    </div>
 <div class="controls-bar" id="controlsBar">
 <button class="toggle-label" id="shuffleToggle" type="button" role="switch" aria-checked="false" onclick="toggleShuffle()">
       <span class="toggle-text">Shuffle</span>
