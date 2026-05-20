@@ -191,20 +191,26 @@ export function navigate(dir, options = {}) {
     return;
   }
 
-  // Vocab unspaced: advance to the next still-active (non-archived) card.
-  // Hard / Uncertain marks rearrange the deck in place (handled by markCard);
-  // Next without marking just steps the cursor forward.
-  for (let i = runtime.currentIdx + 1; i < runtime.deck.length; i++) {
-    if (runtime.marks[runtime.deck[i].id] !== 'known') {
-      runtime.currentIdx = i;
-      host.maybePeriodicReshuffle();
-      renderCard();
-      return;
-    }
+  // Vocab unspaced: Next acts as a neutral pass — moves the current card to
+  // the back of the active queue and ticks the round counter, but does not
+  // record a confidence sample or touch pass/fail/XP. Once the round
+  // completes, applyUnspacedMark reshuffles the active section, which is
+  // how the "no cards left" wrap-around naturally happens.
+  if (runtime.currentIdx < runtime.activeDeckCount) {
+    const currentCard = runtime.deck[runtime.currentIdx];
+    applyUnspacedMark(currentCard, 'pass', { skipRecording: true });
+    host.maybePeriodicReshuffle();
+    host.resetMorphAnswerState();
+    renderCard();
+    renderReview();
+    renderProgress();
+    host.saveState();
+    return;
   }
 
-  // No active card past the cursor. Park at the end so renderCard shows the
-  // done state; the user clicks "↻ Reset" (the morphed Next button) to restart.
+  // Cursor past the active section (e.g. every card archived via Easy).
+  // Park at the end so renderCard shows the done state; the user clicks
+  // "↻ Reset" (the morphed Next button) to restart.
   runtime.currentIdx = runtime.deck.length;
   runtime.unspacedPendingRecycle = false;
   host.resetMorphAnswerState();
@@ -245,13 +251,19 @@ export function markCard(outcome) {
 // All three outcomes still feed recordStudyOutcome so confidence/analytics
 // reflect the response. applyUnspacedSharedSchedule keeps the legacy cycle
 // bookkeeping in sync for any reader that still consults it.
-function applyUnspacedMark(card, outcome) {
+// `options.skipRecording` makes the call a neutral queue-only nudge: the
+// card moves to the back and the round counter still ticks, but
+// confidence, XP, and pass/fail counts are untouched. Used by the Next
+// button in vocab unspaced mode.
+function applyUnspacedMark(card, outcome, options = {}) {
   if (!card) return;
   const normalizedOutcome = outcome === 'easy' ? 'easy' : outcome === 'pass' ? 'pass' : 'again';
-  const recordedOutcome = normalizedOutcome === 'easy' ? 'known' : normalizedOutcome === 'pass' ? 'pass' : 'review';
-  const reviewedAt = Date.now();
-  host.recordStudyOutcome(card.id, recordedOutcome, reviewedAt);
-  host.applyUnspacedSharedSchedule(card, normalizedOutcome, reviewedAt);
+  if (!options.skipRecording) {
+    const recordedOutcome = normalizedOutcome === 'easy' ? 'known' : normalizedOutcome === 'pass' ? 'pass' : 'review';
+    const reviewedAt = Date.now();
+    host.recordStudyOutcome(card.id, recordedOutcome, reviewedAt);
+    host.applyUnspacedSharedSchedule(card, normalizedOutcome, reviewedAt);
+  }
 
   const directionalMarks = host.getDirectionalMarksStore();
   const fromIdx = runtime.deck.findIndex(c => c && c.id === card.id);
