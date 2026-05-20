@@ -448,11 +448,28 @@
     <div class="consent-label">User guide</div>
     <h2 id="shortcutsTitle">How to use this app</h2>
     <div class="consent-copy user-guide-copy">
-      <p>An unofficial study aid for J. W. Wenham / Duff <em>Elementary New Testament Greek</em>. Flip cards, mark how confident you felt, and the app schedules what comes back next.</p>
+      <p>An unofficial study aid for Duff's <em>Elementary New Testament Greek</em>. Flip cards, mark how confident you felt, and the app schedules what comes back next.</p>
 
       <details class="user-guide-changelog">
         <summary>Changelog</summary>
         <details class="user-guide-changelog-version" open>
+          <summary>Version 1.3 &middot; 2026-05-20</summary>
+          <ul class="user-guide-list">
+            <li><strong>Grammar drills realigned to Duff's chapter TOC.</strong> Every chapter's drills have been audited against Duff's actual chapter scope: Chapter 8 expanded, liquid stems moved from Ch 8 to Ch 11, Ch 9 &amp; 10 reworked, and Ch 2&ndash;8 &amp; 11&ndash;20 cleaned up so out-of-scope concepts and distractors are gone. W&ndash;week supplements now focus on paradigm memorization, with concept questions that used to live in W3O / W4O moved back into their chapter sections.</li>
+            <li><strong>Mounce-informed grammar drills.</strong> New items covering reduplication rules, the articular infinitive, and -&mu;&iota; verb peculiarities, backed by a Mounce overheads PDF included as a reference source.</li>
+            <li><strong>Translation drills per chapter.</strong> Every reader chapter now has its own translation drill section built from cumulative vocabulary, with padded distractors so the correct answer doesn't stand out by length.</li>
+            <li><strong>Grammar prompts stop leaking the case.</strong> Parsing prompts were reworded so the wording itself no longer telegraphs the gender / case / number being asked for.</li>
+            <li><strong>Analytics restructured into Total &amp; Selected sections.</strong> The Progress overlay now separates lifetime totals from your current selection. Vocabulary stats are broken out by direction (Gk &rarr; En vs En &rarr; Gk), every section is collapsible, and the <em>Most improved words</em> list is collapsed by default. Most-stubborn and Most-improved lists scroll inside a fixed-height box.</li>
+            <li><strong>Honest analytics math.</strong> The chapter-map % now uses rolling confidence instead of jumping to 100 the moment a card is marked &ldquo;known.&rdquo; Most-stubborn excludes cards already above 50% rolling confidence, and Most-improved rows show the underlying guess count. Histograms no longer double-count cards, the <em>Slipping</em> list was regrouped, and list filters were tightened.</li>
+            <li><strong>Display preferences.</strong> New <em>font family</em> and <em>text size</em> controls under Advanced settings. The <em>Small</em> text size was dropped because it broke too many layouts, and reader verse text now matches drill text size.</li>
+            <li><strong>Reset progress, clearer.</strong> <em>Reset required</em> is now its own button instead of buried in the deck-reset flow. In the reset-spaced modal, the destructive <em>Set all to now</em> option is tinted gold while <em>Cancel</em> stays muted. Week-level <em>Select all</em> supplemental buttons now toggle selection on and off.</li>
+            <li><strong>Reader fixes.</strong> Restoring a reader-mode save now re-renders the reader UI immediately, and exports / imports while in reader mode land back at the vocab home state for consistency.</li>
+            <li><strong>Light mode and heatmap polish.</strong> Supplemental and Advanced panels no longer show a washed-out grey background in light mode, and the study-activity heatmap's top row of month labels no longer clips.</li>
+            <li><strong>Analytics tag added.</strong> A Google Analytics 4 page-visit tag is now embedded so basic usage volume can be tracked; no card content, progress, or personal data is sent.</li>
+            <li><strong>App cache bumped</strong> so updated cards and styles reach all devices on next load.</li>
+          </ul>
+        </details>
+        <details class="user-guide-changelog-version">
           <summary>Version 1.2 &middot; 2026-05-15</summary>
           <ul class="user-guide-list">
             <li><strong>New analytics views.</strong> The <em>Progress</em> overlay now includes a <em>Grammar concepts to review</em> report (groups every chapter&rsquo;s grammar drills by concept and flags ones below mastery), a tappable <em>Chapter map</em> that drills into per-word stats, and per-word <em>Stubborn cards</em> lists for vocabulary and grammar.</li>
