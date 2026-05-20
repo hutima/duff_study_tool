@@ -110,6 +110,8 @@ export const S = {
   activeDeckCount: 0,
   unspacedPendingRecycle: false,
   unspacedCycleState: {},
+  unspacedRoundSize: 0,
+  unspacedRoundMarks: 0,
   spacedUndoSnapshot: null,
   marks: {}
 };
