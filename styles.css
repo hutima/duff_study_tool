@@ -505,8 +505,8 @@
     border-radius: 8px; cursor: pointer; transition: all 0.2s;
     border: 1px solid var(--border);
   }
-  .nav-prev { background: none; color: var(--muted); }
-  .nav-prev:hover { border-color: var(--gold-dim); color: var(--cream); }
+  .nav-prev { background: rgba(107, 98, 60, 0.10); color: var(--muted); border-color: var(--border); }
+  .nav-prev:hover { background: rgba(107, 98, 60, 0.20); border-color: var(--gold-dim); color: var(--cream); }
   .nav-next { background: linear-gradient(135deg, #2a2818, #1e1e2a); color: var(--gold); border-color: var(--gold-dim); }
   .nav-next:hover { background: linear-gradient(135deg, #332e1a, #252535); border-color: var(--gold); color: var(--gold-light); }
   .nav-next.spaced-again { background: linear-gradient(135deg, #3a1d1d, #241416); color: #e79a9a; border-color: #a55151; }
@@ -994,6 +994,14 @@
   .nav-btn.nav-disabled,
   .nav-btn:disabled {
     opacity: 0.4;
+    cursor: not-allowed;
+  }
+  /* Prev keeps the same Reset-like swatch when inactive — it's a constant
+     anchor in the nav row, so a grey-out reads as "broken" rather than
+     "nothing to do here right now". */
+  .nav-btn.nav-prev.nav-disabled,
+  .nav-btn.nav-prev:disabled {
+    opacity: 1;
     cursor: not-allowed;
   }
 
@@ -1863,8 +1871,14 @@
     color: #7a2e2e;
   }
   html[data-theme="light"] .nav-prev {
-    background: transparent;
-    color: var(--muted);
+    background: rgba(210, 188, 110, 0.10);
+    border-color: rgba(142, 112, 34, 0.28);
+    color: #7a5b1f;
+  }
+  html[data-theme="light"] .nav-prev:hover {
+    background: rgba(210, 188, 110, 0.22);
+    border-color: rgba(142, 112, 34, 0.45);
+    color: #553c00;
   }
 
   /* ── Light mode: soften mark buttons ── */
