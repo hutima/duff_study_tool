@@ -82,7 +82,7 @@ export function renderCard() {
       : host.isMorphologyMode()
         ? 'Everything in this grammar selection is currently marked correct. Press next to reshuffle the full selected set and run it again.'
         : unspacedRoundComplete
-          ? 'You\'ve cycled through every card in this round. Press <strong>Next →</strong> to shuffle the remaining cards and run another pass.<br><span style="color:var(--muted);font-size:13px">Use Hard / Uncertain / Easy on individual cards — they\'re hidden here because there\'s no current card.</span>'
+          ? 'Press <strong>Next →</strong> to shuffle the remaining cards and run another pass, or <strong>↻ Reset</strong> to start the whole deck over.'
           : 'Every card in this deck is archived.<br><span style="color:var(--muted);font-size:13px">Press <strong>↻ Reset</strong> to bring them all back and run the deck again. Archived cards stay archived until you reset or pick a new session.</span>';
 
     area.innerHTML = `

@@ -558,10 +558,11 @@ export function toggleSpacedRepetition() {
 // Easy-archived cards persist indefinitely until the user resets.
 export function toggleUnspacedDailyReset() {
   runtime.unspacedAutoResetEnabled = !runtime.unspacedAutoResetEnabled;
-  if (runtime.unspacedAutoResetEnabled && !runtime.lastUnspacedArchiveDayKey) {
-    // Seed the key so we don't immediately wipe archives the first time
-    // the toggle is flipped on — the auto-clear is meant for the *next*
-    // 5 AM boundary, not the moment of opt-in.
+  if (runtime.unspacedAutoResetEnabled) {
+    // Re-seed on every opt-in so the auto-clear fires on the *next*
+    // 5 AM boundary, never the moment of opt-in. Without this, flipping
+    // the toggle off+on across a day rollover would surprise the user
+    // by wiping archives the instant they re-enable it.
     host.noteUnspacedArchiveActivity();
   }
   host.syncToggleButtons();
