@@ -790,10 +790,12 @@ function syncLayoutVisibility() {
   if (prevBtn) {
     // Hidden in spaced/morph (those use the dedicated Undo button), and in
     // unspaced when a mark just landed (Prev morphs into Undo for that
-    // step so the confidence-impacting action can be rolled back).
-    const hidePrev = isMorphologyMode() || (runtime.spacedRepetition && !isMorphologyMode()) || unspacedHasUndo;
-    prevBtn.style.display = hidePrev ? 'none' : '';
+    // step so the confidence-impacting action can be rolled back). Also
+    // hidden when there's no card to step back to — a greyed-out Prev
+    // at the start of the deck is just visual noise.
     const atStart = !runtime.deck.length || runtime.currentIdx <= 0;
+    const hidePrev = isMorphologyMode() || (runtime.spacedRepetition && !isMorphologyMode()) || unspacedHasUndo || atStart;
+    prevBtn.style.display = hidePrev ? 'none' : '';
     prevBtn.disabled = atStart;
     prevBtn.classList.toggle('nav-disabled', atStart);
   }
