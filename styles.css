@@ -26,7 +26,6 @@
 
   /* Text size: uses `zoom` so padding scales with the text — buttons keep
      proportions instead of overflowing when the user picks a larger size. */
-  html[data-text-size="small"] body { zoom: 0.9; }
   html[data-text-size="medium"] body { zoom: 1; }
   html[data-text-size="large"] body { zoom: 1.12; }
   html[data-text-size="x-large"] body { zoom: 1.25; }
@@ -332,39 +331,26 @@
   .session-btn.special { border-color: var(--gold-dim); }
   .session-btn.special .session-tag { color: var(--gold); }
 
-  /* ── Display preferences (font + text size) ── */
+  /* ── Display preferences (font + text size) ──
+     Buttons reuse the .theme-switcher / .theme-btn segmented-control styling
+     used by the header's color-theme picker, so the pattern is consistent
+     and any cached older CSS still renders these as styled buttons. */
   .display-prefs {
-    display: flex; flex-direction: column; gap: 10px;
-    padding: 14px 18px; background: var(--surface);
-    border: 1px solid var(--border); border-radius: var(--radius);
+    display: flex; flex-direction: column; gap: 8px;
     margin-bottom: 14px;
   }
-  .display-pref-row {
+  .display-prefs-row {
     display: flex; align-items: center; gap: 12px;
     flex-wrap: wrap;
   }
-  .display-pref-label {
+  .display-prefs-label {
     font-family: var(--font-display);
     font-size: 11px; letter-spacing: 1.5px;
     text-transform: uppercase; color: var(--gold-dim);
-    flex: 0 0 auto; min-width: 84px;
+    flex: 0 0 auto; min-width: 78px;
   }
-  .pref-switcher {
-    display: inline-flex; flex-wrap: wrap;
-    border: 1px solid var(--border); border-radius: 999px;
-    overflow: hidden; background: var(--bg);
-    max-width: 100%;
-  }
-  .pref-btn {
-    background: transparent; border: 0; color: var(--muted);
-    font-family: var(--font-display); font-size: 11px;
-    letter-spacing: 1px; text-transform: uppercase;
-    padding: 7px 12px; cursor: pointer; transition: all 0.2s;
-    white-space: nowrap;
-  }
-  .pref-btn + .pref-btn { border-left: 1px solid var(--border); }
-  .pref-btn:hover { color: var(--gold); background: rgba(201,168,76,0.06); }
-  .pref-btn.active { color: var(--gold-light); background: rgba(201,168,76,0.14); }
+  .display-prefs .theme-switcher { flex: 0 0 auto; max-width: 100%; }
+  .display-prefs .theme-btn.active { color: var(--gold-light); background: rgba(201,168,76,0.14); }
 
   /* ── Controls Bar ── */
   .controls-bar {
@@ -793,6 +779,7 @@
     .controls-bar { flex-direction: column; align-items: flex-start; }
     .mode-group { display: flex; width: 100%; }
     .mode-group .mode-btn { flex: 1; text-align: center; padding: 8px 4px; }
+    .display-prefs .theme-btn { padding: 7px 10px; }
   }
 
   .mode-group {

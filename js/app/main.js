@@ -605,7 +605,7 @@ function initializeThemeMode() {
 }
 
 const FONT_FAMILY_OPTIONS = ['serif', 'sans'];
-const TEXT_SIZE_OPTIONS = ['small', 'medium', 'large', 'x-large'];
+const TEXT_SIZE_OPTIONS = ['medium', 'large', 'x-large'];
 
 function applyFontFamily(value = runtime.fontFamily, persist = true) {
   runtime.fontFamily = FONT_FAMILY_OPTIONS.includes(value) ? value : 'serif';
@@ -643,7 +643,6 @@ function applyTextSize(value = runtime.textSize, persist = true) {
 
 function syncTextSizeButtons() {
   const map = {
-    'small': 'textSizeSmallBtn',
     'medium': 'textSizeMediumBtn',
     'large': 'textSizeLargeBtn',
     'x-large': 'textSizeXLargeBtn'
