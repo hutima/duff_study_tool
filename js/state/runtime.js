@@ -108,6 +108,15 @@ export const runtime = {
   // remaining (non-archived) cards reshuffle for the next round.
   unspacedRoundSize: 0,
   unspacedRoundMarks: 0,
+  // 5 AM-cutoff day key recorded the last time an unspaced archive (Easy
+  // mark) was active. When the current day key drifts past this and
+  // unspacedAutoResetEnabled is on, the daily auto-clear wipes all
+  // unspaced 'known' marks across both vocab directions.
+  lastUnspacedArchiveDayKey: '',
+  // Off by default: Easy-archived cards persist across sessions and chapter
+  // changes until the user explicitly resets, or until they opt in to the
+  // 5 AM daily reset via the deck control toggle.
+  unspacedAutoResetEnabled: false,
   flipsSinceReshuffle: 0,         // forward navigations since last periodic reshuffle (legacy; see lastPeriodicReshuffleAt)
   lastPeriodicReshuffleAt: 0,     // timestamp (ms) of the last periodic reshuffle; throttled to ≥ 1 hour
   spacedUndoSnapshot: null,

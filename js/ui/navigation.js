@@ -50,6 +50,7 @@ let host = {
   captureSpacedUndoSnapshot: () => {},
   applySpacedReview: () => {},
   clearSpacedUndoSnapshot: () => {},
+  restoreSpacedUndo: () => {},
   clearSavedState: () => {},
   maybeReturnConfirmedDeferredCard: () => {},
   maybePeriodicReshuffle: () => {},
@@ -57,6 +58,7 @@ let host = {
   applyUnspacedSharedSchedule: () => {},
   getRemainingCards: () => [],
   resetUnspacedCycleState: () => {},
+  noteUnspacedArchiveActivity: () => {},
   saveCurrentDeckStateToBank: () => {},
   markActiveDeckRef: () => {},
   saveState: () => {},
@@ -95,6 +97,15 @@ export function navigate(dir, options = {}) {
   host.noteStudyInteraction();
 
   if (dir < 0) {
+    // Vocab unspaced: Prev is a single-level undo. Each mark/next captures
+    // a snapshot before mutating, and Prev rolls back to it. Stepping the
+    // cursor backwards no longer makes sense now that marks impact
+    // confidence — replaying the same card off-the-record would silently
+    // duplicate the previous mark's stat updates on the next forward press.
+    if (!runtime.spacedRepetition && !host.isMorphologyMode() && runtime.spacedUndoSnapshot) {
+      host.restoreSpacedUndo();
+      return;
+    }
     runtime.currentIdx = Math.max(0, runtime.currentIdx - 1);
     host.resetMorphAnswerState();
     renderCard();
@@ -116,15 +127,18 @@ export function navigate(dir, options = {}) {
       renderReview();
       renderProgress();
       host.saveState();
-    } else if (runtime.activeDeckCount === 0
-      && runtime.originalDeck.length > 0
-      && runtime.selectedKeys.length > 0) {
-      // Vocab unspaced + every card archived: the Next button visually
-      // morphs into "↻ Reset", and the keyboard equivalent does the same.
-      resetUnspacedDeckNoConfirm();
+    } else if (runtime.activeDeckCount > 0) {
+      // Vocab unspaced + end-of-round confirmation card: Next shuffles the
+      // still-active cards and starts a fresh round. (All-archived state
+      // requires the explicit Reset control — Next is a no-op there.)
+      reshuffleUnspacedRound(host.getDirectionalMarksStore());
+      runtime.isFlipped = false;
+      host.resetMorphAnswerState();
+      renderCard();
+      renderReview();
+      renderProgress();
+      host.saveState();
     }
-    // Otherwise: no auto-cycle. Vocab unspaced restart goes through the
-    // explicit "↻ Reset" button.
     return;
   }
 
@@ -193,11 +207,14 @@ export function navigate(dir, options = {}) {
 
   // Vocab unspaced: Next acts as a neutral pass — moves the current card to
   // the back of the active queue and ticks the round counter, but does not
-  // record a confidence sample or touch pass/fail/XP. Once the round
-  // completes, applyUnspacedMark reshuffles the active section, which is
-  // how the "no cards left" wrap-around naturally happens.
+  // record a confidence sample or touch pass/fail/XP. The end-of-round
+  // confirmation card lives one Next press further on, where the actual
+  // reshuffle finally fires. Next is a forward navigation — it never owns
+  // an undo, so any snapshot left over from a prior Hard/Medium/Easy mark
+  // is dropped here so Prev falls back to plain cursor navigation.
   if (runtime.currentIdx < runtime.activeDeckCount) {
     const currentCard = runtime.deck[runtime.currentIdx];
+    host.clearSpacedUndoSnapshot();
     applyUnspacedMark(currentCard, 'pass', { skipRecording: true });
     host.maybePeriodicReshuffle();
     host.resetMorphAnswerState();
@@ -235,6 +252,7 @@ export function markCard(outcome) {
       navigate(1, { skipAutoReview: true });
     }
   } else {
+    host.captureSpacedUndoSnapshot();
     applyUnspacedMark(currentCard, outcome);
     renderCard();
   }
@@ -270,6 +288,7 @@ function applyUnspacedMark(card, outcome, options = {}) {
 
   if (normalizedOutcome === 'easy') {
     directionalMarks[card.id] = 'known';
+    host.noteUnspacedArchiveActivity();
     if (fromIdx >= 0) {
       runtime.deck.splice(fromIdx, 1);
       runtime.deck.push(card);
@@ -292,16 +311,19 @@ function applyUnspacedMark(card, outcome, options = {}) {
   runtime.activeDeckCount = runtime.deck.filter(c => directionalMarks[c.id] !== 'known').length;
   runtime.unspacedRoundMarks = (Number(runtime.unspacedRoundMarks) || 0) + 1;
 
-  // Round complete: reshuffle the still-active cards and start a new round.
+  // Round complete: park at the end-of-deck so renderCard shows the
+  // "Press Next to shuffle" confirmation. navigate(1) at deck.length is
+  // where the actual reshuffle happens, so the learner gets a chance to
+  // pause/reset instead of being yanked into a new shuffle automatically.
   const roundSize = Number(runtime.unspacedRoundSize) || 0;
-  if (roundSize > 0 && runtime.unspacedRoundMarks >= roundSize && runtime.activeDeckCount > 0) {
-    reshuffleUnspacedRound(directionalMarks);
-  } else if (runtime.activeDeckCount === 0) {
+  if (runtime.activeDeckCount === 0) {
     // Everything is archived; freeze the cursor at the end so renderCard()
     // shows the done state instead of looping back to a known card.
     runtime.currentIdx = runtime.deck.length;
     runtime.unspacedRoundSize = 0;
     runtime.unspacedRoundMarks = 0;
+  } else if (roundSize > 0 && runtime.unspacedRoundMarks >= roundSize) {
+    runtime.currentIdx = runtime.deck.length;
   } else {
     // Mid-round: the splice shifted later cards into our slot, so currentIdx
     // already points at the next card. Clamp to the new active count.
@@ -527,6 +549,22 @@ export function toggleSpacedRepetition() {
   renderCard();
   renderProgress();
   renderReview();
+  host.saveState();
+}
+
+// Toggle the unspaced "Daily archive reset" preference. When on, the next
+// time the app sees the 5 AM-cutoff day key has rolled over from the last
+// archive activity it wipes the unspaced 'known' marks. When off,
+// Easy-archived cards persist indefinitely until the user resets.
+export function toggleUnspacedDailyReset() {
+  runtime.unspacedAutoResetEnabled = !runtime.unspacedAutoResetEnabled;
+  if (runtime.unspacedAutoResetEnabled && !runtime.lastUnspacedArchiveDayKey) {
+    // Seed the key so we don't immediately wipe archives the first time
+    // the toggle is flipped on — the auto-clear is meant for the *next*
+    // 5 AM boundary, not the moment of opt-in.
+    host.noteUnspacedArchiveActivity();
+  }
+  host.syncToggleButtons();
   host.saveState();
 }
 
