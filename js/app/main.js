@@ -208,7 +208,8 @@ import {
   configureProgress,
   renderProgress,
   renderReview,
-  returnSeenCardToDeck
+  returnSeenCardToDeck,
+  setReviewSortMode
 } from '../ui/progress.js';
 import { configureRender, renderCard, flipCard } from '../ui/render.js';
 import {
@@ -346,7 +347,6 @@ configureProgress({
   getDueCount: (cards) => getDueCount(cards),
   getRemainingCards: () => getRemainingCards(),
   getHighConfidenceCount: () => getHighConfidenceCount(),
-  getDeckAggregateStats: (cards) => getDeckAggregateStats(cards),
   getWordProgress: (id, opts) => getWordProgress(id, opts),
   isMorphologyMode: () => isMorphologyMode(),
   renderAnalyticsOverlay: () => renderAnalyticsOverlay(),
@@ -1622,6 +1622,7 @@ const GLOBAL_CLICK_HANDLERS = {
   closeResetUnspacedModal, confirmResetUnspacedMarks,
   openResetStatsModal, closeResetStatsModal,
   confirmResetStatsKeepSettings, confirmResetToStart,
+  setReviewSortMode,
   reshuffleEligible,
   fastForwardOneDay, fastForwardOneWeek,
   restoreSpacedUndo, setAppProfile, setStudyMode, setThemeMode, setFontFamily, setTextSize,
