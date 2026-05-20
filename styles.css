@@ -1330,6 +1330,13 @@
     text-align: center;
   }
 
+  /* Set all to now is the recommended-but-still-noteworthy action, so
+     it gets the gold tint while Cancel keeps the default muted look. */
+  .reset-spaced-primary-btn {
+    color: var(--gold-light);
+    border-color: var(--gold-dim);
+  }
+
   /* Destructive action: on its own row below the safer choices, centered,
      and styled in red so it's obviously distinct. Sized a bit smaller than
      the top row so the dangerous option doesn't read as the prominent one. */
@@ -1868,6 +1875,10 @@
     border-color: var(--gold-dim);
     color: var(--gold);
     background: rgba(142,108,30,0.06);
+  }
+  html[data-theme="light"] .reset-spaced-primary-btn {
+    color: var(--gold);
+    border-color: var(--gold-dim);
   }
   html[data-theme="light"] .reset-spaced-danger-btn {
     color: var(--accent-red);
