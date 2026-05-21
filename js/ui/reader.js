@@ -37,7 +37,32 @@ function sortReaderDrillsByLevel(drills) {
 // within a chapter, not absolute pedagogical placement.
 const SUBORDINATOR_RE = /(?:^|[\s·,.;:])(ὅτι|ἵνα|ἐάν|ὡς|ὅπως|καθώς|καθὼς|ἐπεί|ἐπειδή|ἕως|πρίν|ὅπου|ὅταν|ἀφ['ʼ’]οὗ|μέχρι|ὅθεν)(?=$|[\s·,.;:])/giu;
 const PARTICIPLE_RE = /(μενος|μενον|μένη|μένου|μένων|μένῳ|μένοις|μέναις|μέναι|νοντος|νοντες|νοντι|νόντων|σαντος|σαντες|σαντι|σάντων|θέντος|θέντες|θέντι|θέντων|θεῖσα|θείς|θέν)$/iu;
-const INFINITIVE_RE = /(ειν|εῖν|σαι|σθαι|σθῆναι|ναι|θῆναι)$/iu;
+const INFINITIVE_RE = /(ειν|εῖν|σθαι|σθῆναι|θῆναι|σαι|ναι)$/iu;
+// High-frequency narrative discourse participles ("said", "answered", "going",
+// "taking") — present in nearly every gospel pericope. They satisfy the
+// participle regex but rarely add real translation difficulty, so they're
+// counted with a smaller weight.
+const DISCOURSE_PARTICIPLES = new Set([
+  'λέγων', 'λέγοντες', 'λέγουσα', 'λέγουσαι', 'λέγοντος', 'λέγοντι',
+  'εἰπών', 'εἰποῦσα', 'εἰπόντες', 'εἰπόντος',
+  'ἀποκριθείς', 'ἀποκριθεὶς', 'ἀποκριθεῖσα', 'ἀποκριθέντες',
+  'ἐλθών', 'ἐλθὼν', 'ἐλθόντες', 'ἐλθοῦσα', 'ἐλθόντος',
+  'ἀπελθών', 'ἀπελθὼν', 'ἀπελθόντες', 'ἀπελθοῦσα',
+  'λαβών', 'λαβὼν', 'λαβόντες', 'λαβοῦσα',
+  'ἰδών', 'ἰδὼν', 'ἰδόντες', 'ἰδοῦσα',
+  'ἀκούσας', 'ἀκούσαντες', 'ἀκούσασα',
+  'προσελθών', 'προσελθὼν', 'προσελθόντες', 'προσελθοῦσα',
+  'ἀναστάς', 'ἀναστὰς',
+]);
+// Words that end in -ναι / -σαι / -ειν but aren't infinitives. Vocatives like
+// Γύναι and pronominal/adjectival forms like πᾶσαι show up in NT prose.
+const INFINITIVE_FALSE_POSITIVES = new Set([
+  'γύναι', 'ναί', 'οὐχί', 'πᾶσαι', 'αὐταί', 'αὗται', 'τινες', 'ἥτις',
+]);
+
+function stripAccentsLower(s) {
+  return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+}
 
 function tokenizeGreekVerse(text) {
   if (!text) return [];
@@ -58,17 +83,28 @@ function computeVerseDifficulty(greekText) {
   const subordinators = (raw.match(SUBORDINATOR_RE) || []).length;
   score += subordinators * 2.0;
 
-  const participles = words.filter(w => PARTICIPLE_RE.test(w)).length;
-  score += participles * 1.6;
+  let participleScore = 0;
+  for (const w of words) {
+    if (!PARTICIPLE_RE.test(w)) continue;
+    participleScore += DISCOURSE_PARTICIPLES.has(w) ? 0.4 : 1.4;
+  }
+  score += participleScore;
 
-  const infinitives = words.filter(w => INFINITIVE_RE.test(w)).length;
-  score += infinitives * 1.4;
+  const infinitives = words.filter(w => {
+    if (!INFINITIVE_RE.test(w)) return false;
+    return !INFINITIVE_FALSE_POSITIVES.has(stripAccentsLower(w));
+  }).length;
+  score += infinitives * 1.2;
 
   const longWords = words.filter(w => w.length >= 9).length;
   score += longWords * 0.5;
 
-  const clauseBreaks = (raw.match(/[·,;]/g) || []).length;
-  score += clauseBreaks * 0.5;
+  // Clause breaks only signal complexity in longer verses — a comma between
+  // three words isn't real subordination, just punctuation.
+  if (words.length >= 8) {
+    const clauseBreaks = (raw.match(/[·;]|,(?=\s)/g) || []).length;
+    score += clauseBreaks * 0.4;
+  }
 
   if (/ἂν\b/u.test(raw)) score += 1.0; // potential / contingent constructions
 
