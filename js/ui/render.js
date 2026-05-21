@@ -214,11 +214,13 @@ export function renderCard() {
   const prepStar = host.isMultiCasePreposition(card) ? '★ ' : '';
   const greekDisplay = `${prepStar}${host.formatGreekHeadword(card.g)}`;
   const englishDisplay = `${prepStar}${card.e || '—'}`;
+  const requiredLabelHTML = `<span class="card-required-label card-required-label-${card.required ? 'req' : 'opt'}">(${card.required ? 'req.' : 'opt.'})</span>`;
 
   let frontHTML, backHTML;
   if (!runtime.directionToGreek) {
     frontHTML = `
         <div class="card-face card-front">
+          ${requiredLabelHTML}
           <span class="card-label">Greek</span>
           <div class="card-greek">${greekDisplay}</div>
           <div class="card-hint">${sourceLabelDisplay}</div>
@@ -226,6 +228,7 @@ export function renderCard() {
         </div>`;
     backHTML = `
         <div class="card-face card-back">
+          ${requiredLabelHTML}
           <span class="card-label">English</span>
           <div class="card-english">${englishDisplay}</div>
           <div class="card-greek-small">${host.formatGreekHeadword(card.g)}</div>
@@ -235,6 +238,7 @@ export function renderCard() {
   } else {
     frontHTML = `
         <div class="card-face card-front">
+          ${requiredLabelHTML}
           <span class="card-label">English</span>
           <div class="card-english">${englishDisplay}</div>
           <div class="card-hint">${sourceLabelDisplay}</div>
@@ -242,6 +246,7 @@ export function renderCard() {
         </div>`;
     backHTML = `
         <div class="card-face card-back">
+          ${requiredLabelHTML}
           <span class="card-label">Greek</span>
           <div class="card-greek">${greekDisplay}</div>
           <div class="card-hint">${host.transliterateGreek(host.formatGreekHeadword(card.g))}${advancedCountSuffix}</div>
