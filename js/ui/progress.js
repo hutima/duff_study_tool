@@ -94,6 +94,7 @@ export function renderReview() {
       unseenCount += 1;
     }
   });
+  const deckCount = runtime.originalDeck.length;
 
   const deckTagEl = document.getElementById('reviewDeckTag');
   if (deckTagEl) {
@@ -103,6 +104,7 @@ export function renderReview() {
   }
 
   document.getElementById('reviewStats').innerHTML = `
+      <span class="stat-deck">▦ Cards in deck: ${deckCount}</span>
       <span class="stat-known">✓ High confidence: ${highCount}</span>
       <span class="stat-unsure">○ Low confidence: ${lowCount}</span>
       <span class="stat-total">· Unseen: ${unseenCount}</span>`;
