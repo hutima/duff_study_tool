@@ -32,6 +32,68 @@ function sortReaderDrillsByLevel(drills) {
   }).map(x => x.d);
 }
 
+// Heuristic translation-difficulty score for a Greek verse. Higher = harder.
+// Mixes length with rough morphology cues; intended only for relative ranking
+// within a chapter, not absolute pedagogical placement.
+const SUBORDINATOR_RE = /(?:^|[\s·,.;:])(ὅτι|ἵνα|ἐάν|ὡς|ὅπως|καθώς|καθὼς|ἐπεί|ἐπειδή|ἕως|πρίν|ὅπου|ὅταν|ἀφ['ʼ’]οὗ|μέχρι|ὅθεν)(?=$|[\s·,.;:])/giu;
+const PARTICIPLE_RE = /(μενος|μενον|μένη|μένου|μένων|μένῳ|μένοις|μέναις|μέναι|νοντος|νοντες|νοντι|νόντων|σαντος|σαντες|σαντι|σάντων|θέντος|θέντες|θέντι|θέντων|θεῖσα|θείς|θέν)$/iu;
+const INFINITIVE_RE = /(ειν|εῖν|σαι|σθαι|σθῆναι|ναι|θῆναι)$/iu;
+
+function tokenizeGreekVerse(text) {
+  if (!text) return [];
+  return String(text)
+    .replace(/[·,.;:!?“”"()]/gu, ' ')
+    .split(/\s+/)
+    .filter(Boolean);
+}
+
+function computeVerseDifficulty(greekText) {
+  const raw = String(greekText || '');
+  if (!raw) return 0;
+  const words = tokenizeGreekVerse(raw);
+  if (!words.length) return 0;
+
+  let score = words.length * 1.0;
+
+  const subordinators = (raw.match(SUBORDINATOR_RE) || []).length;
+  score += subordinators * 2.0;
+
+  const participles = words.filter(w => PARTICIPLE_RE.test(w)).length;
+  score += participles * 1.6;
+
+  const infinitives = words.filter(w => INFINITIVE_RE.test(w)).length;
+  score += infinitives * 1.4;
+
+  const longWords = words.filter(w => w.length >= 9).length;
+  score += longWords * 0.5;
+
+  const clauseBreaks = (raw.match(/[·,;]/g) || []).length;
+  score += clauseBreaks * 0.5;
+
+  if (/ἂν\b/u.test(raw)) score += 1.0; // potential / contingent constructions
+
+  return score;
+}
+
+function assignVerseDifficultyRanks(verses) {
+  if (!Array.isArray(verses) || !verses.length) return [];
+  const scored = verses.map((v, i) => ({ v, i, s: computeVerseDifficulty(v && v.g) }));
+  scored.sort((a, b) => (a.s - b.s) || (a.i - b.i));
+
+  const n = scored.length;
+  // Single verse: skip a band (no relative comparison to make).
+  if (n === 1) return [{ verse: scored[0].v, band: null }];
+
+  return scored.map((row, rank) => {
+    const pct = rank / (n - 1);
+    let band;
+    if (pct <= 1 / 3) band = 'e';
+    else if (pct <= 2 / 3) band = 'm';
+    else band = 'h';
+    return { verse: row.v, band };
+  });
+}
+
 export function renderReaderModule() {
   const area = document.getElementById('cardArea');
   if (!area) return;
@@ -80,8 +142,9 @@ export function renderReaderModule() {
         ? `Verses (${verses.length}, ${versesWithTranslations} with translation)`
         : `Verses (${verses.length})`;
       html += `<details class="reader-verses-block" open><summary class="reader-verses-header">${verseLabel}</summary><div class="reader-verse-list">`;
-      verses.forEach((verse, vIdx) => {
-        html += renderReaderVerseHtml(chapterNum, vIdx, verse);
+      const ranked = assignVerseDifficultyRanks(verses);
+      ranked.forEach((entry, vIdx) => {
+        html += renderReaderVerseHtml(chapterNum, vIdx, entry.verse, entry.band);
       });
       html += '</div></details>';
     }
@@ -180,7 +243,15 @@ function renderReaderDrillHtml(chapterNum, idx, drill) {
     </div>`;
 }
 
-function renderReaderVerseHtml(chapterNum, vIdx, verse) {
+function difficultyBadgeHtml(band) {
+  if (!band) return '';
+  const letter = band === 'e' ? 'E' : band === 'm' ? 'M' : 'H';
+  const titleMap = { e: 'Easier in this chapter', m: 'Moderate in this chapter', h: 'Harder in this chapter' };
+  const title = titleMap[band] || '';
+  return `<span class="reader-verse-difficulty reader-verse-difficulty-${band}" title="${title}" aria-label="${title}">${letter}</span>`;
+}
+
+function renderReaderVerseHtml(chapterNum, vIdx, verse, band) {
   if (!verse) return '';
   const greek = escapeHtml(verse.g || '');
   const ref = escapeHtml(verse.r || '');
@@ -189,9 +260,10 @@ function renderReaderVerseHtml(chapterNum, vIdx, verse) {
     ? literal
     : (literal && typeof literal === 'object' ? (literal.en || '') : '');
   const noteText = (literal && typeof literal === 'object') ? (literal.note || '') : '';
+  const badge = difficultyBadgeHtml(band);
 
   if (!literalText) {
-    return `<div class="reader-verse"><span class="reader-verse-greek">${greek}</span><span class="reader-verse-ref">${ref}</span></div>`;
+    return `<div class="reader-verse"><span class="reader-verse-greek">${badge}${greek}</span><span class="reader-verse-ref">${ref}</span></div>`;
   }
 
   const id = readerVerseRevealId(chapterNum, vIdx);
@@ -199,7 +271,7 @@ function renderReaderVerseHtml(chapterNum, vIdx, verse) {
   return `
     <div class="reader-verse reader-verse-with-drill">
       <div class="reader-verse-row">
-        <span class="reader-verse-greek">${greek}</span>
+        <span class="reader-verse-greek">${badge}${greek}</span>
         <span class="reader-verse-ref">${ref}</span>
       </div>
       <details class="reader-verse-reveal" id="${id}">
