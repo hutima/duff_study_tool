@@ -117,6 +117,13 @@ export const runtime = {
   unspacedPendingRecycle: false,
   unspacedCycleState: {},
   unspacedDeferredIds: new Set(), // 'pass' and 'again' cards excluded from current pass; reappear in next cycle
+  // Cards Hard/Uncertain-marked in the current unspaced round, awaiting the
+  // next reshuffle. Sits between active and archived in the deck layout.
+  // In-memory only — on reload everything unmarked goes back to active so a
+  // fresh round starts. Never persisted (Sets aren't in saveStateImpl's
+  // allow-list).
+  unspacedMiddleIds: new Set(),
+  unspacedMiddleCount: 0,
   // Round bookkeeping for the unspaced flip-deck flow. A "round" is one pass
   // through the active deck — Hard/Uncertain bump the card to the back of the
   // active queue (it'll reappear in the same round); Easy archives it. When

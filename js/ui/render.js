@@ -67,7 +67,10 @@ export function renderCard() {
 
   if ((!runtime.spacedRepetition && runtime.currentIdx >= runtime.deck.length) || (runtime.spacedRepetition && runtime.currentIdx >= runtime.activeDeckCount)) {
     const unspacedVocab = !runtime.spacedRepetition && !host.isMorphologyMode();
-    const unspacedRoundComplete = unspacedVocab && runtime.activeDeckCount > 0;
+    // Round complete = active is empty AND middle still has cards waiting to
+    // reshuffle. If middle is empty too, everything is archived and the
+    // "Session Confirmed" state takes over instead.
+    const unspacedRoundComplete = unspacedVocab && runtime.unspacedMiddleCount > 0;
 
     const doneTitle = runtime.spacedRepetition
       ? 'No cards currently due ✦'

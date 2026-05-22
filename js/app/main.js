@@ -1173,6 +1173,8 @@ function buildUndoSnapshot(extra = {}) {
     unspacedPendingRecycle: runtime.unspacedPendingRecycle,
     unspacedRoundSize: runtime.unspacedRoundSize,
     unspacedRoundMarks: runtime.unspacedRoundMarks,
+    unspacedMiddleIds: Array.from(runtime.unspacedMiddleIds || []),
+    unspacedMiddleCount: runtime.unspacedMiddleCount || 0,
     unspacedCycleState: cloneForUndo(runtime.unspacedCycleState),
     lastUnspacedArchiveDayKey: runtime.lastUnspacedArchiveDayKey,
     morphAnswerState: cloneForUndo(runtime.morphAnswerState),
@@ -1226,6 +1228,8 @@ function applyUndoSnapshot(snapshot) {
   runtime.unspacedPendingRecycle = !!snapshot.unspacedPendingRecycle;
   if (Number.isFinite(snapshot.unspacedRoundSize)) runtime.unspacedRoundSize = snapshot.unspacedRoundSize;
   if (Number.isFinite(snapshot.unspacedRoundMarks)) runtime.unspacedRoundMarks = snapshot.unspacedRoundMarks;
+  if (Array.isArray(snapshot.unspacedMiddleIds)) runtime.unspacedMiddleIds = new Set(snapshot.unspacedMiddleIds);
+  if (Number.isFinite(snapshot.unspacedMiddleCount)) runtime.unspacedMiddleCount = snapshot.unspacedMiddleCount;
   if (snapshot.unspacedCycleState) runtime.unspacedCycleState = cloneForUndo(snapshot.unspacedCycleState);
   if (typeof snapshot.lastUnspacedArchiveDayKey === 'string') runtime.lastUnspacedArchiveDayKey = snapshot.lastUnspacedArchiveDayKey;
   if (isMorphologyMode() && snapshot.morphAnswerState) {
@@ -1309,21 +1313,29 @@ function restoreSpacedUndo() {
 
 function buildStudyDeck(cards, options = {}) {
   if (!runtime.spacedRepetition) {
-    // Unspaced flip deck: keep the deck partitioned as [active..., archived...].
-    // markCard's "move to end of active section" logic assumes that layout, and
-    // it makes "Next" navigation a straight forward scan past archived cards.
-    const active = cards.filter(card => runtime.marks[card.id] !== 'known');
+    // Unspaced flip deck has three sections: [active..., middle..., known...].
+    //   active — cards not yet seen this round (the in-flight pile).
+    //   middle — cards Hard/Uncertain-marked this round, parked until the
+    //            next reshuffle so they don't reappear before the round ends.
+    //   known  — Easy-archived cards; stay out until the user resets.
+    // Default: every fresh build starts a new round, so middle clears and
+    // every unmarked card collapses back into active. Callers that need to
+    // preserve mid-round middle membership pass preserveUnspacedRound: true.
+    if (options.preserveUnspacedRound !== true) {
+      runtime.unspacedMiddleIds = new Set();
+    }
+    const middleIds = runtime.unspacedMiddleIds || new Set();
+    const active = cards.filter(card => runtime.marks[card.id] !== 'known' && !middleIds.has(card.id));
+    const middle = cards.filter(card => runtime.marks[card.id] !== 'known' && middleIds.has(card.id));
     const known = cards.filter(card => runtime.marks[card.id] === 'known');
     runtime.activeDeckCount = active.length;
+    runtime.unspacedMiddleCount = middle.length;
     const orderedActive = runtime.shuffled ? shuffleArray([...active]) : [...active];
-    // Default: every fresh build starts a new round so the round counter
-    // matches the deck we're about to show. Callers (notably restoreState)
-    // that need to preserve mid-round bookkeeping pass preserveUnspacedRound.
     if (options.preserveUnspacedRound !== true) {
       runtime.unspacedRoundSize = orderedActive.length;
       runtime.unspacedRoundMarks = 0;
     }
-    return [...orderedActive, ...known];
+    return [...orderedActive, ...middle, ...known];
   }
 
   // Three-section spaced deck: [active..., middle..., deferred...].
