@@ -145,8 +145,8 @@
               choices: [
                 "present active indicative, 1st plural",
                 "present active indicative, 2nd plural",
-                "imperfect active indicative, 1st plural",
-                "present middle/passive indicative, 1st plural"
+                "present active indicative, 3rd plural",
+                "present active indicative, 1st singular"
               ] },
             { form: "λύουσι(ν)", prompt: "Parse this verb form.",
               answer: "present active indicative, 3rd plural",
@@ -154,7 +154,7 @@
                 "present active indicative, 3rd plural",
                 "present active indicative, 3rd singular",
                 "present active indicative, 1st plural",
-                "future active indicative, 3rd plural"
+                "present active indicative, 2nd plural"
               ] },
             { form: "βλέπει",
               prompt: "Parse this verb form.",
@@ -163,7 +163,7 @@
                 "present active indicative, 3rd singular ('he/she/it sees')",
                 "present active indicative, 2nd singular",
                 "present active indicative, 3rd plural",
-                "imperfect active indicative, 3rd singular"
+                "present active indicative, 1st singular"
               ],
               note: "-ει is the standard 3rd-singular ending on the present active indicative." },
             { form: "ὁ ἄνθρωπος ἀκούει τὸν λόγον.",
@@ -200,7 +200,7 @@
                 "present active indicative, 3rd singular ('he/she/it loves')",
                 "present active indicative, 2nd singular",
                 "present active indicative, 3rd plural",
-                "imperfect active indicative, 3rd singular"
+                "present active indicative, 1st singular"
               ],
               note: "ε + ει → ει: φιλέ-ει → φιλεῖ. The circumflex marks the contraction." },
             { form: "ποιοῦμεν",
@@ -209,8 +209,8 @@
               choices: [
                 "present active indicative, 1st plural ('we do/make')",
                 "present active indicative, 1st singular",
-                "future active indicative, 1st plural",
-                "imperfect active indicative, 1st plural"
+                "present active indicative, 2nd plural",
+                "present active indicative, 3rd plural"
               ],
               note: "ποιέ-ομεν → ποιοῦμεν (ε + ο → ου)." },
             { form: "contraction rule",
@@ -423,7 +423,7 @@
                 "genitive of source / separation ('away from')",
                 "genitive of possession ('of')",
                 "genitive of time ('during')",
-                "genitive absolute"
+                "the indirect-object case (Greek's term for the dative)"
               ],
               note: "Many of the prepositions taught in Ch 4 (ἀπό, ἐκ, παρά) take genitives of source." },
             { form: "dative of means / instrument",
@@ -553,7 +553,7 @@
                 "O word, you hear the Lord",
                 "Lord, hear the word!"
               ],
-              note: "κύριε is vocative — direct address. ἀκούεις is 2nd sg. indicative ('you hear'), not imperative." }
+              note: "κύριε is vocative — direct address. ἀκούεις is the regular 2nd sg. ('you hear'), not a command." }
           ]
         },
         {
@@ -612,7 +612,7 @@
               choices: [
                 "as the 3rd-person pronoun ('he, she, it, they') in its oblique cases — gen., dat., acc.",
                 "always as the demonstrative 'this' — αὐτός is just another form of οὗτος",
-                "always as the relative pronoun 'who' — equivalent to ὅς, ἥ, ὅ",
+                "always as a possessive ('my, your, his') — like ἐμός or σός",
                 "always as the article 'the' — αὐτός is a third form of the definite article"
               ],
               note: "Deeper uses (emphatic, identifying) are introduced in Ch 9." },
@@ -661,7 +661,7 @@
     // ─────────────────────────────────────────────────────────────
     "4": {
       label: "Chapter 4 Grammar",
-      notes: "Prepositions (basic and multi-case), instruments and agents, compound verbs, questions, and negatives",
+      notes: "Prepositions (basic and multi-case), compound verbs, questions, and negatives",
       items: [
         {
           family: "4.1 Basic Prepositions",
@@ -759,63 +759,7 @@
           ]
         },
         {
-          family: "4.3 Instruments and Agents",
-          lemma: "ὑπό / διά / dative",
-          gloss: "who or what causes the action",
-          questions: [
-            { form: "ὑπό + genitive",
-              prompt: "How does Greek express the personal AGENT (the doer) of a passive verb?",
-              answer: "ὑπό + genitive — 'by (a person)'",
-              choices: [
-                "ὑπό + genitive — 'by (a person)'",
-                "ἐν + dative — 'by' a person",
-                "ἀπό + accusative — 'by' a person",
-                "the bare nominative"
-              ],
-              note: "ἐβαπτίσθη ὑπὸ Ἰωάννου = 'he was baptised by John'." },
-            { form: "διά + genitive (agency)",
-              prompt: "Besides 'through (location)', how does διά + gen. express a doer?",
-              answer: "as an intermediate agent — 'through (someone)'",
-              choices: [
-                "as an intermediate agent — 'through (someone)'",
-                "as the direct agent like ὑπό + gen.",
-                "as the indirect object",
-                "as the location of the action"
-              ],
-              note: "Common in NT: διὰ Χριστοῦ = 'through Christ' (he is the means by which it happens)." },
-            { form: "dative of means",
-              prompt: "How does Greek express the IMPERSONAL instrument ('with a sword', 'by a word')?",
-              answer: "the bare dative — dative of means / instrument",
-              choices: [
-                "the bare dative — dative of means / instrument",
-                "always ὑπό + gen. (the personal-agent construction, even for things)",
-                "always διά + acc. — 'because of' covers both means and cause",
-                "the bare accusative — Greek's all-purpose adverbial case"
-              ],
-              note: "λόγῳ ('by a word'), μαχαίρῃ ('with a sword'). Often reinforced with ἐν + dat." },
-            { form: "agent vs instrument",
-              prompt: "Which case-construction marks a PERSONAL agent vs an IMPERSONAL instrument?",
-              answer: "personal: ὑπό + gen.; impersonal: bare dative",
-              choices: [
-                "personal: ὑπό + gen.; impersonal: bare dative",
-                "personal → dative; impersonal → ὑπό + gen.",
-                "both use ὑπό + gen.",
-                "both use the bare dative"
-              ] },
-            { form: "ὁ λόγος ἀκούεται ὑπὸ τοῦ ἀνθρώπου.",
-              prompt: "Translate.",
-              answer: "the word is heard by the man",
-              choices: [
-                "the word is heard by the man",
-                "the word hears the man",
-                "the man hears the word",
-                "the word is heard in the man"
-              ],
-              note: "ὑπό + genitive = 'by' (personal agent of a passive verb)." }
-          ]
-        },
-        {
-          family: "4.4 Compound Verbs",
+          family: "4.3 Compound Verbs",
           lemma: "ἐκβάλλω, ἀπολύω, παρακαλέω",
           gloss: "preposition + verb",
           questions: [
@@ -870,7 +814,7 @@
           ]
         },
         {
-          family: "4.5 Questions",
+          family: "4.4 Questions",
           lemma: "πῶς, ποῦ, τίς, question mark",
           gloss: "asking questions in Greek",
           questions: [
@@ -915,7 +859,7 @@
           ]
         },
         {
-          family: "4.6 Negatives",
+          family: "4.5 Negatives",
           lemma: "οὐ, οὐκ, οὐχ",
           gloss: "'not' in Greek",
           questions: [
@@ -926,7 +870,7 @@
                 "οὐ + cons.; οὐκ + smooth-breathing vowel; οὐχ + rough-breathing vowel",
                 "they are interchangeable — pick any of the three regardless of context",
                 "οὐ is the singular form; οὐκ is the plural form (and οὐχ the dual)",
-                "οὐχ is reserved for past-tense verbs; οὐ / οὐκ for present and future"
+                "οὐχ is used with the article; οὐ / οὐκ only on verbs"
               ],
               note: "οὐ βλέπει / οὐκ ἀκούει / οὐχ ὁρᾷ — pick the form that matches what follows." },
             { form: "οὐ position",
@@ -939,16 +883,6 @@
                 "anywhere — position is free"
               ],
               note: "οὐ λέγω = 'I am not speaking'." },
-            { form: "οὐ negates",
-              prompt: "Which type of clause does οὐ normally negate?",
-              answer: "a factual statement (indicative mood)",
-              choices: [
-                "a factual statement (indicative mood)",
-                "a command (imperative)",
-                "a subordinate purpose clause (subjunctive)",
-                "an infinitive"
-              ],
-              note: "μή — the other negative — is used with non-indicative moods (introduced from Ch 7 onward)." },
             { form: "οὐκ ἔστιν",
               prompt: "Translate.",
               answer: "'he/she/it is not' — οὐκ + ἐστίν (smooth-breathing vowel)",
@@ -956,7 +890,7 @@
                 "'he/she/it is not' — οὐκ + ἐστίν (smooth-breathing vowel)",
                 "'he is' — οὐκ is enclitic and means 'truly'",
                 "'they are not' — οὐκ marks plural",
-                "'he was not' — οὐκ implies past tense"
+                "'he was not' — οὐκ marks a former state"
               ] },
             { form: "οὐ βλέπει τὸν Χριστόν.",
               prompt: "Translate.",
@@ -965,9 +899,9 @@
                 "he does not see Christ",
                 "Christ does not see him",
                 "he sees no one",
-                "he is not seen by Christ"
+                "he is not Christ"
               ],
-              note: "οὐ stands immediately before the verb it negates; it negates indicative statements." }
+              note: "οὐ stands immediately before the verb it negates." }
           ]
         }
       ]
@@ -990,7 +924,7 @@
                 "masculine = 2nd decl., feminine = 1st decl., neuter = 2nd decl. (e.g., καλός, καλή, καλόν)",
                 "masc. = 2nd decl., fem. = 2nd decl., neut. = 1st decl. (one mismatch)",
                 "all three genders use the 1st declension (every Greek adjective is feminine-like)",
-                "all three genders use the 3rd declension on a consonant stem"
+                "all three genders use the 2nd declension, no feminine pattern"
               ] },
             { form: "agreement",
               prompt: "An adjective agrees with its noun in which categories?",
@@ -1016,7 +950,7 @@
               choices: [
                 "masc. and fem. share -ος; only neuter is -ον",
                 "they have no gender at all",
-                "they are 3rd declension throughout",
+                "they fix as masculine no matter the noun",
                 "they are indeclinable"
               ],
               note: "ζωὴ αἰώνιος = 'eternal life' (αἰώνιος used for fem. ζωή — no separate αἰωνία form)." },
@@ -1084,11 +1018,11 @@
           gloss: "I am",
           questions: [
             { form: "εἰμί", prompt: "Identify this form.", answer: "1st singular ('I am')",
-              choices: ["1st singular ('I am')", "3rd singular ('he/she/it is')", "1st plural ('we are')", "infinitive ('to be')"] },
+              choices: ["1st singular ('I am')", "3rd singular ('he/she/it is')", "1st plural ('we are')", "2nd singular ('you are')"] },
             { form: "ἐστίν", prompt: "Identify this form.", answer: "3rd singular ('he/she/it is')",
               choices: ["3rd singular ('he/she/it is')", "2nd singular ('you are')", "3rd plural ('they are')", "1st singular ('I am')"] },
             { form: "εἰσίν", prompt: "Identify this form.", answer: "3rd plural ('they are')",
-              choices: ["3rd plural ('they are')", "3rd singular ('he/she/it is')", "2nd plural ('you all are')", "infinitive"] },
+              choices: ["3rd plural ('they are')", "3rd singular ('he/she/it is')", "2nd plural ('you all are')", "1st plural ('we are')"] },
             { form: "εἰμί",
               prompt: "What kind of verb is εἰμί syntactically?",
               answer: "an equative (linking) verb — both sides are nominative",
@@ -1272,15 +1206,6 @@
                 "the noun's case shifts to nominative"
               ],
               note: "πάντα δι’ αὐτοῦ ἐγένετο = 'ALL things came into being through him' — πάντα fronted for stress." },
-            { form: "postpositives",
-              prompt: "Which kind of word CANNOT stand first in its clause in Greek?",
-              answer: "postpositives — like δέ, γάρ, οὖν, μέν (introduced in Ch 9)",
-              choices: [
-                "postpositives — like δέ, γάρ, οὖν, μέν (introduced in Ch 9)",
-                "nouns — they must follow the verb",
-                "verbs — they must always come last",
-                "prepositions — they must always come last"
-              ] },
             { form: "τὸν θεὸν ἀκούει ὁ ἄνθρωπος.",
               prompt: "Translate, capturing the fronted emphasis.",
               answer: "God — the man hears him",
@@ -1305,7 +1230,7 @@
                 "'there is / there are' — existential use of εἰμί",
                 "'he/she/it is' — equative use, with a hidden subject",
                 "'he/she/it is going' — εἰμί is suddenly motion-verb",
-                "'he/she/it is being' — passive of an active verb"
+                "'he/she/it possesses' — εἰμί can mean 'have'"
               ],
               note: "ἔστιν ἄνθρωπος = 'there is a man (who…)'. The accent on ἔστιν is the giveaway for the existential sense." },
             { form: "εἰμί + dative of possession",
@@ -1359,8 +1284,8 @@
               choices: [
                 "aspect (ongoing vs whole) — and, in the indicative, time",
                 "only time — Greek tense is identical to English tense",
-                "only voice (active / middle / passive)",
-                "only mood"
+                "only person and number",
+                "only the lexical meaning of the verb"
               ] },
             { form: "five basic indicative tenses",
               prompt: "Which five tense systems are introduced in this chapter for the indicative?",
@@ -1368,11 +1293,11 @@
               choices: [
                 "present, imperfect, future, aorist, perfect (the perfect comes properly in Ch 16)",
                 "only present and aorist — Greek introduces other tenses much later",
-                "all six principal-part stems at once, including both middle/passive forms",
-                "future, perfect, and pluperfect only — the rare or compound tenses"
+                "only the present and the imperfect — Greek lacks a future or aorist",
+                "only the future and the aorist — the present was introduced earlier"
               ] },
-            { form: "tense outside indicative",
-              prompt: "What does tense convey OUTSIDE the indicative (e.g., subjunctive, infinitive, participle)?",
+            { form: "tense outside the indicative",
+              prompt: "When tense appears outside the indicative mood, what does it convey?",
               answer: "aspect only — no time reference",
               choices: [
                 "aspect only — no time reference",
@@ -1380,7 +1305,7 @@
                 "voice only",
                 "person and number — the tense form encodes who/how many"
               ],
-              note: "Present subj. = ongoing aspect, NOT 'present time'. Returns more fully in Chs 7, 14, 17." },
+              note: "Outside the indicative, the tense form encodes aspect (ongoing vs. whole), not absolute time. Returns more fully in later chapters." },
             { form: "ἔγραφον τὸν λόγον.",
               prompt: "Translate, capturing the aspect.",
               answer: "I was writing the word (ongoing past)",
@@ -1406,7 +1331,7 @@
             { form: "λύσω",
               prompt: "What tense is this?",
               answer: "future (active indicative, 1st sg.)",
-              choices: ["future (active indicative, 1st sg.)", "present active indicative (1st sg., primary endings, no augment)", "aorist subjunctive, 1st sg.", "imperfect (1st sg.)"],
+              choices: ["future (active indicative, 1st sg.)", "present active indicative (1st sg., primary endings, no augment)", "aorist active indicative (1st sg., with augment + σα)", "imperfect (1st sg.)"],
               note: "σ before the personal ending = future (or 1st aorist with augment)." },
             { form: "ἔλυον",
               prompt: "What tense is this?",
@@ -1487,8 +1412,8 @@
               choices: [
                 "imperfect and aorist (past indicatives)",
                 "present and future — the primary (non-past) indicative endings",
-                "perfect only — distinct κ-α endings unique to the perfect",
-                "subjunctive only — the long thematic vowel goes with secondary endings"
+                "only the future — the future uses its own dedicated set",
+                "only the present — every other tense reuses present endings"
               ],
               note: "Secondary endings appear with the augment in past-time indicatives." },
             { form: "ending tells",
@@ -1530,8 +1455,8 @@
             { form: "augment",
               prompt: "In which moods does the augment (ε-) appear?",
               answer: "indicative only",
-              choices: ["indicative only", "indicative and subjunctive", "all moods", "infinitive only"],
-              note: "Past-time augment is restricted to the indicative mood." },
+              choices: ["indicative only", "in all moods", "in every past form, regardless of mood", "only on compound verbs"],
+              note: "The past-time augment is restricted to the indicative." },
             { form: "vowel-initial augment",
               prompt: "What happens when a verb's stem begins with a vowel and would take an augment (e.g., ἀκούω → past)?",
               answer: "the initial vowel LENGTHENS instead of adding an ε- (ἀκούω → ἤκουον / ἤκουσα)",
@@ -1773,11 +1698,11 @@
               note: "2nd-plural imperative looks identical to 2nd-plural present indicative; context (and absence of subject) tells you which." },
             { form: "μή + imperative",
               prompt: "How does Greek form a NEGATIVE command ('do not untie!')?",
-              answer: "μή + present imperative (or μή + aorist subjunctive)",
+              answer: "μή + the imperative form (Ch 17 will add a second pattern using the subjunctive)",
               choices: [
-                "μή + present imperative (or μή + aorist subjunctive)",
-                "οὐ + present imperative",
-                "οὐκ + future indicative",
+                "μή + the imperative form (Ch 17 will add a second pattern using the subjunctive)",
+                "οὐ + the imperative form",
+                "οὐκ + the indicative form",
                 "Greek has no negative imperative"
               ],
               note: "Negative commands use μή, not οὐ — οὐ is reserved for the indicative." },
@@ -1801,7 +1726,7 @@
             { form: "λύειν",
               prompt: "What is this form?",
               answer: "present active infinitive",
-              choices: ["present active infinitive", "present active indicative, 2nd sg.", "aorist active subjunctive", "present imperative, 3rd sg."] },
+              choices: ["present active infinitive", "present active indicative, 2nd sg.", "present active imperative, 2nd sg.", "present active indicative, 3rd sg."] },
             { form: "infinitive function",
               prompt: "What's the most basic function of a Greek infinitive?",
               answer: "to complete another verb's idea ('TO do …')",
@@ -1853,14 +1778,14 @@
               ] },
             { form: "participle has",
               prompt: "What VERB-side information does a participle carry, in addition to its adjective-side agreement?",
-              answer: "tense (≈ aspect) and voice (active / middle / passive)",
+              answer: "tense (≈ aspect) and voice",
               choices: [
-                "tense (≈ aspect) and voice (active / middle / passive)",
+                "tense (≈ aspect) and voice",
                 "only mood",
                 "person and number (like a finite verb)",
                 "none — it is purely adjectival"
               ],
-              note: "Participles are revisited at depth in Ch 14." },
+              note: "Participles are revisited at depth in Ch 14, with the full range of voices in Ch 15." },
             { form: "βλέπω τὸν ἀκούοντα ἄνθρωπον.",
               prompt: "Translate.",
               answer: "I see the man who is hearing",
@@ -1946,11 +1871,11 @@
               answer: "1st singular ('I come / go') — a deponent verb",
               choices: [
                 "1st singular ('I come / go') — a deponent verb",
-                "1st singular passive ('I am being come to')",
+                "1st singular ('I come') with a reflexive sense ('to myself')",
                 "3rd singular ('he comes')",
                 "infinitive ('to come')"
               ],
-              note: "Middle/passive form, active meaning. The lemma itself ends in -ομαι, so it is deponent." },
+              note: "The -ομαι series of endings (introduced fully in Ch 15) here belongs to a verb that is always translated actively. The lemma ends in -ομαι, so it is deponent." },
             { form: "ἔρχεται",
               prompt: "Parse this form.",
               answer: "present indicative, 3rd singular ('he/she/it comes')",
@@ -1960,7 +1885,7 @@
                 "present indicative, 3rd plural ('they come')",
                 "imperfect indicative, 3rd singular ('he was coming')"
               ],
-              note: "Middle/passive endings on a deponent verb: still translated actively." },
+              note: "The -εται ending belongs to a deponent verb: still translated actively." },
             { form: "δέχομαι vs δέχω",
               prompt: "Which form is the dictionary (lemma) form?",
               answer: "δέχομαι",
@@ -1975,7 +1900,7 @@
                 "Jesus is coming to me",
                 "I will come to Jesus"
               ],
-              note: "ἔρχομαι is deponent: middle/passive form, active meaning ('I come')." }
+              note: "ἔρχομαι is deponent: -ομαι-style form, active meaning ('I come')." }
           ]
         },
         {
@@ -2020,12 +1945,12 @@
                 "present middle indicative, 1st singular ('I am for myself')",
                 "imperfect active indicative, 1st singular ('I was', but a different form)"
               ],
-              note: "Future of εἰμί uses middle/passive endings (-ομαι series) on the stem ἐσ-." },
+              note: "Future of εἰμί uses the -ομαι (deponent-shaped) endings on the stem ἐσ-." },
             { form: "εἰμί other moods",
-              prompt: "Which non-indicative moods of εἰμί must you eventually learn?",
-              answer: "imperative, infinitive, participle, and subjunctive",
+              prompt: "Which non-indicative forms of εἰμί are covered in this chapter and Ch 7?",
+              answer: "imperative, infinitive, and participle (the subjunctive comes in Ch 17)",
               choices: [
-                "imperative, infinitive, participle, and subjunctive",
+                "imperative, infinitive, and participle (the subjunctive comes in Ch 17)",
                 "only the imperative — εἰμί lacks the other non-indicative forms",
                 "only the infinitive — εἰμί lacks imperative and participle",
                 "εἰμί has no non-indicative forms — only indicatives exist"
@@ -2074,7 +1999,7 @@
                 "it is feminine despite the -ος ending",
                 "it is masculine despite the article ἡ",
                 "it is neuter",
-                "it is 3rd declension"
+                "it is indeclinable — same form in every case"
               ],
               note: "ἡ ὁδός = 'the road / way'. A few other -ος feminines exist (ἡ νῆσος 'island', ἡ ἔρημος '[the] desert')." },
             { form: "νεανίας",
@@ -2224,7 +2149,7 @@
                 "(1) 3rd-person pronoun; (2) emphatic 'self' (predicate); (3) 'the same' (attributive)",
                 "only as a third-person pronoun — never adjectival",
                 "only as the demonstrative 'this'",
-                "as a relative pronoun and as an article"
+                "as a possessive pronoun ('mine, yours, his') and nothing else"
               ] },
             { form: "αὐτὸς ὁ ἀπόστολος",
               prompt: "Translate (predicate position).",
@@ -3123,7 +3048,7 @@
               choices: [
                 "no difference in meaning — only in form. Some verbs use σα (1st aor.), others use a different stem (2nd aor.).",
                 "1st aorist is simple past tense; 2nd aorist marks ongoing past, like the imperfect",
-                "1st aorist is for active voice; 2nd aorist is for middle / passive voice",
+                "1st aorist is for compound verbs; 2nd aorist for simple verbs",
                 "2nd aorist is for compound verbs only — bare verbs always use 1st aorist"
               ] },
             { form: "εἶπεν ὁ Ἰησοῦς τὸν λόγον.",
@@ -3163,7 +3088,7 @@
               choices: [
                 "future active indicative, 1st sg. of μένω",
                 "present active indicative, 1st sg. of μένω",
-                "present active subjunctive, 1st sg. of μένω",
+                "imperfect active indicative, 1st sg. of μένω",
                 "aorist active indicative, 1st sg. of μένω"
               ],
               note: "Liquid stems drop the future σ and ε-contract; the result mimics a contract present." },
@@ -3672,7 +3597,7 @@
                 "-μεν- (the middle/passive participial marker, used regardless of tense)",
                 "-θεντ- (the marker used for the aorist active in 1st-aorist verbs)"
               ],
-              note: "NO AUGMENT on the participle — augment is for indicative only. Same for subjunctive, infinitive." },
+              note: "NO AUGMENT on the participle — the augment is restricted to indicative forms." },
             { form: "ὁ λύων τὸν δοῦλον λέγει.",
               prompt: "Translate.",
               answer: "the one untying the slave is speaking",
@@ -3789,7 +3714,7 @@
         {
           family: "14.4 Other Uses",
           lemma: "participle in context",
-          gloss: "attributive / adverbial / substantive / periphrastic",
+          gloss: "attributive / adverbial / substantive",
           questions: [
             { form: "ὁ λύων ἄνθρωπος",
               prompt: "What is the function of λύων here?",
@@ -3820,16 +3745,6 @@
                 "imperative — a command directed at the subject, 'untie the slave!'"
               ],
               note: "An anarthrous participle agreeing with the subject is normally circumstantial." },
-            { form: "λύσαντος τοῦ ἀνθρώπου τὸν δοῦλον, ἀπῆλθον.",
-              prompt: "What construction is λύσαντος τοῦ ἀνθρώπου?",
-              answer: "genitive absolute",
-              choices: [
-                "genitive absolute",
-                "attributive participle",
-                "substantive participle",
-                "second aorist indicative"
-              ],
-              note: "Genitive absolute: a participle + noun, both genitive, grammatically detached from the main clause. Returns in Ch 20.2." },
             { form: "οἱ πιστεύοντες εἰς τὸν Χριστὸν ἔχουσι ζωήν.",
               prompt: "Translate.",
               answer: "those who believe in Christ have life",
