@@ -95,11 +95,11 @@ export function renderReview() {
     }
   });
   // Combined "still in this session" count: active section + middle section
-  // (the cards waiting to dump into active). Labelled "Due now" in spaced
-  // mode and "Unconfirmed" in unspaced. Counts down on Easy/Pass in spaced
-  // and on Easy in unspaced; in spaced it goes back up when timers expire
-  // mid-session, in unspaced it only goes up after the round reshuffles
-  // (Hard/Uncertain moves card to middle, which still counts).
+  // (the cards waiting to dump into active). Equivalent to getDueCount in
+  // spaced and (total − known) in unspaced, but sourced from the three-deck
+  // bookkeeping so it stays consistent with the mid-session partitioning.
+  // Labelled "Due now" in spaced mode and "Unconfirmed" in unspaced; counts
+  // down on Easy/Pass in spaced and on Easy in unspaced.
   const sessionDeckCount = runtime.activeDeckCount + (runtime.spacedRepetition
     ? (runtime.middleDeckCount || 0)
     : (runtime.unspacedMiddleCount || 0));
