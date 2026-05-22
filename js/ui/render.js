@@ -84,7 +84,7 @@ export function renderCard() {
         ? 'Grammar pass complete ✦'
         : unspacedRoundComplete
           ? 'End of round ✦'
-          : 'Session Confirmed 🎉';
+          : 'All cards confirmed ✨';
 
     const spacedAdvanceSub = nearDueCount > 0
       ? `Everything in this selection is scheduled ahead. Press <strong>Next →</strong> to advance the review clock by 1 hour and pull <strong>${nearDueCount}</strong> near-due card${nearDueCount === 1 ? '' : 's'} back in.`
@@ -96,7 +96,7 @@ export function renderCard() {
         ? 'Everything in this grammar selection is currently marked correct. Press next to reshuffle the full selected set and run it again.'
         : unspacedRoundComplete
           ? 'Press <strong>Next →</strong> to reshuffle unconfirmed cards into another pass, or <strong>↻ Reset</strong> to start the whole deck over.'
-          : 'Every card in this deck is archived.<br><span style="color:var(--muted);font-size:13px">Press <strong>↻ Reset</strong> to bring them all back and run the deck again. Archived cards stay archived until you reset or pick a new session.</span>';
+          : 'Press <strong>↻ Reset</strong> to reshuffle the selected cards.<br><span style="color:var(--muted);font-size:13px">Archived cards stay archived until you reset or pick a new session.</span>';
 
     area.innerHTML = `
       <div class="done-card show">
