@@ -360,6 +360,7 @@ configureRender({
   saveState: () => saveState(),
   syncLayoutVisibility: () => syncLayoutVisibility(),
   noteStudyInteraction: () => noteStudyInteraction(),
+  getNearDueCount: () => getNearDueCount(),
   isMorphologyMode: () => isMorphologyMode(),
   isReverseGrammarActive: () => isReverseGrammarActive(),
   isMorphCard: (card) => isMorphCard(card),
@@ -1539,6 +1540,19 @@ function applySpacedReview(card, outcome) {
 
 function getDueCount(cards = runtime.originalDeck) {
   return (cards || []).filter(isCardDue).length;
+}
+
+// Count of cards that the end-of-deck "advance 1 h" Next press would
+// promote from deferred to due-now. Used by render.js to show the user
+// "(N near-due)" in brackets on the spaced session-complete card so
+// they know whether pressing Next will actually surface more work.
+function getNearDueCount(cards = runtime.originalDeck) {
+  const now = Date.now();
+  const threshold = now + SRS_CYCLE_ADVANCE_MS;
+  return (cards || []).filter(card => {
+    const p = getWordProgress(card.id);
+    return p.dueAt && p.dueAt > now && p.dueAt <= threshold;
+  }).length;
 }
 
 
