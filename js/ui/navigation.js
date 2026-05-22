@@ -158,8 +158,14 @@ export function navigate(dir, options = {}) {
     if (runtime.middleDeckCount > 0) {
       runtime.deck = host.buildStudyDeck(runtime.originalDeck, { forceShuffle: true });
     } else {
+      // Advance the SRS clock so cards within 1 h of due become due-now,
+      // then rebuild with forceShuffle so every newly-promoted card lands
+      // in active (not middle). Without forceShuffle, any stale entry in
+      // spacedActiveIds that happens to coincide with a newly-due card
+      // would split the cohort across active and middle, forcing the user
+      // to press Next a second time to dump middle in.
       host.advanceScheduledCards(runtime.originalDeck, SRS_CYCLE_ADVANCE_MS);
-      runtime.deck = host.buildStudyDeck(runtime.originalDeck);
+      runtime.deck = host.buildStudyDeck(runtime.originalDeck, { forceShuffle: true });
     }
     runtime.currentIdx = 0;
     runtime.lastCardFlipAt = Date.now();
