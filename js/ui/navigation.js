@@ -148,9 +148,19 @@ export function navigate(dir, options = {}) {
   }
 
   if (runtime.spacedRepetition && runtime.currentIdx >= runtime.activeDeckCount) {
-    host.advanceScheduledCards(runtime.originalDeck, SRS_CYCLE_ADVANCE_MS);
-    runtime.deck = host.buildStudyDeck(runtime.originalDeck);
+    // Active section drained. If middle has cards (timers expired during
+    // this session), dump them into active and reshuffle — keeps the user
+    // moving without burning time. Only when middle is empty too do we fall
+    // back to the existing scheduled-advance behaviour, which nudges the
+    // next-up deferred cards forward an hour so the deck isn't dead.
+    if (runtime.middleDeckCount > 0) {
+      runtime.deck = host.buildStudyDeck(runtime.originalDeck, { forceShuffle: true });
+    } else {
+      host.advanceScheduledCards(runtime.originalDeck, SRS_CYCLE_ADVANCE_MS);
+      runtime.deck = host.buildStudyDeck(runtime.originalDeck);
+    }
     runtime.currentIdx = 0;
+    runtime.lastCardFlipAt = Date.now();
     host.resetMorphAnswerState();
     renderCard();
     renderReview();
@@ -179,6 +189,7 @@ export function navigate(dir, options = {}) {
       host.maybeReturnConfirmedDeferredCard();
       host.maybePeriodicReshuffle();
     }
+    runtime.lastCardFlipAt = Date.now();
     host.resetMorphAnswerState();
     renderCard();
     renderReview();
@@ -247,8 +258,17 @@ export function markCard(outcome) {
     host.captureSpacedUndoSnapshot();
     host.applySpacedReview(currentCard, outcome);
     runtime.deck = host.buildStudyDeck(runtime.originalDeck);
+    runtime.lastCardFlipAt = Date.now();
     if (runtime.activeDeckCount <= 0) {
-      runtime.currentIdx = runtime.activeDeckCount;
+      // Active drained on this very mark. If middle has waiting cards, dump
+      // them in so the user keeps moving rather than landing on the
+      // empty-deck state and needing another Next press to recover.
+      if (runtime.middleDeckCount > 0) {
+        runtime.deck = host.buildStudyDeck(runtime.originalDeck, { forceShuffle: true });
+        runtime.currentIdx = 0;
+      } else {
+        runtime.currentIdx = runtime.activeDeckCount;
+      }
       host.resetMorphAnswerState();
       renderCard();
     } else {

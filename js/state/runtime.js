@@ -98,6 +98,22 @@ export const runtime = {
   spacedRepetition: true,
   hardVocabReviewMode: false, // restrict vocab deck to cards missed >10× and still under 40% confidence
   activeDeckCount: 0,
+  // Cards in the "middle deck" — currently due but not yet seen this session.
+  // Builds up as deferred cards' timers expire mid-session; gets dumped into
+  // active when the active section drains, on manual reshuffle, on 2% revival,
+  // or after a 5-hour idle. In-memory only (not persisted, recomputed each
+  // build).
+  middleDeckCount: 0,
+  // IDs that should land in the active section on the next buildStudyDeck.
+  // Drains as those cards are reviewed; replenishes when middle dumps in
+  // (active-empties / manual reshuffle / 2% revival / 5h idle). In-memory
+  // only — on reload it's empty and the next build treats all due cards as
+  // fresh active.
+  spacedActiveIds: [],
+  // Timestamp (ms) of the last card flip. Used to detect a ≥ 5h idle gap;
+  // when that gap is seen, the next buildStudyDeck dumps middle → active and
+  // reshuffles. In-memory only.
+  lastCardFlipAt: 0,
   unspacedPendingRecycle: false,
   unspacedCycleState: {},
   unspacedDeferredIds: new Set(), // 'pass' and 'again' cards excluded from current pass; reappear in next cycle
