@@ -94,13 +94,16 @@ export function renderReview() {
       unseenCount += 1;
     }
   });
-  // Spaced mode: cards not yet due (scheduled ahead). Unspaced: cards not
-  // yet confirmed known. Matches the per-mode "still to confirm" / "scheduled
-  // ahead" metric that used to sit in this stats line.
-  const deckTotal = runtime.originalDeck.length;
-  const cardsLeft = runtime.spacedRepetition
-    ? Math.max(deckTotal - host.getDueCount(runtime.originalDeck), 0)
-    : Math.max(deckTotal - host.getKnownCount(), 0);
+  // Combined "still in this session" count: active section + middle section
+  // (the cards waiting to dump into active). Labelled "Due now" in spaced
+  // mode and "Unconfirmed" in unspaced. Counts down on Easy/Pass in spaced
+  // and on Easy in unspaced; in spaced it goes back up when timers expire
+  // mid-session, in unspaced it only goes up after the round reshuffles
+  // (Hard/Uncertain moves card to middle, which still counts).
+  const sessionDeckCount = runtime.activeDeckCount + (runtime.spacedRepetition
+    ? (runtime.middleDeckCount || 0)
+    : (runtime.unspacedMiddleCount || 0));
+  const sessionDeckLabel = runtime.spacedRepetition ? 'Due now' : 'Unconfirmed';
 
   const deckTagEl = document.getElementById('reviewDeckTag');
   if (deckTagEl) {
@@ -110,7 +113,7 @@ export function renderReview() {
   }
 
   document.getElementById('reviewStats').innerHTML = `
-      <span class="stat-deck">▦ Cards left: ${cardsLeft}</span>
+      <span class="stat-deck">▦ ${sessionDeckLabel}: ${sessionDeckCount}</span>
       <span class="stat-known">✓ High confidence: ${highCount}</span>
       <span class="stat-unsure">○ Low confidence: ${lowCount}</span>
       <span class="stat-total">· Unseen: ${unseenCount}</span>`;

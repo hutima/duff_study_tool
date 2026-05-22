@@ -168,7 +168,6 @@ export function navigate(dir, options = {}) {
       runtime.deck = host.buildStudyDeck(runtime.originalDeck, { forceShuffle: true });
     }
     runtime.currentIdx = 0;
-    runtime.lastCardFlipAt = Date.now();
     host.resetMorphAnswerState();
     renderCard();
     renderReview();
@@ -197,7 +196,6 @@ export function navigate(dir, options = {}) {
       host.maybeReturnConfirmedDeferredCard();
       host.maybePeriodicReshuffle();
     }
-    runtime.lastCardFlipAt = Date.now();
     host.resetMorphAnswerState();
     renderCard();
     renderReview();
@@ -266,7 +264,6 @@ export function markCard(outcome) {
     host.captureSpacedUndoSnapshot();
     host.applySpacedReview(currentCard, outcome);
     runtime.deck = host.buildStudyDeck(runtime.originalDeck);
-    runtime.lastCardFlipAt = Date.now();
     if (runtime.activeDeckCount <= 0) {
       // Active drained on this very mark. If middle has waiting cards, dump
       // them in so the user keeps moving rather than landing on the

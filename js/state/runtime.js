@@ -106,14 +106,21 @@ export const runtime = {
   middleDeckCount: 0,
   // IDs that should land in the active section on the next buildStudyDeck.
   // Drains as those cards are reviewed; replenishes when middle dumps in
-  // (active-empties / manual reshuffle / 2% revival / 5h idle). In-memory
-  // only — on reload it's empty and the next build treats all due cards as
-  // fresh active.
+  // (active-empties / manual reshuffle / 2% revival / 5 h idle). Persisted
+  // through reload only when lastStudyActivityAt is within the 5 h window;
+  // see persistence.js for the gating logic.
   spacedActiveIds: [],
-  // Timestamp (ms) of the last card flip. Used to detect a ≥ 5h idle gap;
-  // when that gap is seen, the next buildStudyDeck dumps middle → active and
-  // reshuffles. In-memory only.
-  lastCardFlipAt: 0,
+  // Timestamp (ms) of the most recent study activity in any mode (vocab,
+  // grammar, or reader — anything that fires noteStudyInteraction).
+  // Persisted, so the timer survives reload. persistence.js gates restore
+  // of session state (spacedActiveIds, unspacedMiddleIds) on
+  // (now - lastStudyActivityAt) <= SESSION_IDLE_RESET_MS.
+  lastStudyActivityAt: 0,
+  // Snapshot of lastStudyActivityAt taken at the start of each
+  // noteStudyInteraction, before the field is bumped to "now". Used by
+  // buildStudyDeck's in-session idle check so it sees the timestamp of the
+  // previous activity instead of the one we just recorded. In-memory.
+  previousStudyActivityAt: 0,
   unspacedPendingRecycle: false,
   unspacedCycleState: {},
   unspacedDeferredIds: new Set(), // 'pass' and 'again' cards excluded from current pass; reappear in next cycle

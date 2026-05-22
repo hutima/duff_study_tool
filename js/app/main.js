@@ -138,7 +138,7 @@ import { getStorage, isLikelyIOS } from '../utils/storage.js';
 import { compareGreekAlphabetical } from '../utils/greekSort.js';
 
 // Domain — SRS
-import { SRS_DAY_MS, SRS_AGAIN_MS, SRS_NEAR_WINDOW_MS, SRS_CYCLE_ADVANCE_MS } from '../domain/srs/constants.js';
+import { SRS_DAY_MS, SRS_AGAIN_MS, SRS_NEAR_WINDOW_MS, SRS_CYCLE_ADVANCE_MS, SESSION_IDLE_RESET_MS } from '../domain/srs/constants.js';
 import { msFromDays, setProgressDelay,
          getSrsEase, getSrsStage, getLastEasyIntervalDays, getNextEasyIntervalDays,
          getEasyDelayMs, getUncertainDelayMs, formatRemainingForTable } from '../domain/srs/scheduler.js';
@@ -871,6 +871,17 @@ function noteStudyInteraction(now = Date.now()) {
     studySessionBreakMs: STUDY_SESSION_BREAK_MS,
     maxStudySessionHistory: MAX_STUDY_SESSION_HISTORY
   });
+  // Session-boundary clock for the three-deck flow. Snapshot the previous
+  // value into previousStudyActivityAt BEFORE updating lastStudyActivityAt,
+  // so buildStudyDeck (called later in the same flip handler) sees the
+  // timestamp of the PREVIOUS activity, not the one we just recorded. Any
+  // study event (vocab mark, grammar mark, reader interaction) updates
+  // both; persistence saves lastStudyActivityAt to gate session-state
+  // restore across reloads.
+  if (!document.hidden) {
+    runtime.previousStudyActivityAt = runtime.lastStudyActivityAt || 0;
+    runtime.lastStudyActivityAt = now;
+  }
 }
 
 function getTodayUsageMs() {
@@ -1175,6 +1186,15 @@ function buildUndoSnapshot(extra = {}) {
     unspacedRoundMarks: runtime.unspacedRoundMarks,
     unspacedMiddleIds: Array.from(runtime.unspacedMiddleIds || []),
     unspacedMiddleCount: runtime.unspacedMiddleCount || 0,
+    // Three-deck spaced state — captured here so the 2% revival (which can
+    // fire between the snapshot and the next user action) doesn't leave
+    // stale spacedActiveIds/middleDeckCount lying around after an undo.
+    // Without this, the visible card is correct after undo but the next
+    // navigation can mis-route end-of-active or treat a card as middle when
+    // it should be active.
+    spacedActiveIds: Array.isArray(runtime.spacedActiveIds) ? [...runtime.spacedActiveIds] : [],
+    middleDeckCount: runtime.middleDeckCount || 0,
+    lastStudyActivityAt: runtime.lastStudyActivityAt || 0,
     unspacedCycleState: cloneForUndo(runtime.unspacedCycleState),
     lastUnspacedArchiveDayKey: runtime.lastUnspacedArchiveDayKey,
     morphAnswerState: cloneForUndo(runtime.morphAnswerState),
@@ -1230,6 +1250,9 @@ function applyUndoSnapshot(snapshot) {
   if (Number.isFinite(snapshot.unspacedRoundMarks)) runtime.unspacedRoundMarks = snapshot.unspacedRoundMarks;
   if (Array.isArray(snapshot.unspacedMiddleIds)) runtime.unspacedMiddleIds = new Set(snapshot.unspacedMiddleIds);
   if (Number.isFinite(snapshot.unspacedMiddleCount)) runtime.unspacedMiddleCount = snapshot.unspacedMiddleCount;
+  if (Array.isArray(snapshot.spacedActiveIds)) runtime.spacedActiveIds = [...snapshot.spacedActiveIds];
+  if (Number.isFinite(snapshot.middleDeckCount)) runtime.middleDeckCount = snapshot.middleDeckCount;
+  if (Number.isFinite(snapshot.lastStudyActivityAt)) runtime.lastStudyActivityAt = snapshot.lastStudyActivityAt;
   if (snapshot.unspacedCycleState) runtime.unspacedCycleState = cloneForUndo(snapshot.unspacedCycleState);
   if (typeof snapshot.lastUnspacedArchiveDayKey === 'string') runtime.lastUnspacedArchiveDayKey = snapshot.lastUnspacedArchiveDayKey;
   if (isMorphologyMode() && snapshot.morphAnswerState) {
@@ -1390,8 +1413,11 @@ function buildStudyDeck(cards, options = {}) {
   //  - the last card flip was ≥ 5 h ago (genuine idle gap), or
   //  - there's no carry-over at all (initial build, post-reload, post-reset,
   //    or deck-identity change so no previous active IDs match the new deck).
-  const lastFlipAt = Number(runtime.lastCardFlipAt) || 0;
-  const idleReset = lastFlipAt && (now - lastFlipAt > SESSION_IDLE_RESET_MS);
+  // Use the previous-activity snapshot (taken at the start of the current
+  // noteStudyInteraction call) so the idle gap reflects time since the
+  // PREVIOUS activity, not the one we just recorded a millisecond ago.
+  const lastActivityAt = Number(runtime.previousStudyActivityAt) || 0;
+  const idleReset = lastActivityAt && (now - lastActivityAt > SESSION_IDLE_RESET_MS);
   const freshStart = forceShuffle || promotedNearCards || idleReset || carriedActiveIds.length === 0;
 
   let activeDue;
@@ -1685,12 +1711,6 @@ function moveCardToBackOfActivePile(card) {
   runtime.unspacedPendingRecycle = false;
   return true;
 }
-
-// Spaced-mode session boundary. After this much real time since the last
-// card flip the next buildStudyDeck treats the previous active section as
-// stale: middle merges back into active and the combined pile is reshuffled
-// (the idle check lives inside buildStudyDeck itself).
-const SESSION_IDLE_RESET_MS = 5 * 60 * 60 * 1000;
 
 // Unspaced flip-deck hourly upcoming-cards reshuffle. Kept on its old
 // cadence — the unspaced flow has no middle deck and still benefits from
