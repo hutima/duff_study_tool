@@ -817,28 +817,37 @@
     margin-right: 4px;
   }
 
-  /* Wrapped layout for the mode shortcut row with 5 entries — 3 on the
-   * first row, 2 on the second. Grid with explicit column count + nth-child
-   * border removal keeps the divider lines aligned. */
+  /* Wrapped layout for the mode shortcut row with 5 entries. Every cell is
+   * the same fixed width (indexed to the longest label, "Paradigms") so the
+   * grid reads as a uniform strip rather than stretching individual cells.
+   * Flex-wrap naturally splits 3/2 on phone widths because three 96px cells
+   * fit and the remaining two land on the next row. */
   .mode-group.mode-group-wrap {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    width: 100%;
-    max-width: 360px;
+    display: flex;
+    flex-wrap: wrap;
+    width: auto;
+    max-width: 100%;
   }
 
   .mode-group.mode-group-wrap .mode-btn {
-    padding: 9px 8px;
+    flex: 0 0 auto;
+    width: 96px;
+    box-sizing: border-box;
+    padding: 9px 6px;
     text-align: center;
+    border-left: 0;
     border-right: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
-    border-left: 0;
   }
 
-  .mode-group.mode-group-wrap .mode-btn:nth-child(3n) {
+  /* The very last cell on each row drops its right border so it meets the
+   * container border cleanly. The last cell overall (5th) also drops its
+   * bottom border. nth-child accounts for the 3/2 split: cells 3 and 5 are
+   * row-trailing, cells 4 and 5 are in the bottom row. */
+  .mode-group.mode-group-wrap .mode-btn:nth-child(3),
+  .mode-group.mode-group-wrap .mode-btn:last-child {
     border-right: 0;
   }
-
   .mode-group.mode-group-wrap .mode-btn:nth-child(n+4) {
     border-bottom: 0;
   }
