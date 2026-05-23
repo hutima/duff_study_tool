@@ -369,7 +369,15 @@ function escapeHtml(s) {
 
 function renderMorphStepBreadcrumb(state) {
   if (!state.steps.length) return '';
-  const dots = state.steps.map((step, idx) => {
+  // Reveal dots one step at a time. Showing the full breadcrumb upfront
+  // leaks the parse class — e.g. an A T M C N G tail on a verb form tells
+  // you it's a participle before you've answered the Mood step, because
+  // only participles carry case/number/gender. Render only the answered
+  // steps plus the current step until the walk completes.
+  const visibleCount = state.completed
+    ? state.steps.length
+    : Math.min(state.steps.length, state.stepIdx + 1);
+  const dots = state.steps.slice(0, visibleCount).map((step, idx) => {
     const answer = state.answers[idx];
     let cls = 'morph-step-dot';
     if (idx === state.stepIdx && !state.completed) cls += ' current';
@@ -393,7 +401,7 @@ function renderMorphStepCurrent(state) {
   }).join('');
   return `
     <div class="morph-step-current">
-      <div class="morph-step-progress">Step ${state.stepIdx + 1} of ${state.steps.length}</div>
+      <div class="morph-step-progress">Step ${state.stepIdx + 1}</div>
       <div class="morph-step-label">${escapeHtml(step.label)}?</div>
       <div class="morph-choices">${choiceButtons}</div>
       <div class="morph-dontknow-row">
@@ -772,7 +780,7 @@ function renderMorphStepCard(area, card) {
       ${lemmaGloss}
       <div class="morph-form">${escapeHtml(card.form)}</div>
       <div class="morph-hint">${escapeHtml(card.lemma)}</div>
-      <div class="morph-source">${escapeHtml(card.sourceLabel || '')} · Stats not affected · Use “continuous/undefined” when the form licenses either reading</div>
+      <div class="morph-source">${escapeHtml(card.sourceLabel || '')} · Use “continuous/undefined” when the form licenses either reading</div>
       ${renderMorphStepBreadcrumb(state)}
       ${body}
     </div>`;
