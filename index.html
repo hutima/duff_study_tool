@@ -19,11 +19,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Greek Cards">
-<link rel="manifest" href="manifest.json?v=137">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=137">
-<link rel="icon" type="image/svg+xml" href="favicon.svg?v=137">
+<link rel="manifest" href="manifest.json?v=138">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=138">
+<link rel="icon" type="image/svg+xml" href="favicon.svg?v=138">
 <title>Elementary NT Greek — Flashcards</title>
-<link rel="stylesheet" href="styles.css?v=137">
+<link rel="stylesheet" href="styles.css?v=138">
 <script>
 (function(){
   try {
@@ -347,7 +347,7 @@
             <span class="analytics-collapse-caret" aria-hidden="true">▾</span>
             <div class="analytics-collapse-title-wrap">
               <h4>Paradigm parsing (step-by-step)</h4>
-              <p class="analytics-collapse-summary-status" id="analyticsParadigmStepStatsStatus">Off-the-record drill stats. Last 20 attempts per paradigm.</p>
+              <p class="analytics-collapse-summary-status" id="analyticsParadigmStepStatsStatus">Off-the-record drill stats. Tap a row for the bucket-of-20 performance chart.</p>
             </div>
           </summary>
           <div class="analytics-collapse-body">
@@ -493,6 +493,7 @@
             <li><strong>Parse-comparison summary on every card.</strong> After you answer (right or wrong), the card always shows your full parse vs. the correct parse alongside the Greek form. If your parse was wrong, it also lists the actual forms in that paradigm that <em>would</em> have matched what you guessed, so the mistake turns into a recognition drill.</li>
             <li><strong>Lemma-wide form lookup.</strong> The form &harr; parse matcher now walks the whole lemma inventory and picks a canonical form per parse, so dimensions like aspect, voice, and mood don't get orphaned when a paradigm row is sparse.</li>
             <li><strong>Per-paradigm parsing stats.</strong> Progress &rarr; Total Grammar now has a <em>Paradigm parsing (step-by-step)</em> panel with rolling per-paradigm, per-dimension accuracy from your last 20 attempts. These are off-the-record drill stats &mdash; they don't feed SRS or main confidence numbers.</li>
+            <li><strong>Tappable performance history for parsing.</strong> Each paradigm row (in the parsing review panel and the analytics tile) now taps open an inline bar chart showing performance by buckets of 20 attempts &mdash; up to the last 10 buckets (200 parses). An <em>All paradigms</em> row at the top shows the same chart aggregated across every paradigm you've drilled.</li>
             <li><strong>Stem-change flip supplements.</strong> New per-week flip-card sets that highlight stem differences for second-aorist (Ch 11), aorist passive (Ch 14), perfect active (Ch 15), and &mu;&iota;-verb principal parts (Ch 18). Stem-recall drills now run in both directions (present &harr; aorist, etc.) with a post-parse stem-pair note.</li>
             <li><strong>Three-deck spaced flow.</strong> Spaced review now uses an explicit <em>active / middle / deferred</em> layout: cards you just got wrong sit in a small <em>middle</em> deck before sliding back to the main rotation, instead of all reappearing at random. Unspaced mode gets the matching middle-deck round so a flip-deck pass has a clearer shape. The bottom progress bar now shows <em>Cards left</em> matching this flow, and the end-of-section card lists how many cards are <em>near-due</em> in spaced or <em>still unconfirmed</em> in unspaced.</li>
             <li><strong>Mode strip refresh.</strong> The home-screen mode strip is now a single uniform-width row of four buttons (Vocab, Grammar, Parsing, Reader), with <em>Paradigms</em> as its own standalone button below.</li>
@@ -700,60 +701,60 @@
   </div>
 </div>
 
-<script defer src="js/data/words.js?v=137"></script>
-<script defer src="js/data/morphology.js?v=137"></script>
-<script defer src="js/data/lemma_inventory.js?v=137"></script>
-<script defer src="js/data/supplemental.js?v=137"></script>
-<script defer src="js/data/grammar.js?v=137"></script>
-<script defer src="js/data/supplementals/week_1_supplemental.js?v=137"></script>
-<script defer src="js/data/supplementals/week_1_paradigms.js?v=137"></script>
-<script defer src="js/data/supplementals/week_2_paradigms.js?v=137"></script>
-<script defer src="js/data/supplementals/week_3_paradigms.js?v=137"></script>
-<script defer src="js/data/supplementals/week_4_paradigms.js?v=137"></script>
-<script defer src="js/data/supplementals/second_aorist_flip.js?v=137"></script>
-<script defer src="js/data/supplementals/week_5_paradigms.js?v=137"></script>
-<script defer src="js/data/supplementals/w6_aorist_passive_flip.js?v=137"></script>
-<script defer src="js/data/supplementals/w6_perfect_active_flip.js?v=137"></script>
-<script defer src="js/data/supplementals/w8_mi_verb_principal_parts_flip.js?v=137"></script>
-<script defer src="js/data/supplementals/week_6_paradigms.js?v=137"></script>
-<script defer src="js/data/supplementals/week_7_paradigms.js?v=137"></script>
-<script defer src="js/data/supplementals/week_8_paradigms.js?v=137"></script>
-<script defer src="js/data/supplementals/adj_paradigms.js?v=137"></script>
-<script defer src="js/data/supplementals/w3o_supplemental.js?v=137"></script>
-<script defer src="js/data/supplementals/w6o_supplemental.js?v=137"></script>
-<script defer src="js/data/supplementals/w7o_supplemental.js?v=137"></script>
-<script defer src="js/data/supplementals/w8o_supplemental.js?v=137"></script>
-<script defer src="js/data/supplementals/paradigm_morphology.js?v=137"></script>
-<script defer src="js/data/supplementals/stem_change_drills.js?v=137"></script>
-<script defer src="js/data/advanced/advanced_01.js?v=137"></script>
-<script defer src="js/data/advanced/advanced_02.js?v=137"></script>
-<script defer src="js/data/advanced/advanced_03.js?v=137"></script>
-<script defer src="js/data/advanced/advanced_04.js?v=137"></script>
-<script defer src="js/data/advanced/advanced_05.js?v=137"></script>
-<script defer src="js/data/advanced/advanced_06.js?v=137"></script>
-<script defer src="js/data/advanced/advanced_07.js?v=137"></script>
-<script defer src="js/data/advanced/advanced_08.js?v=137"></script>
-<script defer src="js/data/advanced/advanced_09.js?v=137"></script>
-<script defer src="js/data/advanced/advanced_10.js?v=137"></script>
-<script defer src="js/data/advanced/advanced_11.js?v=137"></script>
-<script defer src="js/data/advanced/advanced_12.js?v=137"></script>
-<script defer src="js/data/advanced/advanced_13.js?v=137"></script>
-<script defer src="js/data/advanced/advanced_14.js?v=137"></script>
-<script defer src="js/data/advanced/advanced_15.js?v=137"></script>
-<script defer src="js/data/advanced/advanced_16.js?v=137"></script>
-<script defer src="js/data/advanced/advanced_17.js?v=137"></script>
-<script defer src="js/data/advanced/advanced_18.js?v=137"></script>
-<script defer src="js/data/advanced/advanced_19.js?v=137"></script>
-<script defer src="js/data/advanced/advanced_20.js?v=137"></script>
-<script defer src="js/data/advanced/advanced_21.js?v=137"></script>
-<script defer src="js/data/advanced/advanced_22.js?v=137"></script>
-<script defer src="js/data/advanced/advanced_23.js?v=137"></script>
-<script defer src="js/data/advanced/advanced_24.js?v=137"></script>
-<script defer src="js/data/advanced/advanced_25.js?v=137"></script>
-<script defer src="js/data/reader.js?v=137"></script>
-<script defer src="js/data/reader_verse_literals.js?v=137"></script>
-<script defer src="js/data/reader_translations.js?v=137"></script>
-<script defer src="js/logic/pos_logic.js?v=137"></script>
-<script type="module" src="js/app/main.js?v=137"></script>
+<script defer src="js/data/words.js?v=138"></script>
+<script defer src="js/data/morphology.js?v=138"></script>
+<script defer src="js/data/lemma_inventory.js?v=138"></script>
+<script defer src="js/data/supplemental.js?v=138"></script>
+<script defer src="js/data/grammar.js?v=138"></script>
+<script defer src="js/data/supplementals/week_1_supplemental.js?v=138"></script>
+<script defer src="js/data/supplementals/week_1_paradigms.js?v=138"></script>
+<script defer src="js/data/supplementals/week_2_paradigms.js?v=138"></script>
+<script defer src="js/data/supplementals/week_3_paradigms.js?v=138"></script>
+<script defer src="js/data/supplementals/week_4_paradigms.js?v=138"></script>
+<script defer src="js/data/supplementals/second_aorist_flip.js?v=138"></script>
+<script defer src="js/data/supplementals/week_5_paradigms.js?v=138"></script>
+<script defer src="js/data/supplementals/w6_aorist_passive_flip.js?v=138"></script>
+<script defer src="js/data/supplementals/w6_perfect_active_flip.js?v=138"></script>
+<script defer src="js/data/supplementals/w8_mi_verb_principal_parts_flip.js?v=138"></script>
+<script defer src="js/data/supplementals/week_6_paradigms.js?v=138"></script>
+<script defer src="js/data/supplementals/week_7_paradigms.js?v=138"></script>
+<script defer src="js/data/supplementals/week_8_paradigms.js?v=138"></script>
+<script defer src="js/data/supplementals/adj_paradigms.js?v=138"></script>
+<script defer src="js/data/supplementals/w3o_supplemental.js?v=138"></script>
+<script defer src="js/data/supplementals/w6o_supplemental.js?v=138"></script>
+<script defer src="js/data/supplementals/w7o_supplemental.js?v=138"></script>
+<script defer src="js/data/supplementals/w8o_supplemental.js?v=138"></script>
+<script defer src="js/data/supplementals/paradigm_morphology.js?v=138"></script>
+<script defer src="js/data/supplementals/stem_change_drills.js?v=138"></script>
+<script defer src="js/data/advanced/advanced_01.js?v=138"></script>
+<script defer src="js/data/advanced/advanced_02.js?v=138"></script>
+<script defer src="js/data/advanced/advanced_03.js?v=138"></script>
+<script defer src="js/data/advanced/advanced_04.js?v=138"></script>
+<script defer src="js/data/advanced/advanced_05.js?v=138"></script>
+<script defer src="js/data/advanced/advanced_06.js?v=138"></script>
+<script defer src="js/data/advanced/advanced_07.js?v=138"></script>
+<script defer src="js/data/advanced/advanced_08.js?v=138"></script>
+<script defer src="js/data/advanced/advanced_09.js?v=138"></script>
+<script defer src="js/data/advanced/advanced_10.js?v=138"></script>
+<script defer src="js/data/advanced/advanced_11.js?v=138"></script>
+<script defer src="js/data/advanced/advanced_12.js?v=138"></script>
+<script defer src="js/data/advanced/advanced_13.js?v=138"></script>
+<script defer src="js/data/advanced/advanced_14.js?v=138"></script>
+<script defer src="js/data/advanced/advanced_15.js?v=138"></script>
+<script defer src="js/data/advanced/advanced_16.js?v=138"></script>
+<script defer src="js/data/advanced/advanced_17.js?v=138"></script>
+<script defer src="js/data/advanced/advanced_18.js?v=138"></script>
+<script defer src="js/data/advanced/advanced_19.js?v=138"></script>
+<script defer src="js/data/advanced/advanced_20.js?v=138"></script>
+<script defer src="js/data/advanced/advanced_21.js?v=138"></script>
+<script defer src="js/data/advanced/advanced_22.js?v=138"></script>
+<script defer src="js/data/advanced/advanced_23.js?v=138"></script>
+<script defer src="js/data/advanced/advanced_24.js?v=138"></script>
+<script defer src="js/data/advanced/advanced_25.js?v=138"></script>
+<script defer src="js/data/reader.js?v=138"></script>
+<script defer src="js/data/reader_verse_literals.js?v=138"></script>
+<script defer src="js/data/reader_translations.js?v=138"></script>
+<script defer src="js/logic/pos_logic.js?v=138"></script>
+<script type="module" src="js/app/main.js?v=138"></script>
 </body>
 </html>
