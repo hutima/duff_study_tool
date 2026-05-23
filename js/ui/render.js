@@ -8,7 +8,7 @@
 import { runtime } from '../state/runtime.js';
 import { buildGrammarSupportHtml } from '../domain/grammar/explanations.js';
 import { renderProgress, renderReview } from './progress.js';
-import { buildMorphSteps, summarizeLemmaStats, getParadigmStepAttemptWindow, computeAccessibleDimensionPools, parseAnswerDimensions } from '../domain/grammar/morph_steps.js';
+import { buildMorphSteps, summarizeLemmaStats, getParadigmStepAttemptWindow, computeAccessibleDimensionPools, parseAnswerDimensions, aspectMistakeNote } from '../domain/grammar/morph_steps.js';
 import { getAccessibleMorphCards } from '../domain/grammar/paradigm_focus.js';
 
 let host = {
@@ -400,9 +400,9 @@ function applyDisplaySuffixIfPerson(dimKey, value) {
 }
 
 // Builds a human-readable parse from a list of dimension values, e.g.
-// ['continuous', 'present', 'indicative', 'second', 'plural'] →
-// "continuous · present · indicative · second person · plural". Skips
-// empty values so a partial walk still reads cleanly.
+// ['continuous/undefined', 'present', 'indicative', 'second', 'plural'] →
+// "continuous/undefined · present · indicative · second person · plural".
+// Skips empty values so a partial walk still reads cleanly.
 function assembleParseLine(steps, values) {
   return steps.map((step, idx) => {
     const v = values[idx];
@@ -420,18 +420,20 @@ function renderMorphStepSummary(card, state) {
     const correct = answer && answer.isCorrect;
     const markClass = correct ? 'morph-step-correct' : 'morph-step-incorrect';
     const mark = correct ? '✓' : '✗';
-    // Multi-valid dimensions (e.g. aspect for present/future tenses) list
-    // every legitimate answer separated by " / ". For single-valid steps
-    // the list collapses to one entry, so the per-row visual is identical
-    // in shape regardless of multi-validity — the only difference is the
-    // count, and that's only visible on wrong answers (where the parse has
-    // already happened, so it can't be used as a giveaway for the current
-    // question). A static "some dimensions accept multiple valid answers"
-    // banner sits on the parse card itself; see renderMorphStepCard.
     const acceptable = Array.isArray(step.acceptable) ? step.acceptable : [step.correct];
     const correctionInner = acceptable.map((a) => escapeHtml(applyDisplaySuffixIfPerson(step.key, a))).join(' / ');
+    // For aspect mistakes, the picked value can visually overlap with the
+    // correct value (picking "continuous" when the right answer is the
+    // composite "continuous/undefined"). Append a one-line note that names
+    // the mistake — strikethrough + arrow alone reads like a near-miss.
+    let aspectNoteHtml = '';
+    if (!correct && answer && answer.selectedIdx >= 0 && step.key === 'aspect' && step.context) {
+      const pickedRaw = step.choices[answer.selectedIdx];
+      const note = aspectMistakeNote(step.context.tense, pickedRaw, step.correct);
+      if (note) aspectNoteHtml = `<span class="morph-step-aspect-note">${escapeHtml(note)}</span>`;
+    }
     const showCorrection = !correct && answer
-      ? `<span class="morph-step-correction">→ ${correctionInner}</span>`
+      ? `<span class="morph-step-correction">→ ${correctionInner}</span>${aspectNoteHtml}`
       : '';
     return `
       <div class="morph-step-summary-row ${markClass}">
@@ -510,7 +512,7 @@ function renderMorphStepCard(area, card) {
       ${lemmaGloss}
       <div class="morph-form">${escapeHtml(card.form)}</div>
       <div class="morph-hint">${escapeHtml(card.lemma)}</div>
-      <div class="morph-source">${escapeHtml(card.sourceLabel || '')} · Stats not affected · Some dimensions accept multiple valid answers</div>
+      <div class="morph-source">${escapeHtml(card.sourceLabel || '')} · Stats not affected · Use “continuous/undefined” when the form licenses either reading</div>
       ${renderMorphStepBreadcrumb(state)}
       ${body}
     </div>`;
