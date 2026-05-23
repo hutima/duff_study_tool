@@ -189,6 +189,37 @@ function applyDisplaySuffix(dimensionKey, value) {
   return suffix ? `${value}${suffix}` : value;
 }
 
+// 2nd-person plural present (any voice) is genuinely syncretic in Koine
+// Greek: the indicative and imperative are spelt the same — λύετε is both
+// "you (pl.) are untying" and "untie!"; likewise λύεσθε for the middle/
+// passive. The form alone doesn't pick one mood; only context (presence
+// of a subject, surrounding clauses) decides. When a card's parse names
+// this configuration we accept either mood at the Mood step, instead of
+// marking the alternate reading wrong.
+//
+// Detected from the raw answer text so this works across canonical
+// ("second person plural") and abbreviated ("2nd pl.") formats. Imperative
+// cards may omit person entirely (structurally 2nd) — treated as 2nd-pl
+// when the only number marker is plural and no 1st/3rd person tag appears.
+export function isSecondPluralPresentMoodAmbiguity(answer, parsedDims) {
+  if (!answer) return false;
+  const dims = parsedDims || parseAnswerDimensions(answer);
+  if (dims.tense !== 'present') return false;
+  if (dims.mood !== 'indicative' && dims.mood !== 'imperative') return false;
+  const a = String(answer).toLowerCase();
+  const isPlural = dims.number === 'plural' || /\bplural\b/.test(a) || /\bpl\./.test(a);
+  if (!isPlural) return false;
+  if (dims.person === 'second') return true;
+  if (/\b2nd\b/.test(a) || /\bsecond person\b/.test(a)) return true;
+  // Imperative cards are structurally 2nd person and often omit person
+  // markers entirely. Treat as 2nd plural when no other person is named.
+  if (dims.mood === 'imperative' && !dims.person
+      && !/\b(1st|3rd|first person|third person)\b/.test(a)) {
+    return true;
+  }
+  return false;
+}
+
 // When the student picks a mood that requires more dimensions than the
 // source card's parse class supplied, returns the dim keys to inject as
 // ungraded follow-up steps. Example: card λῦε is a 2-singular imperative
@@ -327,6 +358,9 @@ export function buildMorphSteps(card, accessiblePools = null) {
     };
     if (dimKey === 'aspect' && dims.tense) {
       step.context = { tense: dims.tense };
+    }
+    if (dimKey === 'mood' && isSecondPluralPresentMoodAmbiguity(card.answer, dims)) {
+      step.acceptable = ['indicative', 'imperative'];
     }
     steps.push(step);
   }
