@@ -265,7 +265,7 @@ export function renderCard() {
     backHTML = `
         <div class="card-face card-back card-stem-flip">
           ${requiredLabelHTML}
-          <span class="card-label">Aorist (1st sg.)</span>
+          <span class="card-label">${escapeHtml(card.stemFlipAorist || 'Aorist (1st sg.)')}</span>
           <div class="card-greek card-stem-flip-form">${diff.bHtml}</div>
           <div class="card-stem-flip-gloss">${escapeHtml(card.aoristGloss || '')}</div>
           ${noteHtml}

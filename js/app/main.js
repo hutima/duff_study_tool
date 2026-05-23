@@ -1233,6 +1233,17 @@ function getSelectedCards(keys) {
     }
     return cards;
   }
+  // Parsing mode loads the focused paradigm's cards regardless of which
+  // call path got us here (selectors.loadDeckFromKeys vs. restoreState).
+  // selectors.js layers an extra override on top, but restoreState rebuilds
+  // its own deck without that hook — so without this branch a fresh app
+  // load in parsing mode would surface vocab cards until the user picks a
+  // paradigm.
+  if (isParsingMode()) {
+    ensureMorphFocusedParadigm();
+    if (!runtime.morphFocusedParadigm) return [];
+    return getCardsForFocusedParadigm(getAggregateSelectionKeys(), runtime.morphFocusedParadigm);
+  }
   return getSelectedVocabCards(keys, false);
 }
 
@@ -1612,7 +1623,12 @@ function buildStudyDeck(cards, options = {}) {
   // PREVIOUS activity, not the one we just recorded a millisecond ago.
   const lastActivityAt = Number(runtime.previousStudyActivityAt) || 0;
   const idleReset = lastActivityAt && (now - lastActivityAt > SESSION_IDLE_RESET_MS);
-  const freshStart = forceShuffle || promotedNearCards || idleReset || carriedActiveIds.length === 0;
+  // Parsing mode keeps no SRS state, so the carry-over machinery (preserve
+  // the previous session's in-flight active order) has nothing meaningful to
+  // hold onto — and skipping freshStart would mean a reload restores the
+  // previously-shown card order rather than re-shuffling. Always freshStart
+  // in parsing mode so each load resamples the deck.
+  const freshStart = forceShuffle || promotedNearCards || idleReset || carriedActiveIds.length === 0 || isParsingMode();
 
   let activeDue;
   let middleDue;
