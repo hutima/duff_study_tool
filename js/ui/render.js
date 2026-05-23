@@ -234,7 +234,16 @@ export function renderCard() {
   const advancedCountSuffix = (card.advanced && Number.isFinite(Number(card.count)))
     ? ` [${Number(card.count)}× in NT]`
     : '';
-  const sourceLabelDisplay = `${card.sourceLabel}${advancedCountSuffix}`;
+  // Supplemental paradigm set labels read "<lemma> — <sub-paradigm>" (e.g.
+  // "εἰμί — infinitive and participle"). Showing the sub-paradigm on the
+  // card front gives away the parse class of the form — knowing εἶναι is
+  // an infinitive collapses the recall to a single form. Strip the tail
+  // for the on-card hint and show just the lemma side; the full label
+  // still appears in the session selector for browsing.
+  const onCardSourceLabel = card.supplemental
+    ? cardFaceLabelFromSourceLabel(card.sourceLabel)
+    : card.sourceLabel;
+  const sourceLabelDisplay = `${onCardSourceLabel}${advancedCountSuffix}`;
 
   // Prepositions that govern more than one case get a star on both faces as a
   // reminder that the meaning depends on the case of the object.
@@ -365,6 +374,18 @@ function escapeHtml(s) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+// Supplemental set labels follow "<lemma(s)> — <sub-paradigm>" (e.g.
+// "εἰμί — infinitive and participle"). On a card face the sub-paradigm
+// half leaks the parse class — drop it. Labels without an em-dash
+// separator ("First and second personal pronouns") are returned as-is.
+// Selectors/analytics keep the full label by going through card.sourceLabel
+// directly instead of this helper.
+function cardFaceLabelFromSourceLabel(label) {
+  if (!label) return label;
+  const idx = label.indexOf(' — ');
+  return idx >= 0 ? label.slice(0, idx) : label;
 }
 
 function renderMorphStepBreadcrumb(state) {
