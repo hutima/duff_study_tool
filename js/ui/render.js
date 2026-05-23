@@ -112,7 +112,7 @@ export function renderCard() {
     return;
   }
 
-  document.getElementById('markRow').style.display = host.isMorphologyMode() ? 'none' : 'flex';
+  document.getElementById('markRow').style.display = (host.isMorphologyMode() || host.isParsingMode()) ? 'none' : 'flex';
   const card = runtime.deck[runtime.currentIdx];
 
   // Parsing mode always uses the step-by-step renderer for dimensional cards.
@@ -243,7 +243,46 @@ export function renderCard() {
   const englishDisplay = `${prepStar}${card.e || '—'}`;
   const requiredLabelHTML = `<span class="card-required-label card-required-label-${card.required ? 'req' : 'opt'}">(${card.required ? 'req.' : 'opt.'})</span>`;
 
+  // Stem-flip cards (second-aorist supplement set): both faces show Greek +
+  // English gloss subtitle, with the differing characters highlighted so the
+  // stem change between present and aorist is visually obvious.
   let frontHTML, backHTML;
+  if (card.stemFlip) {
+    const diff = diffHighlightPair(card.g, card.aorist);
+    const flipHint = '<div class="flip-hint">click to reveal aorist →</div>';
+    const noteHtml = card.stemNote
+      ? `<div class="card-stem-note">${escapeHtml(card.stemNote)}</div>`
+      : '';
+    frontHTML = `
+        <div class="card-face card-front card-stem-flip">
+          ${requiredLabelHTML}
+          <span class="card-label">Present</span>
+          <div class="card-greek card-stem-flip-form">${diff.aHtml}</div>
+          <div class="card-stem-flip-gloss">${escapeHtml(card.e || '')}</div>
+          <div class="card-hint">${sourceLabelDisplay}</div>
+          ${flipHint}
+        </div>`;
+    backHTML = `
+        <div class="card-face card-back card-stem-flip">
+          ${requiredLabelHTML}
+          <span class="card-label">Aorist (1st sg.)</span>
+          <div class="card-greek card-stem-flip-form">${diff.bHtml}</div>
+          <div class="card-stem-flip-gloss">${escapeHtml(card.aoristGloss || '')}</div>
+          ${noteHtml}
+          <div class="card-hint">${escapeHtml(card.g)} → ${escapeHtml(card.aorist)}</div>
+        </div>`;
+    area.innerHTML = `
+      <div class="card-wrapper" id="cardWrapper" onclick="flipCard()">
+        <div class="card-inner" id="cardInner">
+          ${frontHTML}
+          ${backHTML}
+        </div>
+      </div>`;
+    runtime.isFlipped = false;
+    renderProgress();
+    return;
+  }
+
   if (!runtime.directionToGreek) {
     frontHTML = `
         <div class="card-face card-front">
@@ -425,6 +464,44 @@ function renderMorphStepCard(area, card) {
     </div>`;
   runtime.isFlipped = false;
   renderProgress();
+}
+
+// LCS-based diff between two strings (typically a present and an aorist
+// Greek form). Returns {aHtml, bHtml} where matching characters render
+// plain and differing characters get wrapped in <span class="stem-diff">.
+// Used by the second-aorist flip-card supplement to visualize stem changes.
+function diffHighlightPair(a, b) {
+  const A = [...String(a || '')];
+  const B = [...String(b || '')];
+  if (!A.length || !B.length) return { aHtml: escapeHtml(a || ''), bHtml: escapeHtml(b || '') };
+  // Standard LCS DP table.
+  const m = A.length, n = B.length;
+  const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+  for (let i = 0; i < m; i++) {
+    for (let j = 0; j < n; j++) {
+      dp[i + 1][j + 1] = A[i] === B[j] ? dp[i][j] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+    }
+  }
+  // Walk back to mark which positions in A and B are part of the common
+  // subsequence; anything else gets the diff highlight.
+  const inLCS_A = new Array(m).fill(false);
+  const inLCS_B = new Array(n).fill(false);
+  let i = m, j = n;
+  while (i > 0 && j > 0) {
+    if (A[i - 1] === B[j - 1]) {
+      inLCS_A[i - 1] = true;
+      inLCS_B[j - 1] = true;
+      i--; j--;
+    } else if (dp[i - 1][j] >= dp[i][j - 1]) {
+      i--;
+    } else {
+      j--;
+    }
+  }
+  const wrap = (chars, mask) => chars.map((ch, idx) =>
+    mask[idx] ? escapeHtml(ch) : `<span class="stem-diff">${escapeHtml(ch)}</span>`
+  ).join('');
+  return { aHtml: wrap(A, inLCS_A), bHtml: wrap(B, inLCS_B) };
 }
 
 export function flipCard() {
