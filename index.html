@@ -14,11 +14,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Greek Cards">
-<link rel="manifest" href="manifest.json?v=135">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=135">
-<link rel="icon" type="image/svg+xml" href="favicon.svg?v=135">
+<link rel="manifest" href="manifest.json?v=136">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=136">
+<link rel="icon" type="image/svg+xml" href="favicon.svg?v=136">
 <title>Elementary NT Greek — Flashcards</title>
-<link rel="stylesheet" href="styles.css?v=135">
+<link rel="stylesheet" href="styles.css?v=136">
 <script>
 (function(){
   try {
@@ -480,6 +480,23 @@
       <details class="user-guide-changelog">
         <summary>Changelog</summary>
         <details class="user-guide-changelog-version" open>
+          <summary>Version 1.4 &middot; 2026-05-23</summary>
+          <ul class="user-guide-list">
+            <li><strong>New <em>Parsing</em> mode.</strong> A new top-level mode (next to Vocab / Grammar / Reader) walks you through paradigm forms one dimension at a time &mdash; e.g. for a verb form: tense &rarr; voice &rarr; mood &rarr; person &rarr; number, each as its own multiple-choice step. Distractors are gated to plausible values for that paradigm, so wrong answers are actually instructive instead of giveaways.</li>
+            <li><strong>Step-by-step paradigm coverage.</strong> Parsing mode drives every paradigm form in the chapters you've selected (article, nouns, pronouns, adjectives, verbs across tenses / voices / moods, &mu;&iota; verbs, participles, etc.) using the same paradigm tables as the <strong>Memorization</strong> page. It walks every form once before any repeats, so a session gives full paradigm coverage rather than re-asking the same handful.</li>
+            <li><strong>Multi-valid aspect and a composite &ldquo;continuous / undefined&rdquo; pick.</strong> Aspect is now its own parsing dimension, with combined options like <em>continuous / undefined</em> for forms where more than one aspect is valid &mdash; matching how Duff actually teaches it.</li>
+            <li><strong>Parse-comparison summary on every card.</strong> After you answer (right or wrong), the card always shows your full parse vs. the correct parse alongside the Greek form. If your parse was wrong, it also lists the actual forms in that paradigm that <em>would</em> have matched what you guessed, so the mistake turns into a recognition drill.</li>
+            <li><strong>Lemma-wide form lookup.</strong> The form &harr; parse matcher now walks the whole lemma inventory and picks a canonical form per parse, so dimensions like aspect, voice, and mood don't get orphaned when a paradigm row is sparse.</li>
+            <li><strong>Per-paradigm parsing stats.</strong> Progress &rarr; Total Grammar now has a <em>Paradigm parsing (step-by-step)</em> panel with rolling per-paradigm, per-dimension accuracy from your last 20 attempts. These are off-the-record drill stats &mdash; they don't feed SRS or main confidence numbers.</li>
+            <li><strong>Stem-change flip supplements.</strong> New per-week flip-card sets that highlight stem differences for second-aorist (Ch 11), aorist passive (Ch 14), perfect active (Ch 15), and &mu;&iota;-verb principal parts (Ch 18). Stem-recall drills now run in both directions (present &harr; aorist, etc.) with a post-parse stem-pair note.</li>
+            <li><strong>Three-deck spaced flow.</strong> Spaced review now uses an explicit <em>active / middle / deferred</em> layout: cards you just got wrong sit in a small <em>middle</em> deck before sliding back to the main rotation, instead of all reappearing at random. Unspaced mode gets the matching middle-deck round so a flip-deck pass has a clearer shape. The bottom progress bar now shows <em>Cards left</em> matching this flow, and the end-of-section card lists how many cards are <em>near-due</em> in spaced or <em>still unconfirmed</em> in unspaced.</li>
+            <li><strong>Mode strip refresh.</strong> The home-screen mode strip is now a single uniform-width row of four buttons (Vocab, Grammar, Parsing, Reader), with <em>Paradigms</em> as its own standalone button below.</li>
+            <li><strong>Paradigm dropdown groups + cumulative.</strong> The focused-paradigm picker is grouped by type (articles, nouns, pronouns, verbs, adjectives) with HTML <code>&lt;optgroup&gt;</code> headers, is cumulative across selected chapters, and wraps cleanly on narrow phones. Added the &pi;&rho;&omicron;&phi;&eta;&tau;&eta;&sigma; (1st-decl. masc. -&eta;&sigma;) paradigm.</li>
+            <li><strong>Session persistence + undo robustness.</strong> A study session now persists for up to 5h of inactivity instead of timing out aggressively, and undo in spaced mode is more forgiving across mode switches.</li>
+            <li><strong>App cache bumped</strong> so the new mode and assets reach all devices on next load.</li>
+          </ul>
+        </details>
+        <details class="user-guide-changelog-version">
           <summary>Version 1.3 &middot; 2026-05-20</summary>
           <ul class="user-guide-list">
             <li><strong>Grammar drills realigned to Duff's chapter TOC.</strong> Every chapter's drills have been audited against Duff's actual chapter scope: Chapter 8 expanded, liquid stems moved from Ch 8 to Ch 11, Ch 9 &amp; 10 reworked, and Ch 2&ndash;8 &amp; 11&ndash;20 cleaned up so out-of-scope concepts and distractors are gone. W&ndash;week supplements now focus on paradigm memorization, with concept questions that used to live in W3O / W4O moved back into their chapter sections.</li>
@@ -659,75 +676,77 @@
   </div>
 </div>
 
-<div class="consent-overlay" id="whatsNewV1_1Overlay" aria-hidden="true">
-  <div class="consent-modal" role="dialog" aria-modal="true" aria-labelledby="whatsNewV1_1Title">
-    <div class="consent-label">Version 1.1</div>
-    <h2 id="whatsNewV1_1Title">What's new in this update</h2>
+<div class="consent-overlay" id="whatsNewV1_4Overlay" aria-hidden="true">
+  <div class="consent-modal" role="dialog" aria-modal="true" aria-labelledby="whatsNewV1_4Title">
+    <div class="consent-label">Version 1.4</div>
+    <h2 id="whatsNewV1_4Title">What's new in this update</h2>
     <div class="consent-copy">
-      <p><strong>Paradigm supplemental sets.</strong> The memorization paradigms (article, nouns, pronouns, verbs, adjectives, etc.) are now grouped into per-week supplemental decks. Open <strong>Choose session → Supplemental</strong> on the home screen to pick a week's paradigms; you can also browse them as full reference tables under the <strong>Memorization</strong> tab in the top navigation.</p>
-      <p><strong>Translation exercises.</strong> Each chapter of the reader now has a <strong>Translation drills</strong> section built from cumulative vocabulary, plus tap‑to‑reveal literal English under each verse. Tap <strong>Reader</strong> at the top of the home screen, expand a chapter, and step through the drills one at a time.</p>
-      <p>You can re-open the study aid notice any time from the <strong>Study aid notice</strong> button on the home screen.</p>
+      <p><strong>New <em>Parsing</em> mode.</strong> A new top-level mode sits next to <strong>Vocab</strong>, <strong>Grammar</strong>, and <strong>Reader</strong> on the home screen. It walks you through paradigm forms one dimension at a time &mdash; tense &rarr; voice &rarr; mood &rarr; person &rarr; number for verbs, case &rarr; gender &rarr; number for nominals &mdash; with distractors gated to values that actually appear in that paradigm.</p>
+      <p><strong>Parse-comparison after every card.</strong> Whether you got it right or wrong, the card shows your full parse, the correct parse, and the Greek form. If you got it wrong, it lists the forms in the paradigm that <em>would</em> have matched your guess, turning the mistake into a quick recognition drill.</p>
+      <p><strong>Aspect as its own dimension.</strong> Aspect is now parsed as a separate step, with combined picks like <em>continuous / undefined</em> for forms where more than one aspect is valid &mdash; matching how Duff teaches it.</p>
+      <p><strong>Stem-change supplements + three-deck spaced flow.</strong> New per-week flip-card sets highlight stem differences (2nd aorist, aorist passive, perfect active, &mu;&iota;-verb principal parts), and spaced review now uses an explicit <em>active / middle / deferred</em> layout so cards you just missed reappear sooner without flooding the rotation.</p>
+      <p>Open <strong>User guide &rarr; Changelog</strong> for the full v1.4 list.</p>
     </div>
     <div class="consent-actions">
-      <button class="ctrl-btn consent-primary" id="whatsNewV1_1CloseBtn" type="button" onclick="closeWhatsNewV1_1Modal()">Got it</button>
+      <button class="ctrl-btn consent-primary" id="whatsNewV1_4CloseBtn" type="button" onclick="closeWhatsNewV1_4Modal()">Got it</button>
     </div>
   </div>
 </div>
 
-<script defer src="js/data/words.js?v=135"></script>
-<script defer src="js/data/morphology.js?v=135"></script>
-<script defer src="js/data/lemma_inventory.js?v=135"></script>
-<script defer src="js/data/supplemental.js?v=135"></script>
-<script defer src="js/data/grammar.js?v=135"></script>
-<script defer src="js/data/supplementals/week_1_supplemental.js?v=135"></script>
-<script defer src="js/data/supplementals/week_1_paradigms.js?v=135"></script>
-<script defer src="js/data/supplementals/week_2_paradigms.js?v=135"></script>
-<script defer src="js/data/supplementals/week_3_paradigms.js?v=135"></script>
-<script defer src="js/data/supplementals/week_4_paradigms.js?v=135"></script>
-<script defer src="js/data/supplementals/second_aorist_flip.js?v=135"></script>
-<script defer src="js/data/supplementals/week_5_paradigms.js?v=135"></script>
-<script defer src="js/data/supplementals/w6_aorist_passive_flip.js?v=135"></script>
-<script defer src="js/data/supplementals/w6_perfect_active_flip.js?v=135"></script>
-<script defer src="js/data/supplementals/w8_mi_verb_principal_parts_flip.js?v=135"></script>
-<script defer src="js/data/supplementals/week_6_paradigms.js?v=135"></script>
-<script defer src="js/data/supplementals/week_7_paradigms.js?v=135"></script>
-<script defer src="js/data/supplementals/week_8_paradigms.js?v=135"></script>
-<script defer src="js/data/supplementals/adj_paradigms.js?v=135"></script>
-<script defer src="js/data/supplementals/w3o_supplemental.js?v=135"></script>
-<script defer src="js/data/supplementals/w6o_supplemental.js?v=135"></script>
-<script defer src="js/data/supplementals/w7o_supplemental.js?v=135"></script>
-<script defer src="js/data/supplementals/w8o_supplemental.js?v=135"></script>
-<script defer src="js/data/supplementals/paradigm_morphology.js?v=135"></script>
-<script defer src="js/data/supplementals/stem_change_drills.js?v=135"></script>
-<script defer src="js/data/advanced/advanced_01.js?v=135"></script>
-<script defer src="js/data/advanced/advanced_02.js?v=135"></script>
-<script defer src="js/data/advanced/advanced_03.js?v=135"></script>
-<script defer src="js/data/advanced/advanced_04.js?v=135"></script>
-<script defer src="js/data/advanced/advanced_05.js?v=135"></script>
-<script defer src="js/data/advanced/advanced_06.js?v=135"></script>
-<script defer src="js/data/advanced/advanced_07.js?v=135"></script>
-<script defer src="js/data/advanced/advanced_08.js?v=135"></script>
-<script defer src="js/data/advanced/advanced_09.js?v=135"></script>
-<script defer src="js/data/advanced/advanced_10.js?v=135"></script>
-<script defer src="js/data/advanced/advanced_11.js?v=135"></script>
-<script defer src="js/data/advanced/advanced_12.js?v=135"></script>
-<script defer src="js/data/advanced/advanced_13.js?v=135"></script>
-<script defer src="js/data/advanced/advanced_14.js?v=135"></script>
-<script defer src="js/data/advanced/advanced_15.js?v=135"></script>
-<script defer src="js/data/advanced/advanced_16.js?v=135"></script>
-<script defer src="js/data/advanced/advanced_17.js?v=135"></script>
-<script defer src="js/data/advanced/advanced_18.js?v=135"></script>
-<script defer src="js/data/advanced/advanced_19.js?v=135"></script>
-<script defer src="js/data/advanced/advanced_20.js?v=135"></script>
-<script defer src="js/data/advanced/advanced_21.js?v=135"></script>
-<script defer src="js/data/advanced/advanced_22.js?v=135"></script>
-<script defer src="js/data/advanced/advanced_23.js?v=135"></script>
-<script defer src="js/data/advanced/advanced_24.js?v=135"></script>
-<script defer src="js/data/advanced/advanced_25.js?v=135"></script>
-<script defer src="js/data/reader.js?v=135"></script>
-<script defer src="js/data/reader_verse_literals.js?v=135"></script>
-<script defer src="js/data/reader_translations.js?v=135"></script>
-<script defer src="js/logic/pos_logic.js?v=135"></script>
-<script type="module" src="js/app/main.js?v=135"></script>
+<script defer src="js/data/words.js?v=136"></script>
+<script defer src="js/data/morphology.js?v=136"></script>
+<script defer src="js/data/lemma_inventory.js?v=136"></script>
+<script defer src="js/data/supplemental.js?v=136"></script>
+<script defer src="js/data/grammar.js?v=136"></script>
+<script defer src="js/data/supplementals/week_1_supplemental.js?v=136"></script>
+<script defer src="js/data/supplementals/week_1_paradigms.js?v=136"></script>
+<script defer src="js/data/supplementals/week_2_paradigms.js?v=136"></script>
+<script defer src="js/data/supplementals/week_3_paradigms.js?v=136"></script>
+<script defer src="js/data/supplementals/week_4_paradigms.js?v=136"></script>
+<script defer src="js/data/supplementals/second_aorist_flip.js?v=136"></script>
+<script defer src="js/data/supplementals/week_5_paradigms.js?v=136"></script>
+<script defer src="js/data/supplementals/w6_aorist_passive_flip.js?v=136"></script>
+<script defer src="js/data/supplementals/w6_perfect_active_flip.js?v=136"></script>
+<script defer src="js/data/supplementals/w8_mi_verb_principal_parts_flip.js?v=136"></script>
+<script defer src="js/data/supplementals/week_6_paradigms.js?v=136"></script>
+<script defer src="js/data/supplementals/week_7_paradigms.js?v=136"></script>
+<script defer src="js/data/supplementals/week_8_paradigms.js?v=136"></script>
+<script defer src="js/data/supplementals/adj_paradigms.js?v=136"></script>
+<script defer src="js/data/supplementals/w3o_supplemental.js?v=136"></script>
+<script defer src="js/data/supplementals/w6o_supplemental.js?v=136"></script>
+<script defer src="js/data/supplementals/w7o_supplemental.js?v=136"></script>
+<script defer src="js/data/supplementals/w8o_supplemental.js?v=136"></script>
+<script defer src="js/data/supplementals/paradigm_morphology.js?v=136"></script>
+<script defer src="js/data/supplementals/stem_change_drills.js?v=136"></script>
+<script defer src="js/data/advanced/advanced_01.js?v=136"></script>
+<script defer src="js/data/advanced/advanced_02.js?v=136"></script>
+<script defer src="js/data/advanced/advanced_03.js?v=136"></script>
+<script defer src="js/data/advanced/advanced_04.js?v=136"></script>
+<script defer src="js/data/advanced/advanced_05.js?v=136"></script>
+<script defer src="js/data/advanced/advanced_06.js?v=136"></script>
+<script defer src="js/data/advanced/advanced_07.js?v=136"></script>
+<script defer src="js/data/advanced/advanced_08.js?v=136"></script>
+<script defer src="js/data/advanced/advanced_09.js?v=136"></script>
+<script defer src="js/data/advanced/advanced_10.js?v=136"></script>
+<script defer src="js/data/advanced/advanced_11.js?v=136"></script>
+<script defer src="js/data/advanced/advanced_12.js?v=136"></script>
+<script defer src="js/data/advanced/advanced_13.js?v=136"></script>
+<script defer src="js/data/advanced/advanced_14.js?v=136"></script>
+<script defer src="js/data/advanced/advanced_15.js?v=136"></script>
+<script defer src="js/data/advanced/advanced_16.js?v=136"></script>
+<script defer src="js/data/advanced/advanced_17.js?v=136"></script>
+<script defer src="js/data/advanced/advanced_18.js?v=136"></script>
+<script defer src="js/data/advanced/advanced_19.js?v=136"></script>
+<script defer src="js/data/advanced/advanced_20.js?v=136"></script>
+<script defer src="js/data/advanced/advanced_21.js?v=136"></script>
+<script defer src="js/data/advanced/advanced_22.js?v=136"></script>
+<script defer src="js/data/advanced/advanced_23.js?v=136"></script>
+<script defer src="js/data/advanced/advanced_24.js?v=136"></script>
+<script defer src="js/data/advanced/advanced_25.js?v=136"></script>
+<script defer src="js/data/reader.js?v=136"></script>
+<script defer src="js/data/reader_verse_literals.js?v=136"></script>
+<script defer src="js/data/reader_translations.js?v=136"></script>
+<script defer src="js/logic/pos_logic.js?v=136"></script>
+<script type="module" src="js/app/main.js?v=136"></script>
 </body>
 </html>

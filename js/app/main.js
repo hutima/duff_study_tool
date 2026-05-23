@@ -166,7 +166,7 @@ import { getSelectedVocabCards, getSelectedGrammarCards, getAllVocabKeys, getAll
 
 // Domain — Grammar
 import { buildGrammarSupportHtml } from '../domain/grammar/explanations.js';
-import { recordParadigmAttempt, inferredFollowupDims, buildInferredStep } from '../domain/grammar/morph_steps.js';
+import { recordParadigmAttempt, inferredFollowupDims, buildInferredStep, structuralImpossibilityReason } from '../domain/grammar/morph_steps.js';
 import { listAvailableParadigms, listAvailableParadigmsByCategory, getCardsForFocusedParadigm } from '../domain/grammar/paradigm_focus.js';
 
 // UI
@@ -190,10 +190,10 @@ import {
   initializeConsentGate,
   showDisclaimerModal,
   isDisclaimerModalOpen,
-  maybeShowWhatsNewV1_1Modal,
-  openWhatsNewV1_1Modal,
-  closeWhatsNewV1_1Modal,
-  isWhatsNewV1_1ModalOpen,
+  maybeShowWhatsNewV1_4Modal,
+  openWhatsNewV1_4Modal,
+  closeWhatsNewV1_4Modal,
+  isWhatsNewV1_4ModalOpen,
   isTransferModalOpen,
   isStudySelectorOpen,
   openStudySelector,
@@ -317,7 +317,7 @@ import {
   sanitizeGamificationState,
   STORAGE_KEY,
   CONSENT_STORAGE_KEY,
-  WHATS_NEW_V1_1_STORAGE_KEY,
+  WHATS_NEW_V1_4_STORAGE_KEY,
   THEME_STORAGE_KEY,
   FONT_FAMILY_STORAGE_KEY,
   TEXT_SIZE_STORAGE_KEY,
@@ -701,6 +701,24 @@ function answerMorphologyStep(choiceIdx) {
 
   const answeredIdx = state.stepIdx;
   const wasInferred = !!step.inferred;
+
+  // Structural impossibility check: once the picks collectively name a
+  // non-existent paradigm cell (e.g. future + imperative), there's nothing
+  // sensible to ask for the remaining downstream dimensions — the form
+  // doesn't exist, so person/number are moot. Stop the walk, record the
+  // reason, and let the summary explain why.
+  const struct = detectStructuralImpossibility(state);
+  if (struct) {
+    state.structuralImpossibility = struct;
+    state.stepIdx = state.steps.length;
+    state.completed = true;
+    finalizeMorphStepAttempt(card, state);
+    renderCard();
+    renderProgress();
+    saveState();
+    return;
+  }
+
   const injectedCount = maybeInjectInferredSteps(state, step.key, picked);
   if (injectedCount > 0) {
     // Defer this step's correctness reveal until the injected follow-ups
@@ -719,6 +737,24 @@ function answerMorphologyStep(choiceIdx) {
   renderCard();
   renderProgress();
   saveState();
+}
+
+// Walks the answers collected so far and asks morph_steps whether the
+// (tense, mood) combination names a structurally impossible paradigm cell.
+// Returns { reason } or null. Ignores ungraded inferred steps (their picks
+// still inform the lookup, since e.g. the user might inject person before
+// the impossibility surfaces).
+function detectStructuralImpossibility(state) {
+  if (!state || !Array.isArray(state.steps)) return null;
+  const picked = {};
+  state.steps.forEach((s, idx) => {
+    if (!s) return;
+    const ans = state.answers[idx];
+    if (!ans || ans.selectedIdx < 0) return;
+    picked[s.key] = s.choices[ans.selectedIdx];
+  });
+  const reason = structuralImpossibilityReason(picked);
+  return reason ? { reason } : null;
 }
 
 function skipMorphologyStep() {
@@ -749,6 +785,10 @@ function finalizeMorphStepAttempt(card, state) {
   state.steps.forEach((step, idx) => {
     if (step.inferred) return; // ungraded — don't contribute to per-dim stats
     const ans = state.answers[idx];
+    // Steps left unanswered because a structural impossibility ended the
+    // walk early aren't graded — the form doesn't exist, so person/number
+    // couldn't have been asked.
+    if (!ans) return;
     dims[step.key] = ans && ans.isCorrect ? 1 : 0;
   });
   if (!runtime.paradigmStepStats || typeof runtime.paradigmStepStats !== 'object') {
@@ -2163,7 +2203,7 @@ installKeyboardShortcuts({
   isAnalyticsModalOpen, closeAnalyticsOverlay,
   isStudySelectorOpen, closeStudySelector,
   isShortcutsModalOpen, closeShortcutsModal,
-  isWhatsNewV1_1ModalOpen, closeWhatsNewV1_1Modal,
+  isWhatsNewV1_4ModalOpen, closeWhatsNewV1_4Modal,
   isDisclaimerModalOpen, isTransferModalOpen,
   isReviewDeckMode,
   getSelectedKeys: () => runtime.selectedKeys,
@@ -2199,7 +2239,7 @@ const GLOBAL_CLICK_HANDLERS = {
   toggleMorphStepByStep, setMorphFocusedParadigm,
   toggleRequiredOnly, toggleHardVocabReview, toggleShuffle, toggleSpacedRepetition, toggleSplitSelection, toggleUnspacedDailyReset, triggerImportProgress,
   openReaderTab, selectReaderDrillChoice, advanceReaderDrill,
-  closeWhatsNewV1_1Modal
+  closeWhatsNewV1_4Modal
 };
 if (typeof globalThis !== 'undefined') Object.assign(globalThis, GLOBAL_CLICK_HANDLERS);
 if (typeof window !== 'undefined' && window !== globalThis) Object.assign(window, GLOBAL_CLICK_HANDLERS);
