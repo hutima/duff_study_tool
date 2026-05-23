@@ -8,7 +8,8 @@
 import { runtime } from '../state/runtime.js';
 import { buildGrammarSupportHtml } from '../domain/grammar/explanations.js';
 import { renderProgress, renderReview } from './progress.js';
-import { buildMorphSteps, summarizeLemmaStats, getParadigmStepAttemptWindow } from '../domain/grammar/morph_steps.js';
+import { buildMorphSteps, summarizeLemmaStats, getParadigmStepAttemptWindow, computeAccessibleDimensionPools, parseAnswerDimensions } from '../domain/grammar/morph_steps.js';
+import { getAccessibleMorphCards } from '../domain/grammar/paradigm_focus.js';
 
 let host = {
   saveState: () => {},
@@ -16,6 +17,7 @@ let host = {
   noteStudyInteraction: () => {},
   getNearDueCount: () => 0,
   isMorphologyMode: () => false,
+  isParsingMode: () => false,
   isReverseGrammarActive: () => false,
   isMorphCard: () => false,
   reverseDisplayActive: () => false,
@@ -41,7 +43,9 @@ export function renderCard() {
 
   if (!runtime.deck.length) {
     let emptyMessage;
-    if (host.isMorphologyMode()) {
+    if (host.isParsingMode()) {
+      emptyMessage = 'Pick a focused paradigm from the dropdown above to start parsing.';
+    } else if (host.isMorphologyMode()) {
       emptyMessage = host.isReverseGrammarActive()
         ? 'No reversible grammar items in this selection. Toggle “English → Greek” off to see all questions.'
         : 'No grammar quiz material is available yet for this selection.';
@@ -58,7 +62,7 @@ export function renderCard() {
     runtime.unspacedPendingRecycle = false;
   }
 
-  if (!runtime.spacedRepetition && host.isMorphologyMode() && runtime.currentIdx >= runtime.deck.length && runtime.unspacedPendingRecycle) {
+  if (!runtime.spacedRepetition && (host.isMorphologyMode() || host.isParsingMode()) && runtime.currentIdx >= runtime.deck.length && runtime.unspacedPendingRecycle) {
     host.startNextCycle('remaining');
     host.resetMorphAnswerState();
     renderCard();
@@ -111,7 +115,11 @@ export function renderCard() {
   document.getElementById('markRow').style.display = host.isMorphologyMode() ? 'none' : 'flex';
   const card = runtime.deck[runtime.currentIdx];
 
-  if (host.isMorphCard(card) && runtime.morphStepByStep) {
+  // Parsing mode always uses the step-by-step renderer for dimensional cards.
+  // Stem-change recall cards ("what is the aorist of βάλλω?") have
+  // card.dimensional === false; those fall through to the standard MC
+  // renderer below regardless of mode.
+  if (host.isMorphCard(card) && host.isParsingMode() && card.dimensional !== false) {
     renderMorphStepCard(area, card);
     return;
   }
@@ -291,7 +299,12 @@ export function renderCard() {
 function ensureStepStateForCard(card) {
   const state = runtime.morphStepState;
   if (state && state.cardId === card.id) return state;
-  const steps = buildMorphSteps(card);
+  // Build a chapter-gated distractor pool so MC choices never include
+  // tenses/moods/cases the textbook hasn't introduced by the user's max
+  // selected chapter (e.g. no "pluperfect" while Ch ≤ 11).
+  const accessibleCards = getAccessibleMorphCards(runtime.selectedKeys);
+  const accessiblePools = computeAccessibleDimensionPools(accessibleCards);
+  const steps = buildMorphSteps(card, accessiblePools);
   runtime.morphStepState = {
     cardId: card.id,
     steps,
@@ -369,10 +382,21 @@ function renderMorphStepSummary(card, state) {
     ? `<div class="morph-step-rollup-recent">Last ${lemmaSummary.attempts}/${getParadigmStepAttemptWindow()} attempts for ${escapeHtml(card.lemma)}: ${lemmaSummary.correct}/${lemmaSummary.total} dimensions correct (${Math.round(100 * lemmaSummary.correct / Math.max(1, lemmaSummary.total))}%)</div>`
     : '';
 
+  // Stem-change footer: if the parsed form is in a tense whose stem differs
+  // from the present lemma (aorist family, perfect, pluperfect), surface the
+  // present → form pair so the student sees the stem association alongside
+  // the completed parse.
+  const STEM_CHANGE_TENSES = new Set(['aorist', 'first aorist', 'second aorist', 'perfect', 'pluperfect']);
+  const parsedDims = parseAnswerDimensions(card.answer);
+  const stemChangeNote = (STEM_CHANGE_TENSES.has(parsedDims.tense) && card.lemma && card.form && card.lemma !== card.form)
+    ? `<div class="morph-step-stem-note"><span class="morph-step-stem-label">Stem change</span> ${escapeHtml(card.lemma)} → ${escapeHtml(card.form)}</div>`
+    : '';
+
   return `
     <div class="morph-step-summary">
       <div class="morph-step-summary-title">Parse complete — ${escapeHtml(totalStr)}</div>
       <div class="morph-step-summary-body">${rows}</div>
+      ${stemChangeNote}
       ${recentLine}
       <div class="morph-step-summary-meta">${escapeHtml(card.lemma)}${card.family ? ' · ' + escapeHtml(card.family) : ''}</div>
     </div>`;
