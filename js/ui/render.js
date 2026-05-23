@@ -62,7 +62,7 @@ export function renderCard() {
     runtime.unspacedPendingRecycle = false;
   }
 
-  if (!runtime.spacedRepetition && host.isMorphologyMode() && runtime.currentIdx >= runtime.deck.length && runtime.unspacedPendingRecycle) {
+  if (!runtime.spacedRepetition && (host.isMorphologyMode() || host.isParsingMode()) && runtime.currentIdx >= runtime.deck.length && runtime.unspacedPendingRecycle) {
     host.startNextCycle('remaining');
     host.resetMorphAnswerState();
     renderCard();

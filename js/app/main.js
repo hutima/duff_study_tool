@@ -370,7 +370,7 @@ configureRender({
   isReverseGrammarActive: () => isReverseGrammarActive(),
   isMorphCard: (card) => isMorphCard(card),
   reverseDisplayActive: (card) => reverseDisplayActive(card),
-  startNextCycle: (mode) => startNextCycle(mode),
+  startNextCycle: (mode, opts) => startNextCycle(mode, opts),
   resetMorphAnswerState: () => resetMorphAnswerState(),
   maybeReturnKnownCardToActivePile: () => maybeReturnKnownCardToActivePile(),
   formatGreekHeadword: (g) => typeof window !== 'undefined' && typeof window.formatGreekHeadword === 'function' ? window.formatGreekHeadword(g) : (g || '—'),
@@ -416,7 +416,7 @@ configureNavigation({
   getDirectionalProgressStore: () => getDirectionalProgressStore(),
   syncToggleButtons: () => syncToggleButtons(),
   syncLayoutVisibility: () => syncLayoutVisibility(),
-  startNextCycle: (mode) => startNextCycle(mode),
+  startNextCycle: (mode, opts) => startNextCycle(mode, opts),
   getKnownCount: () => getKnownCount(),
   advanceScheduledCards: (cards, ms) => advanceScheduledCards(cards, ms),
   buildStudyDeck: (cards, opts) => buildStudyDeck(cards, opts),
@@ -1490,6 +1490,20 @@ function restoreSpacedUndo() {
   saveState();
 }
 
+// Returns a deck where deck[0] is guaranteed not to equal avoidHeadId — used
+// to prevent a card the user just saw at the end of one cycle from appearing
+// first in the very next cycle. Mutates the input array in place.
+function avoidHeadCollision(deck, avoidHeadId) {
+  if (!avoidHeadId || !Array.isArray(deck) || deck.length < 2) return deck;
+  if (!deck[0] || deck[0].id !== avoidHeadId) return deck;
+  // Pick a random later slot to swap into; the original head moves elsewhere
+  // in the deck rather than being deferred to the very end (which would be
+  // predictable). With ≥ 2 cards there's always at least one valid swap.
+  const swapIdx = 1 + Math.floor(Math.random() * (deck.length - 1));
+  [deck[0], deck[swapIdx]] = [deck[swapIdx], deck[0]];
+  return deck;
+}
+
 function buildStudyDeck(cards, options = {}) {
   if (!runtime.spacedRepetition) {
     // Unspaced flip deck has three sections: [active..., middle..., known...].
@@ -1510,6 +1524,7 @@ function buildStudyDeck(cards, options = {}) {
     runtime.activeDeckCount = active.length;
     runtime.unspacedMiddleCount = middle.length;
     const orderedActive = runtime.shuffled ? shuffleArray([...active]) : [...active];
+    avoidHeadCollision(orderedActive, options.avoidHeadId);
     if (options.preserveUnspacedRound !== true) {
       runtime.unspacedRoundSize = orderedActive.length;
       runtime.unspacedRoundMarks = 0;
@@ -1581,6 +1596,7 @@ function buildStudyDeck(cards, options = {}) {
   if (freshStart) {
     // Everything currently due collapses into active; middle clears.
     activeDue = runtime.shuffled ? shuffleArray([...dueCards]) : sortCardsByDue(dueCards);
+    avoidHeadCollision(activeDue, options.avoidHeadId);
     middleDue = [];
   } else {
     // Continue session: preserve the in-flight active order from the
@@ -1967,7 +1983,7 @@ function maybeReturnKnownCardToActivePile() {
 
 // Save/restore + JSON export/import + Transfer modal live in js/state/persistence.js
 
-function startNextCycle(mode = 'remaining') {
+function startNextCycle(mode = 'remaining', options = {}) {
   runtime.unspacedDeferredIds = new Set();
   runtime.flipsSinceReshuffle = 0;
   // A new cycle is a fresh shuffle anchor — reset the hourly timer so the
@@ -1980,10 +1996,12 @@ function startNextCycle(mode = 'remaining') {
     });
     runtime.marks = directionalMarks;
     const fullDeck = shuffleArray([...(runtime.originalDeck || [])]);
+    avoidHeadCollision(fullDeck, options.avoidHeadId);
     runtime.deck = fullDeck;
     runtime.currentIdx = fullDeck.length ? 0 : runtime.deck.length;
   } else {
     const remaining = shuffleArray([...getRemainingCards()]);
+    avoidHeadCollision(remaining, options.avoidHeadId);
     const known = (runtime.originalDeck || []).filter(card => runtime.marks[card.id] === 'known');
     runtime.deck = [...remaining, ...known];
     runtime.currentIdx = remaining.length ? 0 : runtime.deck.length;

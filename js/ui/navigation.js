@@ -159,8 +159,13 @@ export function navigate(dir, options = {}) {
     // moving without burning time. Only when middle is empty too do we fall
     // back to the existing scheduled-advance behaviour, which nudges the
     // next-up deferred cards forward an hour so the deck isn't dead.
+    // For parsing mode, also forward the last-shown card's id as
+    // avoidHeadId so the reshuffled deck doesn't repeat that card first.
+    const avoidHeadId = host.isParsingMode() && runtime.deck[runtime.currentIdx - 1]
+      ? runtime.deck[runtime.currentIdx - 1].id
+      : undefined;
     if (runtime.middleDeckCount > 0) {
-      runtime.deck = host.buildStudyDeck(runtime.originalDeck, { forceShuffle: true });
+      runtime.deck = host.buildStudyDeck(runtime.originalDeck, { forceShuffle: true, avoidHeadId });
     } else {
       // Advance the SRS clock so cards within 1 h of due become due-now,
       // then rebuild with forceShuffle so every newly-promoted card lands
@@ -169,7 +174,7 @@ export function navigate(dir, options = {}) {
       // would split the cohort across active and middle, forcing the user
       // to press Next a second time to dump middle in.
       host.advanceScheduledCards(runtime.originalDeck, SRS_CYCLE_ADVANCE_MS);
-      runtime.deck = host.buildStudyDeck(runtime.originalDeck, { forceShuffle: true });
+      runtime.deck = host.buildStudyDeck(runtime.originalDeck, { forceShuffle: true, avoidHeadId });
     }
     runtime.currentIdx = 0;
     host.resetMorphAnswerState();
@@ -191,6 +196,17 @@ export function navigate(dir, options = {}) {
       if (runtime.morphPendingAdvance) {
         runtime.deck = host.buildStudyDeck(runtime.originalDeck);
         runtime.currentIdx = Math.min(runtime.currentIdx, runtime.activeDeckCount);
+      } else if (host.isParsingMode() && runtime.currentIdx + 1 >= runtime.activeDeckCount) {
+        // Parsing has no SRS writes, so the standard end-of-cycle "no cards
+        // due" splash never resolves on its own — reshuffle immediately
+        // when the cursor would step past the last card. The just-shown
+        // card's id is forwarded as avoidHeadId so it doesn't repeat at
+        // the head of the new shuffled cycle.
+        const avoidHeadId = runtime.deck[runtime.currentIdx]
+          ? runtime.deck[runtime.currentIdx].id
+          : undefined;
+        runtime.deck = host.buildStudyDeck(runtime.originalDeck, { forceShuffle: true, avoidHeadId });
+        runtime.currentIdx = 0;
       } else {
         runtime.currentIdx = Math.min(runtime.currentIdx + 1, runtime.activeDeckCount);
       }
@@ -211,7 +227,13 @@ export function navigate(dir, options = {}) {
   if (host.isMorphologyMode() || host.isParsingMode()) {
     const nextIdx = runtime.currentIdx + 1;
     if (nextIdx >= runtime.deck.length) {
-      if (host.getKnownCount() === runtime.originalDeck.length) {
+      if (host.isParsingMode()) {
+        // Parsing: silent auto-reshuffle, no "end of round" splash.
+        const avoidHeadId = runtime.deck[runtime.currentIdx]
+          ? runtime.deck[runtime.currentIdx].id
+          : undefined;
+        host.startNextCycle('remaining', { avoidHeadId });
+      } else if (host.getKnownCount() === runtime.originalDeck.length) {
         runtime.currentIdx = runtime.deck.length;
         runtime.unspacedPendingRecycle = false;
       } else {
