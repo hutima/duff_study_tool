@@ -98,6 +98,22 @@
     ]
   });
 
+  window.registerSupplementalVocabSet('W1_PROPHETES_DECLENSION', {
+    label: 'προφήτης — 1st-decl. masc. (-ης pattern)',
+    week: 1,
+    cards: [
+      { g: 'ὁ προφήτης', e: 'the prophet (masc. Nom. sg.)', required: true },
+      { g: 'τὸν προφήτην', e: 'the prophet (masc. Acc. sg.)', required: true },
+      { g: 'τοῦ προφήτου', e: 'of the prophet (masc. Gen. sg.)', required: true },
+      { g: 'τῷ προφήτῃ', e: 'to/for the prophet (masc. Dat. sg.)', required: true },
+      { g: 'προφῆτα', e: 'O prophet (masc. Voc. sg.)', required: true },
+      { g: 'οἱ προφῆται', e: 'the prophets (masc. Nom. pl.)', required: true },
+      { g: 'τοὺς προφήτας', e: 'the prophets (masc. Acc. pl.)', required: true },
+      { g: 'τῶν προφητῶν', e: 'of the prophets (masc. Gen. pl.)', required: true },
+      { g: 'τοῖς προφήταις', e: 'to/for the prophets (masc. Dat. pl.)', required: true }
+    ]
+  });
+
   window.registerSupplementalVocabSet('W1_AUTOS_PARADIGM', {
     label: 'αὐτός, αὐτή, αὐτό',
     week: 1,
