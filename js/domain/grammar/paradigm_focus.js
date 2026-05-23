@@ -231,10 +231,32 @@ export function listAvailableParadigmsByCategory(selectedKeys) {
   }));
 }
 
+// Normalizes a Greek form for dedup comparison: strips parenthesized
+// optional letters ("ἐστι(ν)" → "ἐστιν"), keeps only the first variant
+// before " / " or " or " ("εἰσίν / εἰσί" → "εἰσίν"), trims whitespace.
+// Used so the same form appearing under multiple chapter-overlapping
+// sources collapses to one card.
+function normalizeFormForDedup(form) {
+  if (!form) return '';
+  let s = String(form);
+  // Strip "(letter)" → "letter" so optional-letter variants compare equal.
+  s = s.replace(/\(([^)]*)\)/g, '$1');
+  // Keep just the first listed variant.
+  s = s.split(/\s+(?:\/|or)\s+/u)[0];
+  return s.trim();
+}
+
 // Given a focused lemma and the selection, return every morph card across
 // all sources whose effective chapter is ≤ the user's max — filtered to the
 // focused lemma so cross-chapter expansions of the same paradigm collapse
 // into one deck.
+//
+// Deduplication: when overlapping sources cover the same form (e.g. εἰμί's
+// present indicatives appear in both W1_EIMI_PRESENT and W3_EIMI_COMPLETE),
+// we keep only the version from the LATER source. The reasoning: a later
+// set that covers the same forms is the more authoritative / pedagogically
+// complete one — the earlier set was an introductory preview that gets
+// superseded once the fuller paradigm chapter rolls around.
 export function getCardsForFocusedParadigm(selectedKeys, focusedLemma) {
   if (!focusedLemma) return [];
   if (typeof window === 'undefined' || typeof window.buildMorphologyCardsForKeys !== 'function') return [];
@@ -250,8 +272,48 @@ export function getCardsForFocusedParadigm(selectedKeys, focusedLemma) {
   });
 
   if (!eligibleSourceKeys.length) return [];
-  const cards = window.buildMorphologyCardsForKeys(eligibleSourceKeys);
-  return cards.filter((card) => card && card.lemma === focusedLemma);
+  const cards = window.buildMorphologyCardsForKeys(eligibleSourceKeys)
+    .filter((card) => card && card.lemma === focusedLemma);
+
+  // Source-level dedup: drop any earlier source whose normalized form set is
+  // entirely contained in a LATER source's form set. The W1_EIMI_PRESENT
+  // forms are all covered by W3_EIMI_COMPLETE, so W3 supersedes W1 once Ch
+  // 8+ is selected. λύω's W1_PRESENT_ACTIVE is similarly a subset of W2's
+  // 4-tense indicative, so W2 supersedes W1 once Ch 6+ is selected.
+  //
+  // Doing this at the source level (rather than per-form) preserves
+  // legitimate within-source duplicates — e.g. λύω's imperfect ἔλυον is the
+  // same Greek string for both 1sg and 3pl, and both cards must survive.
+  const cardsBySource = new Map();
+  cards.forEach((card) => {
+    if (!cardsBySource.has(card.sourceKey)) cardsBySource.set(card.sourceKey, []);
+    cardsBySource.get(card.sourceKey).push(card);
+  });
+  const formsBySource = new Map();
+  cardsBySource.forEach((srcCards, srcKey) => {
+    const formSet = new Set();
+    srcCards.forEach((c) => {
+      const key = normalizeFormForDedup(c.form);
+      if (key) formSet.add(key);
+    });
+    formsBySource.set(srcKey, formSet);
+  });
+  const superseded = new Set();
+  formsBySource.forEach((formsA, srcA) => {
+    if (superseded.has(srcA)) return;
+    const chapA = sourceLevel(srcA).effectiveChapter;
+    formsBySource.forEach((formsB, srcB) => {
+      if (srcA === srcB || superseded.has(srcA)) return;
+      const chapB = sourceLevel(srcB).effectiveChapter;
+      if (chapA >= chapB) return;
+      // srcA is earlier than srcB. Drop srcA if every one of its forms is
+      // present in srcB.
+      let allInB = formsA.size > 0;
+      formsA.forEach((f) => { if (!formsB.has(f)) allInB = false; });
+      if (allInB) superseded.add(srcA);
+    });
+  });
+  return cards.filter((c) => !superseded.has(c.sourceKey));
 }
 
 export function chooseDefaultFocusedParadigm(selectedKeys) {

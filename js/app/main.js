@@ -1623,7 +1623,12 @@ function buildStudyDeck(cards, options = {}) {
   // PREVIOUS activity, not the one we just recorded a millisecond ago.
   const lastActivityAt = Number(runtime.previousStudyActivityAt) || 0;
   const idleReset = lastActivityAt && (now - lastActivityAt > SESSION_IDLE_RESET_MS);
-  const freshStart = forceShuffle || promotedNearCards || idleReset || carriedActiveIds.length === 0;
+  // Parsing mode keeps no SRS state, so the carry-over machinery (preserve
+  // the previous session's in-flight active order) has nothing meaningful to
+  // hold onto — and skipping freshStart would mean a reload restores the
+  // previously-shown card order rather than re-shuffling. Always freshStart
+  // in parsing mode so each load resamples the deck.
+  const freshStart = forceShuffle || promotedNearCards || idleReset || carriedActiveIds.length === 0 || isParsingMode();
 
   let activeDue;
   let middleDue;
