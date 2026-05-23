@@ -34,20 +34,27 @@ const DIM_LABEL = {
   gender: 'Gender'
 };
 
-// Aspect is implicit in tense in Duff's pedagogy: present/imperfect carry
-// continuous (imperfective) aspect, aorists carry undefined (aoristic), and
-// perfect/pluperfect carry completed (stative). Future is conventionally
-// classed as undefined here.
-const TENSE_TO_ASPECT = {
-  'present':       'continuous',
-  'imperfect':     'continuous',
-  'future':        'undefined',
-  'aorist':        'undefined',
-  'first aorist':  'undefined',
-  'second aorist': 'undefined',
-  'perfect':       'completed',
-  'pluperfect':    'completed'
+// Aspect is implicit in tense in Duff's pedagogy. Present and future are
+// ambiguous between continuous (imperfective) and undefined (aoristic) —
+// the present form can carry either depending on context (progressive vs.
+// gnomic), and the future is also context-dependent. Aorists carry
+// undefined, and perfect/pluperfect carry completed. Multiple valid
+// answers per tense are exposed via TENSE_TO_VALID_ASPECTS; the first
+// entry is the primary / default-display answer.
+const TENSE_TO_VALID_ASPECTS = {
+  'present':       ['continuous', 'undefined'],
+  'imperfect':     ['continuous'],
+  'future':        ['undefined', 'continuous'],
+  'aorist':        ['undefined'],
+  'first aorist':  ['undefined'],
+  'second aorist': ['undefined'],
+  'perfect':       ['completed'],
+  'pluperfect':    ['completed']
 };
+
+function validAspectsForTense(tense) {
+  return TENSE_TO_VALID_ASPECTS[tense] || [];
+}
 
 const DIM_DISPLAY_SUFFIX = {
   person: ' person'
@@ -87,7 +94,7 @@ export function parseAnswerDimensions(answer) {
 
   // Aspect is derived from tense (Duff's pedagogy: aspect is the primary
   // category, with tense as a secondary marker). Missing tense → no aspect.
-  const aspect = tense ? (TENSE_TO_ASPECT[tense] || '') : '';
+  const aspect = tense ? (validAspectsForTense(tense)[0] || '') : '';
 
   return { aspect, tense, voice, mood, person, case: grammaticalCase, number, gender };
 }
@@ -140,6 +147,13 @@ export function computeAccessibleDimensionPools(cards) {
     Object.keys(pools).forEach((k) => {
       if (dims[k]) pools[k].add(dims[k]);
     });
+    // Aspect pool: include every valid aspect for the card's tense, not
+    // just the default one, so the user has all acceptable answers as
+    // choices (e.g. present-tense cards expose both "continuous" and
+    // "undefined" since either is a legitimate answer for that tense).
+    if (dims.tense) {
+      validAspectsForTense(dims.tense).forEach((a) => pools.aspect.add(a));
+    }
   });
   const out = {};
   Object.keys(pools).forEach((k) => { out[k] = [...pools[k]]; });
@@ -176,10 +190,21 @@ export function buildMorphSteps(card, accessiblePools = null) {
     const choices = buildChoices(dimKey, correct, pool);
     const displayCorrect = applyDisplaySuffix(dimKey, correct);
     const displayChoices = choices.map((c) => applyDisplaySuffix(dimKey, c));
+    // Some dimensions accept multiple values for the same form. Aspect is
+    // the practical example: a present-tense form is legitimately parsed
+    // either as continuous or undefined aspect (Duff teaches the present
+    // as primarily imperfective, but a gnomic/aoristic reading is also
+    // valid). Step-by-step answer-checking should accept any value in
+    // acceptable[]; the primary `correct` is what gets surfaced as the
+    // "the textbook's default" entry on the summary.
+    const acceptable = (dimKey === 'aspect' && dims.tense)
+      ? validAspectsForTense(dims.tense)
+      : [correct];
     steps.push({
       key: dimKey,
       label: DIM_LABEL[dimKey] || dimKey,
       correct,
+      acceptable,
       choices,
       displayCorrect,
       displayChoices
