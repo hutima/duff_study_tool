@@ -393,6 +393,24 @@ function renderMorphStepCurrent(state) {
     </div>`;
 }
 
+// Mirrors the display-suffix logic in morph_steps.js so a person value
+// like "first" reads as "first person" in correction lines too.
+function applyDisplaySuffixIfPerson(dimKey, value) {
+  return dimKey === 'person' ? `${value} person` : value;
+}
+
+// Builds a human-readable parse from a list of dimension values, e.g.
+// ['continuous', 'present', 'indicative', 'second', 'plural'] →
+// "continuous · present · indicative · second person · plural". Skips
+// empty values so a partial walk still reads cleanly.
+function assembleParseLine(steps, values) {
+  return steps.map((step, idx) => {
+    const v = values[idx];
+    if (!v) return null;
+    return step.key === 'person' ? `${v} person` : v;
+  }).filter(Boolean).join(' · ');
+}
+
 function renderMorphStepSummary(card, state) {
   const rows = state.steps.map((step, idx) => {
     const answer = state.answers[idx];
@@ -402,8 +420,18 @@ function renderMorphStepSummary(card, state) {
     const correct = answer && answer.isCorrect;
     const markClass = correct ? 'morph-step-correct' : 'morph-step-incorrect';
     const mark = correct ? '✓' : '✗';
+    // Multi-valid dimensions (e.g. aspect for present/future tenses) list
+    // every legitimate answer separated by " / ". For single-valid steps
+    // the list collapses to one entry, so the per-row visual is identical
+    // in shape regardless of multi-validity — the only difference is the
+    // count, and that's only visible on wrong answers (where the parse has
+    // already happened, so it can't be used as a giveaway for the current
+    // question). A static "some dimensions accept multiple valid answers"
+    // banner sits on the parse card itself; see renderMorphStepCard.
+    const acceptable = Array.isArray(step.acceptable) ? step.acceptable : [step.correct];
+    const correctionInner = acceptable.map((a) => escapeHtml(applyDisplaySuffixIfPerson(step.key, a))).join(' / ');
     const showCorrection = !correct && answer
-      ? `<span class="morph-step-correction">→ ${escapeHtml(step.displayCorrect)}</span>`
+      ? `<span class="morph-step-correction">→ ${correctionInner}</span>`
       : '';
     return `
       <div class="morph-step-summary-row ${markClass}">
@@ -415,6 +443,29 @@ function renderMorphStepSummary(card, state) {
 
   const totalCorrect = state.answers.filter((a) => a && a.isCorrect).length;
   const totalStr = `${totalCorrect}/${state.steps.length} correct`;
+
+  // Assemble side-by-side "Your answer" vs "Correct" parse lines so the
+  // student sees the full assembled parse of their picks (useful when most
+  // dimensions were wrong — turning the per-row corrections into a coherent
+  // sentence).
+  const anyWrong = state.answers.some((a) => a && a.isCorrect === false);
+  const pickedValues = state.steps.map((step, idx) => {
+    const ans = state.answers[idx];
+    return ans && ans.selectedIdx >= 0 ? step.choices[ans.selectedIdx] : '';
+  });
+  const correctValues = state.steps.map((step) => step.correct);
+  const youParseLine = anyWrong
+    ? `<div class="morph-step-parse-compare">
+         <div class="morph-step-parse-line morph-step-parse-line-yours">
+           <span class="morph-step-parse-label">Your parse</span>
+           ${escapeHtml(assembleParseLine(state.steps, pickedValues) || '—')}
+         </div>
+         <div class="morph-step-parse-line morph-step-parse-line-correct">
+           <span class="morph-step-parse-label">Correct parse</span>
+           ${escapeHtml(assembleParseLine(state.steps, correctValues))}
+         </div>
+       </div>`
+    : '';
 
   const lemmaSummary = summarizeLemmaStats(runtime.paradigmStepStats || {}, card.lemma);
   const recentLine = lemmaSummary.attempts > 0
@@ -435,6 +486,7 @@ function renderMorphStepSummary(card, state) {
     <div class="morph-step-summary">
       <div class="morph-step-summary-title">Parse complete — ${escapeHtml(totalStr)}</div>
       <div class="morph-step-summary-body">${rows}</div>
+      ${youParseLine}
       ${stemChangeNote}
       ${recentLine}
       <div class="morph-step-summary-meta">${escapeHtml(card.lemma)}${card.family ? ' · ' + escapeHtml(card.family) : ''}</div>
@@ -458,7 +510,7 @@ function renderMorphStepCard(area, card) {
       ${lemmaGloss}
       <div class="morph-form">${escapeHtml(card.form)}</div>
       <div class="morph-hint">${escapeHtml(card.lemma)}</div>
-      <div class="morph-source">${escapeHtml(card.sourceLabel || '')} · Stats not affected</div>
+      <div class="morph-source">${escapeHtml(card.sourceLabel || '')} · Stats not affected · Some dimensions accept multiple valid answers</div>
       ${renderMorphStepBreadcrumb(state)}
       ${body}
     </div>`;
