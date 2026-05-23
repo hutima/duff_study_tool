@@ -1482,6 +1482,13 @@
     font-size: 13px;
     font-style: italic;
   }
+  .morph-step-aspect-note {
+    display: block;
+    margin-top: 4px;
+    color: #e7a1a1;
+    font-size: 12px;
+    line-height: 1.4;
+  }
   .morph-step-rollup-recent {
     margin-top: 10px;
     padding-top: 10px;
