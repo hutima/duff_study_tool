@@ -106,9 +106,12 @@ export function parseAnswerDimensions(answer) {
   const grammaticalCase = caseMatch ? caseMatch[1] : '';
 
   // Gender can be combined ("all genders" / "masculine/feminine/neuter").
+  // Canonicalize to the slash-composite so dimsCompatible (which splits on
+  // '/') can match it against a specific gender pick — 'all genders' as a
+  // single token wouldn't intersect with 'masculine'.
   const allGenders = /\ball genders?\b/.test(cleaned) || /\bmasculine\/feminine\/neuter\b/.test(cleaned);
   const gender = allGenders
-    ? 'all genders'
+    ? 'masculine/feminine/neuter'
     : (cleaned.match(/\b(masculine|feminine|neuter)(?:\/(?:masculine|feminine|neuter))*\b/) || [''])[0];
 
   // Aspect is derived from tense (Duff's pedagogy: aspect is the primary

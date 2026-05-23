@@ -474,12 +474,20 @@ function augmentAnswerWithLabel(answer, label) {
   const voiceMatch = t.match(/\b(middle\/passive|middle or passive|active|middle|passive)\b/);
   const moodMatch  = t.match(/\b(indicative|subjunctive|imperative|infinitive|participle)\b/);
   const lcAns = String(answer).toLowerCase();
+  // Only augment when the answer doesn't already carry its OWN mood/voice
+  // marker. Comparing against the label's first match (the previous logic)
+  // misfires on labels that mention multiple moods — e.g. "εἰμί —
+  // infinitive and participle" picks 'infinitive' and prepends it to every
+  // participle card, so ans.mood parses as 'infinitive' and the form
+  // lookup can no longer match the card on a participle pick.
+  const ansHasVoice = /\b(active|middle|passive|middle\/passive)\b/.test(lcAns);
+  const ansHasMood  = /\b(indicative|subjunctive|imperative|infinitive|participle)\b/.test(lcAns);
   let out = String(answer);
-  if (voiceMatch) {
+  if (voiceMatch && !ansHasVoice) {
     const v = voiceMatch[0].replace(/middle or passive/, 'middle/passive');
-    if (!lcAns.includes(v)) out = `${v} ${out}`;
+    out = `${v} ${out}`;
   }
-  if (moodMatch && !lcAns.includes(moodMatch[0])) {
+  if (moodMatch && !ansHasMood) {
     out = `${moodMatch[0]} ${out}`;
   }
   return out;
@@ -572,6 +580,21 @@ function isParseImpossibleForLemma(lemma, pickedDims) {
   return false;
 }
 
+// Mood is a structural class, not just another label: finite forms carry
+// a person; participles carry case + gender; infinitives carry none of
+// these. A candidate whose answer string omits an explicit mood marker
+// (Duff's εἰμί cards say "Future: I will be (1sg.)" with no "indicative"
+// tag) can still be disqualified by its structural shape — without this,
+// picking mood=participle on εἰμί + future happily matches the finite
+// ἔσομαι because per-dim matching only checks tense + number.
+function structurallyCompatibleMood(pickedMood, ansDims) {
+  if (!pickedMood) return true;
+  const nonFinitePick = pickedMood === 'participle' || pickedMood === 'infinitive';
+  if (nonFinitePick && ansDims.person) return false;
+  if (!nonFinitePick && (ansDims.case || ansDims.gender) && !ansDims.person) return false;
+  return true;
+}
+
 // Resolves the student's picked dimensions to one of three outcomes:
 //   { kind: 'form', form }       — canonical Greek form matching the picks
 //   { kind: 'impossible' }       — inventory says this combo doesn't exist
@@ -583,7 +606,10 @@ function isParseImpossibleForLemma(lemma, pickedDims) {
 // since a confident "impossible" verdict should win over a data-gap
 // "—" even if the picks happen not to match anything in the pool.
 // Then try the card's own paradigm subset (tightest context), broaden
-// to the lemma-wide pool, and pick a single canonical form.
+// to the lemma-wide pool, then fall back to lemma_inventory.extraForms
+// (paradigms Duff doesn't drill but which exist in Greek — e.g. εἰμί's
+// future middle participle ἐσόμενος, so ἐσομένου can be surfaced for
+// "future participle gen. sg." picks). Picks a single canonical form.
 function resolveFormForPickedDims(card, steps, pickedValues) {
   if (!card) return { kind: 'none' };
   const pickedDims = {};
@@ -599,14 +625,18 @@ function resolveFormForPickedDims(card, steps, pickedValues) {
   // A dimension the candidate answer doesn't carry (infinitives have no
   // number; finite verbs have no case) shouldn't disqualify the
   // candidate — the orphan dimension is a category error against this
-  // candidate, not a disagreement.
+  // candidate, not a disagreement. Structural mood compatibility is
+  // checked separately so an unlabeled finite candidate can't satisfy a
+  // participle/infinitive pick.
   const matchPool = (pool) => {
     const out = [];
     for (const [form, answer] of Object.entries(pool || {})) {
       if (!form || !answer) continue;
       const ansDims = parseAnswerDimensions(answer);
       const ok = keys.every((k) => !ansDims[k] || dimsCompatible(pickedDims[k], ansDims[k]));
-      if (ok) out.push({ form, ansDims });
+      if (!ok) continue;
+      if (!structurallyCompatibleMood(pickedDims.mood, ansDims)) continue;
+      out.push({ form, ansDims });
     }
     return out;
   };
@@ -619,6 +649,15 @@ function resolveFormForPickedDims(card, steps, pickedValues) {
     // feedback for λύω.
     const accessibleCards = getAccessibleMorphCards(runtime.selectedKeys);
     candidates = matchPool(buildLemmaFormToAnswerFromCards(card.lemma, accessibleCards));
+  }
+  if (!candidates.length) {
+    // Final fallback: lemma_inventory's extraForms — morphologically real
+    // paradigms (εἰμί's future middle participle, etc.) that no card
+    // carries. Pure lookup augmentation; not part of any study deck.
+    const inv = (typeof window !== 'undefined' && window.LEMMA_INVENTORY)
+      ? window.LEMMA_INVENTORY[card.lemma]
+      : null;
+    if (inv && inv.extraForms) candidates = matchPool(inv.extraForms);
   }
   if (!candidates.length) return { kind: 'none' };
 
