@@ -366,6 +366,7 @@ configureRender({
   noteStudyInteraction: () => noteStudyInteraction(),
   getNearDueCount: () => getNearDueCount(),
   isMorphologyMode: () => isMorphologyMode(),
+  isParsingMode: () => isParsingMode(),
   isReverseGrammarActive: () => isReverseGrammarActive(),
   isMorphCard: (card) => isMorphCard(card),
   reverseDisplayActive: (card) => reverseDisplayActive(card),
@@ -395,9 +396,9 @@ configureSelectors({
   markActiveDeckRef: () => markActiveDeckRef(),
   saveState: () => saveState(),
   canAccessGrammarUi: () => canAccessGrammarUi(),
-  isMorphStepByStepActive: () => !!runtime.morphStepByStep && isMorphologyMode(),
+  isMorphStepByStepActive: () => isParsingMode(),
   getFocusedParadigmCards: () => {
-    if (!isMorphologyMode() || !runtime.morphStepByStep) return null;
+    if (!isParsingMode()) return null;
     ensureMorphFocusedParadigm();
     if (!runtime.morphFocusedParadigm) return [];
     return getCardsForFocusedParadigm(runtime.selectedKeys, runtime.morphFocusedParadigm);
@@ -406,6 +407,7 @@ configureSelectors({
 configureNavigation({
   noteStudyInteraction: () => noteStudyInteraction(),
   isMorphologyMode: () => isMorphologyMode(),
+  isParsingMode: () => isParsingMode(),
   isReaderMode: () => isReaderMode(),
   normalizeStudyMode: (m) => normalizeStudyMode(m),
   resetMorphAnswerState: () => resetMorphAnswerState(),
@@ -481,6 +483,10 @@ function getStudyStoreKey() {
   if (runtime.studyMode === 'morph') {
     return runtime.directionToGreek ? 'morph_e2g' : 'morph';
   }
+  // Parsing mode is off-the-record (no SRS / no main-stats writes), so it
+  // reads its directional store under its own key — keeping it cleanly
+  // separated from the grammar-mode mark store.
+  if (runtime.studyMode === 'parsing') return 'parsing';
   return getDirectionKey();
 }
 
@@ -511,10 +517,12 @@ function ensureDirectionalStores() {
   if (!runtime.globalWordMarks.e2g || typeof runtime.globalWordMarks.e2g !== 'object') runtime.globalWordMarks.e2g = {};
   if (!runtime.globalWordMarks.morph || typeof runtime.globalWordMarks.morph !== 'object') runtime.globalWordMarks.morph = {};
   if (!runtime.globalWordMarks.morph_e2g || typeof runtime.globalWordMarks.morph_e2g !== 'object') runtime.globalWordMarks.morph_e2g = {};
+  if (!runtime.globalWordMarks.parsing || typeof runtime.globalWordMarks.parsing !== 'object') runtime.globalWordMarks.parsing = {};
   if (!runtime.globalWordProgress.g2e || typeof runtime.globalWordProgress.g2e !== 'object') runtime.globalWordProgress.g2e = {};
   if (!runtime.globalWordProgress.e2g || typeof runtime.globalWordProgress.e2g !== 'object') runtime.globalWordProgress.e2g = {};
   if (!runtime.globalWordProgress.morph || typeof runtime.globalWordProgress.morph !== 'object') runtime.globalWordProgress.morph = {};
   if (!runtime.globalWordProgress.morph_e2g || typeof runtime.globalWordProgress.morph_e2g !== 'object') runtime.globalWordProgress.morph_e2g = {};
+  if (!runtime.globalWordProgress.parsing || typeof runtime.globalWordProgress.parsing !== 'object') runtime.globalWordProgress.parsing = {};
 }
 
 function getDirectionalMarksStore() {
@@ -537,16 +545,23 @@ function isMorphologyMode() {
   return runtime.studyMode === 'morph';
 }
 
+// Parsing is its own top-level study mode (separate from Grammar). Grammar
+// keeps its single-MC parse cards; Parsing always runs the step-by-step
+// dimensional walk against the focused paradigm.
+function isParsingMode() {
+  return runtime.studyMode === 'parsing';
+}
+
 function isReaderMode() {
   return runtime.studyMode === 'reader';
 }
 
 function isCardStudyMode() {
-  return runtime.studyMode === 'vocab' || runtime.studyMode === 'morph' || runtime.studyMode === 'reader';
+  return runtime.studyMode === 'vocab' || runtime.studyMode === 'morph' || runtime.studyMode === 'parsing' || runtime.studyMode === 'reader';
 }
 
 function isReviewDeckMode() {
-  return runtime.studyMode === 'vocab' || runtime.studyMode === 'morph';
+  return runtime.studyMode === 'vocab' || runtime.studyMode === 'morph' || runtime.studyMode === 'parsing';
 }
 
 function isVocabOnlyProfile() {
@@ -567,6 +582,7 @@ function getProfileDescription() {
 
 function normalizeStudyMode(mode) {
   if (mode === 'morph' && canAccessGrammarUi()) return 'morph';
+  if (mode === 'parsing' && canAccessGrammarUi()) return 'parsing';
   if (mode === 'reader') return 'reader';
   return 'vocab';
 }
@@ -593,20 +609,20 @@ function ensureMorphFocusedParadigm() {
   if (available.length) runtime.morphFocusedParadigm = available[0].lemma;
 }
 
-// Step-by-step mode narrows the morph deck to the focused paradigm's forms
-// via the selectors-host hook; toggling it off (or switching the focused
-// paradigm) re-runs loadDeckFromKeys so the deck rebuilds accordingly.
+// Parsing mode narrows the deck to the focused paradigm's forms via the
+// selectors-host hook; switching the focused paradigm re-runs
+// loadDeckFromKeys so the deck rebuilds accordingly.
 function rebuildMorphDeckForStepMode() {
-  if (!isMorphologyMode()) return;
+  if (!isParsingMode()) return;
   loadDeckFromKeys(runtime.selectedKeys, runtime.currentSession ? runtime.currentSession.id : null);
 }
 
-// Step-by-step answer: record dimension correctness locally, advance through
-// the steps, write a single attempt to the rolling per-lemma window on
+// Step answer: record dimension correctness locally, advance through the
+// steps, write a single attempt to the rolling per-lemma window on
 // completion. NO writes to SRS, recordStudyOutcome, or directional marks —
-// this mode is explicitly off-the-record.
+// parsing mode is explicitly off-the-record.
 function answerMorphologyStep(choiceIdx) {
-  if (!isMorphologyMode() || !runtime.morphStepByStep) return;
+  if (!isParsingMode()) return;
   noteStudyInteraction();
   const card = runtime.deck[runtime.currentIdx];
   if (!card || !runtime.morphStepState || runtime.morphStepState.completed) return;
@@ -627,7 +643,7 @@ function answerMorphologyStep(choiceIdx) {
 }
 
 function skipMorphologyStep() {
-  if (!isMorphologyMode() || !runtime.morphStepByStep) return;
+  if (!isParsingMode()) return;
   noteStudyInteraction();
   const card = runtime.deck[runtime.currentIdx];
   if (!card || !runtime.morphStepState || runtime.morphStepState.completed) return;
@@ -660,6 +676,7 @@ function finalizeMorphStepAttempt(card, state) {
 
 function getModeDescription() {
   if (isMorphologyMode()) return 'Grammar Quiz';
+  if (isParsingMode()) return 'Step-by-step Parsing';
   if (isReaderMode()) return 'Reader';
   return 'Vocabulary Flashcards';
 }
@@ -772,14 +789,13 @@ function initializeTextSize() {
   applyTextSize(runtime.textSize, false);
 }
 
-// Populate the focused-paradigm dropdown from the current selection, and
-// resync runtime.morphFocusedParadigm if the current pick is no longer
-// available (e.g. user changed chapters).
+// Populate the primary focused-paradigm dropdown from the current selection
+// when parsing mode is active, and resync runtime.morphFocusedParadigm if
+// the current pick is no longer available (e.g. user changed chapters).
 function syncParadigmFocusUi() {
-  const select = document.getElementById('paradigmFocusSelect');
+  const select = document.getElementById('paradigmFocusSelectPrimary');
   if (!select) return;
-  const visible = runtime.morphStepByStep && isMorphologyMode();
-  if (!visible) return;
+  if (!isParsingMode()) return;
   const available = listAvailableParadigms(runtime.selectedKeys);
   if (!available.length) {
     select.innerHTML = '<option value="">No paradigms in current selection</option>';
@@ -846,10 +862,6 @@ function syncToggleButtons() {
   if (hardReviewSwitch) hardReviewSwitch.classList.toggle('on', !!runtime.hardVocabReviewMode);
   if (splitSelectionSwitch) splitSelectionSwitch.classList.toggle('on', !!runtime.splitSelection);
   if (selfCheckBtn)    selfCheckBtn.classList.toggle('on',    !!runtime.morphSelfCheck && isMorphologyMode());
-  const stepByStepBtn = document.getElementById('morphStepByStepBtn');
-  const stepByStepToggle = document.getElementById('morphStepByStepToggle');
-  if (stepByStepBtn)    stepByStepBtn.classList.toggle('on', !!runtime.morphStepByStep && isMorphologyMode());
-  if (stepByStepToggle) stepByStepToggle.setAttribute('aria-checked', (runtime.morphStepByStep && isMorphologyMode()) ? 'true' : 'false');
   syncParadigmFocusUi();
   if (dailyResetSwitch) dailyResetSwitch.classList.toggle('on', !!runtime.unspacedAutoResetEnabled);
   if (shuffleToggle)   shuffleToggle.setAttribute('aria-checked',   runtime.shuffled ? 'true' : 'false');
@@ -874,6 +886,8 @@ function syncToggleButtons() {
   if (modeReaderBtn)   modeReaderBtn.classList.toggle('active', runtime.studyMode === 'reader');
   if (modeShortcutVocabBtn) modeShortcutVocabBtn.classList.toggle('active', runtime.studyMode === 'vocab');
   if (modeShortcutMorphBtn) modeShortcutMorphBtn.classList.toggle('active', runtime.studyMode === 'morph');
+  const modeShortcutParsingBtn = document.getElementById('modeShortcutParsingBtn');
+  if (modeShortcutParsingBtn) modeShortcutParsingBtn.classList.toggle('active', runtime.studyMode === 'parsing');
   if (modeShortcutReaderBtn) modeShortcutReaderBtn.classList.toggle('active', runtime.studyMode === 'reader');
   syncThemeButtons();
   if (resetDeckBtn) {
@@ -916,17 +930,15 @@ function syncLayoutVisibility() {
   if (cardArea) cardArea.style.display = cardMode ? '' : 'none';
   if (reviewShell) reviewShell.style.display = reviewDeckMode ? '' : 'none';
   if (navRow) navRow.style.display = reviewDeckMode && runtime.selectedKeys.length ? 'flex' : 'none';
-  if (markRow) markRow.style.display = reviewDeckMode && runtime.selectedKeys.length && !isMorphologyMode() ? 'flex' : 'none';
-  if (ffRow) ffRow.style.display = reviewDeckMode && runtime.selectedKeys.length && runtime.spacedRepetition ? 'flex' : 'none';
+  if (markRow) markRow.style.display = reviewDeckMode && runtime.selectedKeys.length && !isMorphologyMode() && !isParsingMode() ? 'flex' : 'none';
+  if (ffRow) ffRow.style.display = reviewDeckMode && runtime.selectedKeys.length && runtime.spacedRepetition && !isParsingMode() ? 'flex' : 'none';
   if (directionToggle) directionToggle.style.display = (runtime.studyMode === 'vocab' || runtime.studyMode === 'morph') ? 'flex' : 'none';
   if (requiredToggle) requiredToggle.style.display = runtime.studyMode === 'vocab' ? 'flex' : 'none';
   if (hardReviewToggle) hardReviewToggle.style.display = runtime.studyMode === 'vocab' ? 'flex' : 'none';
   if (splitSelectionToggle) splitSelectionToggle.style.display = canAccessGrammarUi() ? 'flex' : 'none';
-  if (selfCheckToggle) selfCheckToggle.style.display = (isMorphologyMode() && canAccessGrammarUi() && !runtime.morphStepByStep) ? 'flex' : 'none';
-  const stepByStepToggle = document.getElementById('morphStepByStepToggle');
-  if (stepByStepToggle) stepByStepToggle.style.display = isMorphologyMode() && canAccessGrammarUi() ? 'flex' : 'none';
-  const paradigmFocusRow = document.getElementById('paradigmFocusRow');
-  if (paradigmFocusRow) paradigmFocusRow.style.display = (runtime.morphStepByStep && isMorphologyMode() && canAccessGrammarUi()) ? 'flex' : 'none';
+  if (selfCheckToggle) selfCheckToggle.style.display = (isMorphologyMode() && canAccessGrammarUi()) ? 'flex' : 'none';
+  const paradigmFocusRowPrimary = document.getElementById('paradigmFocusRowPrimary');
+  if (paradigmFocusRowPrimary) paradigmFocusRowPrimary.style.display = isParsingMode() ? 'flex' : 'none';
   if (shuffleToggle) shuffleToggle.style.display = reviewDeckMode ? 'flex' : 'none';
   if (spacedToggle) spacedToggle.style.display = reviewDeckMode ? 'flex' : 'none';
   if (dailyResetToggle) dailyResetToggle.style.display = (reviewDeckMode && !runtime.spacedRepetition && runtime.studyMode === 'vocab') ? 'flex' : 'none';

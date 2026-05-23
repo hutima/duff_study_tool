@@ -17,6 +17,7 @@ let host = {
   noteStudyInteraction: () => {},
   getNearDueCount: () => 0,
   isMorphologyMode: () => false,
+  isParsingMode: () => false,
   isReverseGrammarActive: () => false,
   isMorphCard: () => false,
   reverseDisplayActive: () => false,
@@ -42,7 +43,9 @@ export function renderCard() {
 
   if (!runtime.deck.length) {
     let emptyMessage;
-    if (host.isMorphologyMode()) {
+    if (host.isParsingMode()) {
+      emptyMessage = 'Pick a focused paradigm from the dropdown above to start parsing.';
+    } else if (host.isMorphologyMode()) {
       emptyMessage = host.isReverseGrammarActive()
         ? 'No reversible grammar items in this selection. Toggle “English → Greek” off to see all questions.'
         : 'No grammar quiz material is available yet for this selection.';
@@ -112,10 +115,11 @@ export function renderCard() {
   document.getElementById('markRow').style.display = host.isMorphologyMode() ? 'none' : 'flex';
   const card = runtime.deck[runtime.currentIdx];
 
-  // Step-by-step only applies to dimensional parsing cards. Stem-change
-  // recall cards ("what is the aorist of βάλλω?") have card.dimensional ===
-  // false; for those we fall through to the standard MC renderer below.
-  if (host.isMorphCard(card) && runtime.morphStepByStep && card.dimensional !== false) {
+  // Parsing mode always uses the step-by-step renderer for dimensional cards.
+  // Stem-change recall cards ("what is the aorist of βάλλω?") have
+  // card.dimensional === false; those fall through to the standard MC
+  // renderer below regardless of mode.
+  if (host.isMorphCard(card) && host.isParsingMode() && card.dimensional !== false) {
     renderMorphStepCard(area, card);
     return;
   }

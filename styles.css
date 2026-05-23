@@ -817,6 +817,32 @@
     margin-right: 4px;
   }
 
+  /* Wrapped layout for the mode shortcut row with 5 entries — 3 on the
+   * first row, 2 on the second. Grid with explicit column count + nth-child
+   * border removal keeps the divider lines aligned. */
+  .mode-group.mode-group-wrap {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    width: 100%;
+    max-width: 360px;
+  }
+
+  .mode-group.mode-group-wrap .mode-btn {
+    padding: 9px 8px;
+    text-align: center;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    border-left: 0;
+  }
+
+  .mode-group.mode-group-wrap .mode-btn:nth-child(3n) {
+    border-right: 0;
+  }
+
+  .mode-group.mode-group-wrap .mode-btn:nth-child(n+4) {
+    border-bottom: 0;
+  }
+
   .mode-btn {
     background: transparent;
     border: 0;
@@ -1208,6 +1234,18 @@
     font-size: 13px;
     color: var(--muted);
     width: 100%;
+  }
+
+  /* Primary placement above the card area when Parsing mode is active —
+   * elevates the dropdown out of advanced settings so the lemma choice is
+   * a first-class control. */
+  .paradigm-focus-row-primary {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    margin-bottom: 14px;
+    gap: 12px;
   }
 
   .paradigm-focus-label {
