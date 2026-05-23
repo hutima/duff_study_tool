@@ -8,7 +8,7 @@
 import { runtime } from '../state/runtime.js';
 import { buildGrammarSupportHtml } from '../domain/grammar/explanations.js';
 import { renderProgress, renderReview } from './progress.js';
-import { buildMorphSteps, summarizeLemmaStats, getParadigmStepAttemptWindow, computeAccessibleDimensionPools } from '../domain/grammar/morph_steps.js';
+import { buildMorphSteps, summarizeLemmaStats, getParadigmStepAttemptWindow, computeAccessibleDimensionPools, parseAnswerDimensions } from '../domain/grammar/morph_steps.js';
 import { getAccessibleMorphCards } from '../domain/grammar/paradigm_focus.js';
 
 let host = {
@@ -378,10 +378,21 @@ function renderMorphStepSummary(card, state) {
     ? `<div class="morph-step-rollup-recent">Last ${lemmaSummary.attempts}/${getParadigmStepAttemptWindow()} attempts for ${escapeHtml(card.lemma)}: ${lemmaSummary.correct}/${lemmaSummary.total} dimensions correct (${Math.round(100 * lemmaSummary.correct / Math.max(1, lemmaSummary.total))}%)</div>`
     : '';
 
+  // Stem-change footer: if the parsed form is in a tense whose stem differs
+  // from the present lemma (aorist family, perfect, pluperfect), surface the
+  // present → form pair so the student sees the stem association alongside
+  // the completed parse.
+  const STEM_CHANGE_TENSES = new Set(['aorist', 'first aorist', 'second aorist', 'perfect', 'pluperfect']);
+  const parsedDims = parseAnswerDimensions(card.answer);
+  const stemChangeNote = (STEM_CHANGE_TENSES.has(parsedDims.tense) && card.lemma && card.form && card.lemma !== card.form)
+    ? `<div class="morph-step-stem-note"><span class="morph-step-stem-label">Stem change</span> ${escapeHtml(card.lemma)} → ${escapeHtml(card.form)}</div>`
+    : '';
+
   return `
     <div class="morph-step-summary">
       <div class="morph-step-summary-title">Parse complete — ${escapeHtml(totalStr)}</div>
       <div class="morph-step-summary-body">${rows}</div>
+      ${stemChangeNote}
       ${recentLine}
       <div class="morph-step-summary-meta">${escapeHtml(card.lemma)}${card.family ? ' · ' + escapeHtml(card.family) : ''}</div>
     </div>`;

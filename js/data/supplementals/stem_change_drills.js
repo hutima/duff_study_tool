@@ -1,129 +1,125 @@
-// Auto-generates "what is the aorist of X?" stem-change recall cards from
-// stem-pair vocab sets (e.g. W4_SECOND_AORIST_STEMS: "βάλλω → ἔβαλον"). The
-// existing paradigm-morphology auto-generator deliberately skips entries
-// whose Greek form contains "→" because they're not single parseable forms;
-// this file picks those up and reshapes them into stem-recall MC cards.
+// Auto-generates stem-change recall cards from stem-pair vocab sets (entries
+// whose Greek field contains "X → Y" or "X → Y → Z"). Each stem-pair becomes
+// a pair (or more) of MC questions:
 //
-// Each generated card asks the student to recognize the correct aorist
-// 1st-singular given the present-tense lemma. Distractors are pulled from
-// other entries in the same set — every distractor is a real Greek aorist,
-// so the test is whether the student knows which stem belongs to which verb.
+//   forward:  "What is the 1st-singular {tense} of {present}?"  → target
+//   reverse:  "{target} is the {tense} of which present-tense verb?" → present
+//
+// Distractors are pulled from other entries in the same set, so every wrong
+// choice is a real Greek form that the student must distinguish.
+//
+// Adding a new tense-pair set (e.g. a future "Perfect stems" vocab block in
+// a later week) is a one-line entry in STEM_DRILL_CONFIG.
 
 (function () {
   if (typeof window.registerSupplementalMorphologySet !== 'function') return;
 
   const STEM_ARROW_REGEX = /\s*→\s*/;
 
-  function extractPairs(set) {
-    const pairs = [];
+  // Each config:
+  //   vocabKey      — source SUPPLEMENTAL_VOCAB_SETS key (must contain
+  //                   "→"-delimited Greek forms)
+  //   drillKey      — new MORPHOLOGY_SETS key to register under
+  //   label         — set label shown in the dropdown/source line
+  //   lemma         — group lemma used by paradigm_focus.js for category
+  //                   placement and the focused-paradigm dropdown
+  //   transforms    — names of the columns *after* the present form, in
+  //                   order. For "present → future → aorist" use
+  //                   ['future', 'aorist'].
+  //   gloss         — short string shown under the dropdown entry
+  //   notes         — set-level note (appears with the question)
+  //   week          — week tag for chapter gating
+  const STEM_DRILL_CONFIG = [
+    {
+      vocabKey: 'W4_SECOND_AORIST_STEMS',
+      drillKey: 'W4_SECOND_AORIST_STEMS_DRILL',
+      label:    'Second-aorist stem changes',
+      lemma:    'Second-aorist stems',
+      gloss:    'present ↔ 1st-sg aorist',
+      transforms: ['aorist'],
+      notes:    'Recall the 1st-singular aorist given the present (and the present given the aorist).',
+      week:     4
+    },
+    {
+      vocabKey: 'W4_FUTURE_LIQUID_STEMS',
+      drillKey: 'W4_FUTURE_LIQUID_STEMS_DRILL',
+      label:    'Liquid-future stem changes',
+      lemma:    'Liquid-stem futures',
+      gloss:    'present ↔ future ↔ aorist',
+      transforms: ['future', 'aorist'],
+      notes:    'Recall the future and aorist 1st-sg given the present (and the present given each form).',
+      week:     4
+    }
+    // Add future entries here when perfect-stem or μι-verb stem-pair vocab
+    // sets land. e.g.:
+    //   { vocabKey: 'W6_PERFECT_STEMS', drillKey: ..., transforms: ['perfect'], ... }
+  ];
+
+  function extractTuples(set, expectedColumns) {
+    // Returns array of [present, ...transforms] arrays, one per parseable
+    // stem-pair card. Cards with fewer columns are skipped (the data is
+    // sometimes inconsistent — e.g. some rows might only have present →
+    // aorist while the set expects 3 columns).
+    const out = [];
     (set.cards || []).forEach((card) => {
       const greek = String(card && card.g ? card.g : '').trim();
-      const english = String(card && card.e ? card.e : '').trim();
       const parts = greek.split(STEM_ARROW_REGEX).map((s) => s.trim()).filter(Boolean);
-      if (parts.length < 2) return;
-      // For stem-pair entries with more than two forms (e.g. W4_FUTURE_LIQUID
-      // "σπείρω → σπερῶ → ἔσπειρα"), take the first form as the lemma and
-      // generate a card per subsequent form (future, aorist, etc.).
-      const lemmaForm = parts[0];
-      const meaningPart = english.replace(/\s*\([^)]*\)\s*$/, '').trim();
-      const meaningSegments = meaningPart.split(STEM_ARROW_REGEX).map((s) => s.trim());
-      for (let i = 1; i < parts.length; i++) {
-        pairs.push({
-          present: lemmaForm,
-          target: parts[i],
-          presentMeaning: meaningSegments[0] || '',
-          targetMeaning: meaningSegments[i] || ''
+      if (parts.length < expectedColumns) return;
+      out.push(parts.slice(0, expectedColumns));
+    });
+    return out;
+  }
+
+  function buildQuestions(set, transforms) {
+    const tuples = extractTuples(set, transforms.length + 1);
+    if (tuples.length < 2) return null;
+
+    const questions = [];
+    tuples.forEach((row) => {
+      const present = row[0];
+      transforms.forEach((tName, idx) => {
+        const target = row[idx + 1];
+        if (!target) return;
+        // Forward: given the present, recall the transformed form.
+        questions.push({
+          form: present,
+          answer: target,
+          prompt: `What is the 1st-singular ${tName} of ${present}?`,
+          dimensional: false,
+          reversible: false
         });
-      }
+        // Reverse: given the transformed form, recall the present lemma.
+        questions.push({
+          form: target,
+          answer: present,
+          prompt: `${target} — what is the present-tense lemma?`,
+          dimensional: false,
+          reversible: false
+        });
+      });
     });
-    return pairs;
-  }
-
-  function buildQuestionsFromAoristPairs(set, label) {
-    const pairs = extractPairs(set);
-    if (pairs.length < 2) return null;
-    return {
-      family: label,
-      lemma: 'Second-aorist stems',
-      gloss: 'present → 1st-sg aorist',
-      questions: pairs.map((p) => ({
-        form: p.present,
-        answer: p.target,
-        prompt: `What is the 1st-singular aorist of ${p.present}?`,
-        gloss: p.targetMeaning || '',
-        dimensional: false,
-        reversible: false
-      }))
-    };
-  }
-
-  function buildQuestionsFromLiquidFutures(set, label) {
-    // W4_FUTURE_LIQUID_STEMS holds triples: present → future → aorist. Split
-    // into two question banks — one for the future, one for the aorist — so
-    // the student is asked which transformation they're producing.
-    const pairs = [];
-    (set.cards || []).forEach((card) => {
-      const greek = String(card && card.g ? card.g : '').trim();
-      const parts = greek.split(STEM_ARROW_REGEX).map((s) => s.trim()).filter(Boolean);
-      if (parts.length < 3) return;
-      pairs.push({ present: parts[0], future: parts[1], aorist: parts[2] });
-    });
-    if (pairs.length < 2) return null;
-
-    const futureQuestions = pairs.map((p) => ({
-      form: p.present,
-      answer: p.future,
-      prompt: `What is the 1st-singular future of ${p.present}?`,
-      dimensional: false,
-      reversible: false
-    }));
-    const aoristQuestions = pairs.map((p) => ({
-      form: p.present,
-      answer: p.aorist,
-      prompt: `What is the 1st-singular aorist of ${p.present}?`,
-      dimensional: false,
-      reversible: false
-    }));
-
-    return {
-      family: label,
-      lemma: 'Liquid-stem futures',
-      gloss: 'present → future → aorist',
-      questions: [...futureQuestions, ...aoristQuestions]
-    };
+    return questions;
   }
 
   const vocabSets = window.SUPPLEMENTAL_VOCAB_SETS || {};
 
-  const secondAoristSet = vocabSets['W4_SECOND_AORIST_STEMS'];
-  if (secondAoristSet) {
-    const item = buildQuestionsFromAoristPairs(
-      secondAoristSet,
-      'Second-aorist stem changes'
-    );
-    if (item) {
-      window.registerSupplementalMorphologySet('W4_SECOND_AORIST_STEMS_DRILL', {
-        label: 'Second-aorist stem changes',
-        week: 4,
-        notes: 'Recall the 1st-sg aorist given the present-tense lemma. Distractors are other real 2nd-aorist forms.',
-        items: [item]
-      });
-    }
-  }
-
-  const liquidSet = vocabSets['W4_FUTURE_LIQUID_STEMS'];
-  if (liquidSet) {
-    const item = buildQuestionsFromLiquidFutures(
-      liquidSet,
-      'Liquid-future stem changes'
-    );
-    if (item) {
-      window.registerSupplementalMorphologySet('W4_FUTURE_LIQUID_STEMS_DRILL', {
-        label: 'Liquid-future stem changes',
-        week: 4,
-        notes: 'Recall the future and aorist 1st-sg given the present. Distractors are other real liquid-stem forms.',
-        items: [item]
-      });
-    }
-  }
+  STEM_DRILL_CONFIG.forEach((cfg) => {
+    const sourceSet = vocabSets[cfg.vocabKey];
+    if (!sourceSet) return;
+    const questions = buildQuestions(sourceSet, cfg.transforms);
+    if (!questions) return;
+    window.registerSupplementalMorphologySet(cfg.drillKey, {
+      label: cfg.label,
+      week:  cfg.week,
+      notes: cfg.notes,
+      items: [
+        {
+          family: cfg.label,
+          lemma:  cfg.lemma,
+          gloss:  cfg.gloss,
+          questions
+        }
+      ]
+    });
+  });
 })();

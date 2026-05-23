@@ -1346,6 +1346,25 @@
     font-size: 12px;
     color: var(--muted);
   }
+  .morph-step-stem-note {
+    margin-top: 10px;
+    padding: 8px 10px;
+    border-left: 2px solid rgba(201,168,76,0.45);
+    background: rgba(201,168,76,0.05);
+    font-family: var(--font-greek);
+    font-size: 15px;
+    color: var(--cream);
+    border-radius: 0 6px 6px 0;
+  }
+  .morph-step-stem-label {
+    display: inline-block;
+    margin-right: 8px;
+    font-family: var(--font-display);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+  }
   .morph-step-summary-meta {
     margin-top: 10px;
     font-size: 12px;
