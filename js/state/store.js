@@ -97,6 +97,7 @@ export const S = {
   morphFocusedParadigm: null,
   morphStepState: { cardId: null, steps: [], stepIdx: 0, answers: [], completed: false },
   paradigmStepStats: { byLemma: {} },
+  aspectStep: true,
 
   // Deck / study state
   deckStates: {},

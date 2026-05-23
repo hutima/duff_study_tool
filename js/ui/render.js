@@ -214,6 +214,9 @@ export function renderCard() {
         : `<div class="morph-result pending">${pendingLabel}</div>`;
     }
 
+    const morphSourceLabel = card.supplemental
+      ? cardFaceLabelFromSourceLabel(card.sourceLabel)
+      : card.sourceLabel;
     area.innerHTML = `
       <div class="morph-card">
         <div class="morph-label">Grammar${reversed ? ' · English → Greek' : ''}</div>
@@ -222,7 +225,7 @@ export function renderCard() {
         <div class="${formClass}">${displayForm}</div>
         ${contextHtml}
         <div class="morph-hint">${card.lemma}</div>
-        <div class="morph-source">${card.sourceLabel}${runtime.morphSelfCheck ? ' · Self-check' : ''}</div>
+        <div class="morph-source">${morphSourceLabel}${runtime.morphSelfCheck ? ' · Self-check' : ''}</div>
         ${interactionHtml}
         ${resultHtml}
       </div>`;
@@ -352,7 +355,7 @@ function ensureStepStateForCard(card) {
   // selected chapter (e.g. no "pluperfect" while Ch ≤ 11).
   const accessibleCards = getAccessibleMorphCards(runtime.selectedKeys);
   const accessiblePools = computeAccessibleDimensionPools(accessibleCards);
-  const steps = buildMorphSteps(card, accessiblePools);
+  const steps = buildMorphSteps(card, accessiblePools, { includeAspect: runtime.aspectStep !== false });
   runtime.morphStepState = {
     cardId: card.id,
     steps,
@@ -646,7 +649,10 @@ function resolveFormForPickedDims(card, steps, pickedValues) {
   // A dimension the candidate answer doesn't carry (infinitives have no
   // number; finite verbs have no case) shouldn't disqualify the
   // candidate — the orphan dimension is a category error against this
-  // candidate, not a disagreement. Structural mood compatibility is
+  // candidate, not a disagreement. But require at least one positive dim
+  // match too, otherwise a card whose answer carries no parseable dims
+  // ("an equative (linking) verb...") passes every check vacuously and
+  // wins the lookup for any picks. Structural mood compatibility is
   // checked separately so an unlabeled finite candidate can't satisfy a
   // participle/infinitive pick.
   const matchPool = (pool) => {
@@ -656,6 +662,8 @@ function resolveFormForPickedDims(card, steps, pickedValues) {
       const ansDims = parseAnswerDimensions(answer);
       const ok = keys.every((k) => !ansDims[k] || dimsCompatible(pickedDims[k], ansDims[k]));
       if (!ok) continue;
+      const hasAnyMatch = keys.some((k) => ansDims[k] && dimsCompatible(pickedDims[k], ansDims[k]));
+      if (!hasAnyMatch) continue;
       if (!structurallyCompatibleMood(pickedDims.mood, ansDims)) continue;
       out.push({ form, ansDims });
     }
@@ -833,6 +841,9 @@ function renderMorphStepCard(area, card) {
     ? renderMorphStepSummary(card, state)
     : renderMorphStepCurrent(state);
 
+  const stepSourceLabel = card.supplemental
+    ? cardFaceLabelFromSourceLabel(card.sourceLabel || '')
+    : (card.sourceLabel || '');
   area.innerHTML = `
     <div class="morph-card morph-step-card">
       <div class="morph-label">Grammar · Step-by-step</div>
@@ -840,7 +851,7 @@ function renderMorphStepCard(area, card) {
       ${lemmaGloss}
       <div class="morph-form">${escapeHtml(card.form)}</div>
       <div class="morph-hint">${escapeHtml(card.lemma)}</div>
-      <div class="morph-source">${escapeHtml(card.sourceLabel || '')} · Use “continuous/undefined” when the form licenses either reading</div>
+      <div class="morph-source">${escapeHtml(stepSourceLabel)} · Use “continuous/undefined” when the form licenses either reading</div>
       ${renderMorphStepBreadcrumb(state)}
       ${body}
     </div>`;
