@@ -14,8 +14,8 @@ export function installKeyboardShortcuts(deps) {
     closeStudySelector,
     isShortcutsModalOpen,
     closeShortcutsModal,
-    isWhatsNewV1_1ModalOpen,
-    closeWhatsNewV1_1Modal,
+    isWhatsNewV1_4ModalOpen,
+    closeWhatsNewV1_4Modal,
     isDisclaimerModalOpen,
     isTransferModalOpen,
     isReviewDeckMode,
@@ -31,8 +31,8 @@ export function installKeyboardShortcuts(deps) {
     if (e.key === 'Escape' && isAnalyticsModalOpen()) { closeAnalyticsOverlay(); return; }
     if (e.key === 'Escape' && isStudySelectorOpen()) { closeStudySelector(); return; }
     if (e.key === 'Escape' && isShortcutsModalOpen()) { closeShortcutsModal(); return; }
-    if (e.key === 'Escape' && isWhatsNewV1_1ModalOpen()) { closeWhatsNewV1_1Modal(); return; }
-    if (isDisclaimerModalOpen() || isTransferModalOpen() || isAnalyticsModalOpen() || isStudySelectorOpen() || isShortcutsModalOpen() || isWhatsNewV1_1ModalOpen()) return;
+    if (e.key === 'Escape' && isWhatsNewV1_4ModalOpen()) { closeWhatsNewV1_4Modal(); return; }
+    if (isDisclaimerModalOpen() || isTransferModalOpen() || isAnalyticsModalOpen() || isStudySelectorOpen() || isShortcutsModalOpen() || isWhatsNewV1_4ModalOpen()) return;
     if (!isReviewDeckMode() || !getSelectedKeys().length) return;
 
     if (isMorphologyMode()) {
