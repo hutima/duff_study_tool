@@ -133,3 +133,16 @@ export function chooseDefaultFocusedParadigm(selectedKeys) {
   if (!available.length) return null;
   return available[0].lemma;
 }
+
+// Every morph card whose source is in scope at the student's current max
+// chapter — used to derive the chapter-gated distractor pool so the drill
+// never asks about tenses/moods the textbook hasn't introduced yet.
+export function getAccessibleMorphCards(selectedKeys) {
+  if (typeof window === 'undefined' || typeof window.buildMorphologyCardsForKeys !== 'function') return [];
+  const sets = safeMorphSets();
+  const levels = deriveSelectionLevels(selectedKeys);
+  if (levels.maxEffectiveChapter == null) return [];
+  const eligibleSourceKeys = Object.keys(sets).filter((key) => sourcePassesLevel(key, levels));
+  if (!eligibleSourceKeys.length) return [];
+  return window.buildMorphologyCardsForKeys(eligibleSourceKeys);
+}

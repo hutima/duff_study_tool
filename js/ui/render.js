@@ -8,7 +8,8 @@
 import { runtime } from '../state/runtime.js';
 import { buildGrammarSupportHtml } from '../domain/grammar/explanations.js';
 import { renderProgress, renderReview } from './progress.js';
-import { buildMorphSteps, summarizeLemmaStats, getParadigmStepAttemptWindow } from '../domain/grammar/morph_steps.js';
+import { buildMorphSteps, summarizeLemmaStats, getParadigmStepAttemptWindow, computeAccessibleDimensionPools } from '../domain/grammar/morph_steps.js';
+import { getAccessibleMorphCards } from '../domain/grammar/paradigm_focus.js';
 
 let host = {
   saveState: () => {},
@@ -291,7 +292,12 @@ export function renderCard() {
 function ensureStepStateForCard(card) {
   const state = runtime.morphStepState;
   if (state && state.cardId === card.id) return state;
-  const steps = buildMorphSteps(card);
+  // Build a chapter-gated distractor pool so MC choices never include
+  // tenses/moods/cases the textbook hasn't introduced by the user's max
+  // selected chapter (e.g. no "pluperfect" while Ch ≤ 11).
+  const accessibleCards = getAccessibleMorphCards(runtime.selectedKeys);
+  const accessiblePools = computeAccessibleDimensionPools(accessibleCards);
+  const steps = buildMorphSteps(card, accessiblePools);
   runtime.morphStepState = {
     cardId: card.id,
     steps,
