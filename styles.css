@@ -1846,6 +1846,32 @@
     border-color: var(--border);
   }
 
+  .whats-new-modal {
+    max-height: calc(100vh - 40px);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .whats-new-modal .consent-copy {
+    overflow-y: auto;
+    min-height: 0;
+    flex: 1 1 auto;
+  }
+
+  .whats-new-list {
+    margin: 0;
+  }
+
+  .whats-new-list li + li {
+    margin-top: 8px;
+  }
+
+  .whats-new-footer {
+    margin-top: 14px;
+    font-size: 14px;
+    color: var(--muted);
+  }
+
   .user-guide-overlay {
     align-items: flex-start;
     overflow-y: auto;

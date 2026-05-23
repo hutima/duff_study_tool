@@ -677,15 +677,17 @@
 </div>
 
 <div class="consent-overlay" id="whatsNewV1_4Overlay" aria-hidden="true">
-  <div class="consent-modal" role="dialog" aria-modal="true" aria-labelledby="whatsNewV1_4Title">
+  <div class="consent-modal whats-new-modal" role="dialog" aria-modal="true" aria-labelledby="whatsNewV1_4Title">
     <div class="consent-label">Version 1.4</div>
-    <h2 id="whatsNewV1_4Title">What's new in this update</h2>
+    <h2 id="whatsNewV1_4Title">What's new</h2>
     <div class="consent-copy">
-      <p><strong>New <em>Parsing</em> mode.</strong> A new top-level mode sits next to <strong>Vocab</strong>, <strong>Grammar</strong>, and <strong>Reader</strong> on the home screen. It walks you through paradigm forms one dimension at a time &mdash; tense &rarr; voice &rarr; mood &rarr; person &rarr; number for verbs, case &rarr; gender &rarr; number for nominals &mdash; with distractors gated to values that actually appear in that paradigm.</p>
-      <p><strong>Parse-comparison after every card.</strong> Whether you got it right or wrong, the card shows your full parse, the correct parse, and the Greek form. If you got it wrong, it lists the forms in the paradigm that <em>would</em> have matched your guess, turning the mistake into a quick recognition drill.</p>
-      <p><strong>Aspect as its own dimension.</strong> Aspect is now parsed as a separate step, with combined picks like <em>continuous / undefined</em> for forms where more than one aspect is valid &mdash; matching how Duff teaches it.</p>
-      <p><strong>Stem-change supplements + three-deck spaced flow.</strong> New per-week flip-card sets highlight stem differences (2nd aorist, aorist passive, perfect active, &mu;&iota;-verb principal parts), and spaced review now uses an explicit <em>active / middle / deferred</em> layout so cards you just missed reappear sooner without flooding the rotation.</p>
-      <p>Open <strong>User guide &rarr; Changelog</strong> for the full v1.4 list.</p>
+      <ul class="user-guide-list whats-new-list">
+        <li><strong>Parsing mode</strong> &mdash; new top-level mode that walks paradigm forms one dimension at a time, with a parse-comparison summary on every card.</li>
+        <li><strong>Aspect</strong> is now its own parsing dimension, with combined picks like <em>continuous / undefined</em>.</li>
+        <li><strong>Stem-change supplements</strong> for 2nd aorist, aorist passive, perfect active, and &mu;&iota;-verb principal parts.</li>
+        <li><strong>Three-deck spaced flow</strong> &mdash; missed cards return sooner via an explicit <em>active / middle / deferred</em> layout.</li>
+      </ul>
+      <p class="whats-new-footer">See <strong>User guide &rarr; Changelog</strong> for the full v1.4 list.</p>
     </div>
     <div class="consent-actions">
       <button class="ctrl-btn consent-primary" id="whatsNewV1_4CloseBtn" type="button" onclick="closeWhatsNewV1_4Modal()">Got it</button>
