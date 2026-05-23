@@ -41,6 +41,7 @@ const APP_SHELL_PATHS = [
   'js/data/supplementals/w7o_supplemental.js?v=120',
   'js/data/supplementals/w8o_supplemental.js?v=120',
   'js/data/supplementals/paradigm_morphology.js?v=120',
+  'js/data/supplementals/stem_change_drills.js?v=120',
   'js/data/advanced/advanced_01.js?v=120',
   'js/data/advanced/advanced_02.js?v=120',
   'js/data/advanced/advanced_03.js?v=120',

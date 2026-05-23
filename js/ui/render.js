@@ -112,7 +112,10 @@ export function renderCard() {
   document.getElementById('markRow').style.display = host.isMorphologyMode() ? 'none' : 'flex';
   const card = runtime.deck[runtime.currentIdx];
 
-  if (host.isMorphCard(card) && runtime.morphStepByStep) {
+  // Step-by-step only applies to dimensional parsing cards. Stem-change
+  // recall cards ("what is the aorist of βάλλω?") have card.dimensional ===
+  // false; for those we fall through to the standard MC renderer below.
+  if (host.isMorphCard(card) && runtime.morphStepByStep && card.dimensional !== false) {
     renderMorphStepCard(area, card);
     return;
   }

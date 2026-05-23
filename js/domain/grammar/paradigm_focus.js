@@ -54,6 +54,8 @@ const PARADIGM_CATEGORIES = {
   'ῥύομαι':                              'Verbs · middle / deponent',
   'βάλλω':                               'Verbs · second aorist',
   'γίνομαι':                             'Verbs · second aorist',
+  'Second-aorist stems':                 'Verbs · second aorist',
+  'Liquid-stem futures':                 'Verbs · second aorist',
   'δίδωμι':                              'Verbs · μι-verbs',
   'δίδομαι':                             'Verbs · μι-verbs',
   'ἵστημι':                              'Verbs · μι-verbs',
@@ -71,7 +73,9 @@ const PARADIGM_CATEGORIES = {
 const PARADIGM_DISPLAY_OVERRIDES = {
   'πολύς / μέγας-paradigm':             'πολύς, μέγας',
   'First and second personal pronouns': 'ἐγώ / σύ — personal pronouns',
-  '-μι verbs':                          '-μι verbs (other active forms)'
+  '-μι verbs':                          '-μι verbs (other active forms)',
+  'Second-aorist stems':                'Second-aorist stem recall (what is the aorist of … ?)',
+  'Liquid-stem futures':                'Liquid-future stem recall (what is the future / aorist of … ?)'
 };
 
 // Display order for the optgroup headings in the dropdown. Order reflects
