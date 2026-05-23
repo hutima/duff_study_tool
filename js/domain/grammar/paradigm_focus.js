@@ -11,6 +11,106 @@
 
 import { CHAPTER_TO_WEEK } from '../../data/setMeta.js';
 
+// Categorical grouping for the focused-paradigm dropdown. Each lemma string
+// (matched verbatim against the extractLemma output) maps to a category
+// label; lemmas without a mapping fall into "Other constructions". Display
+// overrides clean up a few labels (e.g. dropping the cosmetic "-paradigm"
+// suffix on the πολύς/μέγας set).
+const PARADIGM_CATEGORIES = {
+  // ─── Article ───
+  'ὁ, ἡ, τό':                            'Article',
+
+  // ─── Nouns by declension/pattern ───
+  'λόγος':                               'Nouns · 2nd-decl. masculine',
+  'ἔργον':                               'Nouns · 2nd-decl. neuter',
+  'ἀρχή':                                'Nouns · 1st-decl. feminine (η-pattern)',
+  'φωνή':                                'Nouns · 1st-decl. feminine (η-pattern)',
+  'ἡμέρα':                               'Nouns · 1st-decl. feminine (α-pattern)',
+  'ἁμαρτία':                             'Nouns · 1st-decl. feminine (α-pattern)',
+  'δόξα':                                'Nouns · 1st-decl. feminine (mixed pattern)',
+  'προφήτης':                            'Nouns · 1st-decl. masculine (-ης pattern)',
+  'σάρξ':                                'Nouns · 3rd declension',
+  'ὄνομα':                               'Nouns · 3rd declension',
+  'πόλις & βασιλεύς':                    'Nouns · 3rd declension',
+  'ἀστήρ':                               'Nouns · 3rd declension',
+
+  // ─── Adjectives ───
+  'πᾶς, πᾶσα, πᾶν':                      'Adjectives',
+  'πολύς / μέγας-paradigm':              'Adjectives',
+  'πλείων':                              'Adjectives',
+
+  // ─── Pronouns ───
+  'αὐτός, αὐτή, αὐτό':                   'Pronouns · personal / intensive',
+  'First and second personal pronouns':  'Pronouns · personal / intensive',
+  'οὗτος, αὕτη, τοῦτο':                  'Pronouns · demonstrative',
+  'ἐκεῖνος, ἐκείνη, ἐκεῖνο':             'Pronouns · demonstrative',
+  'ὅς, ἥ, ὅ':                            'Pronouns · relative',
+  'τίς, τί':                             'Pronouns · interrogative / indefinite',
+
+  // ─── Verbs (finite) ───
+  'λύω':                                 'Verbs · standard ω-pattern',
+  'φιλέω':                               'Verbs · contract (-έω)',
+  'εἰμί':                                'Verbs · irregular (εἰμί)',
+  'ῥύομαι':                              'Verbs · middle / deponent',
+  'βάλλω':                               'Verbs · second aorist',
+  'γίνομαι':                             'Verbs · second aorist',
+  'δίδωμι':                              'Verbs · μι-verbs',
+  'δίδομαι':                             'Verbs · μι-verbs',
+  'ἵστημι':                              'Verbs · μι-verbs',
+  'τίθημι':                              'Verbs · μι-verbs',
+  '-μι verbs':                           'Verbs · μι-verbs',
+
+  // ─── Participles (case-marked verbals; their own group) ───
+  'λύων, λύουσα, λῦον':                  'Participles',
+  'λύσας, λύσασα, λῦσαν':                'Participles',
+  'λυθείς, λυθεῖσα, λυθέν':              'Participles',
+  'ῥυόμενος, -η, -ον':                   'Participles',
+  'ῥυσάμενος, -η, -ον':                  'Participles'
+};
+
+const PARADIGM_DISPLAY_OVERRIDES = {
+  'πολύς / μέγας-paradigm':             'πολύς, μέγας',
+  'First and second personal pronouns': 'ἐγώ / σύ — personal pronouns',
+  '-μι verbs':                          '-μι verbs (other active forms)'
+};
+
+// Display order for the optgroup headings in the dropdown. Order reflects
+// course progression (article → nouns → adjectives → pronouns → verbs →
+// participles → other). Categories not in this list are appended at the end.
+const CATEGORY_ORDER = [
+  'Article',
+  'Nouns · 2nd-decl. masculine',
+  'Nouns · 2nd-decl. neuter',
+  'Nouns · 1st-decl. feminine (η-pattern)',
+  'Nouns · 1st-decl. feminine (α-pattern)',
+  'Nouns · 1st-decl. feminine (mixed pattern)',
+  'Nouns · 1st-decl. masculine (-ης pattern)',
+  'Nouns · 3rd declension',
+  'Adjectives',
+  'Pronouns · personal / intensive',
+  'Pronouns · demonstrative',
+  'Pronouns · relative',
+  'Pronouns · interrogative / indefinite',
+  'Verbs · standard ω-pattern',
+  'Verbs · contract (-έω)',
+  'Verbs · irregular (εἰμί)',
+  'Verbs · middle / deponent',
+  'Verbs · second aorist',
+  'Verbs · μι-verbs',
+  'Participles',
+  'Other constructions'
+];
+
+function categoryForLemma(lemma) {
+  return PARADIGM_CATEGORIES[lemma] || 'Other constructions';
+}
+
+function displayLabelForLemma(lemma, item) {
+  const override = PARADIGM_DISPLAY_OVERRIDES[lemma];
+  if (override) return override;
+  return lemma + (item && item.gloss ? ` — ${item.gloss}` : '');
+}
+
 // Inverse of CHAPTER_TO_WEEK keyed by week → first chapter where that
 // week's material starts in the textbook. Used to give W*_* sources an
 // effective chapter so they sort/gate alongside chapter-keyed sets.
@@ -86,7 +186,8 @@ export function listAvailableParadigms(selectedKeys) {
         const lvl = sourceLevel(key);
         seen.set(lemma, {
           lemma,
-          displayLabel: lemma + (item.gloss ? ` — ${item.gloss}` : ''),
+          displayLabel: displayLabelForLemma(lemma, item),
+          category: categoryForLemma(lemma),
           sources: new Set(),
           firstChapter: lvl.effectiveChapter
         });
@@ -103,6 +204,27 @@ export function listAvailableParadigms(selectedKeys) {
   return [...seen.values()]
     .map((p) => ({ ...p, sources: [...p.sources] }))
     .sort((a, b) => (a.firstChapter - b.firstChapter) || a.lemma.localeCompare(b.lemma));
+}
+
+// Groups listAvailableParadigms output by category for optgroup rendering.
+// Returns [{ category, lemmas: [...] }, ...] in CATEGORY_ORDER (with any
+// unknown categories appended at the end alphabetically). Categories that
+// have no available paradigms at the current selection are omitted.
+export function listAvailableParadigmsByCategory(selectedKeys) {
+  const flat = listAvailableParadigms(selectedKeys);
+  const grouped = new Map();
+  flat.forEach((p) => {
+    if (!grouped.has(p.category)) grouped.set(p.category, []);
+    grouped.get(p.category).push(p);
+  });
+  const orderedCats = [
+    ...CATEGORY_ORDER.filter((c) => grouped.has(c)),
+    ...[...grouped.keys()].filter((c) => !CATEGORY_ORDER.includes(c)).sort()
+  ];
+  return orderedCats.map((category) => ({
+    category,
+    lemmas: grouped.get(category)
+  }));
 }
 
 // Given a focused lemma and the selection, return every morph card across

@@ -167,7 +167,7 @@ import { getSelectedVocabCards, getSelectedGrammarCards, getAllVocabKeys, getAll
 // Domain — Grammar
 import { buildGrammarSupportHtml } from '../domain/grammar/explanations.js';
 import { recordParadigmAttempt } from '../domain/grammar/morph_steps.js';
-import { listAvailableParadigms, getCardsForFocusedParadigm } from '../domain/grammar/paradigm_focus.js';
+import { listAvailableParadigms, listAvailableParadigmsByCategory, getCardsForFocusedParadigm } from '../domain/grammar/paradigm_focus.js';
 
 // UI
 import {
@@ -793,10 +793,25 @@ function syncParadigmFocusUi() {
     runtime.morphFocusedParadigm = chosen;
     rebuildMorphDeckForStepMode();
   }
-  select.innerHTML = available
-    .map((p) => `<option value="${p.lemma}">${p.displayLabel}</option>`)
-    .join('');
+  // Render with native <optgroup>s — categories like "Verbs · standard
+  // ω-pattern" head sections of lemmas, so the user can scan by paradigm
+  // type instead of reading a flat alphabetical list.
+  const grouped = listAvailableParadigmsByCategory(runtime.selectedKeys);
+  select.innerHTML = grouped.map((g) => {
+    const opts = g.lemmas
+      .map((p) => `<option value="${escapeAttr(p.lemma)}">${escapeAttr(p.displayLabel)}</option>`)
+      .join('');
+    return `<optgroup label="${escapeAttr(g.category)}">${opts}</optgroup>`;
+  }).join('');
   select.value = chosen;
+}
+
+function escapeAttr(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 }
 
 function syncToggleButtons() {
