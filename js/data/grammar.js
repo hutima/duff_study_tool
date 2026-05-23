@@ -1018,10 +1018,13 @@
           gloss: "I am",
           questions: [
             { form: "εἰμί", prompt: "Identify this form.", answer: "1st singular ('I am')",
+              parsed: "present active indicative first person singular",
               choices: ["1st singular ('I am')", "3rd singular ('he/she/it is')", "1st plural ('we are')", "2nd singular ('you are')"] },
             { form: "ἐστίν", prompt: "Identify this form.", answer: "3rd singular ('he/she/it is')",
+              parsed: "present active indicative third person singular",
               choices: ["3rd singular ('he/she/it is')", "2nd singular ('you are')", "3rd plural ('they are')", "1st singular ('I am')"] },
             { form: "εἰσίν", prompt: "Identify this form.", answer: "3rd plural ('they are')",
+              parsed: "present active indicative third person plural",
               choices: ["3rd plural ('they are')", "3rd singular ('he/she/it is')", "2nd plural ('you all are')", "1st plural ('we are')"] },
             { form: "εἰμί",
               prompt: "What kind of verb is εἰμί syntactically?",

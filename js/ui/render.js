@@ -534,10 +534,14 @@ function buildLemmaFormToAnswerFromCards(lemma, cards) {
   if (!lemma) return {};
   const out = {};
   for (const c of (cards || [])) {
-    if (!c || c.lemma !== lemma || !c.form || !c.answer) continue;
+    if (!c || c.lemma !== lemma || !c.form) continue;
+    // Prefer the canonical parsed form when the card supplies one
+    // (grammar.js can ship a `parsed:` next to a sparse human answer).
+    const ans = c.parsedAnswer || c.answer;
+    if (!ans) continue;
     // Stem-pair study notes like 'βάλλω → ἔβαλον' aren't single forms.
     if (/→/.test(c.form)) continue;
-    if (out[c.form] === undefined) out[c.form] = augmentAnswerWithLabel(c.answer, c.sourceLabel || '');
+    if (out[c.form] === undefined) out[c.form] = augmentAnswerWithLabel(ans, c.sourceLabel || '');
   }
   return out;
 }
