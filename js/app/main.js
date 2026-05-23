@@ -401,7 +401,7 @@ configureSelectors({
     if (!isParsingMode()) return null;
     ensureMorphFocusedParadigm();
     if (!runtime.morphFocusedParadigm) return [];
-    return getCardsForFocusedParadigm(runtime.selectedKeys, runtime.morphFocusedParadigm);
+    return getCardsForFocusedParadigm(getAggregateSelectionKeys(), runtime.morphFocusedParadigm);
   }
 });
 configureNavigation({
@@ -605,8 +605,26 @@ function resetMorphStepState() {
 // it only writes when the field is currently null and a candidate exists.
 function ensureMorphFocusedParadigm() {
   if (runtime.morphFocusedParadigm) return;
-  const available = listAvailableParadigms(runtime.selectedKeys);
+  const available = listAvailableParadigms(getAggregateSelectionKeys());
   if (available.length) runtime.morphFocusedParadigm = available[0].lemma;
+}
+
+// Union of selectedKeys from every mode (vocab, morph, parsing) so the
+// student's "max effective chapter" reflects their highest point in the
+// course anywhere in the app — not just their parsing-mode-local selection.
+// With split-selection on, a user who has Ch 1-11 picked in vocab/grammar
+// but only the W1_EIMI_PRESENT set checked in parsing would otherwise be
+// gated at week 1, hiding W3's full εἰμί paradigm.
+function getAggregateSelectionKeys() {
+  const union = new Set((runtime.selectedKeys || []).map(String));
+  const ms = runtime.modeSelections || {};
+  Object.keys(ms).forEach((mode) => {
+    const entry = ms[mode];
+    if (entry && Array.isArray(entry.selectedKeys)) {
+      entry.selectedKeys.forEach((k) => union.add(String(k)));
+    }
+  });
+  return [...union];
 }
 
 // Parsing mode narrows the deck to the focused paradigm's forms via the
@@ -796,7 +814,8 @@ function syncParadigmFocusUi() {
   const select = document.getElementById('paradigmFocusSelectPrimary');
   if (!select) return;
   if (!isParsingMode()) return;
-  const available = listAvailableParadigms(runtime.selectedKeys);
+  const aggregateKeys = getAggregateSelectionKeys();
+  const available = listAvailableParadigms(aggregateKeys);
   if (!available.length) {
     select.innerHTML = '<option value="">No paradigms in current selection</option>';
     select.value = '';
@@ -812,7 +831,7 @@ function syncParadigmFocusUi() {
   // Render with native <optgroup>s — categories like "Verbs · standard
   // ω-pattern" head sections of lemmas, so the user can scan by paradigm
   // type instead of reading a flat alphabetical list.
-  const grouped = listAvailableParadigmsByCategory(runtime.selectedKeys);
+  const grouped = listAvailableParadigmsByCategory(aggregateKeys);
   select.innerHTML = grouped.map((g) => {
     const opts = g.lemmas
       .map((p) => `<option value="${escapeAttr(p.lemma)}">${escapeAttr(p.displayLabel)}</option>`)
@@ -940,7 +959,9 @@ function syncLayoutVisibility() {
   const paradigmFocusRowPrimary = document.getElementById('paradigmFocusRowPrimary');
   if (paradigmFocusRowPrimary) paradigmFocusRowPrimary.style.display = isParsingMode() ? 'flex' : 'none';
   if (shuffleToggle) shuffleToggle.style.display = reviewDeckMode ? 'flex' : 'none';
-  if (spacedToggle) spacedToggle.style.display = reviewDeckMode ? 'flex' : 'none';
+  // Spaced repetition writes confidence stats — parsing mode is explicitly
+  // off-the-record, so the toggle is irrelevant there and gets hidden.
+  if (spacedToggle) spacedToggle.style.display = (reviewDeckMode && !isParsingMode()) ? 'flex' : 'none';
   if (dailyResetToggle) dailyResetToggle.style.display = (reviewDeckMode && !runtime.spacedRepetition && runtime.studyMode === 'vocab') ? 'flex' : 'none';
   if (modeGroup) modeGroup.style.display = canAccessGrammarUi() ? 'inline-flex' : 'none';
   if (!reviewDeckMode) return;
@@ -981,7 +1002,9 @@ function syncLayoutVisibility() {
     navResetBtn.style.display = unspacedVocab && runtime.selectedKeys.length > 0 ? '' : 'none';
   }
   if (nextBtn) {
-    if (isMorphologyMode()) {
+    if (isMorphologyMode() || isParsingMode()) {
+      // Grammar and Parsing have no SRS/confidence writes, so the "Again →"
+      // semantic doesn't apply — Next is just "advance to the next card".
       nextBtn.textContent = 'Next →';
       nextBtn.classList.remove('spaced-again', 'nav-next-as-reset');
     } else if (runtime.spacedRepetition) {

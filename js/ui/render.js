@@ -112,7 +112,7 @@ export function renderCard() {
     return;
   }
 
-  document.getElementById('markRow').style.display = host.isMorphologyMode() ? 'none' : 'flex';
+  document.getElementById('markRow').style.display = (host.isMorphologyMode() || host.isParsingMode()) ? 'none' : 'flex';
   const card = runtime.deck[runtime.currentIdx];
 
   // Parsing mode always uses the step-by-step renderer for dimensional cards.
