@@ -1,12 +1,28 @@
 // Catalog + chapter-gated lookups for the step-by-step morphology drill.
 //
-// When step-by-step mode is on, a single paradigm (lemma) is focused at a
-// time. The eligible cards for that lemma include every morph set whose
-// "level" is at or below the user's max selected level — chapter-keyed sets
-// gate against the max selected numeric chapter, W*_* sets against the max
-// selected week. That matches "include all forms a lemma has been expanded
-// to across previously-covered chapters" while still honoring the user's
-// chapter selection as the upper bound.
+// Sources have one of two shapes: chapter-keyed sets ("2", "3", …) and
+// W*_* paradigm/supplemental sets. We unify them into a single "effective
+// chapter" scale via CHAPTER_TO_WEEK (its inverse picks the first chapter
+// of each week). The dropdown list and the focused-paradigm card pool are
+// then both cumulative: every paradigm whose effective chapter is ≤ the
+// user's max selected effective chapter is in scope — so picking Ch N
+// unlocks all paradigms introduced in Ch 1..N regardless of whether the
+// underlying source is chapter-keyed or week-keyed.
+
+import { CHAPTER_TO_WEEK } from '../../data/setMeta.js';
+
+// Inverse of CHAPTER_TO_WEEK keyed by week → first chapter where that
+// week's material starts in the textbook. Used to give W*_* sources an
+// effective chapter so they sort/gate alongside chapter-keyed sets.
+const WEEK_FIRST_CHAPTER = (() => {
+  const map = {};
+  Object.keys(CHAPTER_TO_WEEK).forEach((chapStr) => {
+    const ch = Number(chapStr);
+    const wk = CHAPTER_TO_WEEK[chapStr];
+    if (!map[wk] || ch < map[wk]) map[wk] = ch;
+  });
+  return map;
+})();
 
 function safeMorphSets() {
   const sets = (typeof window !== 'undefined' && window.MORPHOLOGY_SETS) || {};
@@ -15,71 +31,91 @@ function safeMorphSets() {
 
 function sourceLevel(sourceKey) {
   const str = String(sourceKey || '');
-  const numericChapter = Number(str);
-  if (!Number.isNaN(numericChapter) && /^\d+$/.test(str)) {
-    return { kind: 'chapter', value: numericChapter };
+  if (/^\d+$/.test(str)) {
+    const ch = Number(str);
+    return { kind: 'chapter', week: CHAPTER_TO_WEEK[ch] || null, effectiveChapter: ch };
   }
   const weekMatch = str.match(/^W(\d+)_/);
-  if (weekMatch) return { kind: 'week', value: Number(weekMatch[1]) };
-  return { kind: 'other', value: 0 };
+  if (weekMatch) {
+    const wk = Number(weekMatch[1]);
+    const firstCh = WEEK_FIRST_CHAPTER[wk];
+    return { kind: 'week', week: wk, effectiveChapter: firstCh || (wk * 2 - 1) };
+  }
+  return { kind: 'other', week: null, effectiveChapter: 0 };
 }
 
+// Single number that drives gating: the max "effective chapter" across all
+// selected keys. If the user picks Ch 8 and W5_PAS, max is 12 (W5's first
+// chapter), which is then the cap for everything else.
 export function deriveSelectionLevels(selectedKeys) {
-  let maxChapter = -Infinity;
-  let maxWeek = -Infinity;
+  let maxEffectiveChapter = -Infinity;
   (selectedKeys || []).forEach((k) => {
     const lvl = sourceLevel(k);
-    if (lvl.kind === 'chapter') maxChapter = Math.max(maxChapter, lvl.value);
-    if (lvl.kind === 'week') maxWeek = Math.max(maxWeek, lvl.value);
+    if (lvl.effectiveChapter > maxEffectiveChapter) maxEffectiveChapter = lvl.effectiveChapter;
   });
   return {
-    maxChapter: maxChapter === -Infinity ? null : maxChapter,
-    maxWeek: maxWeek === -Infinity ? null : maxWeek
+    maxEffectiveChapter: maxEffectiveChapter === -Infinity ? null : maxEffectiveChapter
   };
 }
 
 function sourcePassesLevel(sourceKey, levels) {
+  if (levels.maxEffectiveChapter == null) return false;
   const lvl = sourceLevel(sourceKey);
-  if (lvl.kind === 'chapter') return levels.maxChapter != null && lvl.value <= levels.maxChapter;
-  if (lvl.kind === 'week') return levels.maxWeek != null && lvl.value <= levels.maxWeek;
-  return false;
+  if (lvl.kind === 'other') return false;
+  return lvl.effectiveChapter <= levels.maxEffectiveChapter;
 }
 
-// Returns the list of paradigm lemmas that are present in the currently-
-// selected morph sets. Each entry: { lemma, displayLabel, sources: [keys] }.
-// Used to populate the focused-paradigm dropdown.
+// Cumulative list of paradigm lemmas available to the user given their
+// selection. Walks every morph set in MORPHOLOGY_SETS and includes any whose
+// effective chapter is ≤ the user's max selected effective chapter — so a
+// user on Ch 8 sees every paradigm introduced from Ch 1 through Ch 8, not
+// just the ones in their currently-checked sources.
 export function listAvailableParadigms(selectedKeys) {
   const sets = safeMorphSets();
+  const levels = deriveSelectionLevels(selectedKeys);
+  if (levels.maxEffectiveChapter == null) return [];
   const seen = new Map();
-  (selectedKeys || []).forEach((key) => {
-    const set = sets[String(key)];
+  Object.keys(sets).forEach((key) => {
+    if (!sourcePassesLevel(key, levels)) return;
+    const set = sets[key];
     if (!set || !Array.isArray(set.items)) return;
     set.items.forEach((item) => {
       if (!item || !item.lemma) return;
       const lemma = item.lemma;
       if (!seen.has(lemma)) {
+        const lvl = sourceLevel(key);
         seen.set(lemma, {
           lemma,
           displayLabel: lemma + (item.gloss ? ` — ${item.gloss}` : ''),
-          sources: new Set()
+          sources: new Set(),
+          firstChapter: lvl.effectiveChapter
         });
+      } else {
+        const lvl = sourceLevel(key);
+        const entry = seen.get(lemma);
+        if (lvl.effectiveChapter < entry.firstChapter) entry.firstChapter = lvl.effectiveChapter;
       }
       seen.get(lemma).sources.add(String(key));
     });
   });
-  return [...seen.values()].map((p) => ({ ...p, sources: [...p.sources] }));
+  // Sort by first-introduced chapter (ascending), then alphabetically, so the
+  // dropdown reads as a natural progression through the course.
+  return [...seen.values()]
+    .map((p) => ({ ...p, sources: [...p.sources] }))
+    .sort((a, b) => (a.firstChapter - b.firstChapter) || a.lemma.localeCompare(b.lemma));
 }
 
 // Given a focused lemma and the selection, return every morph card across
-// all sources whose source level is ≤ the user's max selected level. Cards
-// are built the same way buildMorphologyCardsForKeys does so they fit the
-// existing renderer, but they're filtered to the focused lemma.
+// all sources whose effective chapter is ≤ the user's max — filtered to the
+// focused lemma so cross-chapter expansions of the same paradigm collapse
+// into one deck.
 export function getCardsForFocusedParadigm(selectedKeys, focusedLemma) {
   if (!focusedLemma) return [];
   if (typeof window === 'undefined' || typeof window.buildMorphologyCardsForKeys !== 'function') return [];
 
   const sets = safeMorphSets();
   const levels = deriveSelectionLevels(selectedKeys);
+  if (levels.maxEffectiveChapter == null) return [];
   const eligibleSourceKeys = Object.keys(sets).filter((key) => {
     if (!sourcePassesLevel(key, levels)) return false;
     const set = sets[key];
@@ -92,8 +128,6 @@ export function getCardsForFocusedParadigm(selectedKeys, focusedLemma) {
   return cards.filter((card) => card && card.lemma === focusedLemma);
 }
 
-// Pick a sensible default focused paradigm when the user hasn't chosen one.
-// Strategy: first paradigm in the selection by source key order.
 export function chooseDefaultFocusedParadigm(selectedKeys) {
   const available = listAvailableParadigms(selectedKeys);
   if (!available.length) return null;
