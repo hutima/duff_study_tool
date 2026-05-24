@@ -678,25 +678,27 @@ function rebuildMorphDeckForStepMode() {
 // Handler for the parsing-mode chapter dropdown. Updates runtime.parsingChapter,
 // resyncs the deck's gating, and lets the focused-paradigm dropdown pick a
 // new default if the previous lemma falls out of scope at the new chapter.
-// Handler for the parsing-mode redirect card. Stem-recall drills (e.g.
-// W4_SECOND_AORIST_STEMS_DRILL) live in Grammar mode — parsing can't walk
-// them dimensionally — so the card is a one-tap shortcut: switch to morph
-// mode, replace the current grammar selection with just the drill set,
+// Handler for the parsing-mode redirect card. The stem-highlighted
+// stem-pair cards (e.g. W4_SECOND_AORIST_STEMS — "γινώσκω → ἔγνων") live
+// in Vocab mode as a supplemental set; parsing can't walk them
+// dimensionally. The card is a one-tap shortcut: switch to vocab mode,
+// replace the current vocab selection with just that supplemental set,
 // and rebuild the deck.
-function goToStemDrillFromParsing(drillKey) {
-  if (typeof drillKey !== 'string' || !drillKey) return;
-  // Drill set must actually be registered as a morphology set — otherwise
-  // we'd switch the user into grammar mode with an empty deck for no
-  // visible reason.
-  const sets = (typeof window !== 'undefined' && window.MORPHOLOGY_SETS) || {};
-  if (!sets[drillKey]) return;
-  // setStudyMode handles the parsing→morph save/restore of modeSelections
-  // (parsing's chapter key gets stashed under modeSelections.parsing so it
-  // survives the round trip). After the mode flip, loadDeckFromKeys
-  // overwrites whatever morph selection was restored with just the drill
-  // set the user tapped on.
-  setStudyMode('morph');
-  loadDeckFromKeys([drillKey], null, { clearUnspacedMarks: true });
+function goToStemDrillFromParsing(setKey) {
+  if (typeof setKey !== 'string' || !setKey) return;
+  // The supplemental set must actually be registered — otherwise we'd
+  // switch the user into vocab mode with an empty deck for no visible
+  // reason. Both SETS (master vocab registry) and the supplemental-vocab
+  // registry get the same key when registerSupplementalVocabSet runs.
+  const vocabSets = (typeof window !== 'undefined' && window.SUPPLEMENTAL_VOCAB_SETS) || {};
+  if (!vocabSets[setKey]) return;
+  // setStudyMode handles the parsing→vocab save/restore of modeSelections
+  // (parsing's chapter key gets stashed under modeSelections.parsing so
+  // it survives the round trip). After the mode flip, loadDeckFromKeys
+  // overwrites whatever vocab selection was restored with just the
+  // supplemental set the user tapped on.
+  setStudyMode('vocab');
+  loadDeckFromKeys([setKey], null, { clearUnspacedMarks: true });
 }
 
 function setParsingChapter(value) {
