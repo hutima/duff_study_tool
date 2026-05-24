@@ -253,6 +253,7 @@ import {
   toggleAspectStep,
   toggleDimStep,
   toggleOptionalForms,
+  toggleOptionalFormFilter,
   toggleUnspacedDailyReset,
   reshuffleEligible,
   fastForwardOneDay,
@@ -371,7 +372,10 @@ configureProgress({
   getMorphCardsForLemma: (lemma) => getCardsForFocusedParadigm(
     getAggregateSelectionKeys(),
     lemma,
-    { includeOptional: !!runtime.includeOptionalForms }
+    {
+      includeOptional: !!runtime.includeOptionalForms,
+      optionalFilters: runtime.optionalFormFilters
+    }
   )
 });
 configureRender({
@@ -418,7 +422,10 @@ configureSelectors({
     return getCardsForFocusedParadigm(
       getAggregateSelectionKeys(),
       runtime.morphFocusedParadigm,
-      { includeOptional: !!runtime.includeOptionalForms }
+      {
+        includeOptional: !!runtime.includeOptionalForms,
+        optionalFilters: runtime.optionalFormFilters
+      }
     );
   }
 });
@@ -1000,6 +1007,9 @@ function syncToggleButtons() {
   const dimStepToggles = Object.fromEntries(DIM_TOGGLE_KEYS.map(k => [k, document.getElementById(`${k}StepToggle`)]));
   const optionalFormsSwitch = document.getElementById('optionalFormsBtn');
   const optionalFormsToggle = document.getElementById('optionalFormsToggle');
+  const OPTIONAL_FILTER_KEYS = ['imperative', 'subjunctive', 'infinitive', 'participle', 'thirdPerson', 'futureTense', 'perfectTense'];
+  const optionalFilterSwitches = Object.fromEntries(OPTIONAL_FILTER_KEYS.map(k => [k, document.getElementById(`optionalFilter_${k}_Btn`)]));
+  const optionalFilterToggles  = Object.fromEntries(OPTIONAL_FILTER_KEYS.map(k => [k, document.getElementById(`optionalFilter_${k}_Toggle`)]));
   const dailyResetSwitch = document.getElementById('unspacedDailyResetBtn');
   const shuffleToggle   = document.getElementById('shuffleToggle');
   const requiredToggle  = document.getElementById('requiredToggle');
@@ -1032,6 +1042,11 @@ function syncToggleButtons() {
     if (sw) sw.classList.toggle('on', on);
   });
   if (optionalFormsSwitch) optionalFormsSwitch.classList.toggle('on', !!runtime.includeOptionalForms);
+  OPTIONAL_FILTER_KEYS.forEach((k) => {
+    const sw = optionalFilterSwitches[k];
+    const on = !runtime.optionalFormFilters || runtime.optionalFormFilters[k] !== false;
+    if (sw) sw.classList.toggle('on', on);
+  });
   syncParadigmFocusUi();
   if (dailyResetSwitch) dailyResetSwitch.classList.toggle('on', !!runtime.unspacedAutoResetEnabled);
   if (shuffleToggle)   shuffleToggle.setAttribute('aria-checked',   runtime.shuffled ? 'true' : 'false');
@@ -1048,6 +1063,11 @@ function syncToggleButtons() {
     if (t) t.setAttribute('aria-checked', on ? 'true' : 'false');
   });
   if (optionalFormsToggle) optionalFormsToggle.setAttribute('aria-checked', runtime.includeOptionalForms ? 'true' : 'false');
+  OPTIONAL_FILTER_KEYS.forEach((k) => {
+    const t = optionalFilterToggles[k];
+    const on = !runtime.optionalFormFilters || runtime.optionalFormFilters[k] !== false;
+    if (t) t.setAttribute('aria-checked', on ? 'true' : 'false');
+  });
   if (dailyResetToggle) dailyResetToggle.setAttribute('aria-checked', runtime.unspacedAutoResetEnabled ? 'true' : 'false');
 
   if (directionToggle) {
@@ -1403,7 +1423,10 @@ function getSelectedCards(keys) {
     return getCardsForFocusedParadigm(
       getAggregateSelectionKeys(),
       runtime.morphFocusedParadigm,
-      { includeOptional: !!runtime.includeOptionalForms }
+      {
+        includeOptional: !!runtime.includeOptionalForms,
+        optionalFilters: runtime.optionalFormFilters
+      }
     );
   }
   return getSelectedVocabCards(keys, false);
@@ -2294,7 +2317,7 @@ const GLOBAL_CLICK_HANDLERS = {
   restoreSpacedUndo, setAppProfile, setStudyMode, setThemeMode, setFontFamily, setTextSize,
   showDisclaimerModal, startStudying, toggleDirection, toggleMorphSelfCheck,
   toggleMorphStepByStep, setMorphFocusedParadigm,
-  toggleRequiredOnly, toggleHardVocabReview, toggleShuffle, toggleSpacedRepetition, toggleSplitSelection, toggleAspectStep, toggleDimStep, toggleOptionalForms, toggleUnspacedDailyReset, triggerImportProgress,
+  toggleRequiredOnly, toggleHardVocabReview, toggleShuffle, toggleSpacedRepetition, toggleSplitSelection, toggleAspectStep, toggleDimStep, toggleOptionalForms, toggleOptionalFormFilter, toggleUnspacedDailyReset, triggerImportProgress,
   openReaderTab, selectReaderDrillChoice, advanceReaderDrill,
   closeWhatsNewV1_4Modal
 };
@@ -2356,7 +2379,7 @@ function preventDoubleTapZoom(el) {
   }, false);
 }
 
-['shuffleToggle','requiredToggle','directionToggle','spacedToggle','splitSelectionToggle','selfCheckToggle','aspectStepToggle','tenseStepToggle','voiceStepToggle','moodStepToggle','personStepToggle','numberStepToggle','caseStepToggle','genderStepToggle','optionalFormsToggle','unspacedDailyResetToggle','modeVocabBtn','modeMorphBtn','modeReaderBtn','modeShortcutVocabBtn','modeShortcutMorphBtn','modeShortcutReaderBtn','themeSystemBtn','themeDarkBtn','themeLightBtn'].forEach(id => {
+['shuffleToggle','requiredToggle','directionToggle','spacedToggle','splitSelectionToggle','selfCheckToggle','aspectStepToggle','tenseStepToggle','voiceStepToggle','moodStepToggle','personStepToggle','numberStepToggle','caseStepToggle','genderStepToggle','optionalFormsToggle','optionalFilter_imperative_Toggle','optionalFilter_subjunctive_Toggle','optionalFilter_infinitive_Toggle','optionalFilter_participle_Toggle','optionalFilter_thirdPerson_Toggle','optionalFilter_futureTense_Toggle','optionalFilter_perfectTense_Toggle','unspacedDailyResetToggle','modeVocabBtn','modeMorphBtn','modeReaderBtn','modeShortcutVocabBtn','modeShortcutMorphBtn','modeShortcutReaderBtn','themeSystemBtn','themeDarkBtn','themeLightBtn'].forEach(id => {
   const el = document.getElementById(id);
   if (el) preventDoubleTapZoom(el);
 });

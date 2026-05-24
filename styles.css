@@ -1898,6 +1898,35 @@
     gap: 8px;
   }
 
+  /* Sub-filters nested under the "Optional paradigm extensions" toggle.
+     Slight inset so the hierarchy reads visually; muted top-border ties
+     it to the parent toggle. The category-level toggles inside use the
+     standard .toggle-label style. */
+  .parsing-options-subfilters {
+    margin-left: 16px;
+    margin-bottom: 0;
+    border-color: var(--border);
+    border-style: dashed;
+    background: transparent;
+    padding: 8px 12px;
+  }
+  .parsing-options-subfilters[open] {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .parsing-options-subfilters summary {
+    color: var(--muted);
+    font-size: 10px;
+  }
+  .parsing-options-subfilters-note {
+    color: var(--muted);
+    font-size: 11px;
+    font-style: italic;
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+
 
   .review-shell {
     margin-bottom: 12px;

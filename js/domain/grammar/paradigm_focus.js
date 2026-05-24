@@ -194,12 +194,29 @@ function sourcePassesLevel(sourceKey, levels) {
 // extension content). choices/reverseChoices are left as the single-item
 // arrays the form-lookup feedback uses; the parsing walk doesn't read
 // these.
-function buildOptionalMorphCardsForLemma(lemma, levels) {
+function buildOptionalMorphCardsForLemma(lemma, levels, filters) {
   if (!lemma || !levels || levels.maxEffectiveChapter == null) return [];
   const inv = (typeof window !== 'undefined' && window.LEMMA_INVENTORY)
     ? window.LEMMA_INVENTORY[lemma]
     : null;
   if (!inv || !Array.isArray(inv.optionalFormGroups)) return [];
+
+  // Per-category filter: a card is dropped if any of its canonical-parse
+  // tokens corresponds to a filter that's been turned off. Filters
+  // default to "include" — only explicit `false` excludes. Empty/missing
+  // filters object means no filtering.
+  const filterCard = (parsedAnswer) => {
+    if (!filters || typeof filters !== 'object') return true;
+    const parse = String(parsedAnswer || '').toLowerCase();
+    if (filters.imperative === false   && /\bimperative\b/.test(parse))    return false;
+    if (filters.subjunctive === false  && /\bsubjunctive\b/.test(parse))   return false;
+    if (filters.infinitive === false   && /\binfinitive\b/.test(parse))    return false;
+    if (filters.participle === false   && /\bparticiple\b/.test(parse))    return false;
+    if (filters.thirdPerson === false  && /\bthird person\b/.test(parse))  return false;
+    if (filters.futureTense === false  && /\bfuture\b/.test(parse))        return false;
+    if (filters.perfectTense === false && /\bperfect\b/.test(parse))       return false;
+    return true;
+  };
 
   const out = [];
   inv.optionalFormGroups.forEach((group, groupIdx) => {
@@ -210,6 +227,7 @@ function buildOptionalMorphCardsForLemma(lemma, levels) {
     const entries = Object.entries(group.forms);
     entries.forEach(([form, parsedAnswer], formIdx) => {
       if (!form || !parsedAnswer) return;
+      if (!filterCard(parsedAnswer)) return;
       out.push({
         id: `morph-OPT-${stableMorphKey(lemma)}-${group.chapter}-${groupIdx}-${formIdx}-${stableMorphKey(form)}`,
         kind: 'morph',
@@ -365,7 +383,7 @@ export function getCardsForFocusedParadigm(selectedKeys, focusedLemma, options =
   // but the fallback form-lookup in render.js still consults
   // LEMMA_INVENTORY.extraForms, so wrong-pick feedback stays canonical.
   const optionalCards = options.includeOptional
-    ? buildOptionalMorphCardsForLemma(focusedLemma, levels)
+    ? buildOptionalMorphCardsForLemma(focusedLemma, levels, options.optionalFilters)
     : [];
 
   if (!eligibleSourceKeys.length && !optionalCards.length) return [];

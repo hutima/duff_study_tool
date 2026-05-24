@@ -108,6 +108,22 @@ export const runtime = {
   // pool with extension paradigms. The fallback form-lookup (extraForms)
   // is always consulted regardless of this toggle.
   includeOptionalForms: false,
+  // Per-category sub-filters on the optional-form drill pool. Each key
+  // defaults to true (the category is INCLUDED); flipping a key to false
+  // excludes any optional-form card whose canonical parse mentions the
+  // category. Only consulted when includeOptionalForms is on; never
+  // affects the always-on fallback form-lookup. Useful when the full
+  // optional set is too big and the student wants to drill, say, all
+  // optional forms EXCEPT 3rd-person imperatives.
+  optionalFormFilters: {
+    imperative: true,
+    subjunctive: true,
+    infinitive: true,
+    participle: true,
+    thirdPerson: true,
+    futureTense: true,
+    perfectTense: true
+  },
 
   // ── Persisted directional stores (rebuilt from localStorage) ────────
   deckStates: {},
