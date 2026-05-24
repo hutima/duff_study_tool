@@ -224,8 +224,8 @@ export function computeAccessibleDimensionPools(cards) {
   if (sawVerb) {
     ['first', 'second', 'third'].forEach(p => pools.person.add(p));
     ['singular', 'plural'].forEach(n => pools.number.add(n));
-    // Voice is intentionally NOT seeded — it stays whatever the
-    // accessible cards have tagged. Duff doesn't introduce voice
+    // Voice is intentionally NOT seeded as a whole — it stays whatever
+    // the accessible cards have tagged. Duff doesn't introduce voice
     // formally until ch 15 (with deponent verbs covered ch 8/9 as the
     // bridge), so seeding all four voices would show "active vs
     // middle/passive" choices to chapter 5 students who only have
@@ -233,6 +233,13 @@ export function computeAccessibleDimensionPools(cards) {
     // chapters that haven't yet introduced voice see no voice
     // distractors; buildMorphSteps additionally skips the voice step
     // entirely for active-tagged cards before ch 15.
+    //
+    // BUT: once any non-active voice has shown up (chapter 8/9 onward
+    // with deponents), seed 'active' as the comparison voice so the
+    // deponent's middle/passive voice step doesn't render as a
+    // single-choice no-info pick.
+    const sawNonActiveVoice = [...pools.voice].some(v => v && v !== 'active');
+    if (sawNonActiveVoice) pools.voice.add('active');
   }
   if (sawNominal) {
     ['singular', 'plural'].forEach(n => pools.number.add(n));
@@ -429,7 +436,9 @@ export function buildMorphSteps(card, accessiblePools = null, options = {}) {
   const order = (isVerb ? verbOrder : nominalOrder).filter(k => includeAspect || k !== 'aspect');
 
   const steps = [];
+  const skippedCorrect = {}; // dim → correct value for steps we silently skipped
   const maxChapter = Number.isFinite(options.maxChapter) ? options.maxChapter : Infinity;
+  const dimToggles = (options.dimToggles && typeof options.dimToggles === 'object') ? options.dimToggles : null;
   for (const dimKey of order) {
     const correct = dims[dimKey];
     if (!correct) continue;
@@ -443,7 +452,18 @@ export function buildMorphSteps(card, accessiblePools = null, options = {}) {
     // a card whose answer is active is a no-info step. Non-active voices
     // (deponent middle/passive, middle, passive) keep the step regardless
     // — those are pedagogically notable from chapter 8/9 onward.
-    if (dimKey === 'voice' && correct === 'active' && maxChapter < VOICE_INTRODUCED_AT_CHAPTER) continue;
+    if (dimKey === 'voice' && correct === 'active' && maxChapter < VOICE_INTRODUCED_AT_CHAPTER) {
+      skippedCorrect[dimKey] = correct;
+      continue;
+    }
+    // Per-dim toggle: user-controlled opt-out. Off → step skipped, dim
+    // doesn't contribute to stats, omitted from the parse summary; the
+    // form lookup auto-fills the canonical correct value via
+    // skippedCorrect below.
+    if (dimToggles && dimKey !== 'aspect' && dimToggles[dimKey] === false) {
+      skippedCorrect[dimKey] = correct;
+      continue;
+    }
     const pool = accessiblePools ? accessiblePools[dimKey] : null;
     const choices = buildChoices(dimKey, correct, pool);
     const displayCorrect = applyDisplaySuffix(dimKey, correct);
@@ -472,6 +492,11 @@ export function buildMorphSteps(card, accessiblePools = null, options = {}) {
     }
     steps.push(step);
   }
+  // Attach the auto-filled-correct dim map as a property on the array
+  // (rather than changing the return shape) so the caller can read it
+  // alongside the steps for the form-lookup augmentation, while
+  // callers that just want the step list keep working.
+  steps.autoFilledDims = skippedCorrect;
   return steps;
 }
 
