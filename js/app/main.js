@@ -2360,12 +2360,16 @@ function startNextCycle(mode = 'remaining', options = {}) {
       delete directionalMarks[card.id];
     });
     runtime.marks = directionalMarks;
-    const fullDeck = shuffleArray([...(runtime.originalDeck || [])]);
+    const fullDeck = runtime.shuffled
+      ? shuffleArray([...(runtime.originalDeck || [])])
+      : [...(runtime.originalDeck || [])];
     avoidHeadCollision(fullDeck, options.avoidHeadId);
     runtime.deck = fullDeck;
     runtime.currentIdx = fullDeck.length ? 0 : runtime.deck.length;
   } else {
-    const remaining = shuffleArray([...getRemainingCards()]);
+    const remaining = runtime.shuffled
+      ? shuffleArray([...getRemainingCards()])
+      : [...getRemainingCards()];
     avoidHeadCollision(remaining, options.avoidHeadId);
     const known = (runtime.originalDeck || []).filter(card => runtime.marks[card.id] === 'known');
     runtime.deck = [...remaining, ...known];
