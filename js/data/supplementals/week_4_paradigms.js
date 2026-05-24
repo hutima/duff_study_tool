@@ -90,9 +90,9 @@
   //
   // "Liquid-stem futures" as a whole is registered (in stem_change_drills.js)
   // as a stem-recall drill: present ↔ future identification with no parse
-  // dimensions, so it triggers the parsing-mode redirect card. This set
-  // gives the parsing dropdown one concrete liquid-future paradigm whose
-  // forms ARE parseable dimensionally — same shape as W4_BALLO_SECOND_AORIST.
+  // dimensions. In parsing mode, syncParadigmFocusUi (main.js) substitutes
+  // the stem-recall lemma with μένω so the user gets parseable cards from
+  // this set instead of an unparseable drill — same shape as W4_BALLO_SECOND_AORIST.
   //
   // Active indicative only: present (the baseline) and the liquid future
   // (where the stem contracts and the accent shifts to a circumflex on the
