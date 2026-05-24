@@ -1355,6 +1355,95 @@
     padding-top: 10px;
     border-top: 1px dashed var(--border);
   }
+
+  /* Per-paradigm testable-form list, shown under the bucket-bars chart
+     when a parsing-review row is expanded. Mirrors the analytics
+     chapter-detail row idiom: status dot, Greek headword, canonical parse.
+     Pointer cursor is suppressed so the inner rows don't read as clickable
+     (the click handler treats them as non-toggleable). */
+  .parsing-review-forms {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border);
+  }
+  .parsing-review-forms-empty {
+    color: var(--muted);
+    font-size: 13px;
+    font-style: italic;
+  }
+  .parsing-review-forms-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .parsing-review-forms-title {
+    font-family: var(--font-display);
+    color: var(--gold-dim);
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .parsing-review-forms-summary {
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .parsing-review-forms-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+  .parsing-review-form-row {
+    display: grid;
+    grid-template-columns: 12px minmax(80px, 1fr) minmax(120px, 2fr);
+    align-items: center;
+    gap: 10px;
+    padding: 4px 6px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.02);
+    cursor: default;
+  }
+  .parsing-review-form-row:hover {
+    background: rgba(255,255,255,0.04);
+  }
+  html[data-theme="light"] .parsing-review-form-row {
+    background: rgba(0,0,0,0.02);
+  }
+  html[data-theme="light"] .parsing-review-form-row:hover {
+    background: rgba(0,0,0,0.04);
+  }
+  .parsing-review-form-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    display: inline-block;
+  }
+  .parsing-review-form-dot-right  { background: rgba(102, 164, 120, 0.85); }
+  .parsing-review-form-dot-wrong  { background: rgba(166,  88,  88, 0.85); }
+  .parsing-review-form-dot-unseen { background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255,255,255,0.18); }
+  html[data-theme="light"] .parsing-review-form-dot-unseen {
+    background: rgba(0,0,0,0.06);
+    border-color: rgba(0,0,0,0.15);
+  }
+  .parsing-review-form-greek {
+    font-family: 'Times New Roman', 'GFS Didot', serif;
+    color: var(--cream);
+    font-size: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .parsing-review-form-parse {
+    color: var(--muted);
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
   .paradigm-bucket-chart {
     display: flex;
     align-items: flex-end;
@@ -1792,6 +1881,50 @@
 
   .utility-section[open] summary {
     margin-bottom: 10px;
+  }
+
+  /* Parsing-options sub-collapsible nested inside the controls bar.
+     The controls bar is flex-wrap; full-width basis stops the details
+     element from shrinking to its summary's width. Toggle children
+     re-establish flex layout so each switch lays out like the
+     siblings outside the section did before. */
+  .parsing-options-section {
+    flex: 1 1 100%;
+    margin-bottom: 0;
+  }
+  .parsing-options-section[open] {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  /* Sub-filters nested under the "Optional paradigm extensions" toggle.
+     Slight inset so the hierarchy reads visually; muted top-border ties
+     it to the parent toggle. The category-level toggles inside use the
+     standard .toggle-label style. */
+  .parsing-options-subfilters {
+    margin-left: 16px;
+    margin-bottom: 0;
+    border-color: var(--border);
+    border-style: dashed;
+    background: transparent;
+    padding: 8px 12px;
+  }
+  .parsing-options-subfilters[open] {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .parsing-options-subfilters summary {
+    color: var(--muted);
+    font-size: 10px;
+  }
+  .parsing-options-subfilters-note {
+    color: var(--muted);
+    font-size: 11px;
+    font-style: italic;
+    margin-bottom: 4px;
+    line-height: 1.3;
   }
 
 
