@@ -1565,6 +1565,52 @@
       forms: LUO_FUTURE_PASSIVE_PARTICIPLE }
   ];
 
+  // ─── Aorist passive participles ───────────────────────────────────
+  //
+  // Each major verb has an aorist passive participle following the
+  // λυθείς paradigm (3rd-decl ντ-stem masc/neut with -θεις/-θεντος;
+  // 1st-decl -θεῖσα fem). Stems shift per the verb's principal-part
+  // formation: φιλη-θ-, βλη-θ-, γενη-θ-, δο-θ-, τε-θ-, στα-θ-. All
+  // are real Koine and common in the NT (γενηθεὶς "having become",
+  // δοθείς "having been given", σταθείς "having been placed/stood").
+  //
+  // Gated ch 15 (W6 — aorist passive system intro + ch 12 participles
+  // already in scope; max gives 15).
+
+  function aoristPassiveParticipleParadigm(stem) {
+    // stem is the part before -θεις (e.g. 'φιλη', 'βλη', 'γενη', 'δο',
+    // 'τε', 'στα'). Returns a flat forms object keyed by the inflected
+    // Greek string, with the standard λυθείς pattern parses.
+    const s = stem;
+    return {
+      [`${s}θείς`]:     'aorist passive participle nominative singular masculine',
+      [`${s}θέντος`]:   'aorist passive participle genitive singular masculine/neuter',
+      [`${s}θέντι`]:    'aorist passive participle dative singular masculine/neuter',
+      [`${s}θέντα`]:    'aorist passive participle accusative singular masculine',
+      [`${s}θέντες`]:   'aorist passive participle nominative plural masculine',
+      [`${s}θέντων`]:   'aorist passive participle genitive plural masculine/feminine/neuter',
+      [`${s}θεῖσι`]:    'aorist passive participle dative plural masculine/neuter',
+      [`${s}θεῖσιν`]:   'aorist passive participle dative plural masculine/neuter',
+      [`${s}θέντας`]:   'aorist passive participle accusative plural masculine',
+      [`${s}θεῖσα`]:    'aorist passive participle nominative singular feminine',
+      [`${s}θείσης`]:   'aorist passive participle genitive singular feminine',
+      [`${s}θείσῃ`]:    'aorist passive participle dative singular feminine',
+      [`${s}θεῖσαν`]:   'aorist passive participle accusative singular feminine',
+      [`${s}θεῖσαι`]:   'aorist passive participle nominative plural feminine',
+      [`${s}θεισῶν`]:   'aorist passive participle genitive plural feminine',
+      [`${s}θείσαις`]:  'aorist passive participle dative plural feminine',
+      [`${s}θείσας`]:   'aorist passive participle accusative plural feminine',
+      [`${s}θέν`]:      'aorist passive participle nominative/accusative singular neuter'
+    };
+  }
+
+  const PHILEO_AORIST_PASSIVE_PARTICIPLE  = aoristPassiveParticipleParadigm('φιλη');
+  const BALLO_AORIST_PASSIVE_PARTICIPLE   = aoristPassiveParticipleParadigm('βλη');
+  const GINOMAI_AORIST_PASSIVE_PARTICIPLE = aoristPassiveParticipleParadigm('γενη');
+  const DIDOMI_AORIST_PASSIVE_PARTICIPLE  = aoristPassiveParticipleParadigm('δο');
+  const TITHEMI_AORIST_PASSIVE_PARTICIPLE = aoristPassiveParticipleParadigm('τε');
+  const HISTEMI_AORIST_PASSIVE_PARTICIPLE = aoristPassiveParticipleParadigm('στα');
+
   const LEMMA_INVENTORY = {
     'εἰμί': {
       // εἰμί is suppletive: it has no aorist or perfect family — Greek
@@ -1607,49 +1653,88 @@
       optionalFormGroups: RHUOMAI_OPTIONAL_GROUPS
     },
     'βάλλω': {
-      extraForms: { ...BALLO_EXTRA_FORMS, ...BALLO_AORIST_ACTIVE_PARTICIPLE },
-      optionalFormGroups: [...BALLO_OPTIONAL_GROUPS, ...BALLO_PARTICIPLE_OPTIONAL]
+      extraForms: {
+        ...BALLO_EXTRA_FORMS,
+        ...BALLO_AORIST_ACTIVE_PARTICIPLE,
+        ...BALLO_AORIST_PASSIVE_PARTICIPLE
+      },
+      optionalFormGroups: [
+        ...BALLO_OPTIONAL_GROUPS,
+        ...BALLO_PARTICIPLE_OPTIONAL,
+        { chapter: 15, family: 'βάλλω — aorist passive participle βληθείς (optional)',
+          forms: BALLO_AORIST_PASSIVE_PARTICIPLE }
+      ]
     },
     'γίνομαι': {
       extraForms: {
         ...GINOMAI_EXTRA_FORMS,
         ...GINOMAI_AORIST_MIDDLE_PARTICIPLE,
-        ...GINOMAI_PERFECT_ACTIVE_PARTICIPLE
+        ...GINOMAI_PERFECT_ACTIVE_PARTICIPLE,
+        ...GINOMAI_AORIST_PASSIVE_PARTICIPLE
       },
-      optionalFormGroups: [...GINOMAI_OPTIONAL_GROUPS, ...GINOMAI_PARTICIPLE_OPTIONAL]
+      optionalFormGroups: [
+        ...GINOMAI_OPTIONAL_GROUPS,
+        ...GINOMAI_PARTICIPLE_OPTIONAL,
+        { chapter: 15, family: 'γίνομαι — aorist passive participle γενηθείς (optional)',
+          forms: GINOMAI_AORIST_PASSIVE_PARTICIPLE }
+      ]
     },
     'φιλέω': {
       extraForms: {
         ...PHILEO_EXTRA_FORMS,
         ...PHILEO_PRESENT_ACTIVE_PARTICIPLE,
-        ...PHILEO_AORIST_ACTIVE_PARTICIPLE
+        ...PHILEO_AORIST_ACTIVE_PARTICIPLE,
+        ...PHILEO_AORIST_PASSIVE_PARTICIPLE
       },
-      optionalFormGroups: [...PHILEO_OPTIONAL_GROUPS, ...PHILEO_PARTICIPLE_OPTIONAL]
+      optionalFormGroups: [
+        ...PHILEO_OPTIONAL_GROUPS,
+        ...PHILEO_PARTICIPLE_OPTIONAL,
+        { chapter: 15, family: 'φιλέω — aorist passive participle φιληθείς (optional)',
+          forms: PHILEO_AORIST_PASSIVE_PARTICIPLE }
+      ]
     },
     'δίδωμι': {
       extraForms: {
         ...DIDOMI_EXTRA_FORMS,
         ...DIDOMI_PRESENT_ACTIVE_PARTICIPLE,
-        ...DIDOMI_AORIST_ACTIVE_PARTICIPLE
+        ...DIDOMI_AORIST_ACTIVE_PARTICIPLE,
+        ...DIDOMI_AORIST_PASSIVE_PARTICIPLE
       },
-      optionalFormGroups: [...DIDOMI_OPTIONAL_GROUPS, ...DIDOMI_PARTICIPLE_OPTIONAL]
+      optionalFormGroups: [
+        ...DIDOMI_OPTIONAL_GROUPS,
+        ...DIDOMI_PARTICIPLE_OPTIONAL,
+        { chapter: 19, family: 'δίδωμι — aorist passive participle δοθείς (optional)',
+          forms: DIDOMI_AORIST_PASSIVE_PARTICIPLE }
+      ]
     },
     'τίθημι': {
       extraForms: {
         ...TITHEMI_EXTRA_FORMS,
         ...TITHEMI_PRESENT_ACTIVE_PARTICIPLE,
-        ...TITHEMI_AORIST_ACTIVE_PARTICIPLE
+        ...TITHEMI_AORIST_ACTIVE_PARTICIPLE,
+        ...TITHEMI_AORIST_PASSIVE_PARTICIPLE
       },
-      optionalFormGroups: [...TITHEMI_OPTIONAL_GROUPS, ...TITHEMI_PARTICIPLE_OPTIONAL]
+      optionalFormGroups: [
+        ...TITHEMI_OPTIONAL_GROUPS,
+        ...TITHEMI_PARTICIPLE_OPTIONAL,
+        { chapter: 19, family: 'τίθημι — aorist passive participle τεθείς (optional)',
+          forms: TITHEMI_AORIST_PASSIVE_PARTICIPLE }
+      ]
     },
     'ἵστημι': {
       extraForms: {
         ...HISTEMI_EXTRA_FORMS,
         ...HISTEMI_PRESENT_ACTIVE_PARTICIPLE,
         ...HISTEMI_SECOND_AORIST_ACTIVE_PARTICIPLE,
-        ...HISTEMI_PERFECT_ACTIVE_PARTICIPLE
+        ...HISTEMI_PERFECT_ACTIVE_PARTICIPLE,
+        ...HISTEMI_AORIST_PASSIVE_PARTICIPLE
       },
-      optionalFormGroups: [...HISTEMI_OPTIONAL_GROUPS, ...HISTEMI_PARTICIPLE_OPTIONAL]
+      optionalFormGroups: [
+        ...HISTEMI_OPTIONAL_GROUPS,
+        ...HISTEMI_PARTICIPLE_OPTIONAL,
+        { chapter: 19, family: 'ἵστημι — aorist passive participle σταθείς (optional)',
+          forms: HISTEMI_AORIST_PASSIVE_PARTICIPLE }
+      ]
     },
     'δίδομαι': {
       extraForms: DIDOMAI_EXTRA_FORMS,
