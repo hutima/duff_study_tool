@@ -283,6 +283,290 @@
     ...LUO_AORIST_ACTIVE_SUBJUNCTIVE
   };
 
+  // ─── ῥύομαι (model middle/deponent) ───────────────────────────────
+  //
+  // Duff drills present/future/imperfect/aorist middle indicative (W3),
+  // present + aorist middle subjunctive (W7), present + aorist middle
+  // imperative 2nd person + middle infinitives (W3), and the full
+  // present + aorist middle participle declensions (W5). Gaps are
+  // narrow: 3rd-person imperatives (Duff stops at 2nd person for
+  // ῥύομαι) and the future middle infinitive.
+
+  const RHUOMAI_FUTURE_INFINITIVE = {
+    'ῥύσεσθαι': 'future middle infinitive'
+  };
+
+  const RHUOMAI_IMPERATIVE_3RD = {
+    'ῥυέσθω':      'present middle imperative third person singular',
+    'ῥυέσθωσαν':   'present middle imperative third person plural',
+    'ῥυσάσθω':     'aorist middle imperative third person singular',
+    'ῥυσάσθωσαν':  'aorist middle imperative third person plural'
+  };
+
+  const RHUOMAI_OPTIONAL_GROUPS = [
+    { chapter: 8, family: 'ῥύομαι — future middle infinitive (optional)',
+      forms: RHUOMAI_FUTURE_INFINITIVE },
+    { chapter: 8, family: 'ῥύομαι — 3rd-person middle imperative (optional)',
+      forms: RHUOMAI_IMPERATIVE_3RD }
+  ];
+
+  const RHUOMAI_EXTRA_FORMS = {
+    ...RHUOMAI_FUTURE_INFINITIVE,
+    ...RHUOMAI_IMPERATIVE_3RD
+  };
+
+  // ─── βάλλω (second-aorist model) ──────────────────────────────────
+  //
+  // Duff drills βάλλω only for aorist active (W4: indicative all 6,
+  // imperative 2sg/2pl, infinitive βαλεῖν, masc-nom-only participle
+  // βαλών/βαλόντες) and uses it as a stem-pair recall verb everywhere
+  // else. Real Koine has the full present/imperfect/future/aorist
+  // (passive!)/perfect paradigm for βάλλω — it's an extremely common
+  // verb in the NT (throw, cast, put). These fill the indicative
+  // gaps, the aorist active subjunctive, the aorist passive, and the
+  // perfect active. Liquid-stem future (βαλῶ, contracted) and
+  // 2nd-aorist passive (ἐβλήθην with stem shift β/λ) are the
+  // pedagogically tricky bits to flag.
+
+  const BALLO_PRESENT_ACTIVE_INDICATIVE = {
+    'βάλλω':     'present active indicative first person singular',
+    'βάλλεις':   'present active indicative second person singular',
+    'βάλλει':    'present active indicative third person singular',
+    'βάλλομεν':  'present active indicative first person plural',
+    'βάλλετε':   'present active indicative second person plural',
+    'βάλλουσι':  'present active indicative third person plural',
+    'βάλλουσιν': 'present active indicative third person plural'
+  };
+
+  const BALLO_IMPERFECT_ACTIVE_INDICATIVE = {
+    'ἔβαλλον':    'imperfect active indicative first person singular',
+    // ἔβαλλον is also 3rd person plural (1sg/3pl syncretism in ω-verb
+    // imperfect). The 1sg reading takes the unique key; 3pl picks
+    // resolve via the drilled-card / fallback walk against any other
+    // available pool. Documented to avoid silent overwrite confusion.
+    'ἔβαλλες':    'imperfect active indicative second person singular',
+    'ἔβαλλε':     'imperfect active indicative third person singular',
+    'ἔβαλλεν':    'imperfect active indicative third person singular',
+    'ἐβάλλομεν':  'imperfect active indicative first person plural',
+    'ἐβάλλετε':   'imperfect active indicative second person plural'
+  };
+
+  const BALLO_FUTURE_ACTIVE_INDICATIVE = {
+    'βαλῶ':     'future active indicative first person singular',
+    'βαλεῖς':   'future active indicative second person singular',
+    'βαλεῖ':    'future active indicative third person singular',
+    'βαλοῦμεν': 'future active indicative first person plural',
+    'βαλεῖτε':  'future active indicative second person plural',
+    'βαλοῦσι':  'future active indicative third person plural',
+    'βαλοῦσιν': 'future active indicative third person plural'
+  };
+
+  const BALLO_AORIST_PASSIVE_INDICATIVE = {
+    'ἐβλήθην':   'aorist passive indicative first person singular',
+    'ἐβλήθης':   'aorist passive indicative second person singular',
+    'ἐβλήθη':    'aorist passive indicative third person singular',
+    'ἐβλήθημεν': 'aorist passive indicative first person plural',
+    'ἐβλήθητε':  'aorist passive indicative second person plural',
+    'ἐβλήθησαν': 'aorist passive indicative third person plural'
+  };
+
+  const BALLO_PERFECT_ACTIVE_INDICATIVE = {
+    'βέβληκα':    'perfect active indicative first person singular',
+    'βέβληκας':   'perfect active indicative second person singular',
+    'βέβληκε':    'perfect active indicative third person singular',
+    'βέβληκεν':   'perfect active indicative third person singular',
+    'βεβλήκαμεν': 'perfect active indicative first person plural',
+    'βεβλήκατε':  'perfect active indicative second person plural',
+    'βεβλήκασι':  'perfect active indicative third person plural',
+    'βεβλήκασιν': 'perfect active indicative third person plural'
+  };
+
+  const BALLO_AORIST_ACTIVE_SUBJUNCTIVE = {
+    'βάλω':    'aorist active subjunctive first person singular',
+    'βάλῃς':   'aorist active subjunctive second person singular',
+    'βάλῃ':    'aorist active subjunctive third person singular',
+    'βάλωμεν': 'aorist active subjunctive first person plural',
+    'βάλητε':  'aorist active subjunctive second person plural',
+    'βάλωσι':  'aorist active subjunctive third person plural',
+    'βάλωσιν': 'aorist active subjunctive third person plural'
+  };
+
+  const BALLO_PRESENT_INFINITIVE = {
+    'βάλλειν': 'present active infinitive'
+  };
+
+  // 3rd-person aorist active imperative for βάλλω. The 2sg βάλε / 2pl
+  // βάλετε are drilled (W4_BALLO_SECOND_AORIST); 3rd person is not.
+  const BALLO_AORIST_IMPERATIVE_3RD = {
+    'βαλέτω':     'aorist active imperative third person singular',
+    'βαλέτωσαν':  'aorist active imperative third person plural'
+  };
+
+  // Chapter gates: βάλλω is introduced as a vocab word early but its
+  // full paradigm depends on the broader tense/voice system. Gate
+  // present/imperfect at ch 10 (W4 — when βάλλω itself becomes a focus
+  // via second-aorist); future at ch 10; aorist subjunctive at ch 17;
+  // aorist passive + perfect at ch 15 (W6 — passive + perfect intro);
+  // 3rd-person aorist imperative at ch 10 (the 2sg/2pl are drilled
+  // there, so the 3rd person rounds out the paradigm at the same
+  // time).
+  const BALLO_OPTIONAL_GROUPS = [
+    { chapter: 10, family: 'βάλλω — present active indicative (optional)',
+      forms: BALLO_PRESENT_ACTIVE_INDICATIVE },
+    { chapter: 10, family: 'βάλλω — imperfect active indicative (optional)',
+      forms: BALLO_IMPERFECT_ACTIVE_INDICATIVE },
+    { chapter: 10, family: 'βάλλω — future active indicative (liquid stem, optional)',
+      forms: BALLO_FUTURE_ACTIVE_INDICATIVE },
+    { chapter: 10, family: 'βάλλω — present active infinitive (optional)',
+      forms: BALLO_PRESENT_INFINITIVE },
+    { chapter: 10, family: 'βάλλω — 3rd-person aorist active imperative (optional)',
+      forms: BALLO_AORIST_IMPERATIVE_3RD },
+    { chapter: 15, family: 'βάλλω — aorist passive indicative (optional)',
+      forms: BALLO_AORIST_PASSIVE_INDICATIVE },
+    { chapter: 15, family: 'βάλλω — perfect active indicative (optional)',
+      forms: BALLO_PERFECT_ACTIVE_INDICATIVE },
+    { chapter: 17, family: 'βάλλω — aorist active subjunctive (optional)',
+      forms: BALLO_AORIST_ACTIVE_SUBJUNCTIVE }
+  ];
+
+  const BALLO_EXTRA_FORMS = {
+    ...BALLO_PRESENT_ACTIVE_INDICATIVE,
+    ...BALLO_IMPERFECT_ACTIVE_INDICATIVE,
+    ...BALLO_FUTURE_ACTIVE_INDICATIVE,
+    ...BALLO_PRESENT_INFINITIVE,
+    ...BALLO_AORIST_IMPERATIVE_3RD,
+    ...BALLO_AORIST_PASSIVE_INDICATIVE,
+    ...BALLO_PERFECT_ACTIVE_INDICATIVE,
+    ...BALLO_AORIST_ACTIVE_SUBJUNCTIVE
+  };
+
+  // ─── γίνομαι (second-aorist deponent — ubiquitous in NT) ──────────
+  //
+  // Per the audit γίνομαι is drilled only for the aorist middle
+  // subjunctive (W7) and as a stem-pair recall entry ("γίνομαι →
+  // ἐγενόμην"). The actual indicative paradigm — including the
+  // famous aorist middle ἐγένετο, perfect active γέγονα, and aorist
+  // middle infinitive γενέσθαι, all extremely common in the Greek
+  // NT — has no drill cards. Filling these gaps is the highest-
+  // pedagogical-value addition in this batch.
+  //
+  // Note on voice: γίνομαι is deponent middle in the present, future,
+  // imperfect, and aorist; the perfect (γέγονα) is morphologically
+  // active and meaning-active. The aorist passive (ἐγενήθην) is
+  // genuinely passive in form, sometimes used with active meaning in
+  // Koine. We tag voices per Greek-grammar convention.
+
+  const GINOMAI_PRESENT_MIDDLE_INDICATIVE = {
+    'γίνομαι':   'present middle indicative first person singular',
+    'γίνῃ':      'present middle indicative second person singular',
+    'γίνεται':   'present middle indicative third person singular',
+    'γινόμεθα':  'present middle indicative first person plural',
+    'γίνεσθε':   'present middle indicative second person plural',
+    'γίνονται':  'present middle indicative third person plural'
+  };
+
+  const GINOMAI_IMPERFECT_MIDDLE_INDICATIVE = {
+    'ἐγινόμην':  'imperfect middle indicative first person singular',
+    'ἐγίνου':    'imperfect middle indicative second person singular',
+    'ἐγίνετο':   'imperfect middle indicative third person singular',
+    'ἐγινόμεθα': 'imperfect middle indicative first person plural',
+    'ἐγίνεσθε':  'imperfect middle indicative second person plural',
+    'ἐγίνοντο':  'imperfect middle indicative third person plural'
+  };
+
+  const GINOMAI_FUTURE_MIDDLE_INDICATIVE = {
+    'γενήσομαι':  'future middle indicative first person singular',
+    'γενήσῃ':     'future middle indicative second person singular',
+    'γενήσεται':  'future middle indicative third person singular',
+    'γενησόμεθα': 'future middle indicative first person plural',
+    'γενήσεσθε':  'future middle indicative second person plural',
+    'γενήσονται': 'future middle indicative third person plural'
+  };
+
+  const GINOMAI_AORIST_MIDDLE_INDICATIVE = {
+    'ἐγενόμην':   'aorist middle indicative first person singular',
+    'ἐγένου':     'aorist middle indicative second person singular',
+    'ἐγένετο':    'aorist middle indicative third person singular',
+    'ἐγενόμεθα':  'aorist middle indicative first person plural',
+    'ἐγένεσθε':   'aorist middle indicative second person plural',
+    'ἐγένοντο':   'aorist middle indicative third person plural'
+  };
+
+  const GINOMAI_AORIST_PASSIVE_INDICATIVE = {
+    'ἐγενήθην':   'aorist passive indicative first person singular',
+    'ἐγενήθης':   'aorist passive indicative second person singular',
+    'ἐγενήθη':    'aorist passive indicative third person singular',
+    'ἐγενήθημεν': 'aorist passive indicative first person plural',
+    'ἐγενήθητε':  'aorist passive indicative second person plural',
+    'ἐγενήθησαν': 'aorist passive indicative third person plural'
+  };
+
+  const GINOMAI_PERFECT_ACTIVE_INDICATIVE = {
+    'γέγονα':    'perfect active indicative first person singular',
+    'γέγονας':   'perfect active indicative second person singular',
+    'γέγονε':    'perfect active indicative third person singular',
+    'γέγονεν':   'perfect active indicative third person singular',
+    'γεγόναμεν': 'perfect active indicative first person plural',
+    'γεγόνατε':  'perfect active indicative second person plural',
+    'γεγόνασι':  'perfect active indicative third person plural',
+    'γεγόνασιν': 'perfect active indicative third person plural'
+  };
+
+  const GINOMAI_AORIST_MIDDLE_INFINITIVE = {
+    'γενέσθαι': 'aorist middle infinitive'
+  };
+
+  const GINOMAI_PRESENT_MIDDLE_INFINITIVE = {
+    'γίνεσθαι': 'present middle infinitive'
+  };
+
+  const GINOMAI_AORIST_MIDDLE_IMPERATIVE = {
+    'γενοῦ':       'aorist middle imperative second person singular',
+    'γενέσθω':     'aorist middle imperative third person singular',
+    'γένεσθε':     'aorist middle imperative second person plural',
+    'γενέσθωσαν':  'aorist middle imperative third person plural'
+  };
+
+  // Chapter gates: γίνομαι is a vocab introduction-era word (it appears
+  // in early chapters as a deponent verb). The present/imperfect/
+  // future middle indicatives gate at ch 8 (the chapter Duff
+  // introduces middle/deponent verbs alongside the W3 ῥύομαι treatment).
+  // 2nd-aorist forms (ἐγενόμην series, infinitive γενέσθαι, imperative
+  // γενοῦ) gate at ch 10 (W4 — second aorist intro). Perfect active
+  // and aorist passive gate at ch 15 (W6 — passive + perfect intro).
+  const GINOMAI_OPTIONAL_GROUPS = [
+    { chapter: 8,  family: 'γίνομαι — present middle indicative (optional)',
+      forms: GINOMAI_PRESENT_MIDDLE_INDICATIVE },
+    { chapter: 8,  family: 'γίνομαι — imperfect middle indicative (optional)',
+      forms: GINOMAI_IMPERFECT_MIDDLE_INDICATIVE },
+    { chapter: 8,  family: 'γίνομαι — future middle indicative (optional)',
+      forms: GINOMAI_FUTURE_MIDDLE_INDICATIVE },
+    { chapter: 8,  family: 'γίνομαι — present middle infinitive (optional)',
+      forms: GINOMAI_PRESENT_MIDDLE_INFINITIVE },
+    { chapter: 10, family: 'γίνομαι — aorist middle indicative (2nd aorist, optional)',
+      forms: GINOMAI_AORIST_MIDDLE_INDICATIVE },
+    { chapter: 10, family: 'γίνομαι — aorist middle infinitive γενέσθαι (optional)',
+      forms: GINOMAI_AORIST_MIDDLE_INFINITIVE },
+    { chapter: 10, family: 'γίνομαι — aorist middle imperative (optional)',
+      forms: GINOMAI_AORIST_MIDDLE_IMPERATIVE },
+    { chapter: 15, family: 'γίνομαι — aorist passive indicative (optional)',
+      forms: GINOMAI_AORIST_PASSIVE_INDICATIVE },
+    { chapter: 15, family: 'γίνομαι — perfect active indicative γέγονα (optional)',
+      forms: GINOMAI_PERFECT_ACTIVE_INDICATIVE }
+  ];
+
+  const GINOMAI_EXTRA_FORMS = {
+    ...GINOMAI_PRESENT_MIDDLE_INDICATIVE,
+    ...GINOMAI_IMPERFECT_MIDDLE_INDICATIVE,
+    ...GINOMAI_FUTURE_MIDDLE_INDICATIVE,
+    ...GINOMAI_AORIST_MIDDLE_INDICATIVE,
+    ...GINOMAI_AORIST_PASSIVE_INDICATIVE,
+    ...GINOMAI_PERFECT_ACTIVE_INDICATIVE,
+    ...GINOMAI_AORIST_MIDDLE_INFINITIVE,
+    ...GINOMAI_PRESENT_MIDDLE_INFINITIVE,
+    ...GINOMAI_AORIST_MIDDLE_IMPERATIVE
+  };
+
   const LEMMA_INVENTORY = {
     'εἰμί': {
       // εἰμί is suppletive: it has no aorist or perfect family — Greek
@@ -308,6 +592,18 @@
     'λύω': {
       extraForms: LUO_EXTRA_FORMS,
       optionalFormGroups: LUO_OPTIONAL_GROUPS
+    },
+    'ῥύομαι': {
+      extraForms: RHUOMAI_EXTRA_FORMS,
+      optionalFormGroups: RHUOMAI_OPTIONAL_GROUPS
+    },
+    'βάλλω': {
+      extraForms: BALLO_EXTRA_FORMS,
+      optionalFormGroups: BALLO_OPTIONAL_GROUPS
+    },
+    'γίνομαι': {
+      extraForms: GINOMAI_EXTRA_FORMS,
+      optionalFormGroups: GINOMAI_OPTIONAL_GROUPS
     }
     // Add more defective lemmas here (e.g. οἶδα — no present form, the
     // perfect serves as present; χρή — only third singular, etc.) when
