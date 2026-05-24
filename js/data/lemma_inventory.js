@@ -113,6 +113,176 @@
       forms: EIMI_FUTURE_MIDDLE_PARTICIPLE }
   ];
 
+  // ─── λύω (model regular ω-verb) ────────────────────────────────────
+  //
+  // Duff drills present/imperfect/future/aorist active indicative (W2),
+  // present/imperfect/future/aorist passive indicative + perfect/
+  // pluperfect active (W6), present active imperative + infinitive (W2),
+  // present/aorist active participles (W5), aorist passive participle
+  // (W6 λυθείς), and present passive imperative + infinitive (W6). The
+  // subjunctive is touched only with scattered single-person examples
+  // in grammar.js ch 17 (λύῃ 3sg, λύσωσιν 3pl); the rest of the
+  // subjunctive paradigm — every other person, every voice — is real
+  // Koine but undrilled. Same with non-present infinitives (future
+  // active/middle/passive, perfect active and middle/passive), the
+  // aorist middle imperative paradigm, and the 3rd-person present
+  // middle/passive imperative. These fill the gaps.
+  //
+  // Notes on syncretic forms: λύῃ is morphologically the 3sg present
+  // active subjunctive AND the 2sg present middle/passive subjunctive/
+  // imperative — extraForms keys are unique by Greek string, so we
+  // pick the parse most pedagogically prominent (the active sub-
+  // junctive 3sg form a student picking subjunctive will hit first).
+  // λύσῃ has similar overload between aorist active subjunctive 3sg
+  // and aorist middle subjunctive 2sg + future indicative 2sg/3sg
+  // (the future indicative parse stays in the drilled card pool, so
+  // the fallback claim here is the subjunctive reading). λῦσαι is
+  // both aorist active infinitive (drilled in W2) and aorist middle
+  // imperative 2sg — drilled card wins for the infinitive parse, so
+  // the middle-imperative line below resolves only when picks land on
+  // the imperative reading.
+
+  const LUO_PRESENT_ACTIVE_SUBJUNCTIVE = {
+    'λύω':      'present active subjunctive first person singular',
+    'λύῃς':     'present active subjunctive second person singular',
+    'λύῃ':      'present active subjunctive third person singular',
+    'λύωμεν':   'present active subjunctive first person plural',
+    'λύητε':    'present active subjunctive second person plural',
+    'λύωσι':    'present active subjunctive third person plural',
+    'λύωσιν':   'present active subjunctive third person plural'
+  };
+
+  const LUO_AORIST_ACTIVE_SUBJUNCTIVE = {
+    'λύσω':     'aorist active subjunctive first person singular',
+    'λύσῃς':    'aorist active subjunctive second person singular',
+    'λύσῃ':     'aorist active subjunctive third person singular',
+    'λύσωμεν':  'aorist active subjunctive first person plural',
+    'λύσητε':   'aorist active subjunctive second person plural',
+    'λύσωσι':   'aorist active subjunctive third person plural',
+    'λύσωσιν':  'aorist active subjunctive third person plural'
+  };
+
+  const LUO_AORIST_MIDDLE_SUBJUNCTIVE = {
+    'λύσωμαι':   'aorist middle subjunctive first person singular',
+    // 'λύσῃ' 2sg collides with the aorist active subjunctive 3sg key
+    // above; the active reading is more pedagogically prominent, so we
+    // don't shadow it here. A student picking "aorist middle subjunctive
+    // 2sg" hits the data-gap "—" instead of a wrong-class match.
+    'λύσηται':   'aorist middle subjunctive third person singular',
+    'λυσώμεθα':  'aorist middle subjunctive first person plural',
+    'λύσησθε':   'aorist middle subjunctive second person plural',
+    'λύσωνται':  'aorist middle subjunctive third person plural'
+  };
+
+  const LUO_AORIST_PASSIVE_SUBJUNCTIVE = {
+    'λυθῶ':     'aorist passive subjunctive first person singular',
+    'λυθῇς':    'aorist passive subjunctive second person singular',
+    'λυθῇ':     'aorist passive subjunctive third person singular',
+    'λυθῶμεν':  'aorist passive subjunctive first person plural',
+    'λυθῆτε':   'aorist passive subjunctive second person plural',
+    'λυθῶσι':   'aorist passive subjunctive third person plural',
+    'λυθῶσιν':  'aorist passive subjunctive third person plural'
+  };
+
+  const LUO_PRESENT_MIDDLE_PASSIVE_SUBJUNCTIVE = {
+    'λύωμαι':   'present middle/passive subjunctive first person singular',
+    // 'λύῃ' 2sg again collides with the present active subjunctive 3sg
+    // entry; same reasoning — we don't shadow the active reading.
+    'λύηται':   'present middle/passive subjunctive third person singular',
+    'λυώμεθα':  'present middle/passive subjunctive first person plural',
+    'λύησθε':   'present middle/passive subjunctive second person plural',
+    'λύωνται':  'present middle/passive subjunctive third person plural'
+  };
+
+  // Non-present active/middle/passive infinitives. λύειν (present
+  // active) and λύεσθαι (present m/p) and λῦσαι (aorist active) and
+  // λυθῆναι (aorist passive) are drilled; future + perfect aren't.
+  const LUO_NONPRESENT_INFINITIVES = {
+    'λύσειν':       'future active infinitive',
+    'λύσεσθαι':     'future middle infinitive',
+    'λυθήσεσθαι':   'future passive infinitive',
+    'λελυκέναι':    'perfect active infinitive',
+    'λελύσθαι':     'perfect middle/passive infinitive',
+    'λύσασθαι':     'aorist middle infinitive'
+  };
+
+  // Present middle/passive imperative 3rd person (the 2nd-person forms
+  // are drilled in W6_LUO_PASSIVE_OTHER_MOODS). Voice tagged as the
+  // syncretic m/p composite — Duff's drilled cards may say "passive"
+  // only, so adding the composite covers both pickings.
+  const LUO_PRESENT_MP_IMPERATIVE_3P = {
+    'λυέσθω':     'present middle/passive imperative third person singular',
+    'λυέσθωσαν':  'present middle/passive imperative third person plural'
+  };
+
+  // Aorist middle imperative — not drilled at all for λύω. 2sg λῦσαι
+  // overlaps with the drilled aorist active infinitive; the drilled
+  // card wins for the infinitive parse, but a student picking "aorist
+  // middle imperative 2sg" lands on this entry via fallback.
+  const LUO_AORIST_MIDDLE_IMPERATIVE = {
+    'λῦσαι':       'aorist middle imperative second person singular',
+    'λυσάσθω':     'aorist middle imperative third person singular',
+    'λύσασθε':     'aorist middle imperative second person plural',
+    'λυσάσθωσαν':  'aorist middle imperative third person plural'
+  };
+
+  // Aorist passive imperative — 2nd/3rd person all drilled (W6 + W7);
+  // nothing to add here. Aorist active imperative similarly complete
+  // (W2 + W7).
+
+  // Chapter gates: ω-verb subjunctive is introduced at Ch 17 (W7).
+  // Future infinitives are reasonable from Ch 6 (when future indicative
+  // is taught); middle/passive future infinitives need Ch 15 (W6
+  // introduces the passive system + voice contrasts). Perfect
+  // infinitives need Ch 15 (W6 introduces perfect). Middle imperatives
+  // are introduced at Ch 7 for the mood + Ch 15 for the voice; gate
+  // at max(7,15)=15. 3rd-person m/p imperative gates at Ch 15 (passive
+  // intro).
+  const LUO_OPTIONAL_GROUPS = [
+    { chapter: 6,  family: 'λύω — future active infinitive (optional)',
+      forms: { 'λύσειν': 'future active infinitive' } },
+    { chapter: 15, family: 'λύω — future middle/passive + perfect infinitives (optional)',
+      forms: {
+        'λύσεσθαι':    'future middle infinitive',
+        'λυθήσεσθαι':  'future passive infinitive',
+        'λελυκέναι':   'perfect active infinitive',
+        'λελύσθαι':    'perfect middle/passive infinitive',
+        'λύσασθαι':    'aorist middle infinitive'
+      } },
+    { chapter: 15, family: 'λύω — present middle/passive imperative 3rd person (optional)',
+      forms: LUO_PRESENT_MP_IMPERATIVE_3P },
+    { chapter: 15, family: 'λύω — aorist middle imperative (optional)',
+      forms: LUO_AORIST_MIDDLE_IMPERATIVE },
+    { chapter: 17, family: 'λύω — present active subjunctive (optional)',
+      forms: LUO_PRESENT_ACTIVE_SUBJUNCTIVE },
+    { chapter: 17, family: 'λύω — aorist active subjunctive (optional)',
+      forms: LUO_AORIST_ACTIVE_SUBJUNCTIVE },
+    { chapter: 17, family: 'λύω — aorist middle subjunctive (optional)',
+      forms: LUO_AORIST_MIDDLE_SUBJUNCTIVE },
+    { chapter: 17, family: 'λύω — aorist passive subjunctive (optional)',
+      forms: LUO_AORIST_PASSIVE_SUBJUNCTIVE },
+    { chapter: 17, family: 'λύω — present middle/passive subjunctive (optional)',
+      forms: LUO_PRESENT_MIDDLE_PASSIVE_SUBJUNCTIVE }
+  ];
+
+  // Flat extraForms map for the fallback lookup. Duplicate-key
+  // collisions (e.g. λύῃ across active sub + m/p sub) resolve to the
+  // last spread wins — order the spreads so the most pedagogically
+  // prominent reading sits last for any colliding form.
+  const LUO_EXTRA_FORMS = {
+    ...LUO_AORIST_MIDDLE_SUBJUNCTIVE,
+    ...LUO_PRESENT_MIDDLE_PASSIVE_SUBJUNCTIVE,
+    ...LUO_AORIST_PASSIVE_SUBJUNCTIVE,
+    ...LUO_NONPRESENT_INFINITIVES,
+    ...LUO_PRESENT_MP_IMPERATIVE_3P,
+    ...LUO_AORIST_MIDDLE_IMPERATIVE,
+    // Active subjunctive last so λύῃ resolves to "present active
+    // subjunctive 3sg" (and λύσῃ to "aorist active subjunctive 3sg"),
+    // the most common single-form readings for those Greek strings.
+    ...LUO_PRESENT_ACTIVE_SUBJUNCTIVE,
+    ...LUO_AORIST_ACTIVE_SUBJUNCTIVE
+  };
+
   const LEMMA_INVENTORY = {
     'εἰμί': {
       // εἰμί is suppletive: it has no aorist or perfect family — Greek
@@ -134,6 +304,10 @@
         ...EIMI_PRESENT_ACTIVE_IMPERATIVE
       },
       optionalFormGroups: EIMI_OPTIONAL_GROUPS
+    },
+    'λύω': {
+      extraForms: LUO_EXTRA_FORMS,
+      optionalFormGroups: LUO_OPTIONAL_GROUPS
     }
     // Add more defective lemmas here (e.g. οἶδα — no present form, the
     // perfect serves as present; χρή — only third singular, etc.) when
