@@ -780,6 +780,21 @@ function skipMorphologyStep() {
   saveState();
 }
 
+// Pass on the WHOLE current morph card: drop the in-flight walk
+// without recording any per-dim stats, then advance to the next card.
+// Unlike "I don't know" (per-step, counts as wrong), passing the card
+// is fully off-stats — the student opted out before any grading could
+// settle. Only callable mid-walk; once the walk has completed,
+// finalizeMorphStepAttempt has already written the stats and Pass would
+// just duplicate the NEXT button.
+function passMorphologyCard() {
+  if (!isParsingMode()) return;
+  noteStudyInteraction();
+  if (runtime.morphStepState && runtime.morphStepState.completed) return;
+  runtime.morphStepState = { cardId: null, steps: [], stepIdx: 0, answers: [], completed: false };
+  navigate(1);
+}
+
 function finalizeMorphStepAttempt(card, state) {
   if (!card || !card.lemma) return;
   const dims = {};
@@ -2224,7 +2239,7 @@ installKeyboardShortcuts({
 const GLOBAL_CLICK_HANDLERS = {
   flipCard, navigate, markCard, handleNavNext, answerMorphologyChoice,
   revealMorphologyAnswer, rateMorphologySelfCheck, markMorphologyDontKnow,
-  answerMorphologyStep, skipMorphologyStep,
+  answerMorphologyStep, skipMorphologyStep, passMorphologyCard,
   returnSeenCardToDeck,
   closeAnalyticsOverlay, closeTransferModal, exportProgressJson,
   closeShortcutsModal, closeStudySelector,

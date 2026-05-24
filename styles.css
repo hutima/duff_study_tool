@@ -1042,6 +1042,26 @@
     color: var(--cream);
   }
 
+  .morph-pass-card-row {
+    display: flex;
+    justify-content: center;
+    margin: 0 0 16px;
+  }
+
+  .morph-pass-card-btn {
+    min-width: 180px;
+    font-size: 13px;
+    background: transparent;
+    border: 1px dashed var(--border);
+    color: var(--muted);
+  }
+
+  .morph-pass-card-btn:hover {
+    border-color: var(--gold-dim);
+    border-style: solid;
+    color: var(--cream);
+  }
+
   .nav-btn.nav-disabled,
   .nav-btn:disabled {
     opacity: 0.4;
