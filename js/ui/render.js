@@ -60,7 +60,7 @@ export function renderCard() {
         <div class="big">↗</div>
         <strong>${lemma}</strong> is a stem-recall drill, not a parseable
         paradigm — there are no tense / voice / mood / case dimensions to
-        walk. <u>Tap to open this drill in Grammar mode</u>.
+        walk. <u>Tap to open the matching Vocabulary mode supplemental</u>.
       </button>`;
     return;
   }
