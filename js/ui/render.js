@@ -40,10 +40,11 @@ export function configureRender(deps) {
 // of λαμβάνω?") rather than canonical paradigm forms. Parsing mode can't
 // dimension-walk them — they have no tense/voice/mood/case/etc. parse —
 // so we surface a redirect card that, when clicked, hops the student into
-// Grammar mode with the matching drill set already selected.
+// the matching stem-change Vocab supplemental (the cards with the
+// highlighted-letter stem-pair flip layout).
 const PARSING_INCOMPATIBLE_LEMMAS = {
-  'Second-aorist stems': 'W4_SECOND_AORIST_STEMS_DRILL',
-  'Liquid-stem futures': 'W4_FUTURE_LIQUID_STEMS_DRILL'
+  'Second-aorist stems': 'W4_SECOND_AORIST_STEMS',
+  'Liquid-stem futures': 'W4_FUTURE_LIQUID_STEMS'
 };
 
 export function renderCard() {
