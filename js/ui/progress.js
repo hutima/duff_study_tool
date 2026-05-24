@@ -29,6 +29,7 @@ let host = {
   getRemainingCards: () => [],
   getHighConfidenceCount: () => 0,
   getWordProgress: () => ({}),
+  getMorphCardsForLemma: () => [],
   isMorphologyMode: () => false,
   isParsingMode: () => false,
   renderAnalyticsOverlay: () => {},
@@ -306,6 +307,7 @@ function renderParsingReviewPanel() {
           title: `${s.lemma} parsing performance`
         })
       : '';
+    const formsHtml = isExpanded ? buildLemmaTestableFormsHtml(s.lemma) : '';
     return `
       <div class="parsing-review-row${isExpanded ? ' parsing-review-row-active' : ''}"
            role="button"
@@ -319,7 +321,7 @@ function renderParsingReviewPanel() {
           <span class="parsing-review-attempts">${s.attempts}/${attemptWindow} attempts</span>
         </div>
         <div class="parsing-review-chips">${chips}</div>
-        ${isExpanded ? `<div class="parsing-review-chart">${chartHtml}</div>` : ''}
+        ${isExpanded ? `<div class="parsing-review-chart">${chartHtml}</div>${formsHtml}` : ''}
       </div>`;
   }).join('');
 
@@ -338,6 +340,9 @@ function bindParsingReviewInteractivity() {
     renderParsingReviewPanel();
   };
   list.addEventListener('click', (event) => {
+    // Inner per-form rows are non-interactive so a click on one shouldn't
+    // collapse the parent paradigm row.
+    if (event.target.closest('.parsing-review-form-row')) return;
     const row = event.target.closest('[data-parsing-row]');
     if (!row || !list.contains(row)) return;
     toggle(row.dataset.parsingRow || '');
@@ -349,6 +354,67 @@ function bindParsingReviewInteractivity() {
     event.preventDefault();
     toggle(row.dataset.parsingRow || '');
   });
+}
+
+// Classifies a parsing-mode morph card by the outcome of its most recent
+// drill encounter. Uses the per-card progress streak as the signal:
+//   streak > 0                       → 'right' (last attempt fully passed)
+//   streak == 0 && seenCount > 0     → 'wrong' (last attempt failed)
+//   seenCount == 0                   → 'unseen'
+// Mirrors the analytics chapter-detail dot's red/yellow/green idiom but
+// only needs three states since "last result" isn't a confidence band.
+function classifyFormLastResult(progress) {
+  if (!progress || !progress.seenCount) return 'unseen';
+  if ((progress.streak || 0) > 0) return 'right';
+  return 'wrong';
+}
+
+// Lists every form currently in scope for `lemma` (chapter-gated, and
+// including optional-extension forms iff the user has the toggle on)
+// under the expanded paradigm row. Each form is dotted with its last-
+// attempt outcome so the panel reads as "here's what I can drill for
+// εἰμί, and here's how I did the last time I saw each one." The pool
+// matches getCardsForFocusedParadigm exactly — same dedup/supersession,
+// same chapter cap — so the user's mental model of the deck aligns with
+// what's shown.
+function buildLemmaTestableFormsHtml(lemma) {
+  const cards = host.getMorphCardsForLemma(lemma) || [];
+  if (!cards.length) {
+    return `<div class="parsing-review-forms parsing-review-forms-empty">No forms in scope for this paradigm at your current chapter selection.</div>`;
+  }
+  const sorted = cards.slice().sort((a, b) => {
+    const af = String(a.form || '');
+    const bf = String(b.form || '');
+    return compareGreekAlphabetical(af, bf);
+  });
+  const counts = { right: 0, wrong: 0, unseen: 0 };
+  const rows = sorted.map((card) => {
+    const progress = host.getWordProgress(card.id) || {};
+    const status = classifyFormLastResult(progress);
+    counts[status] += 1;
+    const dotClass = status === 'right' ? 'parsing-review-form-dot-right'
+      : status === 'wrong' ? 'parsing-review-form-dot-wrong'
+      : 'parsing-review-form-dot-unseen';
+    const statusLabel = status === 'right' ? 'last attempt correct'
+      : status === 'wrong' ? 'last attempt incorrect'
+      : 'not yet attempted';
+    const parse = card.parsedAnswer || card.answer || '';
+    return `
+      <li class="parsing-review-form-row">
+        <span class="parsing-review-form-dot ${dotClass}" title="${escapeHtmlSmall(statusLabel)}" aria-label="${escapeHtmlSmall(statusLabel)}"></span>
+        <span class="parsing-review-form-greek">${escapeHtmlSmall(card.form || '')}</span>
+        <span class="parsing-review-form-parse">${escapeHtmlSmall(parse)}</span>
+      </li>`;
+  }).join('');
+  const summary = `${counts.right} correct · ${counts.wrong} missed · ${counts.unseen} unseen`;
+  return `
+    <div class="parsing-review-forms">
+      <div class="parsing-review-forms-header">
+        <span class="parsing-review-forms-title">Testable forms (${sorted.length})</span>
+        <span class="parsing-review-forms-summary">${escapeHtmlSmall(summary)}</span>
+      </div>
+      <ul class="parsing-review-forms-list">${rows}</ul>
+    </div>`;
 }
 
 // Sort-mode toggle for the per-deck progress list. Lives in runtime only —

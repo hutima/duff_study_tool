@@ -362,7 +362,17 @@ configureProgress({
   moveCardToBackOfActivePile: (card) => moveCardToBackOfActivePile(card),
   buildStudyDeck: (cards, opts) => buildStudyDeck(cards, opts),
   renderCard: () => renderCard(),
-  saveState: () => saveState()
+  saveState: () => saveState(),
+  // Same pool the parsing drill uses for `lemma`: chapter-gated against
+  // the user's aggregate selection, and including optional paradigm
+  // extensions iff the user has toggled them on. Used by the parsing-
+  // review row expansion to list "testable forms" with last-attempt
+  // outcomes.
+  getMorphCardsForLemma: (lemma) => getCardsForFocusedParadigm(
+    getAggregateSelectionKeys(),
+    lemma,
+    { includeOptional: !!runtime.includeOptionalForms }
+  )
 });
 configureRender({
   saveState: () => saveState(),
