@@ -158,6 +158,7 @@ export function buildPersistedStatePayload(options = {}) {
     morphStepByStep: runtime.morphStepByStep,
     morphFocusedParadigm: runtime.morphFocusedParadigm,
     paradigmStepStats: runtime.paradigmStepStats,
+    aspectStep: runtime.aspectStep,
     analyticsVocabDirection: runtime.analyticsVocabDirection,
     analyticsVocabScope: runtime.analyticsVocabScope,
     analyticsCollapsed: runtime.analyticsCollapsed,
@@ -222,6 +223,8 @@ function sanitizeImportedState(candidate) {
     ? candidate.morphFocusedParadigm
     : null;
   state.paradigmStepStats = sanitizeParadigmStepStats(candidate.paradigmStepStats);
+  // aspectStep defaults to true; only an explicit `false` flips it off.
+  state.aspectStep = candidate.aspectStep !== false;
 
   // Older exports made while the user was in reader (or parsing) mode persist
   // that as the top-level studyMode, with selectedKeys/currentSessionId left
@@ -878,6 +881,7 @@ export function restoreState() {
       ? saved.morphFocusedParadigm
       : null;
     runtime.paradigmStepStats = sanitizeParadigmStepStats(saved.paradigmStepStats);
+    runtime.aspectStep = saved.aspectStep !== false;
     runtime.analyticsVocabDirection = saved.analyticsVocabDirection === 'e2g' ? 'e2g' : 'g2e';
     runtime.analyticsVocabScope = saved.analyticsVocabScope === 'all' ? 'all' : 'required';
     if (saved.analyticsCollapsed && typeof saved.analyticsCollapsed === 'object') {

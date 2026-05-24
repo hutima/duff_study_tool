@@ -518,6 +518,7 @@
             { form: "κύριε",
               prompt: "What is the form κύριε?",
               answer: "vocative singular ('Lord!') — from κύριος",
+              parsed: "vocative singular masculine",
               choices: [
                 "vocative singular ('Lord!') — from κύριος",
                 "nominative singular ('the Lord')",
@@ -538,6 +539,7 @@
             { form: "ἀδελφοί",
               prompt: "Translate this vocative form.",
               answer: "'Brothers!' — direct address (form identical to the nominative plural)",
+              parsed: "vocative plural masculine",
               choices: [
                 "'Brothers!' — direct address (form identical to the nominative plural)",
                 "'of the brothers' — possession",
@@ -573,6 +575,7 @@
             { form: "Ἰησοῦν",
               prompt: "Parse this form of Ἰησοῦς.",
               answer: "accusative singular — direct object 'Jesus'",
+              parsed: "accusative singular masculine",
               choices: [
                 "accusative singular — direct object 'Jesus'",
                 "genitive singular — 'of Jesus'",
@@ -582,6 +585,7 @@
             { form: "Ἰησοῦ",
               prompt: "Which case(s) does the form Ἰησοῦ cover?",
               answer: "genitive, dative, and vocative",
+              parsed: "genitive/dative/vocative singular masculine",
               choices: [
                 "genitive, dative, and vocative",
                 "only the genitive",
@@ -1018,10 +1022,13 @@
           gloss: "I am",
           questions: [
             { form: "εἰμί", prompt: "Identify this form.", answer: "1st singular ('I am')",
+              parsed: "present active indicative first person singular",
               choices: ["1st singular ('I am')", "3rd singular ('he/she/it is')", "1st plural ('we are')", "2nd singular ('you are')"] },
             { form: "ἐστίν", prompt: "Identify this form.", answer: "3rd singular ('he/she/it is')",
+              parsed: "present active indicative third person singular",
               choices: ["3rd singular ('he/she/it is')", "2nd singular ('you are')", "3rd plural ('they are')", "1st singular ('I am')"] },
             { form: "εἰσίν", prompt: "Identify this form.", answer: "3rd plural ('they are')",
+              parsed: "present active indicative third person plural",
               choices: ["3rd plural ('they are')", "3rd singular ('he/she/it is')", "2nd plural ('you all are')", "1st plural ('we are')"] },
             { form: "εἰμί",
               prompt: "What kind of verb is εἰμί syntactically?",
@@ -1552,6 +1559,7 @@
             { form: "ἔλυσα",
               prompt: "Break down ἔλυσα into its morphological layers.",
               answer: "ε- (augment) + λυ- (stem) + σ (1st-aorist marker) + -α (1sg secondary ending)",
+              parsed: "first aorist active indicative first person singular",
               choices: [
                 "ε- (augment) + λυ- (stem) + σ (1st-aorist marker) + -α (1sg secondary ending)",
                 "ε- (augment) + λυσ- (stem) + -α (ending) — without splitting the σ off",
@@ -1685,6 +1693,7 @@
             { form: "λῦε",
               prompt: "What mood is this (2nd sg., addressed to one person)?",
               answer: "imperative",
+              parsed: "present active imperative second person singular",
               choices: ["imperative", "indicative", "subjunctive", "infinitive"] },
             { form: "λύετε (imperative)",
               prompt: "What does the imperative λύετε mean?",
@@ -1869,6 +1878,7 @@
             { form: "ἔρχομαι",
               prompt: "Identify this form.",
               answer: "1st singular ('I come / go') — a deponent verb",
+              parsed: "present middle/passive indicative first person singular",
               choices: [
                 "1st singular ('I come / go') — a deponent verb",
                 "1st singular ('I come') with a reflexive sense ('to myself')",
@@ -1879,6 +1889,7 @@
             { form: "ἔρχεται",
               prompt: "Parse this form.",
               answer: "present indicative, 3rd singular ('he/she/it comes')",
+              parsed: "present middle/passive indicative third person singular",
               choices: [
                 "present indicative, 3rd singular ('he/she/it comes')",
                 "present indicative, 2nd singular ('you come')",
@@ -1911,6 +1922,7 @@
             { form: "ἤμην",
               prompt: "Identify this form of εἰμί.",
               answer: "imperfect, 1st singular ('I was')",
+              parsed: "imperfect active indicative first person singular",
               choices: [
                 "imperfect, 1st singular ('I was')",
                 "present, 1st singular ('I am')",
@@ -1920,6 +1932,7 @@
             { form: "ἦν",
               prompt: "Identify this form of εἰμί.",
               answer: "imperfect, 3rd singular ('he/she/it was')",
+              parsed: "imperfect active indicative third person singular",
               choices: [
                 "imperfect, 3rd singular ('he/she/it was')",
                 "imperfect, 1st singular ('I was')",
@@ -1930,6 +1943,7 @@
             { form: "ἦσαν",
               prompt: "Identify this form of εἰμί.",
               answer: "imperfect, 3rd plural ('they were')",
+              parsed: "imperfect active indicative third person plural",
               choices: [
                 "imperfect, 3rd plural ('they were')",
                 "imperfect, 3rd singular ('he was')",
@@ -1939,6 +1953,7 @@
             { form: "ἔσομαι",
               prompt: "Identify this form of εἰμί.",
               answer: "future 1st sg. ('I will be') — εἰμί's future is deponent",
+              parsed: "future middle indicative first person singular",
               choices: [
                 "future 1st sg. ('I will be') — εἰμί's future is deponent",
                 "future active indicative, 3rd singular ('he will be')",
@@ -3326,6 +3341,7 @@
             { form: "τίς",
               prompt: "What does τίς (accent on the ι) mean?",
               answer: "'who? / what?' — interrogative (accent fixed on the first syllable)",
+              parsed: "nominative singular masculine/feminine",
               choices: [
                 "'who? / what?' — interrogative (accent fixed on the first syllable)",
                 "'someone / something' — enclitic indefinite",
@@ -3965,6 +3981,7 @@
             { form: "λυθήσομαι",
               prompt: "Parse the tense and voice.",
               answer: "future passive (1st sg. middle/passive ending)",
+              parsed: "future passive indicative first person singular",
               choices: [
                 "future passive (1st sg. middle/passive ending)",
                 "aorist passive (1st sg.)",
@@ -4146,6 +4163,7 @@
             { form: "γέγραπται",
               prompt: "What does γε- at the start signal?",
               answer: "reduplication — this is a perfect form",
+              parsed: "perfect middle/passive indicative third person singular",
               choices: ["reduplication — this is a perfect form", "augment — this is an aorist or imperfect", "particle — 'indeed'", "an unrelated prefix"],
               note: "γέγραπται = perfect middle/passive 3rd sg. of γράφω, 'it has been written / it stands written'." },
             { form: "verbs starting with vowels",
@@ -4235,6 +4253,7 @@
             { form: "γέγραπται",
               prompt: "Best translation of γέγραπται in 'γέγραπται γάρ'?",
               answer: "'it stands written' / 'it is written'",
+              parsed: "perfect middle/passive indicative third person singular",
               choices: [
                 "'it stands written' / 'it is written'",
                 "'someone wrote' (aorist, simple past — no abiding state)",
@@ -4446,6 +4465,7 @@
             { form: "λύσωμεν",
               prompt: "1st-person plural subjunctive in a main clause is the…",
               answer: "hortatory subjunctive ('let us untie!')",
+              parsed: "aorist active subjunctive first person plural",
               choices: [
                 "hortatory subjunctive ('let us untie!')",
                 "deliberative subjunctive ('shall we untie?')",
@@ -4545,6 +4565,7 @@
             { form: "δύναμαι",
               prompt: "What does δύναμαι mean, and what is unusual about its form?",
               answer: "'I am able' — middle-form deponent",
+              parsed: "present middle/passive indicative first person singular",
               choices: [
                 "'I am able' — middle-form deponent",
                 "'I give' — active",
@@ -4555,6 +4576,7 @@
             { form: "οἶδα",
               prompt: "What is unusual about οἶδα ('I know')?",
               answer: "perfect in form, present in meaning ('I have come to know' = 'I know')",
+              parsed: "perfect active indicative first person singular",
               choices: [
                 "perfect in form, present in meaning ('I have come to know' = 'I know')",
                 "it is an irregular aorist that translates as a present in English idiom",
@@ -4564,6 +4586,7 @@
             { form: "ᾔδειν",
               prompt: "Parse this form of οἶδα.",
               answer: "pluperfect with imperfect force — 'I knew'",
+              parsed: "pluperfect active indicative first person singular",
               choices: [
                 "pluperfect with imperfect force — 'I knew'",
                 "future active indicative, 1st sg. — 'I will know'",
@@ -4938,6 +4961,7 @@
             { form: "ἔδωκα",
               prompt: "Parse this form (and note the unusual feature).",
               answer: "aorist active 1st sg. of δίδωμι — uses a κ-aorist",
+              parsed: "aorist active indicative first person singular",
               choices: [
                 "aorist active 1st sg. of δίδωμι — uses a κ-aorist",
                 "perfect active indicative, 1st sg.",
@@ -5025,6 +5049,7 @@
             { form: "διδόασι(ν)",
               prompt: "Which rules explain why the 3rd-pl present-active form is διδόασι(ν) rather than *διδονσι?",
               answer: "Rule 3 (special endings: -ασι in 3 pl) + Rule 4 (short vowel ο in the plural — ablaut)",
+              parsed: "present active indicative third person plural",
               choices: [
                 "Rule 3 (special endings: -ασι in 3 pl) + Rule 4 (short vowel ο in the plural — ablaut)",
                 "Rule 1 (present reduplication only — the iota reduplication explains the ending)",
@@ -5612,6 +5637,7 @@
             { form: "ἔσομαι",
               prompt: "Parse this form of εἰμί.",
               answer: "future indicative, 1st sg. ('I will be')",
+              parsed: "future middle indicative first person singular",
               choices: [
                 "future indicative, 1st sg. ('I will be')",
                 "present indicative, 1st sg.",
@@ -5622,6 +5648,7 @@
             { form: "ἔσται",
               prompt: "Parse this form of εἰμί.",
               answer: "future indicative, 3rd sg. ('he/she/it will be')",
+              parsed: "future middle indicative third person singular",
               choices: [
                 "future indicative, 3rd sg. ('he/she/it will be')",
                 "present indicative, 3rd sg.",
@@ -5631,6 +5658,7 @@
             { form: "ἤμεθα",
               prompt: "Parse this form of εἰμί.",
               answer: "imperfect indicative, 1st pl. ('we were')",
+              parsed: "imperfect active indicative first person plural",
               choices: [
                 "imperfect indicative, 1st pl. ('we were')",
                 "present indicative, 1st pl.",
@@ -5648,10 +5676,12 @@
             { form: "εἶναι",
               prompt: "Parse this form of εἰμί.",
               answer: "present infinitive ('to be')",
+              parsed: "present active infinitive",
               choices: ["present infinitive ('to be')", "1st sg. present indicative", "present participle (nom. masc. sg.)", "imperative, 2nd sg."] },
             { form: "ὤν",
               prompt: "Parse this form of εἰμί.",
               answer: "nominative singular masculine, present participle ('being')",
+              parsed: "present active participle nominative singular masculine",
               choices: [
                 "nominative singular masculine, present participle ('being')",
                 "nominative singular feminine, present participle",
@@ -5661,6 +5691,7 @@
             { form: "οὖσα",
               prompt: "Parse this form of εἰμί.",
               answer: "nominative singular feminine, present participle ('being')",
+              parsed: "present active participle nominative singular feminine",
               choices: [
                 "nominative singular feminine, present participle ('being')",
                 "nominative singular masculine, present participle",
@@ -5671,6 +5702,7 @@
             { form: "ὄντος",
               prompt: "Parse this form of εἰμί.",
               answer: "genitive singular masculine/neuter, present participle",
+              parsed: "present active participle genitive singular masculine/neuter",
               choices: [
                 "genitive singular masculine/neuter, present participle",
                 "nominative singular masculine, present participle",
@@ -5767,6 +5799,7 @@
             { form: "ἐμοῦ",
               prompt: "Parse this form.",
               answer: "genitive singular ('of me') — emphatic 1st sg.",
+              parsed: "genitive singular",
               choices: [
                 "genitive singular ('of me') — emphatic 1st sg.",
                 "dative singular — emphatic 1st sg.",
@@ -5777,6 +5810,7 @@
             { form: "ἡμῶν",
               prompt: "Parse this form.",
               answer: "genitive plural ('of us')",
+              parsed: "genitive plural",
               choices: [
                 "genitive plural ('of us')",
                 "genitive plural ('of you all')",
@@ -5787,6 +5821,7 @@
             { form: "ὑμῖν",
               prompt: "Parse this form.",
               answer: "dative plural ('to you all')",
+              parsed: "dative plural",
               choices: [
                 "dative plural ('to you all')",
                 "dative plural ('to us')",
@@ -5796,6 +5831,7 @@
             { form: "σέ",
               prompt: "Parse this form.",
               answer: "accusative singular ('you') — emphatic 2nd sg.",
+              parsed: "accusative singular",
               choices: [
                 "accusative singular ('you') — emphatic 2nd sg.",
                 "accusative singular — enclitic 2nd sg.",
@@ -5993,6 +6029,7 @@
             { form: "λύων",
               prompt: "Active or middle/passive participle?",
               answer: "active (3rd-decl. masc/neut + 1st-decl. fem.)",
+              parsed: "present active participle nominative singular masculine",
               choices: [
                 "active (3rd-decl. masc/neut + 1st-decl. fem.)",
                 "middle/passive (2-1-2 adjective endings)",
@@ -6002,6 +6039,7 @@
             { form: "λυόμενος",
               prompt: "Active or middle/passive participle?",
               answer: "middle/passive (2-1-2 adjective endings)",
+              parsed: "present middle/passive participle nominative singular masculine",
               choices: [
                 "middle/passive (2-1-2 adjective endings)",
                 "active (3rd-decl. masc/neut + 1st-decl. fem.)",
