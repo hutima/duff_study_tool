@@ -12,6 +12,12 @@
   // Lowercases and reorders parsing components so every answer follows the
   // same shape: [qualifier|tense] [voice] [mood] [person] [case] [number] [gender]
   // matching the canonical format used by the chapter morphology sets.
+  //
+  // No mood/voice defaults here — they're applied at runtime in
+  // buildMorphSteps based on the student's chapter scope. Defaulting at
+  // canonicalization time would force the Mood step to appear even in
+  // early chapters where the student hasn't been introduced to other
+  // moods, making "pick indicative" a no-info step.
   function canonicalizePart(text) {
     if (!text) return '';
     let t = String(text).toLowerCase();
