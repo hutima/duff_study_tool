@@ -54,6 +54,15 @@
     'ἐσόμενα':   'future middle participle nominative/accusative plural neuter'
   };
 
+  // εἰμί's future middle infinitive. Duff drills only the present
+  // infinitive (εἶναι), but ἔσεσθαι is real Koine, so a student picking
+  // "future infinitive" on εἰμί should see it instead of falling through
+  // to "—". Voice is middle for the same reason as the future participle:
+  // εἰμί's future is deponent.
+  const EIMI_FUTURE_MIDDLE_INFINITIVE = {
+    'ἔσεσθαι': 'future middle infinitive'
+  };
+
   const LEMMA_INVENTORY = {
     'εἰμί': {
       // εἰμί is suppletive: it has no aorist or perfect family — Greek
@@ -61,15 +70,15 @@
       // εἰμί does have: present, future, imperfect (and a rarely-
       // attested perfect that classical/Koine pedagogy treats as
       // absent). Voice: εἰμί is active in the present/imperfect but
-      // deponent middle in the future (ἔσομαι, ἐσόμενος) — so we can't
-      // blanket-block middle/passive at the lemma level; it'd wrongly
-      // tag every future-middle pick as impossible. Until the inventory
-      // shape supports tense-conditional voice gating, leave voice
-      // open. Moods exist for some tenses (subjunctive ὦ, imperative
-      // ἴσθι, infinitive εἶναι, participle ὤν) so don't blanket-mark
-      // moods here either.
+      // deponent middle in the future (ἔσομαι, ἐσόμενος, ἔσεσθαι) — so
+      // we can't blanket-block middle/passive at the lemma level; it'd
+      // wrongly tag every future-middle pick as impossible. Until the
+      // inventory shape supports tense-conditional voice gating, leave
+      // voice open. Moods exist for some tenses (subjunctive ὦ,
+      // imperative ἴσθι, infinitive εἶναι/ἔσεσθαι, participle ὤν/
+      // ἐσόμενος) so don't blanket-mark moods here either.
       impossibleTenses: ['aorist', 'first aorist', 'second aorist', 'perfect', 'pluperfect'],
-      extraForms: EIMI_FUTURE_MIDDLE_PARTICIPLE
+      extraForms: { ...EIMI_FUTURE_MIDDLE_PARTICIPLE, ...EIMI_FUTURE_MIDDLE_INFINITIVE }
     }
     // Add more defective lemmas here (e.g. οἶδα — no present form, the
     // perfect serves as present; χρή — only third singular, etc.)
