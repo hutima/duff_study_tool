@@ -678,6 +678,27 @@ function rebuildMorphDeckForStepMode() {
 // Handler for the parsing-mode chapter dropdown. Updates runtime.parsingChapter,
 // resyncs the deck's gating, and lets the focused-paradigm dropdown pick a
 // new default if the previous lemma falls out of scope at the new chapter.
+// Handler for the parsing-mode redirect card. Stem-recall drills (e.g.
+// W4_SECOND_AORIST_STEMS_DRILL) live in Grammar mode — parsing can't walk
+// them dimensionally — so the card is a one-tap shortcut: switch to morph
+// mode, replace the current grammar selection with just the drill set,
+// and rebuild the deck.
+function goToStemDrillFromParsing(drillKey) {
+  if (typeof drillKey !== 'string' || !drillKey) return;
+  // Drill set must actually be registered as a morphology set — otherwise
+  // we'd switch the user into grammar mode with an empty deck for no
+  // visible reason.
+  const sets = (typeof window !== 'undefined' && window.MORPHOLOGY_SETS) || {};
+  if (!sets[drillKey]) return;
+  // setStudyMode handles the parsing→morph save/restore of modeSelections
+  // (parsing's chapter key gets stashed under modeSelections.parsing so it
+  // survives the round trip). After the mode flip, loadDeckFromKeys
+  // overwrites whatever morph selection was restored with just the drill
+  // set the user tapped on.
+  setStudyMode('morph');
+  loadDeckFromKeys([drillKey], null, { clearUnspacedMarks: true });
+}
+
 function setParsingChapter(value) {
   if (!isParsingMode()) return;
   const n = Number(value);
@@ -2418,7 +2439,7 @@ const GLOBAL_CLICK_HANDLERS = {
   fastForwardOneDay, fastForwardOneWeek,
   restoreSpacedUndo, setAppProfile, setStudyMode, setThemeMode, setFontFamily, setTextSize,
   showDisclaimerModal, startStudying, toggleDirection, toggleMorphSelfCheck,
-  toggleMorphStepByStep, setMorphFocusedParadigm, setParsingChapter,
+  toggleMorphStepByStep, setMorphFocusedParadigm, setParsingChapter, goToStemDrillFromParsing,
   toggleRequiredOnly, toggleHardVocabReview, toggleShuffle, toggleSpacedRepetition, toggleSplitSelection, toggleAspectStep, toggleDimStep, toggleOptionalForms, toggleOptionalFormFilter, toggleDimValueFilter, toggleUnspacedDailyReset, triggerImportProgress,
   openReaderTab, selectReaderDrillChoice, advanceReaderDrill,
   closeWhatsNewV1_4Modal
