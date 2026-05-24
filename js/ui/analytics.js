@@ -47,6 +47,7 @@ import {
   buildCumulativeConfirmationSeries,
   buildConfirmationHistogram,
   buildHistogramSvg,
+  buildConfidenceSummaryBox,
   buildLineChartSvg,
   buildHeatmapSvg,
   buildCircularProgressSvg,
@@ -1622,10 +1623,12 @@ export function renderAnalyticsOverlay() {
   const totalVocabBarEl = document.getElementById('analyticsTotalVocabBar');
   if (totalVocabBarEl) {
     const buckets = buildConfirmationHistogram(totalVocabCards, vocabProgressStore);
+    const totalVocabSeries = buildCumulativeConfirmationSeries(totalVocabCards, vocabMarks, vocabProgressStore);
     totalVocabBarEl.innerHTML = `
       <div class="analytics-chart-card">
         <div class="analytics-chart-title">${totalVocabConfirmed} / ${totalVocabCards.length} confirmed · ${escapeHtml(scopeLabel)} · ${escapeHtml(dirLabel)}</div>
         ${buildHistogramSvg(buckets, { title: 'Course vocabulary confirmation' })}
+        ${buildConfidenceSummaryBox({ currentConfirmed: totalVocabConfirmed, total: totalVocabCards.length, weeklyPct: totalVocabSeries.weeklyPct })}
       </div>
     `;
   }
@@ -1679,6 +1682,7 @@ export function renderAnalyticsOverlay() {
         <div class="analytics-chart-card">
           <div class="analytics-chart-title">Selected sets — ${vocabProgress.currentConfirmed} / ${vocabProgress.total || 0} confirmed (${escapeHtml(dirLabel)})</div>
           ${buildHistogramSvg(buckets, { title: 'Selected vocabulary confirmation' })}
+          ${buildConfidenceSummaryBox({ currentConfirmed: vocabProgress.currentConfirmed, total: vocabProgress.total, weeklyPct: vocabProgress.weeklyPct })}
         </div>
       `;
     }
@@ -1714,10 +1718,12 @@ export function renderAnalyticsOverlay() {
       totalGrammarBarEl.innerHTML = '';
     } else {
       const buckets = buildConfirmationHistogram(totalGrammarCards, morphProgressStore);
+      const totalGrammarSeries = buildCumulativeConfirmationSeries(totalGrammarCards, grammarMarks, morphProgressStore);
       totalGrammarBarEl.innerHTML = `
         <div class="analytics-chart-card">
           <div class="analytics-chart-title">${courseData.allGrammarConfirmed} / ${courseData.allGrammarTotal} confirmed</div>
           ${buildHistogramSvg(buckets, { title: 'Course grammar confirmation' })}
+          ${buildConfidenceSummaryBox({ currentConfirmed: courseData.allGrammarConfirmed, total: courseData.allGrammarTotal, weeklyPct: totalGrammarSeries.weeklyPct })}
         </div>
       `;
     }
@@ -1762,6 +1768,7 @@ export function renderAnalyticsOverlay() {
         <div class="analytics-chart-card">
           <div class="analytics-chart-title">Selected sets — ${grammarProgress.currentConfirmed} / ${grammarProgress.total || 0} confirmed</div>
           ${buildHistogramSvg(buckets, { title: 'Selected grammar confirmation' })}
+          ${buildConfidenceSummaryBox({ currentConfirmed: grammarProgress.currentConfirmed, total: grammarProgress.total, weeklyPct: grammarProgress.weeklyPct })}
         </div>
       `;
     }

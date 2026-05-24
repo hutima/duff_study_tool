@@ -160,6 +160,30 @@ export function buildHistogramSvg(counts, options = {}) {
   `;
 }
 
+// Centered summary box meant to sit beneath a stacked confirmation bar.
+// Matches the percent shown in the bar's "X / Y confirmed" header so the
+// reader sees the same number called out at a glance. `weeklyPct` is the
+// percentage points added to the confirmed share in the last 7 days
+// (already computed by `buildCumulativeConfirmationSeries`).
+export function buildConfidenceSummaryBox({ currentConfirmed, total, weeklyPct } = {}) {
+  const totalNum = Number(total) || 0;
+  const confirmedNum = Math.max(0, Number(currentConfirmed) || 0);
+  if (!totalNum) return '';
+  const pct = Math.round((confirmedNum / totalNum) * 100);
+  const delta = Number(weeklyPct) || 0;
+  const deltaRounded = delta >= 10 ? Math.round(delta) : Math.round(delta * 10) / 10;
+  const trendHtml = delta > 0
+    ? `<div class="analytics-confidence-summary-trend analytics-confidence-summary-trend-up" title="Percentage points added to confirmed share in the last 7 days">▲ +${deltaRounded}% this week</div>`
+    : `<div class="analytics-confidence-summary-trend analytics-confidence-summary-trend-flat" title="No newly confirmed cards in the last 7 days">No change this week</div>`;
+  return `
+    <div class="analytics-confidence-summary" role="status" aria-label="Confirmed: ${pct}% (${confirmedNum} of ${totalNum})">
+      <div class="analytics-confidence-summary-pct">${pct}%</div>
+      <div class="analytics-confidence-summary-meta">${confirmedNum.toLocaleString()} / ${totalNum.toLocaleString()} confirmed</div>
+      ${trendHtml}
+    </div>
+  `;
+}
+
 export function buildLineChartSvg(series, options = {}) {
   const width = options.width || 860;
   const height = options.height || 220;
