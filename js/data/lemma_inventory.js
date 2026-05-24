@@ -1242,6 +1242,197 @@
       forms: LUO_PERFECT_MP_PARTICIPLE }
   ];
 
+  // ─── μι-verb participle full declensions ──────────────────────────
+  //
+  // Duff drills only the bare stem form (masc nom sg + the -οῦσα/-όν
+  // gender alternates) for each μι-verb participle. Full case/number
+  // declensions exist and are common in the NT. All follow the same
+  // ντ-stem pattern as λύων but with stem-specific vowel: ο/ου for
+  // δίδωμι, ε/ει for τίθημι, α for ἵστημι.
+
+  // δίδωμι present active participle διδούς (giving).
+  const DIDOMI_PRESENT_ACTIVE_PARTICIPLE = {
+    'διδούς':     'present active participle nominative singular masculine',
+    'διδόντος':   'present active participle genitive singular masculine/neuter',
+    'διδόντι':    'present active participle dative singular masculine/neuter',
+    'διδόντα':    'present active participle accusative singular masculine',
+    'διδόντες':   'present active participle nominative plural masculine',
+    'διδόντων':   'present active participle genitive plural masculine/feminine/neuter',
+    'διδοῦσι':    'present active participle dative plural masculine/neuter',
+    'διδοῦσιν':   'present active participle dative plural masculine/neuter',
+    'διδόντας':   'present active participle accusative plural masculine',
+    'διδοῦσα':    'present active participle nominative singular feminine',
+    'διδούσης':   'present active participle genitive singular feminine',
+    'διδούσῃ':    'present active participle dative singular feminine',
+    'διδοῦσαν':   'present active participle accusative singular feminine',
+    'διδοῦσαι':   'present active participle nominative plural feminine',
+    'διδουσῶν':   'present active participle genitive plural feminine',
+    'διδούσαις':  'present active participle dative plural feminine',
+    'διδούσας':   'present active participle accusative plural feminine',
+    'διδόν':      'present active participle nominative/accusative singular neuter'
+  };
+
+  // δίδωμι aorist active participle δούς (having given).
+  const DIDOMI_AORIST_ACTIVE_PARTICIPLE = {
+    'δούς':     'aorist active participle nominative singular masculine',
+    'δόντος':   'aorist active participle genitive singular masculine/neuter',
+    'δόντι':    'aorist active participle dative singular masculine/neuter',
+    'δόντα':    'aorist active participle accusative singular masculine',
+    'δόντες':   'aorist active participle nominative plural masculine',
+    'δόντων':   'aorist active participle genitive plural masculine/feminine/neuter',
+    'δοῦσι':    'aorist active participle dative plural masculine/neuter',
+    'δοῦσιν':   'aorist active participle dative plural masculine/neuter',
+    'δόντας':   'aorist active participle accusative plural masculine',
+    'δοῦσα':    'aorist active participle nominative singular feminine',
+    'δούσης':   'aorist active participle genitive singular feminine',
+    'δούσῃ':    'aorist active participle dative singular feminine',
+    'δοῦσαν':   'aorist active participle accusative singular feminine',
+    'δοῦσαι':   'aorist active participle nominative plural feminine',
+    'δουσῶν':   'aorist active participle genitive plural feminine',
+    'δούσαις':  'aorist active participle dative plural feminine',
+    'δούσας':   'aorist active participle accusative plural feminine',
+    'δόν':      'aorist active participle nominative/accusative singular neuter'
+  };
+
+  // τίθημι present active participle τιθείς (placing).
+  const TITHEMI_PRESENT_ACTIVE_PARTICIPLE = {
+    'τιθείς':     'present active participle nominative singular masculine',
+    'τιθέντος':   'present active participle genitive singular masculine/neuter',
+    'τιθέντι':    'present active participle dative singular masculine/neuter',
+    'τιθέντα':    'present active participle accusative singular masculine',
+    'τιθέντες':   'present active participle nominative plural masculine',
+    'τιθέντων':   'present active participle genitive plural masculine/feminine/neuter',
+    'τιθεῖσι':    'present active participle dative plural masculine/neuter',
+    'τιθεῖσιν':   'present active participle dative plural masculine/neuter',
+    'τιθέντας':   'present active participle accusative plural masculine',
+    'τιθεῖσα':    'present active participle nominative singular feminine',
+    'τιθείσης':   'present active participle genitive singular feminine',
+    'τιθείσῃ':    'present active participle dative singular feminine',
+    'τιθεῖσαν':   'present active participle accusative singular feminine',
+    'τιθεῖσαι':   'present active participle nominative plural feminine',
+    'τιθεισῶν':   'present active participle genitive plural feminine',
+    'τιθείσαις':  'present active participle dative plural feminine',
+    'τιθείσας':   'present active participle accusative plural feminine',
+    'τιθέν':      'present active participle nominative/accusative singular neuter'
+  };
+
+  // τίθημι aorist active participle θείς (having placed).
+  const TITHEMI_AORIST_ACTIVE_PARTICIPLE = {
+    'θείς':     'aorist active participle nominative singular masculine',
+    'θέντος':   'aorist active participle genitive singular masculine/neuter',
+    'θέντι':    'aorist active participle dative singular masculine/neuter',
+    'θέντα':    'aorist active participle accusative singular masculine',
+    'θέντες':   'aorist active participle nominative plural masculine',
+    'θέντων':   'aorist active participle genitive plural masculine/feminine/neuter',
+    'θεῖσι':    'aorist active participle dative plural masculine/neuter',
+    'θεῖσιν':   'aorist active participle dative plural masculine/neuter',
+    'θέντας':   'aorist active participle accusative plural masculine',
+    'θεῖσα':    'aorist active participle nominative singular feminine',
+    'θείσης':   'aorist active participle genitive singular feminine',
+    'θείσῃ':    'aorist active participle dative singular feminine',
+    'θεῖσαν':   'aorist active participle accusative singular feminine',
+    'θεῖσαι':   'aorist active participle nominative plural feminine',
+    'θεισῶν':   'aorist active participle genitive plural feminine',
+    'θείσαις':  'aorist active participle dative plural feminine',
+    'θείσας':   'aorist active participle accusative plural feminine',
+    'θέν':      'aorist active participle nominative/accusative singular neuter'
+  };
+
+  // ἵστημι present active participle ἱστάς (standing — transitive
+  // "causing to stand").
+  const HISTEMI_PRESENT_ACTIVE_PARTICIPLE = {
+    'ἱστάς':     'present active participle nominative singular masculine',
+    'ἱστάντος':  'present active participle genitive singular masculine/neuter',
+    'ἱστάντι':   'present active participle dative singular masculine/neuter',
+    'ἱστάντα':   'present active participle accusative singular masculine',
+    'ἱστάντες':  'present active participle nominative plural masculine',
+    'ἱστάντων':  'present active participle genitive plural masculine/feminine/neuter',
+    'ἱστᾶσι':    'present active participle dative plural masculine/neuter',
+    'ἱστᾶσιν':   'present active participle dative plural masculine/neuter',
+    'ἱστάντας':  'present active participle accusative plural masculine',
+    'ἱστᾶσα':    'present active participle nominative singular feminine',
+    'ἱστάσης':   'present active participle genitive singular feminine',
+    'ἱστάσῃ':    'present active participle dative singular feminine',
+    'ἱστᾶσαν':   'present active participle accusative singular feminine',
+    'ἱστᾶσαι':   'present active participle nominative plural feminine',
+    'ἱστασῶν':   'present active participle genitive plural feminine',
+    'ἱστάσαις':  'present active participle dative plural feminine',
+    'ἱστάσας':   'present active participle accusative plural feminine',
+    'ἱστάν':     'present active participle nominative/accusative singular neuter'
+  };
+
+  // ἵστημι 2nd aorist active participle στάς (having stood — intransitive).
+  // Statistically more common in the NT than the 1st-aorist στήσας
+  // (transitive "having set up"). 1st-aorist στήσας skipped for now —
+  // a future addition if students hit gaps with it.
+  const HISTEMI_SECOND_AORIST_ACTIVE_PARTICIPLE = {
+    'στάς':     'aorist active participle nominative singular masculine',
+    'στάντος':  'aorist active participle genitive singular masculine/neuter',
+    'στάντι':   'aorist active participle dative singular masculine/neuter',
+    'στάντα':   'aorist active participle accusative singular masculine',
+    'στάντες':  'aorist active participle nominative plural masculine',
+    'στάντων':  'aorist active participle genitive plural masculine/feminine/neuter',
+    'στᾶσι':    'aorist active participle dative plural masculine/neuter',
+    'στᾶσιν':   'aorist active participle dative plural masculine/neuter',
+    'στάντας':  'aorist active participle accusative plural masculine',
+    'στᾶσα':    'aorist active participle nominative singular feminine',
+    'στάσης':   'aorist active participle genitive singular feminine',
+    'στάσῃ':    'aorist active participle dative singular feminine',
+    'στᾶσαν':   'aorist active participle accusative singular feminine',
+    'στᾶσαι':   'aorist active participle nominative plural feminine',
+    'στασῶν':   'aorist active participle genitive plural feminine',
+    'στάσαις':  'aorist active participle dative plural feminine',
+    'στάσας':   'aorist active participle accusative plural feminine',
+    'στάν':     'aorist active participle nominative/accusative singular neuter'
+  };
+
+  // ἵστημι perfect active participle ἑστηκώς (standing — with present
+  // meaning: "I am standing", matching the perfect indicative ἕστηκα).
+  const HISTEMI_PERFECT_ACTIVE_PARTICIPLE = {
+    'ἑστηκώς':    'perfect active participle nominative singular masculine',
+    'ἑστηκότος':  'perfect active participle genitive singular masculine/neuter',
+    'ἑστηκότι':   'perfect active participle dative singular masculine/neuter',
+    'ἑστηκότα':   'perfect active participle accusative singular masculine',
+    'ἑστηκότες':  'perfect active participle nominative plural masculine',
+    'ἑστηκότων':  'perfect active participle genitive plural masculine/feminine/neuter',
+    'ἑστηκόσι':   'perfect active participle dative plural masculine/neuter',
+    'ἑστηκόσιν':  'perfect active participle dative plural masculine/neuter',
+    'ἑστηκότας':  'perfect active participle accusative plural masculine',
+    'ἑστηκυῖα':   'perfect active participle nominative singular feminine',
+    'ἑστηκυίας':  'perfect active participle genitive singular feminine',
+    'ἑστηκυίᾳ':   'perfect active participle dative singular feminine',
+    'ἑστηκυῖαν':  'perfect active participle accusative singular feminine',
+    'ἑστηκυῖαι':  'perfect active participle nominative plural feminine',
+    'ἑστηκυιῶν':  'perfect active participle genitive plural feminine',
+    'ἑστηκυίαις': 'perfect active participle dative plural feminine',
+    'ἑστηκός':    'perfect active participle nominative/accusative singular neuter'
+  };
+
+  // Optional groups for the μι-verb participle additions. Chapter
+  // gates: present participles at ch 12 (W5 — participles introduced);
+  // aorist participles at ch 12 (same); perfect active participle at
+  // ch 15 (perfect intro at W6).
+  const DIDOMI_PARTICIPLE_OPTIONAL = [
+    { chapter: 12, family: 'δίδωμι — present active participle διδούς full declension (optional)',
+      forms: DIDOMI_PRESENT_ACTIVE_PARTICIPLE },
+    { chapter: 12, family: 'δίδωμι — aorist active participle δούς full declension (optional)',
+      forms: DIDOMI_AORIST_ACTIVE_PARTICIPLE }
+  ];
+  const TITHEMI_PARTICIPLE_OPTIONAL = [
+    { chapter: 12, family: 'τίθημι — present active participle τιθείς full declension (optional)',
+      forms: TITHEMI_PRESENT_ACTIVE_PARTICIPLE },
+    { chapter: 12, family: 'τίθημι — aorist active participle θείς full declension (optional)',
+      forms: TITHEMI_AORIST_ACTIVE_PARTICIPLE }
+  ];
+  const HISTEMI_PARTICIPLE_OPTIONAL = [
+    { chapter: 12, family: 'ἵστημι — present active participle ἱστάς full declension (optional)',
+      forms: HISTEMI_PRESENT_ACTIVE_PARTICIPLE },
+    { chapter: 12, family: 'ἵστημι — 2nd aorist active participle στάς full declension (optional)',
+      forms: HISTEMI_SECOND_AORIST_ACTIVE_PARTICIPLE },
+    { chapter: 15, family: 'ἵστημι — perfect active participle ἑστηκώς full declension (optional)',
+      forms: HISTEMI_PERFECT_ACTIVE_PARTICIPLE }
+  ];
+
   const LEMMA_INVENTORY = {
     'εἰμί': {
       // εἰμί is suppletive: it has no aorist or perfect family — Greek
@@ -1293,16 +1484,29 @@
       optionalFormGroups: PHILEO_OPTIONAL_GROUPS
     },
     'δίδωμι': {
-      extraForms: DIDOMI_EXTRA_FORMS,
-      optionalFormGroups: DIDOMI_OPTIONAL_GROUPS
+      extraForms: {
+        ...DIDOMI_EXTRA_FORMS,
+        ...DIDOMI_PRESENT_ACTIVE_PARTICIPLE,
+        ...DIDOMI_AORIST_ACTIVE_PARTICIPLE
+      },
+      optionalFormGroups: [...DIDOMI_OPTIONAL_GROUPS, ...DIDOMI_PARTICIPLE_OPTIONAL]
     },
     'τίθημι': {
-      extraForms: TITHEMI_EXTRA_FORMS,
-      optionalFormGroups: TITHEMI_OPTIONAL_GROUPS
+      extraForms: {
+        ...TITHEMI_EXTRA_FORMS,
+        ...TITHEMI_PRESENT_ACTIVE_PARTICIPLE,
+        ...TITHEMI_AORIST_ACTIVE_PARTICIPLE
+      },
+      optionalFormGroups: [...TITHEMI_OPTIONAL_GROUPS, ...TITHEMI_PARTICIPLE_OPTIONAL]
     },
     'ἵστημι': {
-      extraForms: HISTEMI_EXTRA_FORMS,
-      optionalFormGroups: HISTEMI_OPTIONAL_GROUPS
+      extraForms: {
+        ...HISTEMI_EXTRA_FORMS,
+        ...HISTEMI_PRESENT_ACTIVE_PARTICIPLE,
+        ...HISTEMI_SECOND_AORIST_ACTIVE_PARTICIPLE,
+        ...HISTEMI_PERFECT_ACTIVE_PARTICIPLE
+      },
+      optionalFormGroups: [...HISTEMI_OPTIONAL_GROUPS, ...HISTEMI_PARTICIPLE_OPTIONAL]
     },
     'δίδομαι': {
       extraForms: DIDOMAI_EXTRA_FORMS,
