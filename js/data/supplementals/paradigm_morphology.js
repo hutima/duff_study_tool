@@ -48,7 +48,16 @@
     const tense = find(/\b(present|future|imperfect|aorist|perfect|pluperfect)\b/);
     const voice = find(/\b(middle\/passive|middle or passive|active|middle|passive)\b/);
     const mood = find(/\b(indicative|subjunctive|imperative|infinitive|participle)\b/);
-    const person = find(/\b(first|second|third) person\b/);
+    // Person normalization: prefer explicit "<first|second|third> person".
+    // Fall back to the bare ordinal when followed by a number word so the
+    // canonical always reads "<N> person <singular|plural>" rather than
+    // a bare "<N> <singular|plural>" — keeps the parsed dim available to
+    // the step builder.
+    let person = find(/\b(first|second|third) person\b/);
+    if (!person) {
+      const m = t.match(/\b(first|second|third)\b(?=\s+(?:singular|plural)\b)/);
+      if (m) person = `${m[1]} person`;
+    }
     const number = find(/\b(singular|plural)\b/);
     const casePart = find(/\b(nominative|accusative|genitive|dative|vocative)(?:\/(?:nominative|accusative|genitive|dative|vocative))*\b/);
     const genderPart = find(/\b(masculine|feminine|neuter)(?:\/(?:masculine|feminine|neuter))*\b/);
@@ -135,9 +144,58 @@
     return '';
   }
 
+  // Voice/mood defaults inferred from the SET's label (and, for voice,
+  // from a deponent-shaped lemma). Without these the auto-canonicalized
+  // card answer would say "first person singular" — no tense, voice,
+  // mood — and the parsing drill couldn't ask those steps. With them,
+  // every card in W1_LUO_PRESENT_ACTIVE (label "λύω — present active
+  // indicative") canonicalizes to a full "present active indicative
+  // <person> <number>". Only single-mood, single-voice labels seed
+  // defaults — sets like "infinitive and participle" or "middle/deponent
+  // indicative" with ambiguous labels still rely on per-card text.
+  // Per-lemma voice-by-tense table for verbs where the set's label can't
+  // safely default voice (multi-tense sets like "εἰμί — present, future,
+  // imperfect", where each tense takes a different voice). Each entry
+  // maps a Greek tense word to its canonical voice for that lemma.
+  // εἰμί is intrinsically active in present/imperfect but deponent middle
+  // in the future (ἔσομαι series). Extend this map as similar special
+  // cases come up.
+  const LEMMA_VOICE_BY_TENSE = {
+    'εἰμί': { present: 'active', imperfect: 'active', future: 'middle' }
+  };
+
+  function setDefaults(set) {
+    const label = String(set && set.label || '').toLowerCase();
+    const lemma = String(extractLemma(set && set.label) || '').toLowerCase();
+    const moodMatches = label.match(/\b(indicative|subjunctive|imperative|infinitive|participle)\b/g) || [];
+    const voiceMatches = label.match(/\b(middle\/passive|middle or passive|active|middle|passive)\b/g) || [];
+    const tenseMatches = label.match(/\b(present|future|imperfect|aorist|perfect|pluperfect)\b/g) || [];
+    const mood = moodMatches.length === 1 ? moodMatches[0] : '';
+    let voice = '';
+    if (voiceMatches.length === 1) {
+      voice = voiceMatches[0].replace(/middle or passive/, 'middle/passive');
+    } else if (voiceMatches.length === 0) {
+      // Deponent inference: -ομαι / -μαι lemma endings imply middle/passive
+      // voice across the paradigm (Koine deponents are middle in form).
+      // Skipped when the label already names a voice — that takes
+      // precedence (e.g. ῥύομαι sets may explicitly mark "middle" only).
+      if (/ομαι$|μαι$/.test(lemma)) voice = 'middle/passive';
+    }
+    // Tense default: only when the label names exactly one tense AND
+    // doesn't carry a multi-tense marker like "(4 tenses)" or
+    // "(present & aorist)". Otherwise per-card "Present:" / "Aorist:"
+    // prefixes already provide tense.
+    const multiTenseHint = /\(\d+\s+tenses?\)/i.test(label)
+      || /&\s+(present|future|imperfect|aorist|perfect|pluperfect)/i.test(label)
+      || tenseMatches.length > 1;
+    const tense = (tenseMatches.length === 1 && !multiTenseHint) ? tenseMatches[0] : '';
+    return { tense, voice, mood };
+  }
+
   function buildMorphologyForSet(key, set) {
     if (!set || !Array.isArray(set.cards) || set.cards.length === 0) return null;
 
+    const defaults = setDefaults(set);
     const seenForms = new Set();
     const questions = [];
     set.cards.forEach((card) => {
@@ -146,9 +204,53 @@
       // Stem-pair entries like "βάλλω → ἔβαλον" are study notes, not parseable
       // single forms — skip them so the quiz prompts a real Greek form.
       if (/[→]/.test(form)) return;
+      // Multi-word "forms" — principal-parts cards like
+      // "τιθείς, -εῖσα, -έν" or constructions like "ὅς ἄν + subjunctive"
+      // can't be parsed as a single inflected word. Skip so they don't
+      // generate orphan morph cards (the parsing-deck filter would drop
+      // them anyway, but filtering earlier keeps the data cleaner).
+      if (/\s/.test(form) || /[+=]/.test(form)) return;
       const rawAnswer = extractParsing(card.e);
       if (!rawAnswer) return;
-      const answer = canonicalizeAnswer(rawAnswer);
+      // Inject set-level tense/voice/mood defaults when the per-card text
+      // doesn't already name them. Detection mirrors canonicalizePart's
+      // word lists so "Present participle" already-tagged answers don't
+      // get double-tagged.
+      //
+      // Skip verb defaults entirely for nominal-shaped cards (case/gender
+      // markers in the raw text, no person/tense markers). The set's
+      // label may legitimately mention a verb mood (e.g.
+      // "Indefinite constructions (ἄν + subjunctive)") while individual
+      // cards in the set are conjunctions / relative pronouns — those
+      // shouldn't inherit subjunctive as their parse.
+      let raw = rawAnswer;
+      const isNominalCard = /\b(nom\.?|acc\.?|gen\.?|dat\.?|voc\.?|nominative|accusative|genitive|dative|vocative|masc\.?|fem\.?|neut\.?|masculine|feminine|neuter)\b/i.test(raw)
+        && !/\b(1st|2nd|3rd|first|second|third)\s+(person|sg\.?|pl\.?|singular|plural)\b/i.test(raw)
+        && !/\b(present|future|imperfect|aorist|perfect|pluperfect|indicative|subjunctive|imperative|infinitive|participle|active|middle|passive)\b/i.test(raw);
+      if (!isNominalCard) {
+        if (defaults.tense && !/\b(present|future|imperfect|aorist|perfect|pluperfect)\b/i.test(raw)) {
+          raw = `${defaults.tense} ${raw}`;
+        }
+        // Per-lemma voice-by-tense fallback. Applied before the set-level
+        // voice default so multi-tense sets (e.g. εἰμί present/future/
+        // imperfect, each with its own voice) tag each card correctly.
+        // Reads tense from the raw text (which now includes any defaulted
+        // tense from above) and looks it up against LEMMA_VOICE_BY_TENSE.
+        const lemmaKey = extractLemma(set.label) || '';
+        const lemmaVoiceMap = LEMMA_VOICE_BY_TENSE[lemmaKey];
+        if (lemmaVoiceMap && !/\b(active|middle|passive|middle\/passive)\b/i.test(raw)) {
+          const tenseInText = raw.toLowerCase().match(/\b(present|future|imperfect|aorist|perfect|pluperfect)\b/);
+          const lemmaVoice = tenseInText ? lemmaVoiceMap[tenseInText[0]] : null;
+          if (lemmaVoice) raw = `${lemmaVoice} ${raw}`;
+        }
+        if (defaults.voice && !/\b(active|middle|passive|middle\/passive)\b/i.test(raw)) {
+          raw = `${defaults.voice} ${raw}`;
+        }
+        if (defaults.mood && !/\b(indicative|subjunctive|imperative|infinitive|participle)\b/i.test(raw)) {
+          raw = `${defaults.mood} ${raw}`;
+        }
+      }
+      const answer = canonicalizeAnswer(raw);
       if (!answer) return;
       const gloss = extractCardGloss(card);
       seenForms.add(form);
@@ -175,19 +277,24 @@
     };
   }
 
-  function shouldGenerate(key) {
+  function shouldGenerate(key, set) {
     const raw = String(key || '');
     // Limit to weekly paradigm sets (W1_*, W2_*, ...). W*O are general
     // supplemental vocab without paradigm parsing — skip them.
     if (!/^W\d+_/.test(raw)) return false;
     const morphSets = window.MORPHOLOGY_SETS;
     if (morphSets && morphSets[raw]) return false; // already provided
+    // Skip non-paradigm teaching sets — "constructions" / "usage" sets
+    // contain conjunctions and multi-word patterns rather than declined
+    // forms, and shouldn't show up as parsing cards.
+    const label = String(set && set.label || '').toLowerCase();
+    if (/\b(construction|constructions|usage)\b/.test(label)) return false;
     return true;
   }
 
   const vocabSets = window.SUPPLEMENTAL_VOCAB_SETS || {};
   Object.keys(vocabSets).forEach((key) => {
-    if (!shouldGenerate(key)) return;
+    if (!shouldGenerate(key, vocabSets[key])) return;
     const morphSet = buildMorphologyForSet(key, vocabSets[key]);
     if (!morphSet) return;
     window.registerSupplementalMorphologySet(key, morphSet);

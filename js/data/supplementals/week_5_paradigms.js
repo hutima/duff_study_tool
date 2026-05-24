@@ -31,14 +31,20 @@
     label: 'τίς, τί — interrogative/indefinite pronoun',
     week: 5,
     cards: [
-      { g: 'τίς', e: 'who? / someone (Nom. sg.)', required: true },
-      { g: 'τίνα', e: 'whom? / someone (Acc. sg.)', required: true },
-      { g: 'τίνος', e: 'whose? / of someone (Gen. sg.)', required: true },
-      { g: 'τίνι', e: 'to/for whom? / to/for someone (Dat. sg.)', required: true },
-      { g: 'τίνες', e: 'who? / some (Nom. pl.)', required: true },
-      { g: 'τίνας', e: 'whom? / some (Acc. pl.)', required: true },
-      { g: 'τίνων', e: 'whose? / of some (Gen. pl.)', required: true },
-      { g: 'τίσι(ν)', e: 'to/for whom? / to/for some (Dat. pl.)', required: true }
+      // τίς is 3rd-decl. with masc. and fem. sharing forms; the neuter
+      // (τί / τίνα) is distinct in nom./acc. but syncretic with masc./fem.
+      // in gen./dat. The gen./dat. plural cells are syncretic across all
+      // three genders, like every other 3rd-decl. noun.
+      { g: 'τίς', e: 'who? / someone (masc./fem. Nom. sg.)', required: true },
+      { g: 'τίνα', e: 'whom? / someone (masc./fem. Acc. sg.)', required: true },
+      { g: 'τίνος', e: 'whose? / of someone (masc./fem./neut. Gen. sg.)', required: true },
+      { g: 'τίνι', e: 'to/for whom? / to/for someone (masc./fem./neut. Dat. sg.)', required: true },
+      { g: 'τίνες', e: 'who? / some (masc./fem. Nom. pl.)', required: true },
+      { g: 'τίνας', e: 'whom? / some (masc./fem. Acc. pl.)', required: true },
+      { g: 'τίνων', e: 'whose? / of some (masc./fem./neut. Gen. pl.)', required: true },
+      { g: 'τίσι(ν)', e: 'to/for whom? / to/for some (masc./fem./neut. Dat. pl.)', required: true },
+      // Neuter — distinct from masc./fem. in nom./acc.
+      { g: 'τί', e: 'what? / something (neut. Nom./Acc. sg.)', required: true }
     ]
   });
 
