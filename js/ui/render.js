@@ -42,11 +42,12 @@ export function configureRender(deps) {
 // so we surface a redirect card that, when clicked, hops the student into
 // the matching stem-pair Vocab supplemental. Second-aorist gets the
 // stem-FLIP set (W4_SECOND_AORIST_FLIP, with diff-highlighted changing
-// letters); liquid futures route to W4_FUTURE_LIQUID_STEMS, the only
-// existing stem-pair set for that group (no diff-highlight variant yet).
+// letters). The liquid-future group does NOT redirect — parsing mode
+// substitutes the auto-generated μένω paradigm (W4_MENO_LIQUID_FUTURE),
+// which carries the distinctive liquid-future pattern in parseable form;
+// that swap happens in syncParadigmFocusUi (main.js).
 const PARSING_INCOMPATIBLE_LEMMAS = {
-  'Second-aorist stems': 'W4_SECOND_AORIST_FLIP',
-  'Liquid-stem futures': 'W4_FUTURE_LIQUID_STEMS'
+  'Second-aorist stems': 'W4_SECOND_AORIST_FLIP'
 };
 
 export function renderCard() {
