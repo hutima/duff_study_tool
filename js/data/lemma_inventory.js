@@ -1067,6 +1067,181 @@
     'βασιλεῦ':  'vocative singular masculine'
   };
 
+  // ─── Participle full declensions ──────────────────────────────────
+  //
+  // Per the audit, Duff drills full declensions for λύω's present +
+  // aorist active participles and ῥύομαι's present + aorist middle
+  // participles, plus the aorist passive participle λυθείς. Several
+  // other major participles get only their masculine nominative
+  // singular as a stem-recall form (μι-verb participles, βαλών), or
+  // aren't drilled at all (perfect active/middle-passive participles,
+  // γίνομαι's aorist middle γενόμενος). These are all real Koine
+  // forms commonly seen in the NT — γενόμενος especially is one of
+  // the most frequent participles in the corpus.
+  //
+  // Form helpers: every participle paradigm declines on one of three
+  // patterns:
+  //   - Regular -ος/-η/-ον (m/p participles, future middle): like
+  //     λυόμενος — 2nd-decl masc/neut, 1st-decl fem.
+  //   - 3rd-decl ντ-stem masc/neut + 1st-decl fem in -ουσα/-ασα/
+  //     -εῖσα/-υῖα: active participles. Masc gen sg in -οντος, dat
+  //     pl in -ουσι(ν) etc. (with stem-specific vowel).
+  //   - 3rd-decl κ-stem masc/neut + 1st-decl fem in -υῖα: perfect
+  //     active participles (λελυκώς-type).
+  //
+  // Each declension below names every unique form once; truly
+  // syncretic slots (masc acc sg = neut nom/acc sg for ντ-stems;
+  // gen sg masc = gen sg neut, etc.) get a single entry with the
+  // composite parse string ("masculine/neuter"). This mirrors how
+  // EIMI_FUTURE_MIDDLE_PARTICIPLE handles its overlaps.
+
+  // γίνομαι aorist middle participle γενόμενος — declines like
+  // λυόμενος (regular -ος/-η/-ον adjectival). Extremely common in NT.
+  const GINOMAI_AORIST_MIDDLE_PARTICIPLE = {
+    'γενόμενος':  'aorist middle participle nominative singular masculine',
+    'γενομένου':  'aorist middle participle genitive singular masculine/neuter',
+    'γενομένῳ':   'aorist middle participle dative singular masculine/neuter',
+    'γενόμενον':  'aorist middle participle accusative singular masculine/neuter',
+    'γενόμενε':   'aorist middle participle vocative singular masculine',
+    'γενόμενοι':  'aorist middle participle nominative plural masculine',
+    'γενομένους': 'aorist middle participle accusative plural masculine',
+    'γενομένων':  'aorist middle participle genitive plural masculine/feminine/neuter',
+    'γενομένοις': 'aorist middle participle dative plural masculine/neuter',
+    'γενομένη':   'aorist middle participle nominative singular feminine',
+    'γενομένης':  'aorist middle participle genitive singular feminine',
+    'γενομένῃ':   'aorist middle participle dative singular feminine',
+    'γενομένην':  'aorist middle participle accusative singular feminine',
+    'γενόμεναι':  'aorist middle participle nominative plural feminine',
+    'γενομέναις': 'aorist middle participle dative plural feminine',
+    'γενομένας':  'aorist middle participle accusative plural feminine',
+    'γενόμενα':   'aorist middle participle nominative/accusative plural neuter'
+  };
+
+  // γίνομαι perfect active participle γεγονώς — declines like
+  // λελυκώς (3rd-decl κ-stem masc/neut, 1st-decl fem in -υῖα). The
+  // perfect of γίνομαι is active in form despite the present being
+  // middle/deponent.
+  const GINOMAI_PERFECT_ACTIVE_PARTICIPLE = {
+    'γεγονώς':    'perfect active participle nominative singular masculine',
+    'γεγονότος':  'perfect active participle genitive singular masculine/neuter',
+    'γεγονότι':   'perfect active participle dative singular masculine/neuter',
+    'γεγονότα':   'perfect active participle accusative singular masculine',
+    // 'γεγονότα' also = nom/acc pl neuter; same key serves both. Take
+    // the masculine sg acc reading (more common) and let neuter pl
+    // picks fall to the data gap below.
+    'γεγονότες':  'perfect active participle nominative plural masculine',
+    'γεγονότων':  'perfect active participle genitive plural masculine/feminine/neuter',
+    'γεγονόσι':   'perfect active participle dative plural masculine/neuter',
+    'γεγονόσιν':  'perfect active participle dative plural masculine/neuter',
+    'γεγονότας':  'perfect active participle accusative plural masculine',
+    'γεγονυῖα':   'perfect active participle nominative singular feminine',
+    'γεγονυίας':  'perfect active participle genitive singular feminine',
+    'γεγονυίᾳ':   'perfect active participle dative singular feminine',
+    'γεγονυῖαν':  'perfect active participle accusative singular feminine',
+    'γεγονυῖαι':  'perfect active participle nominative plural feminine',
+    'γεγονυιῶν':  'perfect active participle genitive plural feminine',
+    'γεγονυίαις': 'perfect active participle dative plural feminine',
+    'γεγονυίας_pl': 'perfect active participle accusative plural feminine', // SENTINEL — see below
+    'γεγονός':    'perfect active participle nominative/accusative singular neuter'
+  };
+  // The synthetic 'γεγονυίας_pl' key above is a placeholder — Greek
+  // syncretizes γεγονυίας between fem gen sg and fem acc pl, so the
+  // gen-sg reading takes the real Greek key. Remove the placeholder
+  // from the data shipped to consumers; the acc-pl-fem pick can fall
+  // through to the data gap rather than be silently mislabeled.
+  delete GINOMAI_PERFECT_ACTIVE_PARTICIPLE['γεγονυίας_pl'];
+
+  // βάλλω aorist active participle βαλών — 2nd aorist active, ντ-stem
+  // masc/neut + 1st-decl -οῦσα fem. Only the nominative is drilled
+  // (W4_BALLO_SECOND_AORIST); the full declension is real and common.
+  const BALLO_AORIST_ACTIVE_PARTICIPLE = {
+    'βαλών':      'aorist active participle nominative singular masculine',
+    'βαλόντος':   'aorist active participle genitive singular masculine/neuter',
+    'βαλόντι':    'aorist active participle dative singular masculine/neuter',
+    'βαλόντα':    'aorist active participle accusative singular masculine',
+    'βαλόντες':   'aorist active participle nominative plural masculine',
+    'βαλόντων':   'aorist active participle genitive plural masculine/feminine/neuter',
+    'βαλοῦσι':    'aorist active participle dative plural masculine/neuter',
+    'βαλοῦσιν':   'aorist active participle dative plural masculine/neuter',
+    'βαλόντας':   'aorist active participle accusative plural masculine',
+    'βαλοῦσα':    'aorist active participle nominative singular feminine',
+    'βαλούσης':   'aorist active participle genitive singular feminine',
+    'βαλούσῃ':    'aorist active participle dative singular feminine',
+    'βαλοῦσαν':   'aorist active participle accusative singular feminine',
+    'βαλοῦσαι':   'aorist active participle nominative plural feminine',
+    'βαλουσῶν':   'aorist active participle genitive plural feminine',
+    'βαλούσαις':  'aorist active participle dative plural feminine',
+    'βαλούσας':   'aorist active participle accusative plural feminine',
+    'βαλόν':      'aorist active participle nominative/accusative singular neuter'
+  };
+
+  // λύω perfect active participle λελυκώς — 3rd-decl κ-stem masc/neut
+  // + 1st-decl -υῖα fem.
+  const LUO_PERFECT_ACTIVE_PARTICIPLE = {
+    'λελυκώς':    'perfect active participle nominative singular masculine',
+    'λελυκότος':  'perfect active participle genitive singular masculine/neuter',
+    'λελυκότι':   'perfect active participle dative singular masculine/neuter',
+    'λελυκότα':   'perfect active participle accusative singular masculine',
+    'λελυκότες':  'perfect active participle nominative plural masculine',
+    'λελυκότων':  'perfect active participle genitive plural masculine/feminine/neuter',
+    'λελυκόσι':   'perfect active participle dative plural masculine/neuter',
+    'λελυκόσιν':  'perfect active participle dative plural masculine/neuter',
+    'λελυκότας':  'perfect active participle accusative plural masculine',
+    'λελυκυῖα':   'perfect active participle nominative singular feminine',
+    'λελυκυίας':  'perfect active participle genitive singular feminine',
+    'λελυκυίᾳ':   'perfect active participle dative singular feminine',
+    'λελυκυῖαν':  'perfect active participle accusative singular feminine',
+    'λελυκυῖαι':  'perfect active participle nominative plural feminine',
+    'λελυκυιῶν':  'perfect active participle genitive plural feminine',
+    'λελυκυίαις': 'perfect active participle dative plural feminine',
+    'λελυκός':    'perfect active participle nominative/accusative singular neuter'
+  };
+
+  // λύω perfect middle/passive participle λελυμένος — regular -ος/-η/
+  // -ον adjectival, like λυόμενος.
+  const LUO_PERFECT_MP_PARTICIPLE = {
+    'λελυμένος':  'perfect middle/passive participle nominative singular masculine',
+    'λελυμένου':  'perfect middle/passive participle genitive singular masculine/neuter',
+    'λελυμένῳ':   'perfect middle/passive participle dative singular masculine/neuter',
+    'λελυμένον':  'perfect middle/passive participle accusative singular masculine/neuter',
+    'λελυμένε':   'perfect middle/passive participle vocative singular masculine',
+    'λελυμένοι':  'perfect middle/passive participle nominative plural masculine',
+    'λελυμένους': 'perfect middle/passive participle accusative plural masculine',
+    'λελυμένων':  'perfect middle/passive participle genitive plural masculine/feminine/neuter',
+    'λελυμένοις': 'perfect middle/passive participle dative plural masculine/neuter',
+    'λελυμένη':   'perfect middle/passive participle nominative singular feminine',
+    'λελυμένης':  'perfect middle/passive participle genitive singular feminine',
+    'λελυμένῃ':   'perfect middle/passive participle dative singular feminine',
+    'λελυμένην':  'perfect middle/passive participle accusative singular feminine',
+    'λελυμέναι':  'perfect middle/passive participle nominative plural feminine',
+    'λελυμέναις': 'perfect middle/passive participle dative plural feminine',
+    'λελυμένας':  'perfect middle/passive participle accusative plural feminine',
+    'λελυμένα':   'perfect middle/passive participle nominative/accusative plural neuter'
+  };
+
+  // Optional groups for the participle additions. Chapter gates:
+  // - Aorist participles (γενόμενος, βαλών): ch 12 (W5 — when aorist
+  //   participles are introduced via λύσας).
+  // - Perfect participles (γεγονώς, λελυκώς, λελυμένος): ch 15 (W6 —
+  //   when the perfect system is introduced + ch 12 participles
+  //   already in scope; max(12,15)=15).
+  const GINOMAI_PARTICIPLE_OPTIONAL = [
+    { chapter: 12, family: 'γίνομαι — aorist middle participle γενόμενος (optional)',
+      forms: GINOMAI_AORIST_MIDDLE_PARTICIPLE },
+    { chapter: 15, family: 'γίνομαι — perfect active participle γεγονώς (optional)',
+      forms: GINOMAI_PERFECT_ACTIVE_PARTICIPLE }
+  ];
+  const BALLO_PARTICIPLE_OPTIONAL = [
+    { chapter: 12, family: 'βάλλω — aorist active participle βαλών full declension (optional)',
+      forms: BALLO_AORIST_ACTIVE_PARTICIPLE }
+  ];
+  const LUO_PARTICIPLE_OPTIONAL = [
+    { chapter: 15, family: 'λύω — perfect active participle λελυκώς (optional)',
+      forms: LUO_PERFECT_ACTIVE_PARTICIPLE },
+    { chapter: 15, family: 'λύω — perfect middle/passive participle λελυμένος (optional)',
+      forms: LUO_PERFECT_MP_PARTICIPLE }
+  ];
+
   const LEMMA_INVENTORY = {
     'εἰμί': {
       // εἰμί is suppletive: it has no aorist or perfect family — Greek
@@ -1090,20 +1265,28 @@
       optionalFormGroups: EIMI_OPTIONAL_GROUPS
     },
     'λύω': {
-      extraForms: LUO_EXTRA_FORMS,
-      optionalFormGroups: LUO_OPTIONAL_GROUPS
+      extraForms: {
+        ...LUO_EXTRA_FORMS,
+        ...LUO_PERFECT_ACTIVE_PARTICIPLE,
+        ...LUO_PERFECT_MP_PARTICIPLE
+      },
+      optionalFormGroups: [...LUO_OPTIONAL_GROUPS, ...LUO_PARTICIPLE_OPTIONAL]
     },
     'ῥύομαι': {
       extraForms: RHUOMAI_EXTRA_FORMS,
       optionalFormGroups: RHUOMAI_OPTIONAL_GROUPS
     },
     'βάλλω': {
-      extraForms: BALLO_EXTRA_FORMS,
-      optionalFormGroups: BALLO_OPTIONAL_GROUPS
+      extraForms: { ...BALLO_EXTRA_FORMS, ...BALLO_AORIST_ACTIVE_PARTICIPLE },
+      optionalFormGroups: [...BALLO_OPTIONAL_GROUPS, ...BALLO_PARTICIPLE_OPTIONAL]
     },
     'γίνομαι': {
-      extraForms: GINOMAI_EXTRA_FORMS,
-      optionalFormGroups: GINOMAI_OPTIONAL_GROUPS
+      extraForms: {
+        ...GINOMAI_EXTRA_FORMS,
+        ...GINOMAI_AORIST_MIDDLE_PARTICIPLE,
+        ...GINOMAI_PERFECT_ACTIVE_PARTICIPLE
+      },
+      optionalFormGroups: [...GINOMAI_OPTIONAL_GROUPS, ...GINOMAI_PARTICIPLE_OPTIONAL]
     },
     'φιλέω': {
       extraForms: PHILEO_EXTRA_FORMS,
