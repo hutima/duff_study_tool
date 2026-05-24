@@ -1918,7 +1918,7 @@
   .parsing-options-subfilters[open] {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 10px;
   }
   .parsing-options-subfilters summary {
     color: var(--muted);
@@ -1932,10 +1932,16 @@
     line-height: 1.3;
   }
   /* Per-value subfilter blocks live directly underneath their parent
-     parsing-step toggle; slightly more muted so a glance reads the
-     hierarchy as "step toggle > value toggles" instead of two peers. */
+     parsing-step toggle. Use the active gold-dim instead of the muted
+     summary color so the closed collapsible reads as "on" by default —
+     all values are included unless the user opts one out — instead of
+     looking disabled like the optional-forms subfilters do (which are
+     genuinely inert unless the parent toggle is on). */
   .parsing-dim-value-subfilters > summary {
-    opacity: 0.85;
+    color: var(--gold-dim);
+  }
+  .parsing-dim-value-subfilters {
+    border-color: var(--gold-dim);
   }
 
 
