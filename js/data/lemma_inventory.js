@@ -1037,6 +1037,36 @@
     ...DIDOMAI_PERFECT_INDICATIVE
   };
 
+  // ─── Distinct vocative singulars for noun paradigm exemplars ──────
+  //
+  // Audit finding: Duff intentionally skips vocatives across the noun
+  // paradigms (only προφήτης gets its προφῆτα drilled explicitly).
+  // For most nouns the vocative singular is syncretic with the
+  // nominative singular (1st-decl fem, 2nd-decl neut, most 3rd-decl
+  // stems), so a "vocative singular" pick on the drilled paradigm
+  // resolves via the same Greek string under a different label —
+  // worth adding to extraForms only where the syncretism would
+  // confuse a student looking for explicit confirmation.
+  //
+  // The three lemmas below have DISTINCT vocative singular forms that
+  // appear in the NT as direct addresses (κύριε is similar but its
+  // lemma isn't in our paradigm list yet). Each entry is added to
+  // extraForms only — no optionalFormGroups — because synthesizing a
+  // single-form drill card for a vocative would clutter the deck.
+  // Picks of "vocative singular" hit the fallback and resolve cleanly.
+
+  const LOGOS_VOCATIVE = {
+    'λόγε': 'vocative singular masculine'
+  };
+  // πόλις & βασιλεύς share a single combined lemma string in
+  // paradigm_focus.js (the label "πόλις & βασιλεύς — 3rd-decl. ι/ευ-
+  // stems" yields the joined lemma via extractLemma), so both
+  // vocatives sit under one entry.
+  const POLIS_BASILEUS_VOCATIVES = {
+    'πόλι':     'vocative singular feminine',
+    'βασιλεῦ':  'vocative singular masculine'
+  };
+
   const LEMMA_INVENTORY = {
     'εἰμί': {
       // εἰμί is suppletive: it has no aorist or perfect family — Greek
@@ -1094,6 +1124,12 @@
     'δίδομαι': {
       extraForms: DIDOMAI_EXTRA_FORMS,
       optionalFormGroups: DIDOMAI_OPTIONAL_GROUPS
+    },
+    'λόγος': {
+      extraForms: LOGOS_VOCATIVE
+    },
+    'πόλις & βασιλεύς': {
+      extraForms: POLIS_BASILEUS_VOCATIVES
     }
     // Add more defective lemmas here (e.g. οἶδα — no present form, the
     // perfect serves as present; χρή — only third singular, etc.) when
