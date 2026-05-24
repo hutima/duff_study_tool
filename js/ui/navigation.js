@@ -155,13 +155,15 @@ export function navigate(dir, options = {}) {
 
   if (runtime.spacedRepetition && runtime.currentIdx >= runtime.activeDeckCount) {
     // Active section drained. If middle has cards (timers expired during
-    // this session), dump them into active and reshuffle — keeps the user
-    // moving without burning time. Only when middle is empty too do we fall
-    // back to the existing scheduled-advance behaviour, which nudges the
-    // next-up deferred cards forward an hour so the deck isn't dead.
-    // For parsing mode, also forward the last-shown card's id as
-    // avoidHeadId so the reshuffled deck doesn't repeat that card first.
-    const avoidHeadId = host.isParsingMode() && runtime.deck[runtime.currentIdx - 1]
+    // this session OR cards Again'd during this pass), dump them into
+    // active and reshuffle — keeps the user moving without burning time.
+    // Only when middle is empty too do we fall back to the existing
+    // scheduled-advance behaviour, which nudges the next-up deferred cards
+    // forward an hour so the deck isn't dead. The last-shown card's id is
+    // forwarded as avoidHeadId so the reshuffled deck doesn't put that
+    // same card first — especially important now that Again-marked cards
+    // land directly in middle without a timer-based cool-off.
+    const avoidHeadId = runtime.deck[runtime.currentIdx - 1]
       ? runtime.deck[runtime.currentIdx - 1].id
       : undefined;
     if (runtime.middleDeckCount > 0) {
@@ -293,9 +295,11 @@ export function markCard(outcome) {
     if (runtime.activeDeckCount <= 0) {
       // Active drained on this very mark. If middle has waiting cards, dump
       // them in so the user keeps moving rather than landing on the
-      // empty-deck state and needing another Next press to recover.
+      // empty-deck state and needing another Next press to recover. Forward
+      // the just-marked card's id as avoidHeadId so the dump doesn't put
+      // it first (an Again-marked card would otherwise be a likely head).
       if (runtime.middleDeckCount > 0) {
-        runtime.deck = host.buildStudyDeck(runtime.originalDeck, { forceShuffle: true });
+        runtime.deck = host.buildStudyDeck(runtime.originalDeck, { forceShuffle: true, avoidHeadId: currentCard && currentCard.id });
         runtime.currentIdx = 0;
       } else {
         runtime.currentIdx = runtime.activeDeckCount;
