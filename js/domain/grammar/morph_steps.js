@@ -153,13 +153,26 @@ export function parseAnswerDimensions(answer) {
   return { aspect, tense, voice, mood, person, case: grammaticalCase, number, gender };
 }
 
-function shuffle(arr) {
-  const out = [...arr];
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [out[i], out[j]] = [out[j], out[i]];
-  }
-  return out;
+// Stable canonical ordering for parsing-mode MC option lists. Items present
+// in DIM_POOLS keep that pedagogical order (present → future → imperfect →
+// aorist → …; nom → acc → gen → dat → voc; etc.); composite/syncretic
+// values not in DIM_POOLS (e.g. 'masculine/feminine/neuter') sort last,
+// alphabetically among themselves. Used instead of random shuffling so the
+// same dimension always presents its choices in the same order card-to-card
+// — random reordering forced re-reading on every step and broke the
+// muscle-memory mapping between paradigm-table position and option slot.
+function sortChoicesCanonically(dimensionKey, values) {
+  const canonical = DIM_POOLS[dimensionKey] || [];
+  const ord = (v) => {
+    const i = canonical.indexOf(v);
+    return i === -1 ? canonical.length : i;
+  };
+  return [...values].sort((a, b) => {
+    const oa = ord(a);
+    const ob = ord(b);
+    if (oa !== ob) return oa - ob;
+    return String(a).localeCompare(String(b));
+  });
 }
 
 function buildChoices(dimensionKey, correct, accessiblePool) {
@@ -176,13 +189,13 @@ function buildChoices(dimensionKey, correct, accessiblePool) {
     ? accessiblePool
     : (DIM_POOLS[dimensionKey] || []);
   const seen = new Set([correct]);
-  const distractors = [];
+  const all = [correct];
   for (const candidate of sourcePool) {
     if (seen.has(candidate)) continue;
-    distractors.push(candidate);
     seen.add(candidate);
+    all.push(candidate);
   }
-  return shuffle([correct, ...distractors]);
+  return sortChoicesCanonically(dimensionKey, all);
 }
 
 // Walks a set of morph cards (e.g. every card whose source chapter is ≤ the
@@ -367,7 +380,7 @@ export function buildInferredStep(dimKey, accessiblePools) {
     ? accessiblePools[dimKey]
     : (DIM_POOLS[dimKey] || []);
   if (!pool.length) return null;
-  const choices = shuffle([...pool]);
+  const choices = sortChoicesCanonically(dimKey, pool);
   const displayChoices = choices.map((c) => applyDisplaySuffix(dimKey, c));
   return {
     key: dimKey,
