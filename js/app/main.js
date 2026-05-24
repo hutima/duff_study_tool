@@ -2484,6 +2484,11 @@ if (cardArea) {
   cardArea.addEventListener('click', (event) => {
     const target = event.target;
     if (!target || !(target instanceof Element)) return;
+    // Parsing-mode stem-recall redirect button uses .empty-state for layout
+    // but has its own onclick that switches mode + loads the supplemental
+    // deck. Opening the study selector on top of that would be a confusing
+    // double-effect, so skip the delegate for it.
+    if (target.closest('.parsing-redirect-btn')) return;
     if (target.closest('.empty-state')) openStudySelector();
   });
 }
