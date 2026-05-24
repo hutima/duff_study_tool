@@ -36,10 +36,32 @@ export function configureRender(deps) {
   host = { ...host, ...deps };
 }
 
+// Focused-paradigm lemmas that are stem-recall prompts ("what is the aorist
+// of λαμβάνω?") rather than canonical paradigm forms. Parsing mode can't
+// dimension-walk them — they have no tense/voice/mood/case/etc. parse —
+// so we surface a redirect card instead of an empty deck.
+const PARSING_INCOMPATIBLE_LEMMAS = new Set([
+  'Second-aorist stems',
+  'Liquid-stem futures'
+]);
+
 export function renderCard() {
   const area = document.getElementById('cardArea');
   host.saveState();
   host.syncLayoutVisibility();
+
+  if (host.isParsingMode() && PARSING_INCOMPATIBLE_LEMMAS.has(runtime.morphFocusedParadigm)) {
+    area.innerHTML = `
+      <div class="empty-state">
+        <div class="big">↗</div>
+        <strong>${runtime.morphFocusedParadigm}</strong> is a stem-recall drill,
+        not a parseable paradigm — there are no tense / voice / mood / case
+        dimensions to walk. Switch to <strong>Grammar</strong> mode and pick
+        the matching supplemental set to practice these stems with the
+        highlighted-letter prompts.
+      </div>`;
+    return;
+  }
 
   if (!runtime.deck.length) {
     let emptyMessage;
