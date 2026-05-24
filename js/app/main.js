@@ -1262,14 +1262,16 @@ function syncLayoutVisibility() {
   const unspacedHasHistory = !!unspacedHistoryTop;
   if (prevBtn) {
     // Spaced/morph keep their dedicated Undo button (Prev stays hidden).
-    // In unspaced vocab Prev is always present — a constant anchor in
-    // the nav row — and walks the history stack. Label flips to
-    // "↶ Undo" when the next pop will roll back a confidence-impacting
-    // mark so the user sees the warning at exactly that step. The
-    // button is functionally disabled (CSS keeps the Reset-like swatch
-    // instead of greying out) when there's nothing to undo or step back.
+    // Parsing mode is off-the-record and only supports Skip card → Next,
+    // so Prev is hidden there too. In unspaced vocab Prev is always
+    // present — a constant anchor in the nav row — and walks the history
+    // stack. Label flips to "↶ Undo" when the next pop will roll back a
+    // confidence-impacting mark so the user sees the warning at exactly
+    // that step. The button is functionally disabled (CSS keeps the
+    // Reset-like swatch instead of greying out) when there's nothing to
+    // undo or step back.
     const atStart = !runtime.deck.length || runtime.currentIdx <= 0;
-    const hidePrev = isMorphologyMode() || (runtime.spacedRepetition && !isMorphologyMode());
+    const hidePrev = isMorphologyMode() || isParsingMode() || (runtime.spacedRepetition && !isMorphologyMode());
     prevBtn.style.display = hidePrev ? 'none' : '';
     const prevDisabled = unspacedVocab ? (!unspacedHasHistory && atStart) : atStart;
     prevBtn.disabled = prevDisabled;
@@ -1290,8 +1292,10 @@ function syncLayoutVisibility() {
   if (navResetBtn) {
     // Unspaced vocab keeps the inline Reset visible at all times so the
     // user has a one-tap escape from the all-archived "Session Confirmed"
-    // state without Next having to morph.
-    navResetBtn.style.display = unspacedVocab && runtime.selectedKeys.length > 0 ? '' : 'none';
+    // state without Next having to morph. Parsing mode has nothing to
+    // reset (no SRS, no archive — each card is one walk), so the button
+    // is hidden there even when unspaced.
+    navResetBtn.style.display = unspacedVocab && !isParsingMode() && runtime.selectedKeys.length > 0 ? '' : 'none';
   }
   if (nextBtn) {
     if (isParsingMode()) {
