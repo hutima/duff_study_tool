@@ -224,7 +224,22 @@ export function computeAccessibleDimensionPools(cards) {
   if (sawVerb) {
     ['first', 'second', 'third'].forEach(p => pools.person.add(p));
     ['singular', 'plural'].forEach(n => pools.number.add(n));
-    ['active', 'middle', 'passive', 'middle/passive'].forEach(v => pools.voice.add(v));
+    // Voice is intentionally NOT seeded as a whole — it stays whatever
+    // the accessible cards have tagged. Duff doesn't introduce voice
+    // formally until ch 15 (with deponent verbs covered ch 8/9 as the
+    // bridge), so seeding all four voices would show "active vs
+    // middle/passive" choices to chapter 5 students who only have
+    // active forms in scope. Letting the pool grow organically means
+    // chapters that haven't yet introduced voice see no voice
+    // distractors; buildMorphSteps additionally skips the voice step
+    // entirely for active-tagged cards before ch 15.
+    //
+    // BUT: once any non-active voice has shown up (chapter 8/9 onward
+    // with deponents), seed 'active' as the comparison voice so the
+    // deponent's middle/passive voice step doesn't render as a
+    // single-choice no-info pick.
+    const sawNonActiveVoice = [...pools.voice].some(v => v && v !== 'active');
+    if (sawNonActiveVoice) pools.voice.add('active');
   }
   if (sawNominal) {
     ['singular', 'plural'].forEach(n => pools.number.add(n));
@@ -366,6 +381,17 @@ export function buildInferredStep(dimKey, accessiblePools) {
   };
 }
 
+// Chapter at which Duff formally introduces voice contrasts (the
+// active vs middle/passive distinction). Before this chapter the voice
+// step is suppressed for active-tagged cards, since the only voice
+// in scope is active and the step would be a no-info "pick active".
+// Non-active voice (the deponent middle/passive of ἔρχομαι etc.,
+// introduced ch 8/9) keeps the voice step regardless — the whole
+// point of teaching deponents is the middle/passive form/active meaning
+// contrast, so naming voice on those cards is on-curriculum even
+// before ch 15.
+const VOICE_INTRODUCED_AT_CHAPTER = 15;
+
 // Returns ordered dimension steps for this card. Each step:
 //   { key, label, correct, choices, displayChoices, displayCorrect }
 // `accessiblePools` is the optional chapter-gated distractor pool produced by
@@ -375,6 +401,8 @@ export function buildInferredStep(dimKey, accessiblePools) {
 // Aspect step. Aspect is derivable from tense, so users who don't want to
 // drill the composite-vs-single distinction (continuous/undefined vs
 // continuous) can turn it off.
+// `options.maxChapter` is the student's max effective chapter (from
+// deriveSelectionLevels). Used to gate the voice step.
 export function buildMorphSteps(card, accessiblePools = null, options = {}) {
   if (!card || card.kind !== 'morph') return [];
   // Prefer the canonical parsed form when set — grammar.js cards can ship
@@ -408,6 +436,9 @@ export function buildMorphSteps(card, accessiblePools = null, options = {}) {
   const order = (isVerb ? verbOrder : nominalOrder).filter(k => includeAspect || k !== 'aspect');
 
   const steps = [];
+  const skippedCorrect = {}; // dim → correct value for steps we silently skipped
+  const maxChapter = Number.isFinite(options.maxChapter) ? options.maxChapter : Infinity;
+  const dimToggles = (options.dimToggles && typeof options.dimToggles === 'object') ? options.dimToggles : null;
   for (const dimKey of order) {
     const correct = dims[dimKey];
     if (!correct) continue;
@@ -416,6 +447,27 @@ export function buildMorphSteps(card, accessiblePools = null, options = {}) {
     // imperatives (e.g. "active imperative singular" with no "second person"
     // tag).
     if (dimKey === 'person' && dims.mood === 'imperative') continue;
+    // Voice step: gate on chapter regardless of card voice. Duff
+    // doesn't ask the student to choose a voice until ch 15, and the
+    // deponent forms covered at ch 8/9 are taught as functionally
+    // active (middle/passive in form, active in meaning) — so asking
+    // "what voice is ἔρχομαι?" at ch 9 is a question Duff doesn't
+    // expect a single right answer to. The voice gets silently filled
+    // in (skippedCorrect) so the form lookup still resolves; at ch 15+
+    // the step appears, with the deponent-accepts-active rule applied
+    // when the step is built below.
+    if (dimKey === 'voice' && maxChapter < VOICE_INTRODUCED_AT_CHAPTER) {
+      skippedCorrect[dimKey] = correct;
+      continue;
+    }
+    // Per-dim toggle: user-controlled opt-out. Off → step skipped, dim
+    // doesn't contribute to stats, omitted from the parse summary; the
+    // form lookup auto-fills the canonical correct value via
+    // skippedCorrect below.
+    if (dimToggles && dimKey !== 'aspect' && dimToggles[dimKey] === false) {
+      skippedCorrect[dimKey] = correct;
+      continue;
+    }
     const pool = accessiblePools ? accessiblePools[dimKey] : null;
     const choices = buildChoices(dimKey, correct, pool);
     const displayCorrect = applyDisplaySuffix(dimKey, correct);
@@ -439,11 +491,25 @@ export function buildMorphSteps(card, accessiblePools = null, options = {}) {
     if (dimKey === 'aspect' && dims.tense) {
       step.context = { tense: dims.tense };
     }
+    // Deponent voice handling. Duff treats deponent verbs (lemmas
+    // ending in -μαι and εἰμί's future ἔσομαι family) as functionally
+    // active even though the form is middle / middle-passive — so
+    // when voice IS asked (ch 15+), both 'active' and the formal
+    // middle voice should grade as correct. Genuine passives
+    // (voice='passive') stay strict: passive isn't active in meaning.
+    if (dimKey === 'voice' && (correct === 'middle' || correct === 'middle/passive')) {
+      step.acceptable = [correct, 'active'];
+    }
     if (dimKey === 'mood' && isSecondPluralPresentMoodAmbiguity(card.answer, dims)) {
       step.acceptable = ['indicative', 'imperative'];
     }
     steps.push(step);
   }
+  // Attach the auto-filled-correct dim map as a property on the array
+  // (rather than changing the return shape) so the caller can read it
+  // alongside the steps for the form-lookup augmentation, while
+  // callers that just want the step list keep working.
+  steps.autoFilledDims = skippedCorrect;
   return steps;
 }
 

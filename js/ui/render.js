@@ -9,7 +9,7 @@ import { runtime } from '../state/runtime.js';
 import { buildGrammarSupportHtml } from '../domain/grammar/explanations.js';
 import { renderProgress, renderReview } from './progress.js';
 import { buildMorphSteps, summarizeLemmaStats, getParadigmStepAttemptWindow, computeAccessibleDimensionPools, parseAnswerDimensions, aspectMistakeNote, isSecondPluralPresentMoodAmbiguity } from '../domain/grammar/morph_steps.js';
-import { getAccessibleMorphCards } from '../domain/grammar/paradigm_focus.js';
+import { getAccessibleMorphCards, deriveSelectionLevels } from '../domain/grammar/paradigm_focus.js';
 
 let host = {
   saveState: () => {},
@@ -355,7 +355,12 @@ function ensureStepStateForCard(card) {
   // selected chapter (e.g. no "pluperfect" while Ch ≤ 11).
   const accessibleCards = getAccessibleMorphCards(runtime.selectedKeys);
   const accessiblePools = computeAccessibleDimensionPools(accessibleCards);
-  const steps = buildMorphSteps(card, accessiblePools, { includeAspect: runtime.aspectStep !== false });
+  const levels = deriveSelectionLevels(runtime.selectedKeys || []);
+  const steps = buildMorphSteps(card, accessiblePools, {
+    includeAspect: runtime.aspectStep !== false,
+    maxChapter: levels.maxEffectiveChapter,
+    dimToggles: runtime.dimToggles
+  });
   runtime.morphStepState = {
     cardId: card.id,
     steps,
@@ -365,7 +370,11 @@ function ensureStepStateForCard(card) {
     // Kept on state so answerMorphologyStep can build ungraded follow-up
     // steps with the same chapter-gated MC choices the original steps
     // were drawn from (avoids re-computing on every answer).
-    accessiblePools
+    accessiblePools,
+    // Dims that were skipped (chapter-gated or user-toggled off) along
+    // with their canonical correct values, so the form lookup can fill
+    // them in silently. Survives across renders via the cached state.
+    autoFilledDims: steps.autoFilledDims || {}
   };
   return runtime.morphStepState;
 }
@@ -641,13 +650,25 @@ function structurallyCompatibleMood(pickedMood, ansDims) {
 // (paradigms Duff doesn't drill but which exist in Greek — e.g. εἰμί's
 // future middle participle ἐσόμενος, so ἐσομένου can be surfaced for
 // "future participle gen. sg." picks). Picks a single canonical form.
-function resolveFormForPickedDims(card, steps, pickedValues) {
+function resolveFormForPickedDims(card, steps, pickedValues, autoFilledDims) {
   if (!card) return { kind: 'none' };
   const pickedDims = {};
   steps.forEach((step, idx) => {
     const v = pickedValues[idx];
     if (v && !FORM_LOOKUP_SKIP_DIMS.has(step.key)) pickedDims[step.key] = v;
   });
+  // Dims whose step was silently skipped (chapter-gated voice on active
+  // cards, or user-toggled-off dims) get auto-filled with the canonical
+  // correct value so the form lookup behaves as if the student had
+  // picked correctly. Without this, an off-toggle would orphan-skip
+  // every wrong-form candidate through the matchPool's missing-dim
+  // pass and the lookup would surface noise.
+  if (autoFilledDims && typeof autoFilledDims === 'object') {
+    Object.keys(autoFilledDims).forEach((k) => {
+      if (FORM_LOOKUP_SKIP_DIMS.has(k)) return;
+      if (!pickedDims[k] && autoFilledDims[k]) pickedDims[k] = autoFilledDims[k];
+    });
+  }
   const keys = Object.keys(pickedDims);
   if (keys.length === 0) return { kind: 'none' };
 
@@ -780,7 +801,7 @@ function renderMorphStepSummary(card, state) {
   if (structReason) {
     yourFormHtml = `<div class="morph-step-parse-match morph-step-parse-match-impossible">[${escapeHtml(structReason)}]</div>`;
   } else {
-    const lookup = resolveFormForPickedDims(card, state.steps, pickedValues);
+    const lookup = resolveFormForPickedDims(card, state.steps, pickedValues, state.autoFilledDims);
     if (lookup.kind === 'form') {
       yourFormHtml = `<div class="morph-step-parse-match">${escapeHtml(lookup.form)}</div>`;
     } else if (lookup.kind === 'impossible') {

@@ -98,6 +98,7 @@ export const S = {
   morphStepState: { cardId: null, steps: [], stepIdx: 0, answers: [], completed: false },
   paradigmStepStats: { byLemma: {} },
   aspectStep: true,
+  dimToggles: { tense: true, voice: true, mood: true, person: true, number: true, case: true, gender: true },
 
   // Deck / study state
   deckStates: {},
