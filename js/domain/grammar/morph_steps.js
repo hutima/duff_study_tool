@@ -447,12 +447,16 @@ export function buildMorphSteps(card, accessiblePools = null, options = {}) {
     // imperatives (e.g. "active imperative singular" with no "second person"
     // tag).
     if (dimKey === 'person' && dims.mood === 'imperative') continue;
-    // Voice step: gate on chapter for active-tagged cards. Before ch 15
-    // Duff hasn't introduced voice contrast, so asking "what voice?" on
-    // a card whose answer is active is a no-info step. Non-active voices
-    // (deponent middle/passive, middle, passive) keep the step regardless
-    // — those are pedagogically notable from chapter 8/9 onward.
-    if (dimKey === 'voice' && correct === 'active' && maxChapter < VOICE_INTRODUCED_AT_CHAPTER) {
+    // Voice step: gate on chapter regardless of card voice. Duff
+    // doesn't ask the student to choose a voice until ch 15, and the
+    // deponent forms covered at ch 8/9 are taught as functionally
+    // active (middle/passive in form, active in meaning) — so asking
+    // "what voice is ἔρχομαι?" at ch 9 is a question Duff doesn't
+    // expect a single right answer to. The voice gets silently filled
+    // in (skippedCorrect) so the form lookup still resolves; at ch 15+
+    // the step appears, with the deponent-accepts-active rule applied
+    // when the step is built below.
+    if (dimKey === 'voice' && maxChapter < VOICE_INTRODUCED_AT_CHAPTER) {
       skippedCorrect[dimKey] = correct;
       continue;
     }
@@ -486,6 +490,15 @@ export function buildMorphSteps(card, accessiblePools = null, options = {}) {
     };
     if (dimKey === 'aspect' && dims.tense) {
       step.context = { tense: dims.tense };
+    }
+    // Deponent voice handling. Duff treats deponent verbs (lemmas
+    // ending in -μαι and εἰμί's future ἔσομαι family) as functionally
+    // active even though the form is middle / middle-passive — so
+    // when voice IS asked (ch 15+), both 'active' and the formal
+    // middle voice should grade as correct. Genuine passives
+    // (voice='passive') stay strict: passive isn't active in meaning.
+    if (dimKey === 'voice' && (correct === 'middle' || correct === 'middle/passive')) {
+      step.acceptable = [correct, 'active'];
     }
     if (dimKey === 'mood' && isSecondPluralPresentMoodAmbiguity(card.answer, dims)) {
       step.acceptable = ['indicative', 'imperative'];
