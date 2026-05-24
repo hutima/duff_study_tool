@@ -1918,7 +1918,7 @@
   .parsing-options-subfilters[open] {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 10px;
   }
   .parsing-options-subfilters summary {
     color: var(--muted);
