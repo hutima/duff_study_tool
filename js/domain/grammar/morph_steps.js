@@ -224,7 +224,15 @@ export function computeAccessibleDimensionPools(cards) {
   if (sawVerb) {
     ['first', 'second', 'third'].forEach(p => pools.person.add(p));
     ['singular', 'plural'].forEach(n => pools.number.add(n));
-    ['active', 'middle', 'passive', 'middle/passive'].forEach(v => pools.voice.add(v));
+    // Voice is intentionally NOT seeded — it stays whatever the
+    // accessible cards have tagged. Duff doesn't introduce voice
+    // formally until ch 15 (with deponent verbs covered ch 8/9 as the
+    // bridge), so seeding all four voices would show "active vs
+    // middle/passive" choices to chapter 5 students who only have
+    // active forms in scope. Letting the pool grow organically means
+    // chapters that haven't yet introduced voice see no voice
+    // distractors; buildMorphSteps additionally skips the voice step
+    // entirely for active-tagged cards before ch 15.
   }
   if (sawNominal) {
     ['singular', 'plural'].forEach(n => pools.number.add(n));
@@ -366,6 +374,17 @@ export function buildInferredStep(dimKey, accessiblePools) {
   };
 }
 
+// Chapter at which Duff formally introduces voice contrasts (the
+// active vs middle/passive distinction). Before this chapter the voice
+// step is suppressed for active-tagged cards, since the only voice
+// in scope is active and the step would be a no-info "pick active".
+// Non-active voice (the deponent middle/passive of ἔρχομαι etc.,
+// introduced ch 8/9) keeps the voice step regardless — the whole
+// point of teaching deponents is the middle/passive form/active meaning
+// contrast, so naming voice on those cards is on-curriculum even
+// before ch 15.
+const VOICE_INTRODUCED_AT_CHAPTER = 15;
+
 // Returns ordered dimension steps for this card. Each step:
 //   { key, label, correct, choices, displayChoices, displayCorrect }
 // `accessiblePools` is the optional chapter-gated distractor pool produced by
@@ -375,6 +394,8 @@ export function buildInferredStep(dimKey, accessiblePools) {
 // Aspect step. Aspect is derivable from tense, so users who don't want to
 // drill the composite-vs-single distinction (continuous/undefined vs
 // continuous) can turn it off.
+// `options.maxChapter` is the student's max effective chapter (from
+// deriveSelectionLevels). Used to gate the voice step.
 export function buildMorphSteps(card, accessiblePools = null, options = {}) {
   if (!card || card.kind !== 'morph') return [];
   // Prefer the canonical parsed form when set — grammar.js cards can ship
@@ -408,6 +429,7 @@ export function buildMorphSteps(card, accessiblePools = null, options = {}) {
   const order = (isVerb ? verbOrder : nominalOrder).filter(k => includeAspect || k !== 'aspect');
 
   const steps = [];
+  const maxChapter = Number.isFinite(options.maxChapter) ? options.maxChapter : Infinity;
   for (const dimKey of order) {
     const correct = dims[dimKey];
     if (!correct) continue;
@@ -416,6 +438,12 @@ export function buildMorphSteps(card, accessiblePools = null, options = {}) {
     // imperatives (e.g. "active imperative singular" with no "second person"
     // tag).
     if (dimKey === 'person' && dims.mood === 'imperative') continue;
+    // Voice step: gate on chapter for active-tagged cards. Before ch 15
+    // Duff hasn't introduced voice contrast, so asking "what voice?" on
+    // a card whose answer is active is a no-info step. Non-active voices
+    // (deponent middle/passive, middle, passive) keep the step regardless
+    // — those are pedagogically notable from chapter 8/9 onward.
+    if (dimKey === 'voice' && correct === 'active' && maxChapter < VOICE_INTRODUCED_AT_CHAPTER) continue;
     const pool = accessiblePools ? accessiblePools[dimKey] : null;
     const choices = buildChoices(dimKey, correct, pool);
     const displayCorrect = applyDisplaySuffix(dimKey, correct);

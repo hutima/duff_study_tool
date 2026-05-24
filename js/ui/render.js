@@ -9,7 +9,7 @@ import { runtime } from '../state/runtime.js';
 import { buildGrammarSupportHtml } from '../domain/grammar/explanations.js';
 import { renderProgress, renderReview } from './progress.js';
 import { buildMorphSteps, summarizeLemmaStats, getParadigmStepAttemptWindow, computeAccessibleDimensionPools, parseAnswerDimensions, aspectMistakeNote, isSecondPluralPresentMoodAmbiguity } from '../domain/grammar/morph_steps.js';
-import { getAccessibleMorphCards } from '../domain/grammar/paradigm_focus.js';
+import { getAccessibleMorphCards, deriveSelectionLevels } from '../domain/grammar/paradigm_focus.js';
 
 let host = {
   saveState: () => {},
@@ -355,7 +355,11 @@ function ensureStepStateForCard(card) {
   // selected chapter (e.g. no "pluperfect" while Ch ≤ 11).
   const accessibleCards = getAccessibleMorphCards(runtime.selectedKeys);
   const accessiblePools = computeAccessibleDimensionPools(accessibleCards);
-  const steps = buildMorphSteps(card, accessiblePools, { includeAspect: runtime.aspectStep !== false });
+  const levels = deriveSelectionLevels(runtime.selectedKeys || []);
+  const steps = buildMorphSteps(card, accessiblePools, {
+    includeAspect: runtime.aspectStep !== false,
+    maxChapter: levels.maxEffectiveChapter
+  });
   runtime.morphStepState = {
     cardId: card.id,
     steps,
