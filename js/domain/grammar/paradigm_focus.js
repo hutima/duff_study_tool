@@ -105,6 +105,7 @@ const PARADIGM_CATEGORIES = {
   'γίνομαι':                             'Verbs · second aorist',
   'Second-aorist stems':                 'Verbs · second aorist',
   'Liquid-stem futures':                 'Verbs · second aorist',
+  'μένω':                                'Verbs · liquid future',
   'δίδωμι':                              'Verbs · μι-verbs',
   'δίδομαι':                             'Verbs · μι-verbs',
   'ἵστημι':                              'Verbs · μι-verbs',
@@ -149,6 +150,7 @@ const CATEGORY_ORDER = [
   'Verbs · irregular (εἰμί)',
   'Verbs · middle / deponent',
   'Verbs · second aorist',
+  'Verbs · liquid future',
   'Verbs · μι-verbs',
   'Participles',
   'Other constructions'

@@ -86,4 +86,36 @@
     ]
   });
 
+  // μένω — example liquid-future paradigm for parsing.
+  //
+  // "Liquid-stem futures" as a whole is registered (in stem_change_drills.js)
+  // as a stem-recall drill: present ↔ future identification with no parse
+  // dimensions, so it triggers the parsing-mode redirect card. This set
+  // gives the parsing dropdown one concrete liquid-future paradigm whose
+  // forms ARE parseable dimensionally — same shape as W4_BALLO_SECOND_AORIST.
+  //
+  // Active indicative only: present (the baseline) and the liquid future
+  // (where the stem contracts and the accent shifts to a circumflex on the
+  // ending — μενῶ, μενεῖς, …). Aorist is a plain 1st aorist (ἔμεινα) and
+  // doesn't carry the distinctive liquid-future pattern, so it lives in the
+  // existing aorist paradigm work instead.
+  window.registerSupplementalVocabSet('W4_MENO_LIQUID_FUTURE', {
+    label: 'μένω — present & liquid-future active indicative',
+    week: 4,
+    cards: [
+      { g: 'μένω',      e: 'I remain (Present indicative active, 1st person sg.)',           required: true },
+      { g: 'μένεις',    e: 'you remain (Present indicative active, 2nd person sg.)',         required: true },
+      { g: 'μένει',     e: 'he/she/it remains (Present indicative active, 3rd person sg.)',  required: true },
+      { g: 'μένομεν',   e: 'we remain (Present indicative active, 1st person pl.)',          required: true },
+      { g: 'μένετε',    e: 'you (pl.) remain (Present indicative active, 2nd person pl.)',   required: true },
+      { g: 'μένουσι(ν)', e: 'they remain (Present indicative active, 3rd person pl.)',       required: true },
+      { g: 'μενῶ',      e: 'I will remain (Future indicative active, 1st person sg.)',           required: true },
+      { g: 'μενεῖς',    e: 'you will remain (Future indicative active, 2nd person sg.)',         required: true },
+      { g: 'μενεῖ',     e: 'he/she/it will remain (Future indicative active, 3rd person sg.)',  required: true },
+      { g: 'μενοῦμεν',  e: 'we will remain (Future indicative active, 1st person pl.)',          required: true },
+      { g: 'μενεῖτε',   e: 'you (pl.) will remain (Future indicative active, 2nd person pl.)',   required: true },
+      { g: 'μενοῦσι(ν)', e: 'they will remain (Future indicative active, 3rd person pl.)',      required: true }
+    ]
+  });
+
 })();
