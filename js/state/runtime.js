@@ -99,6 +99,15 @@ export const runtime = {
   // contribute to stats, omitted from the final parse summary, and the
   // form lookup silently auto-fills the canonical correct value.
   dimToggles: { tense: true, voice: true, mood: true, person: true, number: true, case: true, gender: true },
+  // Opt-in to drilling morphologically real paradigm forms that Duff
+  // doesn't drill (e.g. εἰμί's future middle infinitive ἔσεσθαι and
+  // future middle participle ἐσόμενος series). Sourced from
+  // LEMMA_INVENTORY[lemma].optionalFormGroups and chapter-gated by each
+  // group's own `chapter` value. Default off so the standard
+  // Duff-aligned deck is the baseline; opting in expands the parsing
+  // pool with extension paradigms. The fallback form-lookup (extraForms)
+  // is always consulted regardless of this toggle.
+  includeOptionalForms: false,
 
   // ── Persisted directional stores (rebuilt from localStorage) ────────
   deckStates: {},

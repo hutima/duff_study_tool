@@ -701,6 +701,24 @@ export function toggleDimStep(dimKey) {
   host.saveState();
 }
 
+// Opt in/out of drilling LEMMA_INVENTORY.optionalFormGroups. Affects the
+// parsing card pool (not the fallback form-lookup, which always
+// consults extraForms). When the user is in parsing mode and has a
+// focused paradigm, the deck has to be reloaded so the newly-included
+// (or excluded) optional cards take effect; outside parsing mode the
+// flag still flips and persists but nothing visible changes until the
+// next parsing session.
+export function toggleOptionalForms() {
+  runtime.includeOptionalForms = !runtime.includeOptionalForms;
+  host.syncToggleButtons();
+  if (!runtime.selectedKeys.length) {
+    host.saveState();
+    return;
+  }
+  const keysToLoad = runtime.currentSession ? expandSessionSets(runtime.currentSession) : runtime.selectedKeys;
+  loadDeckFromKeys(keysToLoad, runtime.currentSession ? runtime.currentSession.id : null);
+}
+
 export function reshuffleEligible() {
   if (!runtime.selectedKeys.length) return;
 

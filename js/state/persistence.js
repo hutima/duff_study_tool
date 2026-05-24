@@ -160,6 +160,7 @@ export function buildPersistedStatePayload(options = {}) {
     paradigmStepStats: runtime.paradigmStepStats,
     aspectStep: runtime.aspectStep,
     dimToggles: runtime.dimToggles,
+    includeOptionalForms: runtime.includeOptionalForms,
     analyticsVocabDirection: runtime.analyticsVocabDirection,
     analyticsVocabScope: runtime.analyticsVocabScope,
     analyticsCollapsed: runtime.analyticsCollapsed,
@@ -234,6 +235,10 @@ function sanitizeImportedState(candidate) {
   const src = (candidate.dimToggles && typeof candidate.dimToggles === 'object') ? candidate.dimToggles : {};
   DIM_TOGGLE_KEYS.forEach(k => { dt[k] = src[k] !== false; });
   state.dimToggles = dt;
+  // Optional-paradigm-forms toggle defaults to false (off). Older exports
+  // predating this field hydrate to false too, so existing decks keep the
+  // standard Duff-aligned card set as their baseline.
+  state.includeOptionalForms = !!candidate.includeOptionalForms;
 
   // Older exports made while the user was in reader (or parsing) mode persist
   // that as the top-level studyMode, with selectedKeys/currentSessionId left
@@ -895,6 +900,8 @@ export function restoreState() {
     const savedDt = (saved.dimToggles && typeof saved.dimToggles === 'object') ? saved.dimToggles : {};
     runtime.dimToggles = {};
     DIM_TOGGLE_KEYS.forEach(k => { runtime.dimToggles[k] = savedDt[k] !== false; });
+    // Optional paradigm extensions: rehydrate the toggle (default false).
+    runtime.includeOptionalForms = !!saved.includeOptionalForms;
     runtime.analyticsVocabDirection = saved.analyticsVocabDirection === 'e2g' ? 'e2g' : 'g2e';
     runtime.analyticsVocabScope = saved.analyticsVocabScope === 'all' ? 'all' : 'required';
     if (saved.analyticsCollapsed && typeof saved.analyticsCollapsed === 'object') {

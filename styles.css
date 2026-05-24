@@ -1794,6 +1794,21 @@
     margin-bottom: 10px;
   }
 
+  /* Parsing-options sub-collapsible nested inside the controls bar.
+     The controls bar is flex-wrap; full-width basis stops the details
+     element from shrinking to its summary's width. Toggle children
+     re-establish flex layout so each switch lays out like the
+     siblings outside the section did before. */
+  .parsing-options-section {
+    flex: 1 1 100%;
+    margin-bottom: 0;
+  }
+  .parsing-options-section[open] {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
 
   .review-shell {
     margin-bottom: 12px;
