@@ -567,6 +567,476 @@
     ...GINOMAI_AORIST_MIDDLE_IMPERATIVE
   };
 
+  // ─── φιλέω (contract -έω verb) ────────────────────────────────────
+  //
+  // Duff drills present/imperfect/future/aorist active indicative (W2)
+  // and the masculine-nominative present + aorist active participles
+  // (W2). Everything else — passive system, subjunctive, imperative,
+  // infinitives, full participle declensions — is undrilled. These
+  // additions cover the most pedagogically critical contract-verb
+  // forms (passive indicative for showing the -ε contraction across
+  // voices, the active subjunctive/imperative for mood-vs-tense
+  // contrast).
+
+  const PHILEO_PRESENT_PASSIVE_INDICATIVE = {
+    'φιλοῦμαι':   'present middle/passive indicative first person singular',
+    'φιλῇ':       'present middle/passive indicative second person singular',
+    'φιλεῖται':   'present middle/passive indicative third person singular',
+    'φιλούμεθα':  'present middle/passive indicative first person plural',
+    'φιλεῖσθε':   'present middle/passive indicative second person plural',
+    'φιλοῦνται':  'present middle/passive indicative third person plural'
+  };
+
+  const PHILEO_IMPERFECT_PASSIVE_INDICATIVE = {
+    'ἐφιλούμην':  'imperfect middle/passive indicative first person singular',
+    'ἐφιλοῦ':     'imperfect middle/passive indicative second person singular',
+    'ἐφιλεῖτο':   'imperfect middle/passive indicative third person singular',
+    'ἐφιλούμεθα': 'imperfect middle/passive indicative first person plural',
+    'ἐφιλεῖσθε':  'imperfect middle/passive indicative second person plural',
+    'ἐφιλοῦντο':  'imperfect middle/passive indicative third person plural'
+  };
+
+  const PHILEO_AORIST_PASSIVE_INDICATIVE = {
+    'ἐφιλήθην':   'aorist passive indicative first person singular',
+    'ἐφιλήθης':   'aorist passive indicative second person singular',
+    'ἐφιλήθη':    'aorist passive indicative third person singular',
+    'ἐφιλήθημεν': 'aorist passive indicative first person plural',
+    'ἐφιλήθητε':  'aorist passive indicative second person plural',
+    'ἐφιλήθησαν': 'aorist passive indicative third person plural'
+  };
+
+  const PHILEO_PRESENT_ACTIVE_SUBJUNCTIVE = {
+    'φιλῶ':      'present active subjunctive first person singular',
+    'φιλῇς':     'present active subjunctive second person singular',
+    'φιλῇ':      'present active subjunctive third person singular',
+    'φιλῶμεν':   'present active subjunctive first person plural',
+    'φιλῆτε':    'present active subjunctive second person plural',
+    'φιλῶσι':    'present active subjunctive third person plural',
+    'φιλῶσιν':   'present active subjunctive third person plural'
+  };
+
+  const PHILEO_AORIST_ACTIVE_SUBJUNCTIVE = {
+    'φιλήσω':    'aorist active subjunctive first person singular',
+    'φιλήσῃς':   'aorist active subjunctive second person singular',
+    'φιλήσῃ':    'aorist active subjunctive third person singular',
+    'φιλήσωμεν': 'aorist active subjunctive first person plural',
+    'φιλήσητε':  'aorist active subjunctive second person plural',
+    'φιλήσωσι':  'aorist active subjunctive third person plural',
+    'φιλήσωσιν': 'aorist active subjunctive third person plural'
+  };
+
+  const PHILEO_PRESENT_ACTIVE_IMPERATIVE = {
+    'φίλει':       'present active imperative second person singular',
+    'φιλείτω':     'present active imperative third person singular',
+    'φιλεῖτε':     'present active imperative second person plural',
+    'φιλείτωσαν':  'present active imperative third person plural'
+  };
+
+  const PHILEO_AORIST_ACTIVE_IMPERATIVE = {
+    'φίλησον':     'aorist active imperative second person singular',
+    'φιλησάτω':    'aorist active imperative third person singular',
+    'φιλήσατε':    'aorist active imperative second person plural',
+    'φιλησάτωσαν': 'aorist active imperative third person plural'
+  };
+
+  const PHILEO_INFINITIVES = {
+    'φιλεῖν':     'present active infinitive',
+    'φιλῆσαι':    'aorist active infinitive',
+    'φιλεῖσθαι':  'present middle/passive infinitive',
+    'φιληθῆναι':  'aorist passive infinitive'
+  };
+
+  const PHILEO_OPTIONAL_GROUPS = [
+    { chapter: 7,  family: 'φιλέω — present active imperative (optional)',
+      forms: PHILEO_PRESENT_ACTIVE_IMPERATIVE },
+    { chapter: 7,  family: 'φιλέω — aorist active imperative (optional)',
+      forms: PHILEO_AORIST_ACTIVE_IMPERATIVE },
+    { chapter: 7,  family: 'φιλέω — infinitives (optional)',
+      forms: PHILEO_INFINITIVES },
+    { chapter: 15, family: 'φιλέω — present middle/passive indicative (optional)',
+      forms: PHILEO_PRESENT_PASSIVE_INDICATIVE },
+    { chapter: 15, family: 'φιλέω — imperfect middle/passive indicative (optional)',
+      forms: PHILEO_IMPERFECT_PASSIVE_INDICATIVE },
+    { chapter: 15, family: 'φιλέω — aorist passive indicative (optional)',
+      forms: PHILEO_AORIST_PASSIVE_INDICATIVE },
+    { chapter: 17, family: 'φιλέω — present active subjunctive (optional)',
+      forms: PHILEO_PRESENT_ACTIVE_SUBJUNCTIVE },
+    { chapter: 17, family: 'φιλέω — aorist active subjunctive (optional)',
+      forms: PHILEO_AORIST_ACTIVE_SUBJUNCTIVE }
+  ];
+
+  const PHILEO_EXTRA_FORMS = {
+    ...PHILEO_PRESENT_PASSIVE_INDICATIVE,
+    ...PHILEO_IMPERFECT_PASSIVE_INDICATIVE,
+    ...PHILEO_AORIST_PASSIVE_INDICATIVE,
+    ...PHILEO_PRESENT_ACTIVE_IMPERATIVE,
+    ...PHILEO_AORIST_ACTIVE_IMPERATIVE,
+    ...PHILEO_INFINITIVES,
+    // Subjunctive last so φιλῇ resolves to "present active subjunctive
+    // 3sg" (the most common single-form reading) rather than the m/p
+    // 2sg from the present passive indicative spread above.
+    ...PHILEO_PRESENT_ACTIVE_SUBJUNCTIVE,
+    ...PHILEO_AORIST_ACTIVE_SUBJUNCTIVE
+  };
+
+  // ─── δίδωμι (μι-verb, "to give") ──────────────────────────────────
+  //
+  // Per the audit Duff drills present/imperfect/future/aorist/perfect
+  // active indicative (W8), present active subj/imperative/infinitive,
+  // and a nominative-only present active participle stem. Aorist
+  // active subj/imperative/infinitive — the slots a Greek student
+  // hits constantly via ἔδωκα/δοῦναι/δός in the NT — aren't drilled.
+  // Present m/p indicative is covered by δίδομαι below (a separate
+  // lemma in the inventory); aorist passive (ἐδόθην) is genuinely
+  // useful.
+  //
+  // δίδωμι's aorist is the κ-aorist ἔδωκα (athematic), distinct from
+  // ω-verb σα-aorists.
+
+  const DIDOMI_AORIST_ACTIVE_INDICATIVE = {
+    'ἔδωκα':    'aorist active indicative first person singular',
+    'ἔδωκας':   'aorist active indicative second person singular',
+    'ἔδωκε':    'aorist active indicative third person singular',
+    'ἔδωκεν':   'aorist active indicative third person singular',
+    'ἐδώκαμεν': 'aorist active indicative first person plural',
+    'ἐδώκατε':  'aorist active indicative second person plural',
+    'ἔδωκαν':   'aorist active indicative third person plural'
+  };
+
+  const DIDOMI_AORIST_ACTIVE_SUBJUNCTIVE = {
+    'δῶ':      'aorist active subjunctive first person singular',
+    'δῷς':     'aorist active subjunctive second person singular',
+    'δῷ':      'aorist active subjunctive third person singular',
+    'δῶμεν':   'aorist active subjunctive first person plural',
+    'δῶτε':    'aorist active subjunctive second person plural',
+    'δῶσι':    'aorist active subjunctive third person plural',
+    'δῶσιν':   'aorist active subjunctive third person plural'
+  };
+
+  const DIDOMI_AORIST_ACTIVE_IMPERATIVE = {
+    'δός':       'aorist active imperative second person singular',
+    'δότω':      'aorist active imperative third person singular',
+    'δότε':      'aorist active imperative second person plural',
+    'δότωσαν':   'aorist active imperative third person plural'
+  };
+
+  const DIDOMI_AORIST_ACTIVE_INFINITIVE = {
+    'δοῦναι': 'aorist active infinitive'
+  };
+
+  const DIDOMI_AORIST_PASSIVE_INDICATIVE = {
+    'ἐδόθην':    'aorist passive indicative first person singular',
+    'ἐδόθης':    'aorist passive indicative second person singular',
+    'ἐδόθη':     'aorist passive indicative third person singular',
+    'ἐδόθημεν':  'aorist passive indicative first person plural',
+    'ἐδόθητε':   'aorist passive indicative second person plural',
+    'ἐδόθησαν':  'aorist passive indicative third person plural'
+  };
+
+  const DIDOMI_OPTIONAL_GROUPS = [
+    { chapter: 19, family: 'δίδωμι — aorist active indicative ἔδωκα (optional)',
+      forms: DIDOMI_AORIST_ACTIVE_INDICATIVE },
+    { chapter: 19, family: 'δίδωμι — aorist active infinitive δοῦναι (optional)',
+      forms: DIDOMI_AORIST_ACTIVE_INFINITIVE },
+    { chapter: 19, family: 'δίδωμι — aorist active imperative δός (optional)',
+      forms: DIDOMI_AORIST_ACTIVE_IMPERATIVE },
+    { chapter: 19, family: 'δίδωμι — aorist active subjunctive δῶ (optional)',
+      forms: DIDOMI_AORIST_ACTIVE_SUBJUNCTIVE },
+    { chapter: 19, family: 'δίδωμι — aorist passive indicative ἐδόθην (optional)',
+      forms: DIDOMI_AORIST_PASSIVE_INDICATIVE }
+  ];
+
+  const DIDOMI_EXTRA_FORMS = {
+    ...DIDOMI_AORIST_ACTIVE_INDICATIVE,
+    ...DIDOMI_AORIST_ACTIVE_INFINITIVE,
+    ...DIDOMI_AORIST_ACTIVE_IMPERATIVE,
+    ...DIDOMI_AORIST_ACTIVE_SUBJUNCTIVE,
+    ...DIDOMI_AORIST_PASSIVE_INDICATIVE
+  };
+
+  // ─── τίθημι (μι-verb, "to put/place") ─────────────────────────────
+  //
+  // Duff drills only the present active system (W8). Adds imperfect/
+  // future/aorist active indicative, the aorist active subjunctive/
+  // imperative/infinitive (θεῖναι, θές, θῶ), and the aorist passive.
+  // τίθημι's aorist is ἔθηκα (κ-aorist) but the non-indicative forms
+  // use the bare θε- stem (θῶ, θές, θεῖναι). Aorist passive ἐτέθην
+  // uses θε- + the standard passive marker -θη-.
+
+  const TITHEMI_IMPERFECT_ACTIVE_INDICATIVE = {
+    'ἐτίθην':   'imperfect active indicative first person singular',
+    'ἐτίθεις':  'imperfect active indicative second person singular',
+    'ἐτίθει':   'imperfect active indicative third person singular',
+    'ἐτίθεμεν': 'imperfect active indicative first person plural',
+    'ἐτίθετε':  'imperfect active indicative second person plural',
+    'ἐτίθεσαν': 'imperfect active indicative third person plural'
+  };
+
+  const TITHEMI_FUTURE_ACTIVE_INDICATIVE = {
+    'θήσω':     'future active indicative first person singular',
+    'θήσεις':   'future active indicative second person singular',
+    'θήσει':    'future active indicative third person singular',
+    'θήσομεν':  'future active indicative first person plural',
+    'θήσετε':   'future active indicative second person plural',
+    'θήσουσι':  'future active indicative third person plural',
+    'θήσουσιν': 'future active indicative third person plural'
+  };
+
+  const TITHEMI_AORIST_ACTIVE_INDICATIVE = {
+    'ἔθηκα':    'aorist active indicative first person singular',
+    'ἔθηκας':   'aorist active indicative second person singular',
+    'ἔθηκε':    'aorist active indicative third person singular',
+    'ἔθηκεν':   'aorist active indicative third person singular',
+    'ἐθήκαμεν': 'aorist active indicative first person plural',
+    'ἐθήκατε':  'aorist active indicative second person plural',
+    'ἔθηκαν':   'aorist active indicative third person plural'
+  };
+
+  const TITHEMI_AORIST_ACTIVE_SUBJUNCTIVE = {
+    'θῶ':     'aorist active subjunctive first person singular',
+    'θῇς':    'aorist active subjunctive second person singular',
+    'θῇ':     'aorist active subjunctive third person singular',
+    'θῶμεν':  'aorist active subjunctive first person plural',
+    'θῆτε':   'aorist active subjunctive second person plural',
+    'θῶσι':   'aorist active subjunctive third person plural',
+    'θῶσιν':  'aorist active subjunctive third person plural'
+  };
+
+  const TITHEMI_AORIST_ACTIVE_IMPERATIVE = {
+    'θές':       'aorist active imperative second person singular',
+    'θέτω':      'aorist active imperative third person singular',
+    'θέτε':      'aorist active imperative second person plural',
+    'θέτωσαν':   'aorist active imperative third person plural'
+  };
+
+  const TITHEMI_AORIST_ACTIVE_INFINITIVE = {
+    'θεῖναι': 'aorist active infinitive'
+  };
+
+  const TITHEMI_AORIST_PASSIVE_INDICATIVE = {
+    'ἐτέθην':    'aorist passive indicative first person singular',
+    'ἐτέθης':    'aorist passive indicative second person singular',
+    'ἐτέθη':     'aorist passive indicative third person singular',
+    'ἐτέθημεν':  'aorist passive indicative first person plural',
+    'ἐτέθητε':   'aorist passive indicative second person plural',
+    'ἐτέθησαν':  'aorist passive indicative third person plural'
+  };
+
+  const TITHEMI_OPTIONAL_GROUPS = [
+    { chapter: 19, family: 'τίθημι — imperfect active indicative (optional)',
+      forms: TITHEMI_IMPERFECT_ACTIVE_INDICATIVE },
+    { chapter: 19, family: 'τίθημι — future active indicative (optional)',
+      forms: TITHEMI_FUTURE_ACTIVE_INDICATIVE },
+    { chapter: 19, family: 'τίθημι — aorist active indicative ἔθηκα (optional)',
+      forms: TITHEMI_AORIST_ACTIVE_INDICATIVE },
+    { chapter: 19, family: 'τίθημι — aorist active infinitive θεῖναι (optional)',
+      forms: TITHEMI_AORIST_ACTIVE_INFINITIVE },
+    { chapter: 19, family: 'τίθημι — aorist active imperative θές (optional)',
+      forms: TITHEMI_AORIST_ACTIVE_IMPERATIVE },
+    { chapter: 19, family: 'τίθημι — aorist active subjunctive θῶ (optional)',
+      forms: TITHEMI_AORIST_ACTIVE_SUBJUNCTIVE },
+    { chapter: 19, family: 'τίθημι — aorist passive indicative ἐτέθην (optional)',
+      forms: TITHEMI_AORIST_PASSIVE_INDICATIVE }
+  ];
+
+  const TITHEMI_EXTRA_FORMS = {
+    ...TITHEMI_IMPERFECT_ACTIVE_INDICATIVE,
+    ...TITHEMI_FUTURE_ACTIVE_INDICATIVE,
+    ...TITHEMI_AORIST_ACTIVE_INDICATIVE,
+    ...TITHEMI_AORIST_ACTIVE_INFINITIVE,
+    ...TITHEMI_AORIST_ACTIVE_IMPERATIVE,
+    ...TITHEMI_AORIST_ACTIVE_SUBJUNCTIVE,
+    ...TITHEMI_AORIST_PASSIVE_INDICATIVE
+  };
+
+  // ─── ἵστημι (μι-verb, "to stand/cause to stand") ──────────────────
+  //
+  // ἵστημι is the trickiest μι-verb because it has two distinct aorist
+  // formations with different meanings:
+  //   - 1st aorist ἔστησα (transitive: "I caused to stand / I set up")
+  //   - 2nd aorist ἔστην (intransitive: "I stood")
+  // Both are real Koine. Duff drills only the present active system
+  // (W8); both aorist paradigms are absent. The intransitive 2nd
+  // aorist is statistically more common in the NT.
+
+  const HISTEMI_IMPERFECT_ACTIVE_INDICATIVE = {
+    'ἵστην':   'imperfect active indicative first person singular',
+    'ἵστης':   'imperfect active indicative second person singular',
+    'ἵστη':    'imperfect active indicative third person singular',
+    'ἵσταμεν': 'imperfect active indicative first person plural',
+    'ἵστατε':  'imperfect active indicative second person plural',
+    'ἵστασαν': 'imperfect active indicative third person plural'
+  };
+
+  const HISTEMI_FUTURE_ACTIVE_INDICATIVE = {
+    'στήσω':     'future active indicative first person singular',
+    'στήσεις':   'future active indicative second person singular',
+    'στήσει':    'future active indicative third person singular',
+    'στήσομεν':  'future active indicative first person plural',
+    'στήσετε':   'future active indicative second person plural',
+    'στήσουσι':  'future active indicative third person plural',
+    'στήσουσιν': 'future active indicative third person plural'
+  };
+
+  const HISTEMI_FIRST_AORIST_ACTIVE_INDICATIVE = {
+    'ἔστησα':    'aorist active indicative first person singular',
+    'ἔστησας':   'aorist active indicative second person singular',
+    'ἔστησε':    'aorist active indicative third person singular',
+    'ἔστησεν':   'aorist active indicative third person singular',
+    'ἐστήσαμεν': 'aorist active indicative first person plural',
+    'ἐστήσατε':  'aorist active indicative second person plural',
+    'ἔστησαν':   'aorist active indicative third person plural'
+  };
+
+  const HISTEMI_SECOND_AORIST_ACTIVE_INDICATIVE = {
+    'ἔστην':    'aorist active indicative first person singular',
+    'ἔστης':    'aorist active indicative second person singular',
+    'ἔστη':     'aorist active indicative third person singular',
+    'ἔστημεν':  'aorist active indicative first person plural',
+    'ἔστητε':   'aorist active indicative second person plural'
+    // 'ἔστησαν' 3pl collides verbatim with the 1st aorist 3pl above;
+    // since both 1st and 2nd aorist syncretize at 3pl, the 1st aorist
+    // reading takes the key. Documented to avoid silent overwrite.
+  };
+
+  const HISTEMI_AORIST_INFINITIVES = {
+    'στῆσαι': 'aorist active infinitive',  // 1st aorist (transitive)
+    'στῆναι': 'aorist active infinitive'   // 2nd aorist (intransitive)
+  };
+
+  // 2nd aorist subjunctive (intransitive) — common in the NT.
+  const HISTEMI_SECOND_AORIST_SUBJUNCTIVE = {
+    'στῶ':    'aorist active subjunctive first person singular',
+    'στῇς':   'aorist active subjunctive second person singular',
+    'στῇ':    'aorist active subjunctive third person singular',
+    'στῶμεν': 'aorist active subjunctive first person plural',
+    'στῆτε':  'aorist active subjunctive second person plural',
+    'στῶσι':  'aorist active subjunctive third person plural',
+    'στῶσιν': 'aorist active subjunctive third person plural'
+  };
+
+  // 2nd aorist active imperative (intransitive).
+  const HISTEMI_SECOND_AORIST_IMPERATIVE = {
+    'στῆθι':     'aorist active imperative second person singular',
+    'στήτω':     'aorist active imperative third person singular',
+    'στῆτε':     'aorist active imperative second person plural',
+    'στήτωσαν':  'aorist active imperative third person plural'
+  };
+
+  // Aorist passive (ἐστάθην, used for "I stood / was placed") is the
+  // standard passive paradigm.
+  const HISTEMI_AORIST_PASSIVE_INDICATIVE = {
+    'ἐστάθην':   'aorist passive indicative first person singular',
+    'ἐστάθης':   'aorist passive indicative second person singular',
+    'ἐστάθη':    'aorist passive indicative third person singular',
+    'ἐστάθημεν': 'aorist passive indicative first person plural',
+    'ἐστάθητε':  'aorist passive indicative second person plural',
+    'ἐστάθησαν': 'aorist passive indicative third person plural'
+  };
+
+  // Perfect active (ἕστηκα, with present meaning "I am standing" — a
+  // distinctive ἵστημι quirk).
+  const HISTEMI_PERFECT_ACTIVE_INDICATIVE = {
+    'ἕστηκα':    'perfect active indicative first person singular',
+    'ἕστηκας':   'perfect active indicative second person singular',
+    'ἕστηκε':    'perfect active indicative third person singular',
+    'ἕστηκεν':   'perfect active indicative third person singular',
+    'ἑστήκαμεν': 'perfect active indicative first person plural',
+    'ἑστήκατε':  'perfect active indicative second person plural',
+    'ἑστήκασι':  'perfect active indicative third person plural',
+    'ἑστήκασιν': 'perfect active indicative third person plural'
+  };
+
+  const HISTEMI_OPTIONAL_GROUPS = [
+    { chapter: 19, family: 'ἵστημι — imperfect active indicative (optional)',
+      forms: HISTEMI_IMPERFECT_ACTIVE_INDICATIVE },
+    { chapter: 19, family: 'ἵστημι — future active indicative στήσω (optional)',
+      forms: HISTEMI_FUTURE_ACTIVE_INDICATIVE },
+    { chapter: 19, family: 'ἵστημι — 1st aorist active ἔστησα (transitive, optional)',
+      forms: HISTEMI_FIRST_AORIST_ACTIVE_INDICATIVE },
+    { chapter: 19, family: 'ἵστημι — 2nd aorist active ἔστην (intransitive, optional)',
+      forms: HISTEMI_SECOND_AORIST_ACTIVE_INDICATIVE },
+    { chapter: 19, family: 'ἵστημι — aorist active infinitives στῆσαι / στῆναι (optional)',
+      forms: HISTEMI_AORIST_INFINITIVES },
+    { chapter: 19, family: 'ἵστημι — 2nd aorist active subjunctive στῶ (optional)',
+      forms: HISTEMI_SECOND_AORIST_SUBJUNCTIVE },
+    { chapter: 19, family: 'ἵστημι — 2nd aorist active imperative στῆθι (optional)',
+      forms: HISTEMI_SECOND_AORIST_IMPERATIVE },
+    { chapter: 19, family: 'ἵστημι — aorist passive indicative ἐστάθην (optional)',
+      forms: HISTEMI_AORIST_PASSIVE_INDICATIVE },
+    { chapter: 19, family: 'ἵστημι — perfect active indicative ἕστηκα (optional)',
+      forms: HISTEMI_PERFECT_ACTIVE_INDICATIVE }
+  ];
+
+  const HISTEMI_EXTRA_FORMS = {
+    ...HISTEMI_IMPERFECT_ACTIVE_INDICATIVE,
+    ...HISTEMI_FUTURE_ACTIVE_INDICATIVE,
+    ...HISTEMI_FIRST_AORIST_ACTIVE_INDICATIVE,
+    ...HISTEMI_SECOND_AORIST_ACTIVE_INDICATIVE,
+    ...HISTEMI_AORIST_INFINITIVES,
+    ...HISTEMI_SECOND_AORIST_SUBJUNCTIVE,
+    ...HISTEMI_SECOND_AORIST_IMPERATIVE,
+    ...HISTEMI_AORIST_PASSIVE_INDICATIVE,
+    ...HISTEMI_PERFECT_ACTIVE_INDICATIVE
+  };
+
+  // ─── δίδομαι (μι-verb middle/passive of δίδωμι) ───────────────────
+  //
+  // δίδομαι is the middle/passive complement of δίδωμι. Duff drills
+  // only the present m/p indicative; everything else uses the δίδωμι
+  // stem (the m/p paradigm is essentially "δίδωμι forms with passive
+  // endings"). Common gaps: imperfect m/p, aorist passive (already
+  // in δίδωμι's extras as ἐδόθην — duplicating here would create
+  // confusion; we cross-reference instead), present m/p infinitive
+  // (δίδοσθαι), present m/p imperative (δίδοσο), perfect m/p (δέδομαι).
+
+  const DIDOMAI_IMPERFECT_INDICATIVE = {
+    'ἐδιδόμην':   'imperfect middle/passive indicative first person singular',
+    'ἐδίδοσο':    'imperfect middle/passive indicative second person singular',
+    'ἐδίδοτο':    'imperfect middle/passive indicative third person singular',
+    'ἐδιδόμεθα':  'imperfect middle/passive indicative first person plural',
+    'ἐδίδοσθε':   'imperfect middle/passive indicative second person plural',
+    'ἐδίδοντο':   'imperfect middle/passive indicative third person plural'
+  };
+
+  const DIDOMAI_PRESENT_INFINITIVE = {
+    'δίδοσθαι': 'present middle/passive infinitive'
+  };
+
+  const DIDOMAI_PRESENT_IMPERATIVE = {
+    'δίδοσο':      'present middle/passive imperative second person singular',
+    'διδόσθω':     'present middle/passive imperative third person singular',
+    'δίδοσθε':     'present middle/passive imperative second person plural',
+    'διδόσθωσαν':  'present middle/passive imperative third person plural'
+  };
+
+  const DIDOMAI_PERFECT_INDICATIVE = {
+    'δέδομαι':   'perfect middle/passive indicative first person singular',
+    'δέδοσαι':   'perfect middle/passive indicative second person singular',
+    'δέδοται':   'perfect middle/passive indicative third person singular',
+    'δεδόμεθα':  'perfect middle/passive indicative first person plural',
+    'δέδοσθε':   'perfect middle/passive indicative second person plural',
+    'δέδονται':  'perfect middle/passive indicative third person plural'
+  };
+
+  const DIDOMAI_OPTIONAL_GROUPS = [
+    { chapter: 19, family: 'δίδομαι — imperfect middle/passive indicative (optional)',
+      forms: DIDOMAI_IMPERFECT_INDICATIVE },
+    { chapter: 19, family: 'δίδομαι — present middle/passive infinitive δίδοσθαι (optional)',
+      forms: DIDOMAI_PRESENT_INFINITIVE },
+    { chapter: 19, family: 'δίδομαι — present middle/passive imperative (optional)',
+      forms: DIDOMAI_PRESENT_IMPERATIVE },
+    { chapter: 19, family: 'δίδομαι — perfect middle/passive indicative δέδομαι (optional)',
+      forms: DIDOMAI_PERFECT_INDICATIVE }
+  ];
+
+  const DIDOMAI_EXTRA_FORMS = {
+    ...DIDOMAI_IMPERFECT_INDICATIVE,
+    ...DIDOMAI_PRESENT_INFINITIVE,
+    ...DIDOMAI_PRESENT_IMPERATIVE,
+    ...DIDOMAI_PERFECT_INDICATIVE
+  };
+
   const LEMMA_INVENTORY = {
     'εἰμί': {
       // εἰμί is suppletive: it has no aorist or perfect family — Greek
@@ -604,6 +1074,26 @@
     'γίνομαι': {
       extraForms: GINOMAI_EXTRA_FORMS,
       optionalFormGroups: GINOMAI_OPTIONAL_GROUPS
+    },
+    'φιλέω': {
+      extraForms: PHILEO_EXTRA_FORMS,
+      optionalFormGroups: PHILEO_OPTIONAL_GROUPS
+    },
+    'δίδωμι': {
+      extraForms: DIDOMI_EXTRA_FORMS,
+      optionalFormGroups: DIDOMI_OPTIONAL_GROUPS
+    },
+    'τίθημι': {
+      extraForms: TITHEMI_EXTRA_FORMS,
+      optionalFormGroups: TITHEMI_OPTIONAL_GROUPS
+    },
+    'ἵστημι': {
+      extraForms: HISTEMI_EXTRA_FORMS,
+      optionalFormGroups: HISTEMI_OPTIONAL_GROUPS
+    },
+    'δίδομαι': {
+      extraForms: DIDOMAI_EXTRA_FORMS,
+      optionalFormGroups: DIDOMAI_OPTIONAL_GROUPS
     }
     // Add more defective lemmas here (e.g. οἶδα — no present form, the
     // perfect serves as present; χρή — only third singular, etc.) when
