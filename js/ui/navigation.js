@@ -587,9 +587,19 @@ export function toggleShuffle() {
     runtime.deck = host.buildStudyDeck(runtime.originalDeck, { forceShuffle: runtime.shuffled });
     runtime.currentIdx = Math.min(runtime.currentIdx, runtime.activeDeckCount);
   } else {
+    // Toggling shuffle (either direction) collapses the middle pile back
+    // into active so the deck order matches the partition state. Without
+    // this, unspacedMiddleIds keeps cards earmarked as middle even though
+    // they're now interleaved with active in runtime.deck, leaving
+    // activeDeckCount/unspacedMiddleCount out of sync with what the user sees.
+    runtime.unspacedMiddleIds = new Set();
+    runtime.unspacedMiddleCount = 0;
     const activeCards = host.getRemainingCards();
     const knownCards = runtime.deck.filter(card => runtime.marks[card.id] === 'known');
     runtime.deck = runtime.shuffled ? [...shuffleArray([...activeCards]), ...knownCards] : [...activeCards, ...knownCards];
+    runtime.activeDeckCount = activeCards.length;
+    runtime.unspacedRoundSize = activeCards.length;
+    runtime.unspacedRoundMarks = 0;
 
     if (runtime.currentIdx >= activeCards.length) {
       runtime.currentIdx = activeCards.length ? 0 : runtime.deck.length;
@@ -851,10 +861,17 @@ export function reshuffleEligible() {
     runtime.currentIdx = runtime.activeDeckCount ? 0 : runtime.currentIdx;
   } else {
     // Non-spaced: shuffle the still-active (not-yet-known) portion only;
-    // known cards stay pinned to the end of the cycle.
+    // known cards stay pinned to the end of the cycle. Equivalent to an
+    // end-of-round reshuffle — middle dumps back into active first so
+    // unspacedMiddleIds stays aligned with the visible deck order.
+    runtime.unspacedMiddleIds = new Set();
+    runtime.unspacedMiddleCount = 0;
     const activeCards = host.getRemainingCards();
     const knownCards = runtime.deck.filter(card => runtime.marks[card.id] === 'known');
     runtime.deck = [...shuffleArray([...activeCards]), ...knownCards];
+    runtime.activeDeckCount = activeCards.length;
+    runtime.unspacedRoundSize = activeCards.length;
+    runtime.unspacedRoundMarks = 0;
     runtime.currentIdx = activeCards.length ? 0 : runtime.deck.length;
   }
 
