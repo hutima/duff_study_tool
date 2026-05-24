@@ -1433,6 +1433,138 @@
       forms: HISTEMI_PERFECT_ACTIVE_PARTICIPLE }
   ];
 
+  // ─── φιλέω participle declensions ─────────────────────────────────
+  //
+  // Duff drills only the masc-nom forms (W2_PHILEO_ACTIVE_PARTICIPLE:
+  // φιλῶν 1sg, φιλοῦντες 3pl, φιλήσας 1sg, φιλήσαντες 3pl). Full
+  // declensions follow the standard contract -έω pattern: the ε
+  // contracts with the participle suffix (ε+ο → ου, ε+α → α with
+  // accent shift).
+
+  const PHILEO_PRESENT_ACTIVE_PARTICIPLE = {
+    'φιλῶν':       'present active participle nominative singular masculine',
+    'φιλοῦντος':   'present active participle genitive singular masculine/neuter',
+    'φιλοῦντι':    'present active participle dative singular masculine/neuter',
+    'φιλοῦντα':    'present active participle accusative singular masculine',
+    'φιλοῦντες':   'present active participle nominative plural masculine',
+    'φιλούντων':   'present active participle genitive plural masculine/feminine/neuter',
+    'φιλοῦσι':     'present active participle dative plural masculine/neuter',
+    'φιλοῦσιν':    'present active participle dative plural masculine/neuter',
+    'φιλοῦντας':   'present active participle accusative plural masculine',
+    'φιλοῦσα':     'present active participle nominative singular feminine',
+    'φιλούσης':    'present active participle genitive singular feminine',
+    'φιλούσῃ':     'present active participle dative singular feminine',
+    'φιλοῦσαν':    'present active participle accusative singular feminine',
+    'φιλοῦσαι':    'present active participle nominative plural feminine',
+    'φιλουσῶν':    'present active participle genitive plural feminine',
+    'φιλούσαις':   'present active participle dative plural feminine',
+    'φιλούσας':    'present active participle accusative plural feminine',
+    'φιλοῦν':      'present active participle nominative/accusative singular neuter'
+  };
+
+  const PHILEO_AORIST_ACTIVE_PARTICIPLE = {
+    'φιλήσας':       'aorist active participle nominative singular masculine',
+    'φιλήσαντος':    'aorist active participle genitive singular masculine/neuter',
+    'φιλήσαντι':     'aorist active participle dative singular masculine/neuter',
+    'φιλήσαντα':     'aorist active participle accusative singular masculine',
+    'φιλήσαντες':    'aorist active participle nominative plural masculine',
+    'φιλησάντων':    'aorist active participle genitive plural masculine/feminine/neuter',
+    'φιλήσασι':      'aorist active participle dative plural masculine/neuter',
+    'φιλήσασιν':     'aorist active participle dative plural masculine/neuter',
+    'φιλήσαντας':    'aorist active participle accusative plural masculine',
+    'φιλήσασα':      'aorist active participle nominative singular feminine',
+    'φιλησάσης':     'aorist active participle genitive singular feminine',
+    'φιλησάσῃ':      'aorist active participle dative singular feminine',
+    'φιλήσασαν':     'aorist active participle accusative singular feminine',
+    'φιλήσασαι':     'aorist active participle nominative plural feminine',
+    'φιλησασῶν':     'aorist active participle genitive plural feminine',
+    'φιλησάσαις':    'aorist active participle dative plural feminine',
+    'φιλησάσας':     'aorist active participle accusative plural feminine',
+    'φιλῆσαν':       'aorist active participle nominative/accusative singular neuter'
+  };
+
+  const PHILEO_PARTICIPLE_OPTIONAL = [
+    { chapter: 12, family: 'φιλέω — present active participle φιλῶν full declension (optional)',
+      forms: PHILEO_PRESENT_ACTIVE_PARTICIPLE },
+    { chapter: 12, family: 'φιλέω — aorist active participle φιλήσας full declension (optional)',
+      forms: PHILEO_AORIST_ACTIVE_PARTICIPLE }
+  ];
+
+  // ─── λύω future participles (active, middle, passive) ─────────────
+  //
+  // Rare in NT but morphologically real. Future active follows the
+  // λύων pattern (ντ-stem masc/neut + -οῦσα fem); future middle
+  // follows λυόμενος (regular -ος/-η/-ον); future passive likewise
+  // (-θησόμενος, basically the future middle of the passive stem).
+
+  const LUO_FUTURE_ACTIVE_PARTICIPLE = {
+    'λύσων':      'future active participle nominative singular masculine',
+    'λύσοντος':   'future active participle genitive singular masculine/neuter',
+    'λύσοντι':    'future active participle dative singular masculine/neuter',
+    'λύσοντα':    'future active participle accusative singular masculine',
+    'λύσοντες':   'future active participle nominative plural masculine',
+    'λυσόντων':   'future active participle genitive plural masculine/feminine/neuter',
+    'λύσουσι':    'future active participle dative plural masculine/neuter',
+    'λύσουσιν':   'future active participle dative plural masculine/neuter',
+    'λύσοντας':   'future active participle accusative plural masculine',
+    'λύσουσα':    'future active participle nominative singular feminine',
+    'λυσούσης':   'future active participle genitive singular feminine',
+    'λυσούσῃ':    'future active participle dative singular feminine',
+    'λύσουσαν':   'future active participle accusative singular feminine',
+    'λύσουσαι':   'future active participle nominative plural feminine',
+    'λυσουσῶν':   'future active participle genitive plural feminine',
+    'λυσούσαις':  'future active participle dative plural feminine',
+    'λυσούσας':   'future active participle accusative plural feminine',
+    'λῦσον':      'future active participle nominative/accusative singular neuter'
+  };
+
+  const LUO_FUTURE_MIDDLE_PARTICIPLE = {
+    'λυσόμενος':  'future middle participle nominative singular masculine',
+    'λυσομένου':  'future middle participle genitive singular masculine/neuter',
+    'λυσομένῳ':   'future middle participle dative singular masculine/neuter',
+    'λυσόμενον':  'future middle participle accusative singular masculine/neuter',
+    'λυσόμενοι':  'future middle participle nominative plural masculine',
+    'λυσομένους': 'future middle participle accusative plural masculine',
+    'λυσομένων':  'future middle participle genitive plural masculine/feminine/neuter',
+    'λυσομένοις': 'future middle participle dative plural masculine/neuter',
+    'λυσομένη':   'future middle participle nominative singular feminine',
+    'λυσομένης':  'future middle participle genitive singular feminine',
+    'λυσομένῃ':   'future middle participle dative singular feminine',
+    'λυσομένην':  'future middle participle accusative singular feminine',
+    'λυσόμεναι':  'future middle participle nominative plural feminine',
+    'λυσομέναις': 'future middle participle dative plural feminine',
+    'λυσομένας':  'future middle participle accusative plural feminine',
+    'λυσόμενα':   'future middle participle nominative/accusative plural neuter'
+  };
+
+  const LUO_FUTURE_PASSIVE_PARTICIPLE = {
+    'λυθησόμενος':  'future passive participle nominative singular masculine',
+    'λυθησομένου':  'future passive participle genitive singular masculine/neuter',
+    'λυθησομένῳ':   'future passive participle dative singular masculine/neuter',
+    'λυθησόμενον':  'future passive participle accusative singular masculine/neuter',
+    'λυθησόμενοι':  'future passive participle nominative plural masculine',
+    'λυθησομένους': 'future passive participle accusative plural masculine',
+    'λυθησομένων':  'future passive participle genitive plural masculine/feminine/neuter',
+    'λυθησομένοις': 'future passive participle dative plural masculine/neuter',
+    'λυθησομένη':   'future passive participle nominative singular feminine',
+    'λυθησομένης':  'future passive participle genitive singular feminine',
+    'λυθησομένῃ':   'future passive participle dative singular feminine',
+    'λυθησομένην':  'future passive participle accusative singular feminine',
+    'λυθησόμεναι':  'future passive participle nominative plural feminine',
+    'λυθησομέναις': 'future passive participle dative plural feminine',
+    'λυθησομένας':  'future passive participle accusative plural feminine',
+    'λυθησόμενα':   'future passive participle nominative/accusative plural neuter'
+  };
+
+  const LUO_FUTURE_PARTICIPLE_OPTIONAL = [
+    { chapter: 15, family: 'λύω — future active participle λύσων full declension (optional, rare)',
+      forms: LUO_FUTURE_ACTIVE_PARTICIPLE },
+    { chapter: 15, family: 'λύω — future middle participle λυσόμενος full declension (optional, rare)',
+      forms: LUO_FUTURE_MIDDLE_PARTICIPLE },
+    { chapter: 15, family: 'λύω — future passive participle λυθησόμενος full declension (optional, rare)',
+      forms: LUO_FUTURE_PASSIVE_PARTICIPLE }
+  ];
+
   const LEMMA_INVENTORY = {
     'εἰμί': {
       // εἰμί is suppletive: it has no aorist or perfect family — Greek
@@ -1459,9 +1591,16 @@
       extraForms: {
         ...LUO_EXTRA_FORMS,
         ...LUO_PERFECT_ACTIVE_PARTICIPLE,
-        ...LUO_PERFECT_MP_PARTICIPLE
+        ...LUO_PERFECT_MP_PARTICIPLE,
+        ...LUO_FUTURE_ACTIVE_PARTICIPLE,
+        ...LUO_FUTURE_MIDDLE_PARTICIPLE,
+        ...LUO_FUTURE_PASSIVE_PARTICIPLE
       },
-      optionalFormGroups: [...LUO_OPTIONAL_GROUPS, ...LUO_PARTICIPLE_OPTIONAL]
+      optionalFormGroups: [
+        ...LUO_OPTIONAL_GROUPS,
+        ...LUO_PARTICIPLE_OPTIONAL,
+        ...LUO_FUTURE_PARTICIPLE_OPTIONAL
+      ]
     },
     'ῥύομαι': {
       extraForms: RHUOMAI_EXTRA_FORMS,
@@ -1480,8 +1619,12 @@
       optionalFormGroups: [...GINOMAI_OPTIONAL_GROUPS, ...GINOMAI_PARTICIPLE_OPTIONAL]
     },
     'φιλέω': {
-      extraForms: PHILEO_EXTRA_FORMS,
-      optionalFormGroups: PHILEO_OPTIONAL_GROUPS
+      extraForms: {
+        ...PHILEO_EXTRA_FORMS,
+        ...PHILEO_PRESENT_ACTIVE_PARTICIPLE,
+        ...PHILEO_AORIST_ACTIVE_PARTICIPLE
+      },
+      optionalFormGroups: [...PHILEO_OPTIONAL_GROUPS, ...PHILEO_PARTICIPLE_OPTIONAL]
     },
     'δίδωμι': {
       extraForms: {
