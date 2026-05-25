@@ -995,6 +995,8 @@
               ],
               note: "Both attributive patterns mean 'the good word'. The repeated article is the giveaway." },
             { form: "ὁ πιστὸς δοῦλος",
+              lemma: "πιστός in attributive position",
+              gloss: "'the faithful X'",
               prompt: "How should this attributive phrase be translated?",
               answer: "'the faithful servant'",
               choices: [
@@ -1005,6 +1007,8 @@
               ],
               note: "Article–adj–noun: attributive. The adjective is inside the article phrase, sharing it with the noun." },
             { form: "ὁ δοῦλος ὁ πιστός.",
+              lemma: "πιστός in attributive position",
+              gloss: "'the faithful X'",
               prompt: "Translate.",
               answer: "the faithful slave",
               choices: [
