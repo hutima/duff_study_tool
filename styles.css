@@ -8,7 +8,7 @@
     font-style: normal;
     font-weight: 400;
     font-display: swap;
-    src: url('fonts/gentium-plus-latin-400-normal.woff2?v=185') format('woff2');
+    src: url('fonts/gentium-plus-latin-400-normal.woff2?v=186') format('woff2');
     unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
   }
   @font-face {
@@ -16,7 +16,7 @@
     font-style: normal;
     font-weight: 400;
     font-display: swap;
-    src: url('fonts/gentium-plus-latin-ext-400-normal.woff2?v=185') format('woff2');
+    src: url('fonts/gentium-plus-latin-ext-400-normal.woff2?v=186') format('woff2');
     unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
   }
   @font-face {
@@ -24,7 +24,7 @@
     font-style: normal;
     font-weight: 400;
     font-display: swap;
-    src: url('fonts/gentium-plus-greek-400-normal.woff2?v=185') format('woff2');
+    src: url('fonts/gentium-plus-greek-400-normal.woff2?v=186') format('woff2');
     unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
   }
   @font-face {
@@ -32,7 +32,7 @@
     font-style: normal;
     font-weight: 400;
     font-display: swap;
-    src: url('fonts/gentium-plus-greek-ext-400-normal.woff2?v=185') format('woff2');
+    src: url('fonts/gentium-plus-greek-ext-400-normal.woff2?v=186') format('woff2');
     unicode-range: U+1F00-1FFF;
   }
   @font-face {
@@ -40,7 +40,7 @@
     font-style: italic;
     font-weight: 400;
     font-display: swap;
-    src: url('fonts/gentium-plus-latin-400-italic.woff2?v=185') format('woff2');
+    src: url('fonts/gentium-plus-latin-400-italic.woff2?v=186') format('woff2');
     unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
   }
   @font-face {
@@ -48,7 +48,7 @@
     font-style: italic;
     font-weight: 400;
     font-display: swap;
-    src: url('fonts/gentium-plus-latin-ext-400-italic.woff2?v=185') format('woff2');
+    src: url('fonts/gentium-plus-latin-ext-400-italic.woff2?v=186') format('woff2');
     unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
   }
   @font-face {
@@ -56,7 +56,7 @@
     font-style: italic;
     font-weight: 400;
     font-display: swap;
-    src: url('fonts/gentium-plus-greek-400-italic.woff2?v=185') format('woff2');
+    src: url('fonts/gentium-plus-greek-400-italic.woff2?v=186') format('woff2');
     unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
   }
   @font-face {
@@ -64,7 +64,7 @@
     font-style: italic;
     font-weight: 400;
     font-display: swap;
-    src: url('fonts/gentium-plus-greek-ext-400-italic.woff2?v=185') format('woff2');
+    src: url('fonts/gentium-plus-greek-ext-400-italic.woff2?v=186') format('woff2');
     unicode-range: U+1F00-1FFF;
   }
   @font-face {
@@ -72,7 +72,7 @@
     font-style: normal;
     font-weight: 700;
     font-display: swap;
-    src: url('fonts/gentium-plus-latin-700-normal.woff2?v=185') format('woff2');
+    src: url('fonts/gentium-plus-latin-700-normal.woff2?v=186') format('woff2');
     unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
   }
   @font-face {
@@ -80,7 +80,7 @@
     font-style: normal;
     font-weight: 700;
     font-display: swap;
-    src: url('fonts/gentium-plus-latin-ext-700-normal.woff2?v=185') format('woff2');
+    src: url('fonts/gentium-plus-latin-ext-700-normal.woff2?v=186') format('woff2');
     unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
   }
   @font-face {
@@ -88,7 +88,7 @@
     font-style: normal;
     font-weight: 700;
     font-display: swap;
-    src: url('fonts/gentium-plus-greek-700-normal.woff2?v=185') format('woff2');
+    src: url('fonts/gentium-plus-greek-700-normal.woff2?v=186') format('woff2');
     unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
   }
   @font-face {
@@ -96,7 +96,7 @@
     font-style: normal;
     font-weight: 700;
     font-display: swap;
-    src: url('fonts/gentium-plus-greek-ext-700-normal.woff2?v=185') format('woff2');
+    src: url('fonts/gentium-plus-greek-ext-700-normal.woff2?v=186') format('woff2');
     unicode-range: U+1F00-1FFF;
   }
   @font-face {
@@ -104,7 +104,7 @@
     font-style: italic;
     font-weight: 700;
     font-display: swap;
-    src: url('fonts/gentium-plus-latin-700-italic.woff2?v=185') format('woff2');
+    src: url('fonts/gentium-plus-latin-700-italic.woff2?v=186') format('woff2');
     unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
   }
   @font-face {
@@ -112,7 +112,7 @@
     font-style: italic;
     font-weight: 700;
     font-display: swap;
-    src: url('fonts/gentium-plus-latin-ext-700-italic.woff2?v=185') format('woff2');
+    src: url('fonts/gentium-plus-latin-ext-700-italic.woff2?v=186') format('woff2');
     unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
   }
   @font-face {
@@ -120,7 +120,7 @@
     font-style: italic;
     font-weight: 700;
     font-display: swap;
-    src: url('fonts/gentium-plus-greek-700-italic.woff2?v=185') format('woff2');
+    src: url('fonts/gentium-plus-greek-700-italic.woff2?v=186') format('woff2');
     unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
   }
   @font-face {
@@ -128,7 +128,7 @@
     font-style: italic;
     font-weight: 700;
     font-display: swap;
-    src: url('fonts/gentium-plus-greek-ext-700-italic.woff2?v=185') format('woff2');
+    src: url('fonts/gentium-plus-greek-ext-700-italic.woff2?v=186') format('woff2');
     unicode-range: U+1F00-1FFF;
   }
 
@@ -153,7 +153,7 @@
     size-adjust: 85%;
     ascent-override: 110%;
     descent-override: 37%;
-    src: url('fonts/noto-sans-latin-normal.woff2?v=185') format('woff2');
+    src: url('fonts/noto-sans-latin-normal.woff2?v=186') format('woff2');
     unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
   }
   @font-face {
@@ -164,7 +164,7 @@
     size-adjust: 85%;
     ascent-override: 110%;
     descent-override: 37%;
-    src: url('fonts/noto-sans-latin-ext-normal.woff2?v=185') format('woff2');
+    src: url('fonts/noto-sans-latin-ext-normal.woff2?v=186') format('woff2');
     unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
   }
   @font-face {
@@ -175,7 +175,7 @@
     size-adjust: 85%;
     ascent-override: 110%;
     descent-override: 37%;
-    src: url('fonts/noto-sans-greek-normal.woff2?v=185') format('woff2');
+    src: url('fonts/noto-sans-greek-normal.woff2?v=186') format('woff2');
     unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
   }
   @font-face {
@@ -186,7 +186,7 @@
     size-adjust: 85%;
     ascent-override: 110%;
     descent-override: 37%;
-    src: url('fonts/noto-sans-greek-ext-normal.woff2?v=185') format('woff2');
+    src: url('fonts/noto-sans-greek-ext-normal.woff2?v=186') format('woff2');
     unicode-range: U+1F00-1FFF;
   }
   @font-face {
@@ -197,7 +197,7 @@
     size-adjust: 85%;
     ascent-override: 110%;
     descent-override: 37%;
-    src: url('fonts/noto-sans-latin-italic.woff2?v=185') format('woff2');
+    src: url('fonts/noto-sans-latin-italic.woff2?v=186') format('woff2');
     unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
   }
   @font-face {
@@ -208,7 +208,7 @@
     size-adjust: 85%;
     ascent-override: 110%;
     descent-override: 37%;
-    src: url('fonts/noto-sans-latin-ext-italic.woff2?v=185') format('woff2');
+    src: url('fonts/noto-sans-latin-ext-italic.woff2?v=186') format('woff2');
     unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
   }
   @font-face {
@@ -219,7 +219,7 @@
     size-adjust: 85%;
     ascent-override: 110%;
     descent-override: 37%;
-    src: url('fonts/noto-sans-greek-italic.woff2?v=185') format('woff2');
+    src: url('fonts/noto-sans-greek-italic.woff2?v=186') format('woff2');
     unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
   }
   @font-face {
@@ -230,7 +230,7 @@
     size-adjust: 85%;
     ascent-override: 110%;
     descent-override: 37%;
-    src: url('fonts/noto-sans-greek-ext-italic.woff2?v=185') format('woff2');
+    src: url('fonts/noto-sans-greek-ext-italic.woff2?v=186') format('woff2');
     unicode-range: U+1F00-1FFF;
   }
 
@@ -3062,6 +3062,69 @@
   html[data-theme="light"] .consent-overlay {
     background: rgba(88, 72, 38, 0.38);
   }
+
+  /* ── Light mode: deepen parsing correct/incorrect colors ──
+     The dark-mode hues (#9ad0a7 / #e7a1a1) are tuned for a near-black
+     surface; on cream they wash out to near-illegible pastels. Strategy:
+     - Standalone red/green TEXT (parse summary rows, parse-line labels,
+       %-buckets, choice/result body copy) gets saturated oxblood /
+       forest hues so it reads cleanly against cream.
+     - Coloured CIRCLES + chip backgrounds (step dots, choice-btn /
+       morph-result tinted frames) stay in a softer pastel register so
+       they still feel light-mode appropriate, but with a *darker*
+       glyph inside so the C/N/G letter is readable. */
+  html[data-theme="light"] .choice-btn.correct {
+    border-color: #c5dccb;
+    background: rgba(58,106,74,0.06);
+    color: #3a6a4a;
+  }
+  html[data-theme="light"] .choice-btn.incorrect {
+    border-color: #e0c5c5;
+    background: rgba(140,58,58,0.05);
+    color: #8c3a3a;
+  }
+  html[data-theme="light"] .morph-result.correct {
+    background: rgba(58,106,74,0.06);
+    border-color: #c5dccb;
+    color: #3a6a4a;
+  }
+  html[data-theme="light"] .morph-result.incorrect {
+    background: rgba(140,58,58,0.05);
+    border-color: #e0c5c5;
+    color: #8c3a3a;
+  }
+  html[data-theme="light"] .morph-step-dot.correct {
+    border-color: #c5dccb;
+    color: #3a6a4a;
+    background: rgba(58,106,74,0.07);
+  }
+  html[data-theme="light"] .morph-step-dot.incorrect {
+    border-color: #e0c5c5;
+    color: #8c3a3a;
+    background: rgba(140,58,58,0.06);
+  }
+  html[data-theme="light"] .morph-step-summary-row.morph-step-correct .morph-step-summary-pick { color: #3a6a4a; }
+  html[data-theme="light"] .morph-step-summary-row.morph-step-incorrect .morph-step-summary-pick { color: #8c3a3a; }
+  html[data-theme="light"] .morph-step-aspect-note { color: #8c3a3a; }
+  html[data-theme="light"] .morph-step-parse-line-yours .morph-step-parse-label { color: #8c3a3a; }
+  html[data-theme="light"] .morph-step-parse-line-correct .morph-step-parse-label { color: #3a6a4a; }
+  html[data-theme="light"] .morph-step-parse-match-impossible { color: #8c3a3a; }
+  html[data-theme="light"] .morph-wrong-label { color: #8c3a3a; }
+  html[data-theme="light"] .parsing-review-pct-high { color: #3a6a4a; }
+  html[data-theme="light"] .parsing-review-pct-low { color: #8c3a3a; }
+  html[data-theme="light"] .reader-choice-btn.correct {
+    border-color: #c5dccb;
+    background: rgba(58,106,74,0.06);
+    color: #3a6a4a;
+  }
+  html[data-theme="light"] .reader-choice-btn.incorrect {
+    border-color: #e0c5c5;
+    background: rgba(140,58,58,0.05);
+    color: #8c3a3a;
+  }
+  html[data-theme="light"] .reader-drill-result.correct { color: #3a6a4a; }
+  html[data-theme="light"] .reader-drill-result.incorrect { color: #8c3a3a; }
+
   @media (max-width: 600px) {
     .header-top { grid-template-columns: 1fr; }
     .theme-switcher { justify-self: center; }
