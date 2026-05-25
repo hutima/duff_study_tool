@@ -907,7 +907,11 @@ function renderMorphStepSummary(card, state) {
 
 function renderMorphStepCard(area, card) {
   const state = ensureStepStateForCard(card);
-  const lemmaGloss = card.gloss || card.lemmaGloss
+  // Hide the gloss until the parse is complete — a per-form gloss like
+  // "you will be" on ἔσεσθε would otherwise hand the student tense/person/
+  // number on a plate. Revealed in the summary, where it's reinforcement
+  // rather than a giveaway.
+  const lemmaGloss = state.completed && (card.gloss || card.lemmaGloss)
     ? `<div class="morph-gloss">Gloss: “${escapeHtml(card.gloss || card.lemmaGloss)}”</div>`
     : '';
 
