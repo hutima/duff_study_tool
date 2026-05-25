@@ -249,11 +249,27 @@ export function renderCard() {
     const morphSourceLabel = card.supplemental
       ? cardFaceLabelFromSourceLabel(card.sourceLabel)
       : card.sourceLabel;
+    // Translate prompts ("Translate.", "How should this be translated?")
+    // turn the gloss into a giveaway — for εἰμί cards the gloss "I am"
+    // hands the student the verb's meaning in a sentence-translation task.
+    // Hide it until they've answered (or revealed in self-check), then
+    // surface it as reinforcement. The reverse direction (English →
+    // Greek) doesn't have this problem — the English IS the prompt — so
+    // leave it visible there.
+    const isTranslatePrompt = /translate/i.test(card.prompt || '') && !reversed;
+    const glossUnlocked = runtime.morphSelfCheck
+      ? runtime.morphAnswerState.revealed
+      : runtime.morphAnswerState.answered;
+    const showGloss = (card.lemmaGloss || card.gloss)
+      && (!isTranslatePrompt || glossUnlocked);
+    const glossHtml = showGloss
+      ? `<div class="morph-gloss">Gloss: “${card.lemmaGloss || card.gloss}”</div>`
+      : '';
     area.innerHTML = `
       <div class="morph-card">
         <div class="morph-label">Grammar${reversed ? ' · English → Greek' : ''}</div>
         <div class="morph-prompt">${displayPrompt}</div>
-        ${card.lemmaGloss || card.gloss ? `<div class="morph-gloss">Gloss: “${card.lemmaGloss || card.gloss}”</div>` : ''}
+        ${glossHtml}
         <div class="${formClass}">${displayForm}</div>
         ${contextHtml}
         <div class="morph-hint">${card.lemma}</div>
