@@ -249,14 +249,57 @@ export function renderCard() {
     const morphSourceLabel = card.supplemental
       ? cardFaceLabelFromSourceLabel(card.sourceLabel)
       : card.sourceLabel;
+    // Grammar.js families are keyed to a single family-level lemma/gloss
+    // even when a few questions in the family use related-but-different
+    // vocabulary (e.g. the πιστός questions sitting under an ἀγαθός family).
+    // When the family lemma's headword can't be found in the form, the
+    // inherited subtitle ("ἀγαθός in attributive position") and gloss
+    // ("the good X") are misleading — suppress them. Per-question q.lemma
+    // / q.gloss overrides bypass the check (the override IS the right
+    // label for that question).
+    const lemmaMatchesForm = familyLemmaAppearsInForm(card.lemma, card.form);
+    // Translate prompts ("Translate.", "How should this be translated?")
+    // turn the gloss into a giveaway — for εἰμί cards the gloss "I am"
+    // hands the student the verb's meaning in a sentence-translation task.
+    // Hide it until they've answered (or revealed in self-check), then
+    // surface it as reinforcement. The reverse direction (English →
+    // Greek) doesn't have this problem — the English IS the prompt — so
+    // leave it visible there.
+    const isTranslatePrompt = /translate/i.test(card.prompt || '') && !reversed;
+    // Choice-pointing giveaway: when the gloss text appears in exactly one
+    // of the (forward) MC options, it singles that choice out — sometimes
+    // the correct one (Identify εἰμί: gloss "I am" → "1st singular ('I am')")
+    // and sometimes a wrong distractor (Identify ἐστίν: gloss "I am" → also
+    // points at the 1st-sg option). Either way the gloss does the student's
+    // work for them or actively misleads — hide until they commit, then
+    // reveal as reinforcement. When the gloss appears in zero or in
+    // multiple choices (e.g. "the" in every sentence translation, "present
+    // active participle" across every parse variant) it doesn't single one
+    // out, so leave it visible.
+    const glossText = String(card.gloss || card.lemmaGloss || '');
+    const glossSinglesOutChoice = !reversed
+      && glossPointsAtSingleChoice(glossText, displayChoices);
+    const glossUnlocked = runtime.morphSelfCheck
+      ? runtime.morphAnswerState.revealed
+      : runtime.morphAnswerState.answered;
+    const showGloss = glossText
+      && lemmaMatchesForm
+      && (!isTranslatePrompt || glossUnlocked)
+      && (!glossSinglesOutChoice || glossUnlocked);
+    const glossHtml = showGloss
+      ? `<div class="morph-gloss">Gloss: “${glossText}”</div>`
+      : '';
+    const lemmaHintHtml = lemmaMatchesForm
+      ? `<div class="morph-hint">${card.lemma}</div>`
+      : '';
     area.innerHTML = `
       <div class="morph-card">
         <div class="morph-label">Grammar${reversed ? ' · English → Greek' : ''}</div>
         <div class="morph-prompt">${displayPrompt}</div>
-        ${card.gloss || card.lemmaGloss ? `<div class="morph-gloss">Gloss: “${card.gloss || card.lemmaGloss}”</div>` : ''}
+        ${glossHtml}
         <div class="${formClass}">${displayForm}</div>
         ${contextHtml}
-        <div class="morph-hint">${card.lemma}</div>
+        ${lemmaHintHtml}
         <div class="morph-source">${morphSourceLabel}${runtime.morphSelfCheck ? ' · Self-check' : ''}</div>
         ${interactionHtml}
         ${resultHtml}
@@ -419,6 +462,53 @@ function escapeHtml(s) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+// Heuristic: does any Greek head-token in the family lemma string appear
+// (accent-insensitive stem-prefix) somewhere in the form? Used to suppress
+// the inherited subtitle/gloss on cards where the family-level lemma
+// doesn't actually match the question's vocabulary (e.g. the πιστός
+// questions sitting under an ἀγαθός family in grammar.js 5.2).
+//
+// Returns true when nothing Greek is in either string — no signal to act
+// on, so don't suppress. Returns true when the lemma's stem (first
+// max(3, len-2) chars, accents stripped) shows up in any form word, OR
+// vice versa (handles short lemmas like εἰμί). Suppletive pairs (εἰμί ↔
+// ἐστιν) won't match — add an explicit q.lemma override there.
+// True when the gloss text appears (case- and quote-insensitive) in
+// exactly one of the answer choices — i.e. the gloss singles out a
+// single option and steers the student toward it. When it shows up in
+// zero choices the gloss is just context; when it shows up in multiple
+// choices it doesn't disambiguate. Glosses under two characters are
+// ignored to avoid false positives on tiny common words.
+function glossPointsAtSingleChoice(gloss, choices) {
+  if (!gloss || !Array.isArray(choices) || choices.length < 2) return false;
+  const strip = (s) => String(s).toLowerCase().replace(/[''""‘’“”]/g, '').replace(/\s+/g, ' ').trim();
+  const g = strip(gloss);
+  if (g.length < 2) return false;
+  let hits = 0;
+  for (const c of choices) {
+    if (strip(c).includes(g)) hits++;
+    if (hits > 1) return false;
+  }
+  return hits === 1;
+}
+
+function familyLemmaAppearsInForm(lemma, form) {
+  if (!lemma || !form) return true;
+  const greek = /[Ͱ-Ͽἀ-῿]+/g;
+  const lemmaTokens = String(lemma).match(greek) || [];
+  const formTokens = String(form).match(greek) || [];
+  if (!lemmaTokens.length || !formTokens.length) return true;
+  const strip = (s) => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  const formStems = formTokens.map(strip);
+  return lemmaTokens.some((lt) => {
+    const ls = strip(lt);
+    if (ls.length < 2) return false;
+    const stemLen = Math.max(3, ls.length - 2);
+    const stem = ls.slice(0, Math.min(ls.length, stemLen));
+    return formStems.some((fs) => fs.includes(stem) || stem.includes(fs));
+  });
 }
 
 // Supplemental set labels follow "<lemma(s)> — <sub-paradigm>" (e.g.

@@ -190,7 +190,7 @@
             supplemental: !!selection.set.supplemental,
             chapter: Number(selection.baseKey),
             family: item.family,
-            lemma: item.lemma,
+            lemma: q.lemma || item.lemma,
             gloss: q.gloss || item.gloss,
             lemmaGloss: item.gloss,
             form: q.form,
