@@ -253,7 +253,7 @@ export function renderCard() {
       <div class="morph-card">
         <div class="morph-label">Grammar${reversed ? ' · English → Greek' : ''}</div>
         <div class="morph-prompt">${displayPrompt}</div>
-        ${card.lemmaGloss || card.gloss ? `<div class="morph-gloss">Gloss: “${card.lemmaGloss || card.gloss}”</div>` : ''}
+        ${card.gloss || card.lemmaGloss ? `<div class="morph-gloss">Gloss: “${card.gloss || card.lemmaGloss}”</div>` : ''}
         <div class="${formClass}">${displayForm}</div>
         ${contextHtml}
         <div class="morph-hint">${card.lemma}</div>
@@ -693,10 +693,24 @@ function resolveFormForPickedDims(card, steps, pickedValues, autoFilledDims) {
   // picked correctly. Without this, an off-toggle would orphan-skip
   // every wrong-form candidate through the matchPool's missing-dim
   // pass and the lookup would surface noise.
+  //
+  // Voice exception: suppletive εἰμί is active in present/imperfect but
+  // middle in future, and other paradigms split voice by tense too. The
+  // auto-filled voice reflects the CARD's tense — when the student picks
+  // a different tense, that voice no longer applies (a "present 2sg" pick
+  // on the future ἔσεσθε should resolve to εἶ/active, not be blocked by
+  // the card's middle). Drop the voice fill in that case.
   if (autoFilledDims && typeof autoFilledDims === 'object') {
+    const cardDims = parseAnswerDimensions(card.parsedAnswer || card.answer || '');
+    const normalizeTense = (t) => String(t || '').replace(/^(first|second)\s+/, '');
     Object.keys(autoFilledDims).forEach((k) => {
       if (FORM_LOOKUP_SKIP_DIMS.has(k)) return;
-      if (!pickedDims[k] && autoFilledDims[k]) pickedDims[k] = autoFilledDims[k];
+      if (pickedDims[k] || !autoFilledDims[k]) return;
+      if (k === 'voice' && pickedDims.tense && cardDims.tense
+          && normalizeTense(pickedDims.tense) !== normalizeTense(cardDims.tense)) {
+        return;
+      }
+      pickedDims[k] = autoFilledDims[k];
     });
   }
   const keys = Object.keys(pickedDims);
@@ -893,8 +907,12 @@ function renderMorphStepSummary(card, state) {
 
 function renderMorphStepCard(area, card) {
   const state = ensureStepStateForCard(card);
-  const lemmaGloss = card.lemmaGloss || card.gloss
-    ? `<div class="morph-gloss">Gloss: “${escapeHtml(card.lemmaGloss || card.gloss)}”</div>`
+  // Hide the gloss until the parse is complete — a per-form gloss like
+  // "you will be" on ἔσεσθε would otherwise hand the student tense/person/
+  // number on a plate. Revealed in the summary, where it's reinforcement
+  // rather than a giveaway.
+  const lemmaGloss = state.completed && (card.gloss || card.lemmaGloss)
+    ? `<div class="morph-gloss">Gloss: “${escapeHtml(card.gloss || card.lemmaGloss)}”</div>`
     : '';
 
   const body = state.completed
@@ -904,13 +922,25 @@ function renderMorphStepCard(area, card) {
   const stepSourceLabel = card.supplemental
     ? cardFaceLabelFromSourceLabel(card.sourceLabel || '')
     : (card.sourceLabel || '');
+  // The italic line under the form is a reading aid — a transliteration of
+  // the form the student is parsing, so they can sound it out. Printing the
+  // lemma here (the old behavior) doubled up with the source-label prefix
+  // and, on cards where the form IS the lemma (εἰμί = 1sg present), just
+  // duplicated the form in italics. The lemma still appears in the
+  // source-label prefix and in the post-parse summary meta.
+  const formTransliteration = typeof window !== 'undefined' && typeof window.transliterateGreek === 'function'
+    ? window.transliterateGreek(card.form || '')
+    : '';
+  const hintHtml = formTransliteration
+    ? `<div class="morph-hint">${escapeHtml(formTransliteration)}</div>`
+    : '';
   area.innerHTML = `
     <div class="morph-card morph-step-card">
       <div class="morph-label">Grammar · Step-by-step</div>
       <div class="morph-prompt">Parse this form one dimension at a time.</div>
       ${lemmaGloss}
       <div class="morph-form">${escapeHtml(card.form)}</div>
-      <div class="morph-hint">${escapeHtml(card.lemma)}</div>
+      ${hintHtml}
       <div class="morph-source">${escapeHtml(stepSourceLabel)} · Use “continuous/undefined” when the form licenses either reading</div>
       ${renderMorphStepBreadcrumb(state)}
       ${body}
