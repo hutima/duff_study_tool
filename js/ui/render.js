@@ -922,13 +922,25 @@ function renderMorphStepCard(area, card) {
   const stepSourceLabel = card.supplemental
     ? cardFaceLabelFromSourceLabel(card.sourceLabel || '')
     : (card.sourceLabel || '');
+  // The italic line under the form is a reading aid — a transliteration of
+  // the form the student is parsing, so they can sound it out. Printing the
+  // lemma here (the old behavior) doubled up with the source-label prefix
+  // and, on cards where the form IS the lemma (εἰμί = 1sg present), just
+  // duplicated the form in italics. The lemma still appears in the
+  // source-label prefix and in the post-parse summary meta.
+  const formTransliteration = typeof window !== 'undefined' && typeof window.transliterateGreek === 'function'
+    ? window.transliterateGreek(card.form || '')
+    : '';
+  const hintHtml = formTransliteration
+    ? `<div class="morph-hint">${escapeHtml(formTransliteration)}</div>`
+    : '';
   area.innerHTML = `
     <div class="morph-card morph-step-card">
       <div class="morph-label">Grammar · Step-by-step</div>
       <div class="morph-prompt">Parse this form one dimension at a time.</div>
       ${lemmaGloss}
       <div class="morph-form">${escapeHtml(card.form)}</div>
-      <div class="morph-hint">${escapeHtml(card.lemma)}</div>
+      ${hintHtml}
       <div class="morph-source">${escapeHtml(stepSourceLabel)} · Use “continuous/undefined” when the form licenses either reading</div>
       ${renderMorphStepBreadcrumb(state)}
       ${body}
