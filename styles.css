@@ -8,7 +8,7 @@
     font-style: normal;
     font-weight: 400;
     font-display: swap;
-    src: url('fonts/gentium-plus-latin-400-normal.woff2?v=184') format('woff2');
+    src: url('fonts/gentium-plus-latin-400-normal.woff2?v=185') format('woff2');
     unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
   }
   @font-face {
@@ -16,7 +16,7 @@
     font-style: normal;
     font-weight: 400;
     font-display: swap;
-    src: url('fonts/gentium-plus-latin-ext-400-normal.woff2?v=184') format('woff2');
+    src: url('fonts/gentium-plus-latin-ext-400-normal.woff2?v=185') format('woff2');
     unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
   }
   @font-face {
@@ -24,7 +24,7 @@
     font-style: normal;
     font-weight: 400;
     font-display: swap;
-    src: url('fonts/gentium-plus-greek-400-normal.woff2?v=184') format('woff2');
+    src: url('fonts/gentium-plus-greek-400-normal.woff2?v=185') format('woff2');
     unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
   }
   @font-face {
@@ -32,7 +32,7 @@
     font-style: normal;
     font-weight: 400;
     font-display: swap;
-    src: url('fonts/gentium-plus-greek-ext-400-normal.woff2?v=184') format('woff2');
+    src: url('fonts/gentium-plus-greek-ext-400-normal.woff2?v=185') format('woff2');
     unicode-range: U+1F00-1FFF;
   }
   @font-face {
@@ -40,7 +40,7 @@
     font-style: italic;
     font-weight: 400;
     font-display: swap;
-    src: url('fonts/gentium-plus-latin-400-italic.woff2?v=184') format('woff2');
+    src: url('fonts/gentium-plus-latin-400-italic.woff2?v=185') format('woff2');
     unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
   }
   @font-face {
@@ -48,7 +48,7 @@
     font-style: italic;
     font-weight: 400;
     font-display: swap;
-    src: url('fonts/gentium-plus-latin-ext-400-italic.woff2?v=184') format('woff2');
+    src: url('fonts/gentium-plus-latin-ext-400-italic.woff2?v=185') format('woff2');
     unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
   }
   @font-face {
@@ -56,7 +56,7 @@
     font-style: italic;
     font-weight: 400;
     font-display: swap;
-    src: url('fonts/gentium-plus-greek-400-italic.woff2?v=184') format('woff2');
+    src: url('fonts/gentium-plus-greek-400-italic.woff2?v=185') format('woff2');
     unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
   }
   @font-face {
@@ -64,7 +64,7 @@
     font-style: italic;
     font-weight: 400;
     font-display: swap;
-    src: url('fonts/gentium-plus-greek-ext-400-italic.woff2?v=184') format('woff2');
+    src: url('fonts/gentium-plus-greek-ext-400-italic.woff2?v=185') format('woff2');
     unicode-range: U+1F00-1FFF;
   }
   @font-face {
@@ -72,7 +72,7 @@
     font-style: normal;
     font-weight: 700;
     font-display: swap;
-    src: url('fonts/gentium-plus-latin-700-normal.woff2?v=184') format('woff2');
+    src: url('fonts/gentium-plus-latin-700-normal.woff2?v=185') format('woff2');
     unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
   }
   @font-face {
@@ -80,7 +80,7 @@
     font-style: normal;
     font-weight: 700;
     font-display: swap;
-    src: url('fonts/gentium-plus-latin-ext-700-normal.woff2?v=184') format('woff2');
+    src: url('fonts/gentium-plus-latin-ext-700-normal.woff2?v=185') format('woff2');
     unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
   }
   @font-face {
@@ -88,7 +88,7 @@
     font-style: normal;
     font-weight: 700;
     font-display: swap;
-    src: url('fonts/gentium-plus-greek-700-normal.woff2?v=184') format('woff2');
+    src: url('fonts/gentium-plus-greek-700-normal.woff2?v=185') format('woff2');
     unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
   }
   @font-face {
@@ -96,7 +96,7 @@
     font-style: normal;
     font-weight: 700;
     font-display: swap;
-    src: url('fonts/gentium-plus-greek-ext-700-normal.woff2?v=184') format('woff2');
+    src: url('fonts/gentium-plus-greek-ext-700-normal.woff2?v=185') format('woff2');
     unicode-range: U+1F00-1FFF;
   }
   @font-face {
@@ -104,7 +104,7 @@
     font-style: italic;
     font-weight: 700;
     font-display: swap;
-    src: url('fonts/gentium-plus-latin-700-italic.woff2?v=184') format('woff2');
+    src: url('fonts/gentium-plus-latin-700-italic.woff2?v=185') format('woff2');
     unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
   }
   @font-face {
@@ -112,7 +112,7 @@
     font-style: italic;
     font-weight: 700;
     font-display: swap;
-    src: url('fonts/gentium-plus-latin-ext-700-italic.woff2?v=184') format('woff2');
+    src: url('fonts/gentium-plus-latin-ext-700-italic.woff2?v=185') format('woff2');
     unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
   }
   @font-face {
@@ -120,7 +120,7 @@
     font-style: italic;
     font-weight: 700;
     font-display: swap;
-    src: url('fonts/gentium-plus-greek-700-italic.woff2?v=184') format('woff2');
+    src: url('fonts/gentium-plus-greek-700-italic.woff2?v=185') format('woff2');
     unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
   }
   @font-face {
@@ -128,7 +128,109 @@
     font-style: italic;
     font-weight: 700;
     font-display: swap;
-    src: url('fonts/gentium-plus-greek-ext-700-italic.woff2?v=184') format('woff2');
+    src: url('fonts/gentium-plus-greek-ext-700-italic.woff2?v=185') format('woff2');
+    unicode-range: U+1F00-1FFF;
+  }
+
+  /* Noto Sans — self-hosted variable webfont used when the user picks the
+     sans-serif preference. WOFF2 files in fonts/ are Google Fonts' variable
+     Noto Sans (one file per subset × style covers the full 100–900 weight
+     range via variation axis). Bundled subsets: latin, latin-ext, greek,
+     greek-ext. Styles: normal, italic.
+
+     Optical-height match against the serif default: measured from the
+     OS/2 tables, Gentium Plus has x-height 45.4% of em and Noto Sans has
+     53.6%. To make Noto Sans render at the same perceived size as Gentium
+     at a given CSS font-size, scale Noto down to 45.4/53.6 ≈ 85%
+     (size-adjust). To keep line metrics aligned so toggling the
+     preference doesn't shift layout, also override ascent/descent to
+     match Gentium's ratios (ascender 109.9%, descender 36.6% of em). */
+  @font-face {
+    font-family: 'Noto Sans';
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    size-adjust: 85%;
+    ascent-override: 110%;
+    descent-override: 37%;
+    src: url('fonts/noto-sans-latin-normal.woff2?v=185') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  @font-face {
+    font-family: 'Noto Sans';
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    size-adjust: 85%;
+    ascent-override: 110%;
+    descent-override: 37%;
+    src: url('fonts/noto-sans-latin-ext-normal.woff2?v=185') format('woff2');
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  }
+  @font-face {
+    font-family: 'Noto Sans';
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    size-adjust: 85%;
+    ascent-override: 110%;
+    descent-override: 37%;
+    src: url('fonts/noto-sans-greek-normal.woff2?v=185') format('woff2');
+    unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+  }
+  @font-face {
+    font-family: 'Noto Sans';
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    size-adjust: 85%;
+    ascent-override: 110%;
+    descent-override: 37%;
+    src: url('fonts/noto-sans-greek-ext-normal.woff2?v=185') format('woff2');
+    unicode-range: U+1F00-1FFF;
+  }
+  @font-face {
+    font-family: 'Noto Sans';
+    font-style: italic;
+    font-weight: 100 900;
+    font-display: swap;
+    size-adjust: 85%;
+    ascent-override: 110%;
+    descent-override: 37%;
+    src: url('fonts/noto-sans-latin-italic.woff2?v=185') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  @font-face {
+    font-family: 'Noto Sans';
+    font-style: italic;
+    font-weight: 100 900;
+    font-display: swap;
+    size-adjust: 85%;
+    ascent-override: 110%;
+    descent-override: 37%;
+    src: url('fonts/noto-sans-latin-ext-italic.woff2?v=185') format('woff2');
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  }
+  @font-face {
+    font-family: 'Noto Sans';
+    font-style: italic;
+    font-weight: 100 900;
+    font-display: swap;
+    size-adjust: 85%;
+    ascent-override: 110%;
+    descent-override: 37%;
+    src: url('fonts/noto-sans-greek-italic.woff2?v=185') format('woff2');
+    unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+  }
+  @font-face {
+    font-family: 'Noto Sans';
+    font-style: italic;
+    font-weight: 100 900;
+    font-display: swap;
+    size-adjust: 85%;
+    ascent-override: 110%;
+    descent-override: 37%;
+    src: url('fonts/noto-sans-greek-ext-italic.woff2?v=185') format('woff2');
     unicode-range: U+1F00-1FFF;
   }
 
@@ -156,13 +258,13 @@
     --font-greek: 'Gentium Plus', serif;
   }
 
-  /* Sans-serif override: body/display switch to system sans, and Greek
-     text switches to a sans stack that still renders polytonic accents.
-     Fonts come from the OS so the PWA stays fully offline. */
+  /* Sans-serif override: body, display, and Greek text all use the
+     self-hosted Noto Sans declared above. The generic sans-serif is a
+     last-resort fallback if the bundled woff2 ever fails to load. */
   html[data-font-family="sans"] {
-    --font-body: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    --font-display: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    --font-greek: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', 'Noto Sans', 'DejaVu Sans', 'Liberation Sans', Arial, sans-serif;
+    --font-body: 'Noto Sans', sans-serif;
+    --font-display: 'Noto Sans', sans-serif;
+    --font-greek: 'Noto Sans', sans-serif;
   }
 
   /* Text size: uses `zoom` so padding scales with the text — buttons keep
