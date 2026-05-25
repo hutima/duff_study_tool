@@ -253,7 +253,7 @@ export function renderCard() {
       <div class="morph-card">
         <div class="morph-label">Grammar${reversed ? ' · English → Greek' : ''}</div>
         <div class="morph-prompt">${displayPrompt}</div>
-        ${card.lemmaGloss || card.gloss ? `<div class="morph-gloss">Gloss: “${card.lemmaGloss || card.gloss}”</div>` : ''}
+        ${card.gloss || card.lemmaGloss ? `<div class="morph-gloss">Gloss: “${card.gloss || card.lemmaGloss}”</div>` : ''}
         <div class="${formClass}">${displayForm}</div>
         ${contextHtml}
         <div class="morph-hint">${card.lemma}</div>
@@ -693,10 +693,24 @@ function resolveFormForPickedDims(card, steps, pickedValues, autoFilledDims) {
   // picked correctly. Without this, an off-toggle would orphan-skip
   // every wrong-form candidate through the matchPool's missing-dim
   // pass and the lookup would surface noise.
+  //
+  // Voice exception: suppletive εἰμί is active in present/imperfect but
+  // middle in future, and other paradigms split voice by tense too. The
+  // auto-filled voice reflects the CARD's tense — when the student picks
+  // a different tense, that voice no longer applies (a "present 2sg" pick
+  // on the future ἔσεσθε should resolve to εἶ/active, not be blocked by
+  // the card's middle). Drop the voice fill in that case.
   if (autoFilledDims && typeof autoFilledDims === 'object') {
+    const cardDims = parseAnswerDimensions(card.parsedAnswer || card.answer || '');
+    const normalizeTense = (t) => String(t || '').replace(/^(first|second)\s+/, '');
     Object.keys(autoFilledDims).forEach((k) => {
       if (FORM_LOOKUP_SKIP_DIMS.has(k)) return;
-      if (!pickedDims[k] && autoFilledDims[k]) pickedDims[k] = autoFilledDims[k];
+      if (pickedDims[k] || !autoFilledDims[k]) return;
+      if (k === 'voice' && pickedDims.tense && cardDims.tense
+          && normalizeTense(pickedDims.tense) !== normalizeTense(cardDims.tense)) {
+        return;
+      }
+      pickedDims[k] = autoFilledDims[k];
     });
   }
   const keys = Object.keys(pickedDims);
@@ -893,8 +907,8 @@ function renderMorphStepSummary(card, state) {
 
 function renderMorphStepCard(area, card) {
   const state = ensureStepStateForCard(card);
-  const lemmaGloss = card.lemmaGloss || card.gloss
-    ? `<div class="morph-gloss">Gloss: “${escapeHtml(card.lemmaGloss || card.gloss)}”</div>`
+  const lemmaGloss = card.gloss || card.lemmaGloss
+    ? `<div class="morph-gloss">Gloss: “${escapeHtml(card.gloss || card.lemmaGloss)}”</div>`
     : '';
 
   const body = state.completed
