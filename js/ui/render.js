@@ -266,14 +266,28 @@ export function renderCard() {
     // Greek) doesn't have this problem — the English IS the prompt — so
     // leave it visible there.
     const isTranslatePrompt = /translate/i.test(card.prompt || '') && !reversed;
+    // Choice-pointing giveaway: when the gloss text appears in exactly one
+    // of the (forward) MC options, it singles that choice out — sometimes
+    // the correct one (Identify εἰμί: gloss "I am" → "1st singular ('I am')")
+    // and sometimes a wrong distractor (Identify ἐστίν: gloss "I am" → also
+    // points at the 1st-sg option). Either way the gloss does the student's
+    // work for them or actively misleads — hide until they commit, then
+    // reveal as reinforcement. When the gloss appears in zero or in
+    // multiple choices (e.g. "the" in every sentence translation, "present
+    // active participle" across every parse variant) it doesn't single one
+    // out, so leave it visible.
+    const glossText = String(card.lemmaGloss || card.gloss || '');
+    const glossSinglesOutChoice = !reversed
+      && glossPointsAtSingleChoice(glossText, displayChoices);
     const glossUnlocked = runtime.morphSelfCheck
       ? runtime.morphAnswerState.revealed
       : runtime.morphAnswerState.answered;
-    const showGloss = (card.lemmaGloss || card.gloss)
+    const showGloss = glossText
       && lemmaMatchesForm
-      && (!isTranslatePrompt || glossUnlocked);
+      && (!isTranslatePrompt || glossUnlocked)
+      && (!glossSinglesOutChoice || glossUnlocked);
     const glossHtml = showGloss
-      ? `<div class="morph-gloss">Gloss: “${card.lemmaGloss || card.gloss}”</div>`
+      ? `<div class="morph-gloss">Gloss: “${glossText}”</div>`
       : '';
     const lemmaHintHtml = lemmaMatchesForm
       ? `<div class="morph-hint">${card.lemma}</div>`
@@ -461,6 +475,25 @@ function escapeHtml(s) {
 // max(3, len-2) chars, accents stripped) shows up in any form word, OR
 // vice versa (handles short lemmas like εἰμί). Suppletive pairs (εἰμί ↔
 // ἐστιν) won't match — add an explicit q.lemma override there.
+// True when the gloss text appears (case- and quote-insensitive) in
+// exactly one of the answer choices — i.e. the gloss singles out a
+// single option and steers the student toward it. When it shows up in
+// zero choices the gloss is just context; when it shows up in multiple
+// choices it doesn't disambiguate. Glosses under two characters are
+// ignored to avoid false positives on tiny common words.
+function glossPointsAtSingleChoice(gloss, choices) {
+  if (!gloss || !Array.isArray(choices) || choices.length < 2) return false;
+  const strip = (s) => String(s).toLowerCase().replace(/[''""‘’“”]/g, '').replace(/\s+/g, ' ').trim();
+  const g = strip(gloss);
+  if (g.length < 2) return false;
+  let hits = 0;
+  for (const c of choices) {
+    if (strip(c).includes(g)) hits++;
+    if (hits > 1) return false;
+  }
+  return hits === 1;
+}
+
 function familyLemmaAppearsInForm(lemma, form) {
   if (!lemma || !form) return true;
   const greek = /[Ͱ-Ͽἀ-῿]+/g;
