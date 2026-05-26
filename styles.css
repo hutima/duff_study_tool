@@ -318,12 +318,16 @@
     transition: background 0.25s ease, color 0.25s ease;
   }
 
-  /* Subtle texture overlay */
+  /* Subtle texture overlay. will-change promotes this to its own
+     compositor layer so the fixed noise tile doesn't force a repaint of
+     the scrolling content underneath it (notably on Edge, which is more
+     conservative than Chrome about auto-promoting fixed elements). */
   body::before {
     content: '';
     position: fixed; inset: 0;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
     pointer-events: none; z-index: 0;
+    will-change: transform;
   }
 
   .app {
