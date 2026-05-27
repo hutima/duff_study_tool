@@ -16,7 +16,8 @@ import {
   getParadigmBucketHistorySize,
   getLemmaBucketSeries,
   getOverallBucketSeries,
-  summarizeOverallRolling
+  summarizeOverallRolling,
+  getLemmaFormStatus
 } from '../domain/grammar/morph_steps.js';
 import { buildParadigmBucketBarsHtml } from './charts.js';
 
@@ -364,17 +365,49 @@ function bindParsingReviewInteractivity() {
   });
 }
 
-// Classifies a parsing-mode morph card by the outcome of its most recent
-// drill encounter. Uses the per-card progress streak as the signal:
-//   streak > 0                       → 'right' (last attempt fully passed)
-//   streak == 0 && seenCount > 0     → 'wrong' (last attempt failed)
-//   seenCount == 0                   → 'unseen'
-// Mirrors the analytics chapter-detail dot's red/yellow/green idiom but
-// only needs three states since "last result" isn't a confidence band.
-function classifyFormLastResult(progress) {
-  if (!progress || !progress.seenCount) return 'unseen';
-  if ((progress.streak || 0) > 0) return 'right';
-  return 'wrong';
+// Compact parse-string formatter for the testable-forms list, where the
+// column is narrow and the canonical long-form ("present active indicative
+// first person singular") truncates with ellipsis on a phone. Maps every
+// canonical token to its short form (pres / act / ind / 1sg / nom / masc /
+// …) so the full parse fits in the column unabbreviated. Multi-word
+// person+number tokens collapse first ("first person singular" → "1sg")
+// before the single-word substitutions so they don't get half-replaced.
+const PARSE_PHRASE_ABBREVS = [
+  ['first person singular', '1sg'],
+  ['second person singular', '2sg'],
+  ['third person singular', '3sg'],
+  ['first person plural', '1pl'],
+  ['second person plural', '2pl'],
+  ['third person plural', '3pl'],
+  ['first person', '1'],
+  ['second person', '2'],
+  ['third person', '3'],
+  ['second aorist', '2aor'],
+  ['first aorist', '1aor'],
+  ['middle/passive', 'm/p'],
+  ['middle or passive', 'm/p']
+];
+const PARSE_WORD_ABBREVS = {
+  present: 'pres', future: 'fut', imperfect: 'impf',
+  aorist: 'aor', perfect: 'pf', pluperfect: 'plpf',
+  active: 'act', middle: 'mid', passive: 'pass',
+  indicative: 'ind', subjunctive: 'subj', imperative: 'impv',
+  infinitive: 'inf', participle: 'ptcp',
+  singular: 'sg', plural: 'pl',
+  nominative: 'nom', accusative: 'acc', genitive: 'gen', dative: 'dat', vocative: 'voc',
+  masculine: 'masc', feminine: 'fem', neuter: 'neut'
+};
+function abbreviateParse(text) {
+  if (!text) return '';
+  let out = String(text);
+  for (const [from, to] of PARSE_PHRASE_ABBREVS) {
+    const escaped = from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    out = out.replace(new RegExp(`\\b${escaped}\\b`, 'gi'), to);
+  }
+  for (const [from, to] of Object.entries(PARSE_WORD_ABBREVS)) {
+    out = out.replace(new RegExp(`\\b${from}\\b`, 'gi'), to);
+  }
+  return out;
 }
 
 // Lists every form currently in scope for `lemma` (chapter-gated, and
@@ -395,10 +428,10 @@ function buildLemmaTestableFormsHtml(lemma) {
     const bf = String(b.form || '');
     return compareGreekAlphabetical(af, bf);
   });
+  const stats = runtime.paradigmStepStats || {};
   const counts = { right: 0, wrong: 0, unseen: 0 };
   const rows = sorted.map((card) => {
-    const progress = host.getWordProgress(card.id) || {};
-    const status = classifyFormLastResult(progress);
+    const status = getLemmaFormStatus(stats, lemma, card.id);
     counts[status] += 1;
     const dotClass = status === 'right' ? 'parsing-review-form-dot-right'
       : status === 'wrong' ? 'parsing-review-form-dot-wrong'
@@ -406,12 +439,13 @@ function buildLemmaTestableFormsHtml(lemma) {
     const statusLabel = status === 'right' ? 'last attempt correct'
       : status === 'wrong' ? 'last attempt incorrect'
       : 'not yet attempted';
-    const parse = card.parsedAnswer || card.answer || '';
+    const parseFull = card.parsedAnswer || card.answer || '';
+    const parseShort = abbreviateParse(parseFull);
     return `
       <li class="parsing-review-form-row">
         <span class="parsing-review-form-dot ${dotClass}" title="${escapeHtmlSmall(statusLabel)}" aria-label="${escapeHtmlSmall(statusLabel)}"></span>
         <span class="parsing-review-form-greek">${escapeHtmlSmall(card.form || '')}</span>
-        <span class="parsing-review-form-parse">${escapeHtmlSmall(parse)}</span>
+        <span class="parsing-review-form-parse" title="${escapeHtmlSmall(parseFull)}">${escapeHtmlSmall(parseShort)}</span>
       </li>`;
   }).join('');
   const summary = `${counts.right} correct · ${counts.wrong} missed · ${counts.unseen} unseen`;
