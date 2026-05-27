@@ -14,6 +14,21 @@ import { parseAnswerDimensions, dimValuePassesFilter } from './morph_steps.js';
 
 const DIM_VALUE_FILTER_KEYS = ['aspect', 'tense', 'voice', 'mood', 'person', 'number', 'case', 'gender'];
 
+// Single-gender lemmas whose gender is non-obvious from the form pattern:
+// 1st-decl. masculine nouns ending in -ης / -ας wear feminine 1st-decl.
+// endings throughout the paradigm, so a student parsing προφήταις sees
+// what looks like a 1st-decl. feminine dative plural and has to recall
+// that the lemma προφήτης is masculine. For these the gender step is
+// asked even though the lemma is single-gender — buildMorphSteps reads
+// this set and opts out of its single-gender auto-skip when the card's
+// lemma is listed here. The gender filter in cardPassesDimValueFilters
+// still treats them as single-gender (so disabling 'masculine' as a
+// distractor doesn't wipe the whole paradigm); only the auto-skip is
+// affected.
+export const MIXED_FORM_NOUN_LEMMAS = new Set([
+  'προφήτης', 'μαθητής', 'βαπτιστής', 'νεανίας'
+]);
+
 // True iff every dim the card's parse populates passes the per-value
 // filter for that dim. Dims the card's parse leaves blank are ignored
 // (they don't constrain the filter). A null/empty filter map means
@@ -76,11 +91,13 @@ const PARADIGM_CATEGORIES = {
   'φωνή':                                'Nouns · 1st-decl. feminine (η-pattern)',
   'ἡμέρα':                               'Nouns · 1st-decl. feminine (α-pattern)',
   'ἁμαρτία':                             'Nouns · 1st-decl. feminine (α-pattern)',
-  'δόξα':                                'Nouns · 1st-decl. feminine (mixed pattern)',
+  'δόξα':                                'Nouns · 1st-decl. feminine (α-impure pattern)',
   'προφήτης':                            'Nouns · 1st-decl. masculine (-ης pattern)',
+  'μαθητής':                             'Nouns · 1st-decl. masculine (-ης pattern)',
   'σάρξ':                                'Nouns · 3rd declension',
   'ὄνομα':                               'Nouns · 3rd declension',
-  'πόλις & βασιλεύς':                    'Nouns · 3rd declension',
+  'πόλις':                               'Nouns · 3rd declension',
+  'βασιλεύς':                            'Nouns · 3rd declension',
   'ἀστήρ':                               'Nouns · 3rd declension',
 
   // ─── Adjectives ───
@@ -137,7 +154,7 @@ const CATEGORY_ORDER = [
   'Nouns · 2nd-decl. neuter',
   'Nouns · 1st-decl. feminine (η-pattern)',
   'Nouns · 1st-decl. feminine (α-pattern)',
-  'Nouns · 1st-decl. feminine (mixed pattern)',
+  'Nouns · 1st-decl. feminine (α-impure pattern)',
   'Nouns · 1st-decl. masculine (-ης pattern)',
   'Nouns · 3rd declension',
   'Adjectives',

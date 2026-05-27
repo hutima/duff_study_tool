@@ -192,6 +192,19 @@
     return { tense, voice, mood };
   }
 
+  // Definite-article forms (all genders/numbers/cases, both acute and
+  // grave accent variants). Several noun-paradigm vocab sets list forms
+  // with the article prefixed ("ὁ προφήτης", "τοῦ προφήτου", …) so the
+  // student recognizes gender at a glance during vocab drill. For
+  // parsing-mode the article isn't part of the parsed form — strip it
+  // so e.g. "ὁ προφήτης" becomes the single-word "προφήτης" that the
+  // morphology generator can keep.
+  const ARTICLE_PREFIX_RE = /^(?:ὁ|ἡ|τό|τὸ|οἱ|αἱ|τά|τὰ|τοῦ|τῆς|τῷ|τῇ|τόν|τὸν|τήν|τὴν|τῶν|τοῖς|ταῖς|τούς|τοὺς|τάς|τὰς)\s+/;
+
+  function stripLeadingArticle(form) {
+    return form.replace(ARTICLE_PREFIX_RE, '');
+  }
+
   function buildMorphologyForSet(key, set) {
     if (!set || !Array.isArray(set.cards) || set.cards.length === 0) return null;
 
@@ -199,11 +212,17 @@
     const seenForms = new Set();
     const questions = [];
     set.cards.forEach((card) => {
-      const form = String(card && card.g ? card.g : '').trim();
-      if (!form || seenForms.has(form)) return;
+      let form = String(card && card.g ? card.g : '').trim();
+      if (!form) return;
       // Stem-pair entries like "βάλλω → ἔβαλον" are study notes, not parseable
       // single forms — skip them so the quiz prompts a real Greek form.
       if (/[→]/.test(form)) return;
+      // Strip a leading definite article so "ὁ προφήτης" / "τοῦ προφήτου"
+      // collapse to their single-word noun before the multi-word filter.
+      // Done BEFORE the seenForms dedup so each declined form registers
+      // once under its bare-noun key.
+      form = stripLeadingArticle(form);
+      if (seenForms.has(form)) return;
       // Multi-word "forms" — principal-parts cards like
       // "τιθείς, -εῖσα, -έν" or constructions like "ὅς ἄν + subjunctive"
       // can't be parsed as a single inflected word. Skip so they don't

@@ -79,8 +79,8 @@
     ]
   });
 
-  window.registerSupplementalVocabSet('W5_POLIS_BASILEUS', {
-    label: 'πόλις & βασιλεύς — 3rd-decl. ι/ευ-stems',
+  window.registerSupplementalVocabSet('W5_POLIS', {
+    label: 'πόλις — 3rd-decl. ι-stem',
     week: 5,
     cards: [
       { g: 'πόλις', e: 'city (fem. Nom. sg.)', required: true },
@@ -89,7 +89,14 @@
       { g: 'πόλει', e: 'to/for city (fem. Dat. sg.)', required: true },
       { g: 'πόλεις', e: 'cities (fem. Nom./Acc. pl.)', required: true },
       { g: 'πόλεων', e: 'of cities (fem. Gen. pl.)', required: true },
-      { g: 'πόλεσιν', e: 'to/for cities (fem. Dat. pl.)', required: true },
+      { g: 'πόλεσιν', e: 'to/for cities (fem. Dat. pl.)', required: true }
+    ]
+  });
+
+  window.registerSupplementalVocabSet('W5_BASILEUS', {
+    label: 'βασιλεύς — 3rd-decl. ευ-stem',
+    week: 5,
+    cards: [
       { g: 'βασιλεύς', e: 'king (masc. Nom. sg.)', required: true },
       { g: 'βασιλέα', e: 'king (masc. Acc. sg.)', required: true },
       { g: 'βασιλέως', e: 'of king (masc. Gen. sg.)', required: true },
