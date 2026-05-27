@@ -1636,9 +1636,9 @@
   }
   .parsing-review-form-row {
     display: grid;
-    grid-template-columns: 12px minmax(80px, 1fr) minmax(120px, 2fr);
+    grid-template-columns: 12px minmax(60px, 1fr) minmax(0, 2fr);
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     padding: 4px 6px;
     border-radius: 6px;
     background: rgba(255,255,255,0.02);
@@ -3754,11 +3754,11 @@
   }
 
   /* ── Chapter mastery grid (course-wide) ── */
-  .chapter-grid-card { margin-top: 12px; }
+  .chapter-grid-card { margin-top: 12px; padding: 10px 12px; }
   .chapter-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
-    gap: 6px;
+    grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+    gap: 4px;
     margin: 8px 0 10px;
   }
   .chapter-tile {
@@ -3787,14 +3787,14 @@
     transform: translateY(-1px);
   }
   .chapter-tile-num {
-    font-size: 13px;
+    font-size: 12px;
     color: var(--cream);
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
   }
   .chapter-tile-pct {
-    font-size: 10px;
+    font-size: 9px;
     color: var(--muted);
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
   }
   /* Five 20%-wide completion bands matching the vocab/grammar histogram,
      plus an unstarted state. Backgrounds use the same gradient palette
@@ -4154,7 +4154,7 @@
   }
   .word-stat-card {
     margin: 2px 0 8px;
-    padding: 12px;
+    padding: 10px 10px;
     border: 1px solid var(--border);
     border-radius: 8px;
     background: rgba(255,255,255,0.03);
@@ -4220,30 +4220,32 @@
   }
   .word-stat-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-    gap: 6px;
+    grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+    gap: 4px;
   }
   .word-stat-tile {
-    padding: 6px 8px;
+    padding: 5px 6px;
     border: 1px solid var(--border);
     border-radius: 6px;
     background: rgba(255,255,255,0.02);
+    min-width: 0;
   }
   html[data-theme="light"] .word-stat-tile {
     background: rgba(0,0,0,0.02);
   }
   .word-stat-tile-label {
-    font-size: 10px;
-    letter-spacing: 0.5px;
+    font-size: 9px;
+    letter-spacing: 0.3px;
     text-transform: uppercase;
     color: var(--muted);
   }
   .word-stat-tile-value {
     font-family: var(--font-display);
     color: var(--cream);
-    font-size: 13px;
+    font-size: 12px;
     margin-top: 2px;
     word-break: break-word;
+    overflow-wrap: anywhere;
   }
   .word-stat-history-wrap {
     margin-top: 10px;
