@@ -567,6 +567,273 @@
     ...GINOMAI_AORIST_MIDDLE_IMPERATIVE
   };
 
+  // ─── λαμβάνω (second-aorist active, future deponent middle) ───────
+  //
+  // λαμβάνω is the textbook 2nd-aorist example alongside βάλλω
+  // (Mounce-style triad: γίνομαι, λαμβάνω, λείπω). Duff drills only
+  // the stem-pair recall (W4_SECOND_AORIST_STEMS: λαμβάνω → ἔλαβον)
+  // and uses the lemma as a stand-alone vocab word from ch 2 onward;
+  // the full paradigm — present/imperfect, the middle future
+  // λήμψομαι (Koine spelling with inserted μ; classical λήψομαι), the
+  // 2nd-aorist indicative ἔλαβον, aorist passive ἐλήμφθην, perfect
+  // active εἴληφα — is undrilled. These fill the gap and give the
+  // student a full conjugation paired with the W4_LAMBANO_SECOND_AORIST
+  // drill below.
+  //
+  // Voice note: future is middle/deponent (λήμψομαι series) but active
+  // in meaning. Aorist active 2nd-aorist endings (ἔλαβον, ἔλαβες, …)
+  // are syncretic between 1sg and 3pl — the 1sg reading takes the
+  // unique map key, with 3pl resolving via the parsing walk against
+  // the other available pool (same convention as βάλλω's imperfect).
+
+  const LAMBANO_PRESENT_ACTIVE_INDICATIVE = {
+    'λαμβάνω':     'present active indicative first person singular',
+    'λαμβάνεις':   'present active indicative second person singular',
+    'λαμβάνει':    'present active indicative third person singular',
+    'λαμβάνομεν':  'present active indicative first person plural',
+    'λαμβάνετε':   'present active indicative second person plural',
+    'λαμβάνουσι':  'present active indicative third person plural',
+    'λαμβάνουσιν': 'present active indicative third person plural'
+  };
+
+  const LAMBANO_IMPERFECT_ACTIVE_INDICATIVE = {
+    'ἐλάμβανον':   'imperfect active indicative first person singular',
+    // ἐλάμβανον is also 3pl (1sg/3pl syncretism); 1sg takes the unique key.
+    'ἐλάμβανες':   'imperfect active indicative second person singular',
+    'ἐλάμβανε':    'imperfect active indicative third person singular',
+    'ἐλάμβανεν':   'imperfect active indicative third person singular',
+    'ἐλαμβάνομεν': 'imperfect active indicative first person plural',
+    'ἐλαμβάνετε':  'imperfect active indicative second person plural'
+  };
+
+  const LAMBANO_FUTURE_MIDDLE_INDICATIVE = {
+    'λήμψομαι':   'future middle indicative first person singular',
+    'λήμψῃ':      'future middle indicative second person singular',
+    'λήμψεται':   'future middle indicative third person singular',
+    'λημψόμεθα':  'future middle indicative first person plural',
+    'λήμψεσθε':   'future middle indicative second person plural',
+    'λήμψονται':  'future middle indicative third person plural'
+  };
+
+  const LAMBANO_AORIST_ACTIVE_INDICATIVE = {
+    'ἔλαβον':    'aorist active indicative first person singular',
+    // ἔλαβον = 3pl too — 1sg keeps the unique map key.
+    'ἔλαβες':    'aorist active indicative second person singular',
+    'ἔλαβε':     'aorist active indicative third person singular',
+    'ἔλαβεν':    'aorist active indicative third person singular',
+    'ἐλάβομεν':  'aorist active indicative first person plural',
+    'ἐλάβετε':   'aorist active indicative second person plural'
+  };
+
+  const LAMBANO_AORIST_ACTIVE_IMPERATIVE = {
+    'λάβε':       'aorist active imperative second person singular',
+    'λάβετε':     'aorist active imperative second person plural',
+    'λαβέτω':     'aorist active imperative third person singular',
+    'λαβέτωσαν':  'aorist active imperative third person plural'
+  };
+
+  const LAMBANO_AORIST_ACTIVE_INFINITIVE = {
+    'λαβεῖν': 'aorist active infinitive'
+  };
+
+  const LAMBANO_AORIST_ACTIVE_SUBJUNCTIVE = {
+    'λάβω':    'aorist active subjunctive first person singular',
+    'λάβῃς':   'aorist active subjunctive second person singular',
+    'λάβῃ':    'aorist active subjunctive third person singular',
+    'λάβωμεν': 'aorist active subjunctive first person plural',
+    'λάβητε':  'aorist active subjunctive second person plural',
+    'λάβωσι':  'aorist active subjunctive third person plural',
+    'λάβωσιν': 'aorist active subjunctive third person plural'
+  };
+
+  const LAMBANO_AORIST_PASSIVE_INDICATIVE = {
+    'ἐλήμφθην':   'aorist passive indicative first person singular',
+    'ἐλήμφθης':   'aorist passive indicative second person singular',
+    'ἐλήμφθη':    'aorist passive indicative third person singular',
+    'ἐλήμφθημεν': 'aorist passive indicative first person plural',
+    'ἐλήμφθητε':  'aorist passive indicative second person plural',
+    'ἐλήμφθησαν': 'aorist passive indicative third person plural'
+  };
+
+  const LAMBANO_PERFECT_ACTIVE_INDICATIVE = {
+    'εἴληφα':    'perfect active indicative first person singular',
+    'εἴληφας':   'perfect active indicative second person singular',
+    'εἴληφε':    'perfect active indicative third person singular',
+    'εἴληφεν':   'perfect active indicative third person singular',
+    'εἰλήφαμεν': 'perfect active indicative first person plural',
+    'εἰλήφατε':  'perfect active indicative second person plural',
+    'εἰλήφασι':  'perfect active indicative third person plural',
+    'εἰλήφασιν': 'perfect active indicative third person plural'
+  };
+
+  // Chapter gates mirror βάλλω: present/imperfect/future at ch 10
+  // (W4 — second-aorist intro and the lemma takes its place as a
+  // paradigm verb), aorist active indicative + imperative + infinitive
+  // at ch 10, aorist passive + perfect at ch 15 (W6), aorist
+  // subjunctive at ch 17 (W7).
+  const LAMBANO_OPTIONAL_GROUPS = [
+    { chapter: 10, family: 'λαμβάνω — present active indicative (optional)',
+      forms: LAMBANO_PRESENT_ACTIVE_INDICATIVE },
+    { chapter: 10, family: 'λαμβάνω — imperfect active indicative (optional)',
+      forms: LAMBANO_IMPERFECT_ACTIVE_INDICATIVE },
+    { chapter: 10, family: 'λαμβάνω — future middle indicative λήμψομαι (optional, deponent)',
+      forms: LAMBANO_FUTURE_MIDDLE_INDICATIVE },
+    { chapter: 10, family: 'λαμβάνω — aorist active indicative ἔλαβον (2nd aorist, optional)',
+      forms: LAMBANO_AORIST_ACTIVE_INDICATIVE },
+    { chapter: 10, family: 'λαμβάνω — aorist active imperative (optional)',
+      forms: LAMBANO_AORIST_ACTIVE_IMPERATIVE },
+    { chapter: 10, family: 'λαμβάνω — aorist active infinitive λαβεῖν (optional)',
+      forms: LAMBANO_AORIST_ACTIVE_INFINITIVE },
+    { chapter: 15, family: 'λαμβάνω — aorist passive indicative ἐλήμφθην (optional)',
+      forms: LAMBANO_AORIST_PASSIVE_INDICATIVE },
+    { chapter: 15, family: 'λαμβάνω — perfect active indicative εἴληφα (optional)',
+      forms: LAMBANO_PERFECT_ACTIVE_INDICATIVE },
+    { chapter: 17, family: 'λαμβάνω — aorist active subjunctive λάβω (optional)',
+      forms: LAMBANO_AORIST_ACTIVE_SUBJUNCTIVE }
+  ];
+
+  const LAMBANO_EXTRA_FORMS = {
+    ...LAMBANO_PRESENT_ACTIVE_INDICATIVE,
+    ...LAMBANO_IMPERFECT_ACTIVE_INDICATIVE,
+    ...LAMBANO_FUTURE_MIDDLE_INDICATIVE,
+    ...LAMBANO_AORIST_ACTIVE_INDICATIVE,
+    ...LAMBANO_AORIST_ACTIVE_IMPERATIVE,
+    ...LAMBANO_AORIST_ACTIVE_INFINITIVE,
+    ...LAMBANO_AORIST_PASSIVE_INDICATIVE,
+    ...LAMBANO_PERFECT_ACTIVE_INDICATIVE,
+    ...LAMBANO_AORIST_ACTIVE_SUBJUNCTIVE
+  };
+
+  // ─── λείπω (second-aorist active) ─────────────────────────────────
+  //
+  // Mounce's third 2nd-aorist paradigm verb (alongside γίνομαι and
+  // λαμβάνω). In the NT the simple λείπω is rare — καταλείπω /
+  // ὑπολείπω are more common — but Mounce uses the unprefixed root
+  // because its stem-shift pattern (ει → ι in the aorist: λείπω →
+  // ἔλιπον) is the cleanest example of "different stem" 2nd-aorist
+  // formation. Curriculum drill currently lists only the stem pair
+  // "καταλείπω → κατέλιπον" in W4_SECOND_AORIST_STEMS; the full
+  // paradigm and chapter-gated drill set below give a parallel to
+  // the λαμβάνω treatment above.
+  //
+  // The aorist passive is ἐλείφθην and the perfect active is λέλοιπα
+  // (with ε → ει → οι stem grade alternation, classic for liquid +
+  // labial stems).
+
+  const LEIPO_PRESENT_ACTIVE_INDICATIVE = {
+    'λείπω':     'present active indicative first person singular',
+    'λείπεις':   'present active indicative second person singular',
+    'λείπει':    'present active indicative third person singular',
+    'λείπομεν':  'present active indicative first person plural',
+    'λείπετε':   'present active indicative second person plural',
+    'λείπουσι':  'present active indicative third person plural',
+    'λείπουσιν': 'present active indicative third person plural'
+  };
+
+  const LEIPO_IMPERFECT_ACTIVE_INDICATIVE = {
+    'ἔλειπον':   'imperfect active indicative first person singular',
+    // ἔλειπον is also 3pl (1sg/3pl syncretism).
+    'ἔλειπες':   'imperfect active indicative second person singular',
+    'ἔλειπε':    'imperfect active indicative third person singular',
+    'ἔλειπεν':   'imperfect active indicative third person singular',
+    'ἐλείπομεν': 'imperfect active indicative first person plural',
+    'ἐλείπετε':  'imperfect active indicative second person plural'
+  };
+
+  const LEIPO_FUTURE_ACTIVE_INDICATIVE = {
+    'λείψω':     'future active indicative first person singular',
+    'λείψεις':   'future active indicative second person singular',
+    'λείψει':    'future active indicative third person singular',
+    'λείψομεν':  'future active indicative first person plural',
+    'λείψετε':   'future active indicative second person plural',
+    'λείψουσι':  'future active indicative third person plural',
+    'λείψουσιν': 'future active indicative third person plural'
+  };
+
+  const LEIPO_AORIST_ACTIVE_INDICATIVE = {
+    'ἔλιπον':    'aorist active indicative first person singular',
+    // ἔλιπον = 3pl too — 1sg keeps the unique map key.
+    'ἔλιπες':    'aorist active indicative second person singular',
+    'ἔλιπε':     'aorist active indicative third person singular',
+    'ἔλιπεν':    'aorist active indicative third person singular',
+    'ἐλίπομεν':  'aorist active indicative first person plural',
+    'ἐλίπετε':   'aorist active indicative second person plural'
+  };
+
+  const LEIPO_AORIST_ACTIVE_IMPERATIVE = {
+    'λίπε':       'aorist active imperative second person singular',
+    'λίπετε':     'aorist active imperative second person plural',
+    'λιπέτω':     'aorist active imperative third person singular',
+    'λιπέτωσαν':  'aorist active imperative third person plural'
+  };
+
+  const LEIPO_AORIST_ACTIVE_INFINITIVE = {
+    'λιπεῖν': 'aorist active infinitive'
+  };
+
+  const LEIPO_AORIST_ACTIVE_SUBJUNCTIVE = {
+    'λίπω':    'aorist active subjunctive first person singular',
+    'λίπῃς':   'aorist active subjunctive second person singular',
+    'λίπῃ':    'aorist active subjunctive third person singular',
+    'λίπωμεν': 'aorist active subjunctive first person plural',
+    'λίπητε':  'aorist active subjunctive second person plural',
+    'λίπωσι':  'aorist active subjunctive third person plural',
+    'λίπωσιν': 'aorist active subjunctive third person plural'
+  };
+
+  const LEIPO_AORIST_PASSIVE_INDICATIVE = {
+    'ἐλείφθην':   'aorist passive indicative first person singular',
+    'ἐλείφθης':   'aorist passive indicative second person singular',
+    'ἐλείφθη':    'aorist passive indicative third person singular',
+    'ἐλείφθημεν': 'aorist passive indicative first person plural',
+    'ἐλείφθητε':  'aorist passive indicative second person plural',
+    'ἐλείφθησαν': 'aorist passive indicative third person plural'
+  };
+
+  const LEIPO_PERFECT_ACTIVE_INDICATIVE = {
+    'λέλοιπα':    'perfect active indicative first person singular',
+    'λέλοιπας':   'perfect active indicative second person singular',
+    'λέλοιπε':    'perfect active indicative third person singular',
+    'λέλοιπεν':   'perfect active indicative third person singular',
+    'λελοίπαμεν': 'perfect active indicative first person plural',
+    'λελοίπατε':  'perfect active indicative second person plural',
+    'λελοίπασι':  'perfect active indicative third person plural',
+    'λελοίπασιν': 'perfect active indicative third person plural'
+  };
+
+  const LEIPO_OPTIONAL_GROUPS = [
+    { chapter: 10, family: 'λείπω — present active indicative (optional)',
+      forms: LEIPO_PRESENT_ACTIVE_INDICATIVE },
+    { chapter: 10, family: 'λείπω — imperfect active indicative (optional)',
+      forms: LEIPO_IMPERFECT_ACTIVE_INDICATIVE },
+    { chapter: 10, family: 'λείπω — future active indicative λείψω (optional)',
+      forms: LEIPO_FUTURE_ACTIVE_INDICATIVE },
+    { chapter: 10, family: 'λείπω — aorist active indicative ἔλιπον (2nd aorist, optional)',
+      forms: LEIPO_AORIST_ACTIVE_INDICATIVE },
+    { chapter: 10, family: 'λείπω — aorist active imperative (optional)',
+      forms: LEIPO_AORIST_ACTIVE_IMPERATIVE },
+    { chapter: 10, family: 'λείπω — aorist active infinitive λιπεῖν (optional)',
+      forms: LEIPO_AORIST_ACTIVE_INFINITIVE },
+    { chapter: 15, family: 'λείπω — aorist passive indicative ἐλείφθην (optional)',
+      forms: LEIPO_AORIST_PASSIVE_INDICATIVE },
+    { chapter: 15, family: 'λείπω — perfect active indicative λέλοιπα (optional)',
+      forms: LEIPO_PERFECT_ACTIVE_INDICATIVE },
+    { chapter: 17, family: 'λείπω — aorist active subjunctive λίπω (optional)',
+      forms: LEIPO_AORIST_ACTIVE_SUBJUNCTIVE }
+  ];
+
+  const LEIPO_EXTRA_FORMS = {
+    ...LEIPO_PRESENT_ACTIVE_INDICATIVE,
+    ...LEIPO_IMPERFECT_ACTIVE_INDICATIVE,
+    ...LEIPO_FUTURE_ACTIVE_INDICATIVE,
+    ...LEIPO_AORIST_ACTIVE_INDICATIVE,
+    ...LEIPO_AORIST_ACTIVE_IMPERATIVE,
+    ...LEIPO_AORIST_ACTIVE_INFINITIVE,
+    ...LEIPO_AORIST_PASSIVE_INDICATIVE,
+    ...LEIPO_PERFECT_ACTIVE_INDICATIVE,
+    ...LEIPO_AORIST_ACTIVE_SUBJUNCTIVE
+  };
+
   // ─── φιλέω (contract -έω verb) ────────────────────────────────────
   //
   // Duff drills present/imperfect/future/aorist active indicative (W2)
@@ -1292,6 +1559,47 @@
       forms: LUO_PERFECT_MP_PARTICIPLE }
   ];
 
+  // 2nd-aorist active participle paradigm helper (-ών / -οῦσα / -όν,
+  // ντ-stem masc/neut + 1st-decl fem). Built once from a bare stem so
+  // each 2nd-aorist lemma gets a full declension without duplicating
+  // the 19-form template. Mirrors aoristPassiveParticipleParadigm
+  // below but for the active voice (βαλών/λαβών/λιπών-type).
+  function aoristActiveParticipleParadigm(stem) {
+    const s = stem;
+    return {
+      [`${s}ών`]:      'aorist active participle nominative singular masculine',
+      [`${s}όντος`]:   'aorist active participle genitive singular masculine/neuter',
+      [`${s}όντι`]:    'aorist active participle dative singular masculine/neuter',
+      [`${s}όντα`]:    'aorist active participle accusative singular masculine',
+      [`${s}όντες`]:   'aorist active participle nominative plural masculine',
+      [`${s}όντων`]:   'aorist active participle genitive plural masculine/feminine/neuter',
+      [`${s}οῦσι`]:    'aorist active participle dative plural masculine/neuter',
+      [`${s}οῦσιν`]:   'aorist active participle dative plural masculine/neuter',
+      [`${s}όντας`]:   'aorist active participle accusative plural masculine',
+      [`${s}οῦσα`]:    'aorist active participle nominative singular feminine',
+      [`${s}ούσης`]:   'aorist active participle genitive singular feminine',
+      [`${s}ούσῃ`]:    'aorist active participle dative singular feminine',
+      [`${s}οῦσαν`]:   'aorist active participle accusative singular feminine',
+      [`${s}οῦσαι`]:   'aorist active participle nominative plural feminine',
+      [`${s}ουσῶν`]:   'aorist active participle genitive plural feminine',
+      [`${s}ούσαις`]:  'aorist active participle dative plural feminine',
+      [`${s}ούσας`]:   'aorist active participle accusative plural feminine',
+      [`${s}όν`]:      'aorist active participle nominative/accusative singular neuter'
+    };
+  }
+
+  const LAMBANO_AORIST_ACTIVE_PARTICIPLE = aoristActiveParticipleParadigm('λαβ');
+  const LEIPO_AORIST_ACTIVE_PARTICIPLE   = aoristActiveParticipleParadigm('λιπ');
+
+  const LAMBANO_PARTICIPLE_OPTIONAL = [
+    { chapter: 12, family: 'λαμβάνω — aorist active participle λαβών full declension (optional)',
+      forms: LAMBANO_AORIST_ACTIVE_PARTICIPLE }
+  ];
+  const LEIPO_PARTICIPLE_OPTIONAL = [
+    { chapter: 12, family: 'λείπω — aorist active participle λιπών full declension (optional)',
+      forms: LEIPO_AORIST_ACTIVE_PARTICIPLE }
+  ];
+
   // ─── μι-verb participle full declensions ──────────────────────────
   //
   // Duff drills only the bare stem form (masc nom sg + the -οῦσα/-όν
@@ -1660,6 +1968,10 @@
   const DIDOMI_AORIST_PASSIVE_PARTICIPLE  = aoristPassiveParticipleParadigm('δο');
   const TITHEMI_AORIST_PASSIVE_PARTICIPLE = aoristPassiveParticipleParadigm('τε');
   const HISTEMI_AORIST_PASSIVE_PARTICIPLE = aoristPassiveParticipleParadigm('στα');
+  // λαμβάνω aorist passive participle λημφθείς (Koine; classical
+  // ληφθείς), λείπω aorist passive participle λειφθείς.
+  const LAMBANO_AORIST_PASSIVE_PARTICIPLE = aoristPassiveParticipleParadigm('λημφ');
+  const LEIPO_AORIST_PASSIVE_PARTICIPLE   = aoristPassiveParticipleParadigm('λειφ');
 
   const LEMMA_INVENTORY = {
     'εἰμί': {
@@ -1727,6 +2039,32 @@
         ...GINOMAI_PARTICIPLE_OPTIONAL,
         { chapter: 15, family: 'γίνομαι — aorist passive participle γενηθείς (optional)',
           forms: GINOMAI_AORIST_PASSIVE_PARTICIPLE }
+      ]
+    },
+    'λαμβάνω': {
+      extraForms: {
+        ...LAMBANO_EXTRA_FORMS,
+        ...LAMBANO_AORIST_ACTIVE_PARTICIPLE,
+        ...LAMBANO_AORIST_PASSIVE_PARTICIPLE
+      },
+      optionalFormGroups: [
+        ...LAMBANO_OPTIONAL_GROUPS,
+        ...LAMBANO_PARTICIPLE_OPTIONAL,
+        { chapter: 15, family: 'λαμβάνω — aorist passive participle λημφθείς (optional)',
+          forms: LAMBANO_AORIST_PASSIVE_PARTICIPLE }
+      ]
+    },
+    'λείπω': {
+      extraForms: {
+        ...LEIPO_EXTRA_FORMS,
+        ...LEIPO_AORIST_ACTIVE_PARTICIPLE,
+        ...LEIPO_AORIST_PASSIVE_PARTICIPLE
+      },
+      optionalFormGroups: [
+        ...LEIPO_OPTIONAL_GROUPS,
+        ...LEIPO_PARTICIPLE_OPTIONAL,
+        { chapter: 15, family: 'λείπω — aorist passive participle λειφθείς (optional)',
+          forms: LEIPO_AORIST_PASSIVE_PARTICIPLE }
       ]
     },
     'φιλέω': {

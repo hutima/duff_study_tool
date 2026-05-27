@@ -120,6 +120,8 @@ const PARADIGM_CATEGORIES = {
   'ῥύομαι':                              'Verbs · middle / deponent',
   'βάλλω':                               'Verbs · second aorist',
   'γίνομαι':                             'Verbs · second aorist',
+  'λαμβάνω':                             'Verbs · second aorist',
+  'λείπω':                               'Verbs · second aorist',
   'Second-aorist stems':                 'Verbs · second aorist',
   'Liquid-stem futures':                 'Verbs · second aorist',
   'μένω':                                'Verbs · liquid future',
