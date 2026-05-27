@@ -475,6 +475,12 @@ export function buildMorphSteps(card, accessiblePools = null, options = {}) {
   const dimToggles = (options.dimToggles && typeof options.dimToggles === 'object') ? options.dimToggles : null;
   const dimValueFilters = (options.dimValueFilters && typeof options.dimValueFilters === 'object') ? options.dimValueFilters : null;
   const multiGenderLemmas = options.multiGenderLemmas instanceof Set ? options.multiGenderLemmas : null;
+  // Single-gender lemmas whose gender is non-obvious from the form
+  // ending (1st-decl. masc. -ης/-ας nouns: προφήτης, μαθητής, …) —
+  // override the single-gender auto-skip below so the gender step IS
+  // asked. The form looks feminine; recalling the lemma is masculine is
+  // the whole point of the drill for these.
+  const mixedFormNouns = options.mixedFormNouns instanceof Set ? options.mixedFormNouns : null;
   for (const dimKey of order) {
     const correct = dims[dimKey];
     if (!correct) continue;
@@ -513,8 +519,17 @@ export function buildMorphSteps(card, accessiblePools = null, options = {}) {
     // genuinely commits to a gender. The implied gender is auto-filled
     // for form lookup AND surfaced in the final parse summary so the
     // canonical label still reads e.g. "genitive singular masculine".
+    //
+    // Exception: mixed-form nouns (1st-decl. masc. -ης/-ας like
+    // προφήτης, μαθητής) keep the step. Their endings match the 1st-
+    // decl. feminine pattern, so the form-shape misleads the student
+    // into a feminine reading; the gender check is the whole point of
+    // drilling these and the lemma's gender isn't "obvious from the
+    // article" the way it is for λόγος.
+    const isMixedFormNoun = !!(mixedFormNouns && card.lemma && mixedFormNouns.has(card.lemma));
     if (dimKey === 'gender' && multiGenderLemmas && card.lemma
-        && !multiGenderLemmas.has(card.lemma)) {
+        && !multiGenderLemmas.has(card.lemma)
+        && !isMixedFormNoun) {
       skippedCorrect[dimKey] = correct;
       impliedDims[dimKey] = correct;
       continue;

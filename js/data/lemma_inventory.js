@@ -1058,13 +1058,63 @@
   const LOGOS_VOCATIVE = {
     'λόγε': 'vocative singular masculine'
   };
-  // πόλις & βασιλεύς share a single combined lemma string in
-  // paradigm_focus.js (the label "πόλις & βασιλεύς — 3rd-decl. ι/ευ-
-  // stems" yields the joined lemma via extractLemma), so both
-  // vocatives sit under one entry.
-  const POLIS_BASILEUS_VOCATIVES = {
-    'πόλι':     'vocative singular feminine',
-    'βασιλεῦ':  'vocative singular masculine'
+  // πόλις and βασιλεύς each carry one distinct vocative singular form
+  // in the NT — kept separate now that the two lemmas are split into
+  // their own paradigm entries (W5_POLIS / W5_BASILEUS).
+  const POLIS_VOCATIVE = {
+    'πόλι': 'vocative singular feminine'
+  };
+  const BASILEUS_VOCATIVE = {
+    'βασιλεῦ': 'vocative singular masculine'
+  };
+  // 1st-decl masc. -ης nouns: vocative singular shortens to bare -α
+  // (Mt 8:8 κύριε, ἐγὼ μαθητά … attested in NT). προφῆτα is drilled
+  // in W1_PROPHETES_DECLENSION; μαθητά is the parallel form for
+  // μαθητής and isn't drilled in the curriculum but appears in NT
+  // direct address — surface it as an extra form so a "vocative
+  // singular" pick resolves cleanly.
+  const MATHETES_VOCATIVE = {
+    'μαθητά': 'vocative singular masculine'
+  };
+  // Optional full-paradigm completions for the mixed-form / 3rd-decl.
+  // ι-/ευ-stem nouns. Each group lists ONLY the forms the curriculum
+  // doesn't already drill in its W*_*_DECLENSION set: the distinct
+  // vocative singular for all four, plus the ν-less dative-plural
+  // variant for the ι-/ευ-stems (πόλεσι alongside πόλεσι(ν);
+  // βασιλεῦσι alongside βασιλεῦσι(ν)). The vocative PLURAL is omitted
+  // intentionally — it's syncretic with the nominative plural already
+  // drilled in the W set, so a "voc. pl." pick on προφῆται / μαθηταί
+  // / πόλεις / βασιλεῖς resolves via the extraForms fallback below
+  // without an extra drill card colliding with the existing nom-pl
+  // one. The per-form dedup in getCardsForFocusedParadigm collapses
+  // any other overlap with the curriculum cards.
+  const PROPHETES_OPTIONAL_FORMS = {};
+  const MATHETES_OPTIONAL_FORMS = {
+    'μαθητά': 'vocative singular masculine'
+  };
+  const POLIS_OPTIONAL_FORMS = {
+    'πόλι':   'vocative singular feminine',
+    'πόλεσι': 'dative plural feminine'
+  };
+  const BASILEUS_OPTIONAL_FORMS = {
+    'βασιλεῦ':   'vocative singular masculine',
+    'βασιλεῦσι': 'dative plural masculine'
+  };
+  // Extra-forms-only entries (syncretic voc pl: same Greek string as
+  // nom pl, so just an alternative reading of the same form — no need
+  // to drill it as a separate card, but the fallback lookup should
+  // resolve a "voc. pl." pick).
+  const PROPHETES_VOC_PL_EXTRAS = {
+    'προφῆται': 'vocative plural masculine'
+  };
+  const MATHETES_VOC_PL_EXTRAS = {
+    'μαθηταί': 'vocative plural masculine'
+  };
+  const POLIS_VOC_PL_EXTRAS = {
+    'πόλεις': 'vocative plural feminine'
+  };
+  const BASILEUS_VOC_PL_EXTRAS = {
+    'βασιλεῖς': 'vocative plural masculine'
   };
 
   // ─── Participle full declensions ──────────────────────────────────
@@ -1743,8 +1793,29 @@
     'λόγος': {
       extraForms: LOGOS_VOCATIVE
     },
-    'πόλις & βασιλεύς': {
-      extraForms: POLIS_BASILEUS_VOCATIVES
+    'προφήτης': {
+      extraForms: PROPHETES_VOC_PL_EXTRAS
+    },
+    'μαθητής': {
+      extraForms: { ...MATHETES_VOCATIVE, ...MATHETES_VOC_PL_EXTRAS },
+      optionalFormGroups: [
+        { chapter: 8, family: 'μαθητής — vocative singular (optional)',
+          forms: MATHETES_OPTIONAL_FORMS }
+      ]
+    },
+    'πόλις': {
+      extraForms: { ...POLIS_VOCATIVE, ...POLIS_OPTIONAL_FORMS, ...POLIS_VOC_PL_EXTRAS },
+      optionalFormGroups: [
+        { chapter: 12, family: 'πόλις — vocative sg. + ν-less dat. pl. (optional)',
+          forms: POLIS_OPTIONAL_FORMS }
+      ]
+    },
+    'βασιλεύς': {
+      extraForms: { ...BASILEUS_VOCATIVE, ...BASILEUS_OPTIONAL_FORMS, ...BASILEUS_VOC_PL_EXTRAS },
+      optionalFormGroups: [
+        { chapter: 12, family: 'βασιλεύς — vocative sg. + ν-less dat. pl. (optional)',
+          forms: BASILEUS_OPTIONAL_FORMS }
+      ]
     }
     // Add more defective lemmas here (e.g. οἶδα — no present form, the
     // perfect serves as present; χρή — only third singular, etc.) when

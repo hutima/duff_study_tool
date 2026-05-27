@@ -84,7 +84,7 @@
   });
 
   window.registerSupplementalVocabSet('W1_DOXA_DECLENSION', {
-    label: 'δόξα — 1st-decl. fem. (mixed pattern)',
+    label: 'δόξα — 1st-decl. fem. (α-impure pattern)',
     week: 1,
     cards: [
       { g: 'δόξα', e: 'glory (fem. Nom. sg.)', required: true },
@@ -111,6 +111,21 @@
       { g: 'τοὺς προφήτας', e: 'the prophets (masc. Acc. pl.)', required: true },
       { g: 'τῶν προφητῶν', e: 'of the prophets (masc. Gen. pl.)', required: true },
       { g: 'τοῖς προφήταις', e: 'to/for the prophets (masc. Dat. pl.)', required: true }
+    ]
+  });
+
+  window.registerSupplementalVocabSet('W1_MATHETES_DECLENSION', {
+    label: 'μαθητής — 1st-decl. masc. (-ης pattern)',
+    week: 1,
+    cards: [
+      { g: 'ὁ μαθητής', e: 'the disciple (masc. Nom. sg.)', required: true },
+      { g: 'τὸν μαθητήν', e: 'the disciple (masc. Acc. sg.)', required: true },
+      { g: 'τοῦ μαθητοῦ', e: 'of the disciple (masc. Gen. sg.)', required: true },
+      { g: 'τῷ μαθητῇ', e: 'to/for the disciple (masc. Dat. sg.)', required: true },
+      { g: 'οἱ μαθηταί', e: 'the disciples (masc. Nom. pl.)', required: true },
+      { g: 'τοὺς μαθητάς', e: 'the disciples (masc. Acc. pl.)', required: true },
+      { g: 'τῶν μαθητῶν', e: 'of the disciples (masc. Gen. pl.)', required: true },
+      { g: 'τοῖς μαθηταῖς', e: 'to/for the disciples (masc. Dat. pl.)', required: true }
     ]
   });
 

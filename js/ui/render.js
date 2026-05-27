@@ -9,7 +9,7 @@ import { runtime } from '../state/runtime.js';
 import { buildGrammarSupportHtml } from '../domain/grammar/explanations.js';
 import { renderProgress, renderReview } from './progress.js';
 import { buildMorphSteps, summarizeLemmaStats, getParadigmStepAttemptWindow, computeAccessibleDimensionPools, parseAnswerDimensions, aspectMistakeNote, isSecondPluralPresentMoodAmbiguity } from '../domain/grammar/morph_steps.js';
-import { getAccessibleMorphCards, deriveSelectionLevels, buildMultiGenderLemmas } from '../domain/grammar/paradigm_focus.js';
+import { getAccessibleMorphCards, deriveSelectionLevels, buildMultiGenderLemmas, MIXED_FORM_NOUN_LEMMAS } from '../domain/grammar/paradigm_focus.js';
 
 let host = {
   saveState: () => {},
@@ -437,7 +437,8 @@ function ensureStepStateForCard(card) {
     maxChapter: levels.maxEffectiveChapter,
     dimToggles: runtime.dimToggles,
     dimValueFilters: runtime.dimValueFilters,
-    multiGenderLemmas
+    multiGenderLemmas,
+    mixedFormNouns: MIXED_FORM_NOUN_LEMMAS
   });
   runtime.morphStepState = {
     cardId: card.id,

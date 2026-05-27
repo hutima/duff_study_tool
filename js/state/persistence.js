@@ -96,6 +96,44 @@ function sanitizeParsingChapter(input) {
   return 20;
 }
 
+// Legacy paradigm-lemma renames. Old saves may reference lemma strings
+// that no longer exist (e.g. the combined 'πόλις & βασιλεύς' lemma is
+// now split into two separate paradigm entries). Map each retired key
+// to its successor so saved stats and the focused-paradigm pointer
+// land on a real lemma after the split.
+const LEGACY_PARADIGM_LEMMA_RENAMES = {
+  'πόλις & βασιλεύς': 'πόλις'
+};
+
+export function migrateParadigmLemma(lemma) {
+  if (typeof lemma !== 'string') return lemma;
+  return LEGACY_PARADIGM_LEMMA_RENAMES[lemma] || lemma;
+}
+
+// Legacy supplemental-set key splits. Same idea as the lemma rename but
+// for `selectedKeys` entries: the old combined W5_POLIS_BASILEUS vocab/
+// morphology set is replaced by two separate sets, so a saved selection
+// that listed the combined key expands to both successors.
+const LEGACY_SELECTION_KEY_SPLITS = {
+  'W5_POLIS_BASILEUS': ['W5_POLIS', 'W5_BASILEUS']
+};
+
+function migrateSelectionKeys(keys) {
+  if (!Array.isArray(keys)) return keys;
+  const out = [];
+  const seen = new Set();
+  keys.forEach((k) => {
+    const s = String(k);
+    const successors = LEGACY_SELECTION_KEY_SPLITS[s] || [s];
+    successors.forEach((sk) => {
+      if (seen.has(sk)) return;
+      seen.add(sk);
+      out.push(sk);
+    });
+  });
+  return out;
+}
+
 function sanitizeParadigmStepStats(input) {
   const out = { byLemma: {}, overall: { totalAttempts: 0, inProgress: { correct: 0, total: 0 }, buckets: [] } };
   if (!isPlainObject(input)) return out;
@@ -117,6 +155,10 @@ function sanitizeParadigmStepStats(input) {
       const inProgress = sanitizeInProgressBucket(entry.inProgress);
       const totalAttempts = Math.max(0, Math.floor(Number(entry.totalAttempts) || 0));
       if (attempts.length || buckets.length || inProgress.total) {
+        // Drop attempts for legacy combined lemmas rather than misattributing
+        // them to one half of the split — the stats came from a mixed-paradigm
+        // deck, so neither successor lemma cleanly inherits them.
+        if (LEGACY_PARADIGM_LEMMA_RENAMES[String(lemma)]) return;
         out.byLemma[String(lemma)] = { attempts, totalAttempts, inProgress, buckets };
       }
     });
@@ -242,7 +284,7 @@ function sanitizeImportedState(candidate) {
   if (!hasRecognizedStateShape) return null;
 
   const state = { ...candidate };
-  state.selectedKeys = Array.isArray(candidate.selectedKeys) ? candidate.selectedKeys.map(String) : [];
+  state.selectedKeys = Array.isArray(candidate.selectedKeys) ? migrateSelectionKeys(candidate.selectedKeys.map(String)) : [];
   state.deckStates = isPlainObject(candidate.deckStates) ? candidate.deckStates : {};
   state.globalWordMarks = isPlainObject(candidate.globalWordMarks) ? candidate.globalWordMarks : {};
   state.globalWordProgress = isPlainObject(candidate.globalWordProgress) ? candidate.globalWordProgress : {};
@@ -259,7 +301,7 @@ function sanitizeImportedState(candidate) {
   state.morphSelfCheck = !!candidate.morphSelfCheck;
   state.morphStepByStep = !!candidate.morphStepByStep;
   state.morphFocusedParadigm = typeof candidate.morphFocusedParadigm === 'string'
-    ? candidate.morphFocusedParadigm
+    ? migrateParadigmLemma(candidate.morphFocusedParadigm)
     : null;
   state.parsingChapter = sanitizeParsingChapter(candidate.parsingChapter);
   state.paradigmStepStats = sanitizeParadigmStepStats(candidate.paradigmStepStats);
@@ -306,11 +348,11 @@ function sanitizeImportedState(candidate) {
     const morphSel = state.modeSelections.morph;
     if (vocabSel && Array.isArray(vocabSel.selectedKeys)) {
       state.studyMode = 'vocab';
-      state.selectedKeys = vocabSel.selectedKeys.map(String);
+      state.selectedKeys = migrateSelectionKeys(vocabSel.selectedKeys.map(String));
       state.currentSessionId = vocabSel.currentSessionId || null;
     } else if (morphSel && Array.isArray(morphSel.selectedKeys)) {
       state.studyMode = 'morph';
-      state.selectedKeys = morphSel.selectedKeys.map(String);
+      state.selectedKeys = migrateSelectionKeys(morphSel.selectedKeys.map(String));
       state.currentSessionId = morphSel.currentSessionId || null;
     } else {
       state.studyMode = 'vocab';
@@ -930,13 +972,23 @@ export function restoreState() {
     // we never drop a legacy save still being used as the load source.
     if (storage.getItem(STORAGE_KEY) !== null) clearLegacySaves(storage);
 
-    runtime.selectedKeys = Array.isArray(saved.selectedKeys) ? sortSetKeys(saved.selectedKeys.map(String)) : [];
+    runtime.selectedKeys = Array.isArray(saved.selectedKeys) ? sortSetKeys(migrateSelectionKeys(saved.selectedKeys.map(String))) : [];
     runtime.requiredOnly = saved.requiredOnly !== false;
     runtime.directionToGreek = !!saved.directionToGreek;
     runtime.spacedRepetition = saved.spacedRepetition !== false;
     runtime.hardVocabReviewMode = !!saved.hardVocabReviewMode;
     runtime.splitSelection = !!saved.splitSelection;
     runtime.modeSelections = saved.modeSelections && typeof saved.modeSelections === 'object' ? saved.modeSelections : {};
+    // Apply the same legacy-key rename to any per-mode selection snapshot so
+    // a vocab→parsing→vocab round-trip after the πόλις/βασιλεύς split
+    // restores a deck with the two successor keys, not the dropped combined
+    // key.
+    Object.keys(runtime.modeSelections).forEach((mode) => {
+      const entry = runtime.modeSelections[mode];
+      if (entry && Array.isArray(entry.selectedKeys)) {
+        entry.selectedKeys = migrateSelectionKeys(entry.selectedKeys.map(String));
+      }
+    });
     runtime.appProfile = 'vocab_grammar';
     const hadSavedAchievementSnapshot = Array.isArray(saved?.gamification?.lastEarnedAchievementIds);
     runtime.appGamification = sanitizeGamificationState(saved.gamification);
@@ -944,7 +996,7 @@ export function restoreState() {
     runtime.morphSelfCheck = !!saved.morphSelfCheck;
     runtime.morphStepByStep = !!saved.morphStepByStep;
     runtime.morphFocusedParadigm = typeof saved.morphFocusedParadigm === 'string'
-      ? saved.morphFocusedParadigm
+      ? migrateParadigmLemma(saved.morphFocusedParadigm)
       : null;
     runtime.parsingChapter = sanitizeParsingChapter(saved.parsingChapter);
     // Parsing mode's deck is driven by runtime.parsingChapter, not the
