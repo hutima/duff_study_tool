@@ -81,6 +81,7 @@ All use `class="consent-overlay"` + an `aria-hidden` toggle. Most use
 | 643–657  | `#resetStatsOverlay`         | Confirm reset of stats |
 | 659–677  | `#resetUnspacedOverlay`      | Confirm reset of current (unspaced) deck |
 | 679–696  | `#whatsNewV1_4Overlay`       | Version popup. Each release gets a fresh `#whatsNewVX_Y` overlay; the old one is removed once the next release ships. |
+| 698–710  | `#refreshAvailableOverlay`   | "A new version is ready" prompt. Shown when the SW registration detects a newly-installed worker in the `waiting` state (i.e. a returning user is running stale assets). "Refresh now" posts `{type:'SKIP_WAITING'}` to the waiting worker; a `controllerchange` listener in `main.js` then reloads the page. Wired up in `js/app/main.js` (the SW registration block) and `sw.js` (the `message` listener). |
 
 When adding a release:
 1. Bump `?v=NNN` on every `<link>` and `<script>` URL (and in `sw.js`).

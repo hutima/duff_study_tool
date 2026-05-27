@@ -2548,9 +2548,62 @@ function preventDoubleTapZoom(el) {
 });
 
 if ('serviceWorker' in navigator) {
+  let pendingWorker = null;
+  let reloading = false;
+
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (reloading) return;
+    reloading = true;
+    window.location.reload();
+  });
+
+  window.acceptRefreshAvailable = function () {
+    if (pendingWorker) {
+      try { pendingWorker.postMessage({ type: 'SKIP_WAITING' }); } catch (_) {}
+    }
+  };
+
+  window.dismissRefreshAvailable = function () {
+    const overlay = document.getElementById('refreshAvailableOverlay');
+    if (overlay) overlay.setAttribute('aria-hidden', 'true');
+  };
+
+  function showRefreshOverlay(sw) {
+    pendingWorker = sw;
+    const overlay = document.getElementById('refreshAvailableOverlay');
+    if (overlay) overlay.setAttribute('aria-hidden', 'false');
+  }
+
+  function trackUpdates(reg) {
+    // The new SW only counts as an update if a controller is already in place
+    // (i.e. this isn't the first install on a fresh device).
+    if (reg.waiting && navigator.serviceWorker.controller) {
+      showRefreshOverlay(reg.waiting);
+    }
+    reg.addEventListener('updatefound', () => {
+      const sw = reg.installing;
+      if (!sw) return;
+      sw.addEventListener('statechange', () => {
+        if (sw.state === 'installed' && navigator.serviceWorker.controller) {
+          showRefreshOverlay(sw);
+        }
+      });
+    });
+  }
+
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' })
-      .then(reg => { try { reg.update(); } catch (_) {} })
+      .then(reg => {
+        trackUpdates(reg);
+        try { reg.update(); } catch (_) {}
+        // Re-check whenever the tab regains focus, so a PWA reopened a day
+        // later picks up a deploy without needing a hard reload first.
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') {
+            try { reg.update(); } catch (_) {}
+          }
+        });
+      })
       .catch(() => {});
   });
 }
