@@ -69,6 +69,79 @@
     ]
   });
 
+  // λαμβάνω — Mounce's second 2nd-aorist paradigm verb. Same shape as
+  // W4_BALLO_SECOND_AORIST: 6 indicatives + 2 imperatives + infinitive +
+  // masc. nom. participle (sg + pl). 1sg / 3pl syncretism (ἔλαβον) is
+  // listed twice with distinct parsings — both cards survive the deck
+  // dedup because the existing per-form collapse picks the richer-parse
+  // winner, and "1sg" / "3pl" both have the same dim count, so the order
+  // here determines which reading any duplicate-form pick resolves to.
+  window.registerSupplementalVocabSet('W4_LAMBANO_SECOND_AORIST', {
+    label: 'λαμβάνω — second-aorist active forms',
+    week: 4,
+    cards: [
+      { g: 'ἔλαβον', e: 'I took (Aorist indicative, 1st person sg.)', required: true },
+      { g: 'ἔλαβες', e: 'you took (Aorist indicative, 2nd person sg.)', required: true },
+      { g: 'ἔλαβεν', e: 'he/she/it took (Aorist indicative, 3rd person sg.)', required: true },
+      { g: 'ἐλάβομεν', e: 'we took (Aorist indicative, 1st person pl.)', required: true },
+      { g: 'ἐλάβετε', e: 'you took (Aorist indicative, 2nd person pl.)', required: true },
+      { g: 'ἔλαβον', e: 'they took (Aorist indicative, 3rd person pl.)', required: true },
+      { g: 'λάβε', e: 'take! (Aorist imperative, 2nd person sg.)', required: true },
+      { g: 'λάβετε', e: 'take! (Aorist imperative, 2nd person pl.)', required: true },
+      { g: 'λαβεῖν', e: 'to take (Aorist infinitive)', required: true },
+      { g: 'λαβών', e: 'having taken (Aorist participle, masc. Nom. sg.)', required: true },
+      { g: 'λαβόντες', e: 'having taken (Aorist participle, masc. Nom. pl.)', required: true }
+    ]
+  });
+
+  // λείπω — Mounce's third 2nd-aorist paradigm verb. Stem-grade
+  // alternation ει → ι (λείπω → ἔλιπον) is the cleanest "different
+  // stem" 2nd-aorist example. The simple λείπω is rare in NT (the
+  // compound καταλείπω is more common), but Mounce uses the bare
+  // root because the stem shift is easier to see without a prefix.
+  window.registerSupplementalVocabSet('W4_LEIPO_SECOND_AORIST', {
+    label: 'λείπω — second-aorist active forms',
+    week: 4,
+    cards: [
+      { g: 'ἔλιπον', e: 'I left (Aorist indicative, 1st person sg.)', required: true },
+      { g: 'ἔλιπες', e: 'you left (Aorist indicative, 2nd person sg.)', required: true },
+      { g: 'ἔλιπεν', e: 'he/she/it left (Aorist indicative, 3rd person sg.)', required: true },
+      { g: 'ἐλίπομεν', e: 'we left (Aorist indicative, 1st person pl.)', required: true },
+      { g: 'ἐλίπετε', e: 'you left (Aorist indicative, 2nd person pl.)', required: true },
+      { g: 'ἔλιπον', e: 'they left (Aorist indicative, 3rd person pl.)', required: true },
+      { g: 'λίπε', e: 'leave! (Aorist imperative, 2nd person sg.)', required: true },
+      { g: 'λίπετε', e: 'leave! (Aorist imperative, 2nd person pl.)', required: true },
+      { g: 'λιπεῖν', e: 'to leave (Aorist infinitive)', required: true },
+      { g: 'λιπών', e: 'having left (Aorist participle, masc. Nom. sg.)', required: true },
+      { g: 'λιπόντες', e: 'having left (Aorist participle, masc. Nom. pl.)', required: true }
+    ]
+  });
+
+  // γίνομαι — Mounce's deponent 2nd-aorist example. Endings are middle
+  // throughout (γίνομαι is middle/deponent across present, imperfect,
+  // future, and aorist; perfect γέγονα is morphologically active).
+  // 1sg/3pl don't syncretize here — the middle endings -μην / -ντο are
+  // distinct — but the indicative -υ ending for 2sg (γένου) does
+  // collide with the imperative form, so the imperative card uses
+  // γενοῦ (the standard accent) to distinguish.
+  window.registerSupplementalVocabSet('W4_GINOMAI_SECOND_AORIST', {
+    label: 'γίνομαι — second-aorist middle forms',
+    week: 4,
+    cards: [
+      { g: 'ἐγενόμην', e: 'I became (Aorist middle indicative, 1st person sg.)', required: true },
+      { g: 'ἐγένου', e: 'you became (Aorist middle indicative, 2nd person sg.)', required: true },
+      { g: 'ἐγένετο', e: 'he/she/it became (Aorist middle indicative, 3rd person sg.)', required: true },
+      { g: 'ἐγενόμεθα', e: 'we became (Aorist middle indicative, 1st person pl.)', required: true },
+      { g: 'ἐγένεσθε', e: 'you became (Aorist middle indicative, 2nd person pl.)', required: true },
+      { g: 'ἐγένοντο', e: 'they became (Aorist middle indicative, 3rd person pl.)', required: true },
+      { g: 'γενοῦ', e: 'become! (Aorist middle imperative, 2nd person sg.)', required: true },
+      { g: 'γένεσθε', e: 'become! (Aorist middle imperative, 2nd person pl.)', required: true },
+      { g: 'γενέσθαι', e: 'to become (Aorist middle infinitive)', required: true },
+      { g: 'γενόμενος', e: 'having become (Aorist middle participle, masc. Nom. sg.)', required: true },
+      { g: 'γενόμενοι', e: 'having become (Aorist middle participle, masc. Nom. pl.)', required: true }
+    ]
+  });
+
   window.registerSupplementalVocabSet('W4_FUTURE_LIQUID_STEMS', {
     label: 'Future-liquid stems (present → future → aorist)',
     week: 4,
