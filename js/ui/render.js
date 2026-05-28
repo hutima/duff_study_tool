@@ -693,7 +693,16 @@ function buildLemmaFormToAnswerFromCards(lemma, cards) {
     if (!ans) continue;
     // Stem-pair study notes like 'βάλλω → ἔβαλον' aren't single forms.
     if (/→/.test(c.form)) continue;
-    if (out[c.form] === undefined) out[c.form] = augmentAnswerWithLabel(ans, c.sourceLabel || '');
+    // Syncretic forms (e.g. λύω's ἔλυον = imperfect active 1sg AND 3pl)
+    // appear in the supplemental paradigms as TWO cards with different
+    // parses but the same Greek. Both readings must reach the lookup so a
+    // student picking the second reading isn't told "no morph exists" —
+    // collect every distinct answer per form into an array, deduping on
+    // the canonical text so a card and its richer-label twin don't both
+    // surface.
+    const augmented = augmentAnswerWithLabel(ans, c.sourceLabel || '');
+    if (!out[c.form]) out[c.form] = [];
+    if (!out[c.form].includes(augmented)) out[c.form].push(augmented);
   }
   return out;
 }
@@ -702,13 +711,15 @@ function buildLemmaFormToAnswerFromCards(lemma, cards) {
 // card's sourceLabel — same reason as buildLemmaFormToAnswerFromCards
 // above. Without this the orphan-skip rule lets every untagged answer
 // in the card's pool spuriously match whichever mood/voice the student
-// picked.
+// picked. Same array-valued shape as buildLemmaFormToAnswerFromCards;
+// most paradigm subsets don't have syncretic forms, but the matchPool
+// consumer treats single answers and arrays uniformly.
 function buildAugmentedCardPool(card) {
   if (!card || !card.formToAnswer || typeof card.formToAnswer !== 'object') return {};
   const out = {};
   for (const [form, answer] of Object.entries(card.formToAnswer)) {
     if (!form || !answer) continue;
-    out[form] = augmentAnswerWithLabel(answer, card.sourceLabel || '');
+    out[form] = [augmentAnswerWithLabel(answer, card.sourceLabel || '')];
   }
   return out;
 }
@@ -839,15 +850,23 @@ function resolveFormForPickedDims(card, steps, pickedValues, autoFilledDims) {
   // participle/infinitive pick.
   const matchPool = (pool) => {
     const out = [];
-    for (const [form, answer] of Object.entries(pool || {})) {
-      if (!form || !answer) continue;
-      const ansDims = parseAnswerDimensions(answer);
-      const ok = keys.every((k) => !ansDims[k] || dimsCompatible(pickedDims[k], ansDims[k]));
-      if (!ok) continue;
-      const hasAnyMatch = keys.some((k) => ansDims[k] && dimsCompatible(pickedDims[k], ansDims[k]));
-      if (!hasAnyMatch) continue;
-      if (!structurallyCompatibleMood(pickedDims.mood, ansDims)) continue;
-      out.push({ form, ansDims });
+    for (const [form, answers] of Object.entries(pool || {})) {
+      if (!form || !answers) continue;
+      // Pool values are arrays of answer strings (one per distinct parse
+      // of a syncretic form, e.g. ἔλυον = imperfect active 1sg AND 3pl).
+      // The lemma_inventory.extraForms fallback still hands us plain
+      // strings, so handle both shapes.
+      const answerList = Array.isArray(answers) ? answers : [answers];
+      for (const answer of answerList) {
+        if (!answer) continue;
+        const ansDims = parseAnswerDimensions(answer);
+        const ok = keys.every((k) => !ansDims[k] || dimsCompatible(pickedDims[k], ansDims[k]));
+        if (!ok) continue;
+        const hasAnyMatch = keys.some((k) => ansDims[k] && dimsCompatible(pickedDims[k], ansDims[k]));
+        if (!hasAnyMatch) continue;
+        if (!structurallyCompatibleMood(pickedDims.mood, ansDims)) continue;
+        out.push({ form, ansDims });
+      }
     }
     return out;
   };
