@@ -29,7 +29,8 @@ let host = {
   formatGreekHeadword: (g) => g || '—',
   transliterateGreek: (s) => s,
   detectPartOfSpeech: () => '',
-  isMultiCasePreposition: () => false
+  isMultiCasePreposition: () => false,
+  getEnabledParsingDims: () => null
 };
 
 export function configureRender(deps) {
@@ -979,7 +980,7 @@ function renderMorphStepSummary(card, state) {
        </div>
      </div>`;
 
-  const lemmaSummary = summarizeLemmaStats(runtime.paradigmStepStats || {}, card.lemma);
+  const lemmaSummary = summarizeLemmaStats(runtime.paradigmStepStats || {}, card.lemma, host.getEnabledParsingDims());
   const recentLine = lemmaSummary.attempts > 0
     ? `<div class="morph-step-rollup-recent">Last ${lemmaSummary.attempts}/${getParadigmStepAttemptWindow()} attempts for ${escapeHtml(card.lemma)}: ${lemmaSummary.correct}/${lemmaSummary.total} dimensions correct (${Math.round(100 * lemmaSummary.correct / Math.max(1, lemmaSummary.total))}%)</div>`
     : '';
