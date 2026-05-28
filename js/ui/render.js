@@ -77,7 +77,16 @@ export function renderCard() {
   if (!runtime.deck.length) {
     let emptyMessage;
     if (host.isParsingMode()) {
-      emptyMessage = 'Pick a focused paradigm from the dropdown above to start parsing.';
+      // A paradigm IS focused but the deck came back empty: with "Exclude
+      // known morphs" on that means every in-scope form is 2/2 known, so
+      // the filter (correctly) drained the deck. Tell the student the
+      // paradigm is mastered rather than nudging them to pick one they've
+      // already picked. Focused paradigms always have forms in scope (they
+      // come from listAvailableParadigms), so an empty deck here is the
+      // exclude-known case, not a genuinely empty paradigm.
+      emptyMessage = (runtime.morphFocusedParadigm && runtime.excludeKnownMorphs)
+        ? 'Every form in this paradigm is mastered (both of the last two attempts correct under your current parsing toggles). Pick another paradigm above, clear a form’s tally with the ✕ in the progress panel below, or turn off “Exclude known morphs” to drill them again.'
+        : 'Pick a focused paradigm from the dropdown above to start parsing.';
     } else if (host.isMorphologyMode()) {
       emptyMessage = host.isReverseGrammarActive()
         ? 'No reversible grammar items in this selection. Toggle “English → Greek” off to see all questions.'
