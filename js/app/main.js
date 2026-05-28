@@ -190,10 +190,10 @@ import {
   initializeConsentGate,
   showDisclaimerModal,
   isDisclaimerModalOpen,
-  maybeShowWhatsNewV1_4Modal,
-  openWhatsNewV1_4Modal,
-  closeWhatsNewV1_4Modal,
-  isWhatsNewV1_4ModalOpen,
+  maybeShowWhatsNewV1_5Modal,
+  openWhatsNewV1_5Modal,
+  closeWhatsNewV1_5Modal,
+  isWhatsNewV1_5ModalOpen,
   isTransferModalOpen,
   isStudySelectorOpen,
   openStudySelector,
@@ -326,7 +326,7 @@ import {
   sanitizeGamificationState,
   STORAGE_KEY,
   CONSENT_STORAGE_KEY,
-  WHATS_NEW_V1_4_STORAGE_KEY,
+  WHATS_NEW_V1_5_STORAGE_KEY,
   THEME_STORAGE_KEY,
   FONT_FAMILY_STORAGE_KEY,
   TEXT_SIZE_STORAGE_KEY,
@@ -490,7 +490,19 @@ configureAnalytics({
   accumulateActiveStudyTime: () => accumulateActiveStudyTime(),
   canAccessGrammarUi: () => canAccessGrammarUi(),
   saveState: () => saveState(),
-  getEnabledParsingDims: () => getEnabledParsingDims()
+  getEnabledParsingDims: () => getEnabledParsingDims(),
+  // Chapter-gated in-scope forms for a paradigm (same pool the deck + the
+  // review panel use), so the analytics breakdown only shows values the
+  // student's current chapter scope has unlocked.
+  getMorphCardsForLemma: (lemma) => getCardsForFocusedParadigm(
+    getAggregateSelectionKeys(),
+    lemma,
+    {
+      includeOptional: !!runtime.includeOptionalForms,
+      optionalFilters: runtime.optionalFormFilters,
+      dimValueFilters: runtime.dimValueFilters
+    }
+  )
 });
 configurePersistence({
   ensureUsageStats: (stats) => ensureUsageStats(stats),
@@ -2507,7 +2519,7 @@ installKeyboardShortcuts({
   isAnalyticsModalOpen, closeAnalyticsOverlay,
   isStudySelectorOpen, closeStudySelector,
   isShortcutsModalOpen, closeShortcutsModal,
-  isWhatsNewV1_4ModalOpen, closeWhatsNewV1_4Modal,
+  isWhatsNewV1_5ModalOpen, closeWhatsNewV1_5Modal,
   isDisclaimerModalOpen, isTransferModalOpen,
   isReviewDeckMode,
   getSelectedKeys: () => runtime.selectedKeys,
@@ -2543,7 +2555,7 @@ const GLOBAL_CLICK_HANDLERS = {
   toggleMorphStepByStep, setMorphFocusedParadigm, setParsingChapter, goToStemDrillFromParsing,
   toggleRequiredOnly, toggleHardVocabReview, toggleShuffle, toggleSpacedRepetition, toggleSplitSelection, toggleAspectStep, toggleDimStep, toggleOptionalForms, toggleOptionalFormFilter, toggleDimValueFilter, toggleExcludeKnownMorphs, resetKnownMorphs, clearParsingStats, toggleUnspacedDailyReset, triggerImportProgress,
   openReaderTab, selectReaderDrillChoice, advanceReaderDrill,
-  closeWhatsNewV1_4Modal
+  closeWhatsNewV1_5Modal
 };
 if (typeof globalThis !== 'undefined') Object.assign(globalThis, GLOBAL_CLICK_HANDLERS);
 if (typeof window !== 'undefined' && window !== globalThis) Object.assign(window, GLOBAL_CLICK_HANDLERS);

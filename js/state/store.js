@@ -4,7 +4,7 @@ import { isPlainObject } from '../utils/helpers.js';
 // ── Persistence keys ──
 export const STORAGE_KEY = 'greekFlashcardsStateV18';
 export const CONSENT_STORAGE_KEY = 'greekFlashcardsConsentV1';
-export const WHATS_NEW_V1_4_STORAGE_KEY = 'greekFlashcardsWhatsNewV1_4Seen';
+export const WHATS_NEW_V1_5_STORAGE_KEY = 'greekFlashcardsWhatsNewV1_5Seen';
 export const THEME_STORAGE_KEY = 'greekFlashcardsThemeMode';
 export const FONT_FAMILY_STORAGE_KEY = 'greekFlashcardsFontFamily';
 export const TEXT_SIZE_STORAGE_KEY = 'greekFlashcardsTextSize';
