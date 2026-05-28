@@ -762,6 +762,52 @@ export function toggleOptionalForms() {
   loadDeckFromKeys(keysToLoad, runtime.currentSession ? runtime.currentSession.id : null);
 }
 
+// Drop any card whose last two parsing attempts are both correct (2/2)
+// from the parsing deck. The 1/1 "single right answer so far" state is
+// intentionally kept in the pool — the user has to demonstrate the form
+// twice before parsing mode skips it. Rebuilds the deck immediately so
+// the toggle takes effect mid-session; outside parsing mode the flag
+// still flips and persists but the deck isn't rebuilt (vocab/grammar
+// don't read it).
+export function toggleExcludeKnownMorphs() {
+  runtime.excludeKnownMorphs = !runtime.excludeKnownMorphs;
+  host.syncToggleButtons();
+  if (!runtime.selectedKeys.length) {
+    host.saveState();
+    return;
+  }
+  const keysToLoad = runtime.currentSession ? expandSessionSets(runtime.currentSession) : runtime.selectedKeys;
+  loadDeckFromKeys(keysToLoad, runtime.currentSession ? runtime.currentSession.id : null);
+}
+
+// Wipe every per-paradigm parsing stat — per-lemma sliding windows,
+// completed buckets, in-progress counters, per-form recent-attempt
+// records, and the cross-paradigm overall. Sets all correct counts to
+// zero so the parsing-review dots all read as unseen (0/0) and the %
+// rows reset to "—". Parsing mode's "Reset parse" button replaces the
+// vocab/grammar Reset-deck/Reset-required pair (neither applies here:
+// parsing has no SRS state and no required-vs-supplemental split).
+export function resetParseStats() {
+  if (!window.confirm('Reset every parsing-mode correct count? This clears per-form, per-paradigm, and overall parsing stats. Your vocab/grammar progress is not affected.')) return;
+  runtime.paradigmStepStats = {
+    byLemma: {},
+    overall: { totalAttempts: 0, inProgress: { correct: 0, total: 0 }, buckets: [] }
+  };
+  host.resetMorphAnswerState();
+  // Round-trip through loadDeckFromKeys so any 2/2-known forms that the
+  // exclude-known-morphs filter dropped at deck-build time come back into
+  // scope now that every form is unseen again.
+  if (runtime.selectedKeys.length) {
+    const keysToLoad = runtime.currentSession ? expandSessionSets(runtime.currentSession) : runtime.selectedKeys;
+    loadDeckFromKeys(keysToLoad, runtime.currentSession ? runtime.currentSession.id : null);
+  } else {
+    renderCard();
+    renderProgress();
+    renderReview();
+  }
+  host.saveState();
+}
+
 const OPTIONAL_FILTER_KEYS = new Set(['imperative', 'subjunctive', 'infinitive', 'participle', 'thirdPerson', 'futureTense', 'perfectTense']);
 
 // Per-category filter on the optional-form pool. Off → cards whose
