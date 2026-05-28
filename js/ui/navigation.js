@@ -780,19 +780,24 @@ export function toggleExcludeKnownMorphs() {
   loadDeckFromKeys(keysToLoad, runtime.currentSession ? runtime.currentSession.id : null);
 }
 
-// Wipe every per-paradigm parsing stat — per-lemma sliding windows,
-// completed buckets, in-progress counters, per-form recent-attempt
-// records, and the cross-paradigm overall. Sets all correct counts to
-// zero so the parsing-review dots all read as unseen (0/0) and the %
-// rows reset to "—". Parsing mode's "Reset parse" button replaces the
-// vocab/grammar Reset-deck/Reset-required pair (neither applies here:
-// parsing has no SRS state and no required-vs-supplemental split).
-export function resetParseStats() {
-  if (!window.confirm('Reset every parsing-mode correct count? This clears per-form, per-paradigm, and overall parsing stats. Your vocab/grammar progress is not affected.')) return;
-  runtime.paradigmStepStats = {
-    byLemma: {},
-    overall: { totalAttempts: 0, inProgress: { correct: 0, total: 0 }, buckets: [] }
-  };
+// Reset every form's per-form tally to 0/2 — drops the `recent` attempts
+// (and the seen count) on every lemma's forms map. Per-paradigm rolling
+// %, the completed bucket history, in-progress counters, and the
+// cross-paradigm overall are intentionally kept; "Reset stats" remains
+// the option for wiping those too. Lets the user re-verify a paradigm
+// from scratch without losing the long-term performance record. The
+// parsing-mode "Reset known" button replaces vocab/grammar's
+// Reset-deck/Reset-required pair (neither applies in parsing: no SRS
+// state, no required-vs-supplemental split).
+export function resetKnownMorphs() {
+  if (!window.confirm('Set every form back to 0/2 attempts? This clears the per-form "known" tally so parsing forms read as unseen again. Per-paradigm % and history are kept.')) return;
+  const stats = runtime.paradigmStepStats;
+  if (stats && stats.byLemma && typeof stats.byLemma === 'object') {
+    Object.keys(stats.byLemma).forEach((lemma) => {
+      const entry = stats.byLemma[lemma];
+      if (entry && typeof entry === 'object') entry.forms = {};
+    });
+  }
   host.resetMorphAnswerState();
   // Round-trip through loadDeckFromKeys so any 2/2-known forms that the
   // exclude-known-morphs filter dropped at deck-build time come back into

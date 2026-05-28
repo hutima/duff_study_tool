@@ -262,7 +262,7 @@ import {
   fastForwardOneWeek,
   resetCurrentDeck,
   resetRequiredOnly,
-  resetParseStats,
+  resetKnownMorphs,
   closeResetSpacedModal,
   confirmResetSpacedTimingOnly,
   confirmResetSpacedProgress,
@@ -1243,14 +1243,14 @@ function syncToggleButtons() {
   }
   // Reset deck/required don't apply in parsing mode (no SRS, no
   // required/supplemental split — parsing's record is the per-form recent
-  // attempts). Swap both for a single "Reset parse" that zeros out the
-  // parsing-stats payload.
+  // attempts). Swap both for a single "Reset known" that drops every
+  // form's per-form tally back to 0/2 (per-paradigm history kept).
   const resetRequiredBtn = document.getElementById('resetRequiredBtn');
-  const resetParseBtn = document.getElementById('resetParseBtn');
+  const resetKnownBtn = document.getElementById('resetKnownBtn');
   const parsing = isParsingMode();
   if (resetDeckBtn) resetDeckBtn.style.display = parsing ? 'none' : '';
   if (resetRequiredBtn) resetRequiredBtn.style.display = parsing ? 'none' : '';
-  if (resetParseBtn) resetParseBtn.style.display = parsing ? '' : 'none';
+  if (resetKnownBtn) resetKnownBtn.style.display = parsing ? '' : 'none';
 
   const subtitle = document.getElementById('appSubtitle');
   if (subtitle) subtitle.textContent = getModeDescription();
@@ -1305,6 +1305,11 @@ function syncLayoutVisibility() {
   const paradigmFocusRowPrimary = document.getElementById('paradigmFocusRowPrimary');
   if (paradigmFocusRowPrimary) paradigmFocusRowPrimary.style.display = isParsingMode() ? 'flex' : 'none';
   if (shuffleToggle) shuffleToggle.style.display = reviewDeckMode ? 'flex' : 'none';
+  // Exclude-known-morphs is a parsing-only filter on the deck pool —
+  // promoted from inside Parsing options to a top-level toggle next to
+  // Shuffle so it's reachable without expanding the per-dim section.
+  const excludeKnownMorphsToggle = document.getElementById('excludeKnownMorphsToggle');
+  if (excludeKnownMorphsToggle) excludeKnownMorphsToggle.style.display = isParsingMode() ? 'flex' : 'none';
   // Spaced repetition writes confidence stats — parsing mode is explicitly
   // off-the-record, so the toggle is irrelevant there and gets hidden.
   if (spacedToggle) spacedToggle.style.display = (reviewDeckMode && !isParsingMode()) ? 'flex' : 'none';
@@ -2526,7 +2531,7 @@ const GLOBAL_CLICK_HANDLERS = {
   restoreSpacedUndo, setAppProfile, setStudyMode, setThemeMode, setFontFamily, setTextSize,
   showDisclaimerModal, startStudying, toggleDirection, toggleMorphSelfCheck,
   toggleMorphStepByStep, setMorphFocusedParadigm, setParsingChapter, goToStemDrillFromParsing,
-  toggleRequiredOnly, toggleHardVocabReview, toggleShuffle, toggleSpacedRepetition, toggleSplitSelection, toggleAspectStep, toggleDimStep, toggleOptionalForms, toggleOptionalFormFilter, toggleDimValueFilter, toggleExcludeKnownMorphs, resetParseStats, toggleUnspacedDailyReset, triggerImportProgress,
+  toggleRequiredOnly, toggleHardVocabReview, toggleShuffle, toggleSpacedRepetition, toggleSplitSelection, toggleAspectStep, toggleDimStep, toggleOptionalForms, toggleOptionalFormFilter, toggleDimValueFilter, toggleExcludeKnownMorphs, resetKnownMorphs, toggleUnspacedDailyReset, triggerImportProgress,
   openReaderTab, selectReaderDrillChoice, advanceReaderDrill,
   closeWhatsNewV1_4Modal
 };
