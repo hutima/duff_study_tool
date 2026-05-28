@@ -9,7 +9,7 @@
 
 import { getStorage } from '../utils/storage.js';
 import { shieldClicksBriefly } from '../utils/clickShield.js';
-import { CONSENT_STORAGE_KEY, WHATS_NEW_V1_4_STORAGE_KEY } from '../state/store.js';
+import { CONSENT_STORAGE_KEY, WHATS_NEW_V1_5_STORAGE_KEY } from '../state/store.js';
 
 let host = {
   // Defaults are intentional no-ops so the predicate functions can run before
@@ -85,7 +85,7 @@ export function handleConsentAction() {
     storage.setItem(CONSENT_STORAGE_KEY, 'accepted');
     // First-time accepters already see the new features as part of the base
     // experience, so suppress the v1.4 announcement for them.
-    storage.setItem(WHATS_NEW_V1_4_STORAGE_KEY, 'seen');
+    storage.setItem(WHATS_NEW_V1_5_STORAGE_KEY, 'seen');
   }
   closeDisclaimerModal();
   openStudySelector();
@@ -102,7 +102,7 @@ export function initializeConsentGate() {
     openDisclaimerModal(true);
   } else {
     updateConsentButtonState();
-    maybeShowWhatsNewV1_4Modal();
+    maybeShowWhatsNewV1_5Modal();
   }
 }
 
@@ -116,37 +116,37 @@ export function isDisclaimerModalOpen() {
 
 // ── What's New v1.4 ──────────────────────────────────────────────────────
 
-export function maybeShowWhatsNewV1_4Modal() {
+export function maybeShowWhatsNewV1_5Modal() {
   if (!host.getHasAcceptedDisclaimer()) return;
   const storage = getStorage();
   if (!storage) return;
-  if (storage.getItem(WHATS_NEW_V1_4_STORAGE_KEY) === 'seen') return;
-  openWhatsNewV1_4Modal();
+  if (storage.getItem(WHATS_NEW_V1_5_STORAGE_KEY) === 'seen') return;
+  openWhatsNewV1_5Modal();
 }
 
-export function openWhatsNewV1_4Modal() {
-  const overlay = document.getElementById('whatsNewV1_4Overlay');
+export function openWhatsNewV1_5Modal() {
+  const overlay = document.getElementById('whatsNewV1_5Overlay');
   if (!overlay) return;
   overlay.classList.add('show');
   overlay.setAttribute('aria-hidden', 'false');
   document.body.classList.add('modal-open');
 }
 
-export function closeWhatsNewV1_4Modal() {
-  const overlay = document.getElementById('whatsNewV1_4Overlay');
+export function closeWhatsNewV1_5Modal() {
+  const overlay = document.getElementById('whatsNewV1_5Overlay');
   if (!overlay) return;
   overlay.classList.remove('show');
   overlay.setAttribute('aria-hidden', 'true');
   const storage = getStorage();
-  if (storage) storage.setItem(WHATS_NEW_V1_4_STORAGE_KEY, 'seen');
+  if (storage) storage.setItem(WHATS_NEW_V1_5_STORAGE_KEY, 'seen');
   if (!isDisclaimerModalOpen() && !isTransferModalOpen() && !isAnalyticsModalOpen() && !isStudySelectorOpen() && !isShortcutsModalOpen()) {
     document.body.classList.remove('modal-open');
   }
   shieldClicksBriefly();
 }
 
-export function isWhatsNewV1_4ModalOpen() {
-  return !!document.getElementById('whatsNewV1_4Overlay')?.classList.contains('show');
+export function isWhatsNewV1_5ModalOpen() {
+  return !!document.getElementById('whatsNewV1_5Overlay')?.classList.contains('show');
 }
 
 // ── Transfer modal (open-state only — open/close lives with the import/
