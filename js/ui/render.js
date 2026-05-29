@@ -51,10 +51,33 @@ const PARSING_INCOMPATIBLE_LEMMAS = {
   'Second-aorist stems': 'W4_SECOND_AORIST_FLIP'
 };
 
+// The "nothing selected" placeholder — the same markup index.html ships in
+// #cardArea. Shown on a fresh start, after deselecting everything, and when
+// switching into a mode that has no chapters selected (e.g. split
+// vocab/grammar selection with only one side populated). Only paints the card
+// area; callers that also need the deck cleared do that themselves.
+export function renderChooseSessionEmptyState() {
+  const area = document.getElementById('cardArea');
+  if (area) {
+    area.innerHTML = '<div class="empty-state"><div class="big">αβγ</div>Tap to choose a session and start studying.</div>';
+  }
+}
+
 export function renderCard() {
   const area = document.getElementById('cardArea');
   host.saveState();
   host.syncLayoutVisibility();
+
+  // No chapters selected for the current mode → show the canonical "choose a
+  // session" placeholder. Sits ahead of every deck-dependent branch so a stale
+  // deck carried over from the mode we just left can't render here. This is
+  // the split vocab/grammar case: switching to the side with no selection used
+  // to surface the other side's cards (e.g. grammar cards in an empty vocab
+  // deck) because the deck was never cleared.
+  if (!runtime.selectedKeys.length) {
+    renderChooseSessionEmptyState();
+    return;
+  }
 
   if (host.isParsingMode() && runtime.morphFocusedParadigm && Object.prototype.hasOwnProperty.call(PARSING_INCOMPATIBLE_LEMMAS, runtime.morphFocusedParadigm)) {
     const lemma = runtime.morphFocusedParadigm;
