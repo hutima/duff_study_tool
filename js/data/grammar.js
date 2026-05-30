@@ -750,14 +750,14 @@
             { form: "περί + accusative", prompt: "περί + accusative means…",
               answer: "around, about (location/approx.)",
               choices: ["around, about (location/approx.)", "concerning, about (topic)", "after", "by"] },
-            { form: "ἐκβάλλει τὰ δαιμόνια διὰ τοῦ θεοῦ.",
+            { form: "ἐκβάλλει τὸν δοῦλον διὰ τοῦ λόγου.",
               prompt: "Translate.",
-              answer: "he casts out the demons through God",
+              answer: "he casts out the slave through the word",
               choices: [
-                "he casts out the demons through God",
-                "he casts out the demons because of God",
-                "he casts out God through the demons",
-                "the demons are cast out by God"
+                "he casts out the slave through the word",
+                "he casts out the slave because of the word",
+                "he casts out the word through the slave",
+                "the slave is cast out by the word"
               ],
               note: "διά + genitive = 'through' (means / agency)." }
           ]
@@ -2755,14 +2755,14 @@
                 "neutral — they have no expectation",
                 "demanding — they want an immediate command response"
               ] },
-            { form: "μὴ σὺ μείζων εἶ τοῦ πατρός;",
+            { form: "μὴ σὺ εἶ ὁ Χριστός;",
               prompt: "Translate, capturing the slant.",
-              answer: "'You are not greater than the father, are you?' (expecting 'no')",
+              answer: "'You are not the Christ, are you?' (expecting 'no')",
               choices: [
-                "'You are not greater than the father, are you?' (expecting 'no')",
-                "'Aren't you greater than the father?' (expecting 'yes')",
-                "'Are you greater than the father?' (neutral)",
-                "'You are not greater than the father.' (statement)"
+                "'You are not the Christ, are you?' (expecting 'no')",
+                "'Aren't you the Christ?' (expecting 'yes')",
+                "'Are you the Christ?' (neutral)",
+                "'You are not the Christ.' (statement)"
               ] },
             { form: "μή slant — speaker's attitude",
               prompt: "If a speaker uses a μή-question, what is their attitude toward the answer?",
@@ -2994,14 +2994,14 @@
                 "dative — point in time ('at day and night')",
                 "nominative — subject of the verb"
               ] },
-            { form: "τῷ σαββάτῳ",
+            { form: "τῇ ἡμέρᾳ",
               prompt: "Translate this time expression.",
-              answer: "'on the sabbath' — point in time",
+              answer: "'on the day' — point in time",
               choices: [
-                "'on the sabbath' — point in time",
-                "'for the sabbath' — duration",
-                "'during the sabbath' — time within which",
-                "'with the sabbath' — accompaniment"
+                "'on the day' — point in time",
+                "'for a day' — duration",
+                "'throughout the day' — time within which",
+                "'with the day' — accompaniment"
               ] },
             { form: "ἐν ἐκείνῃ τῇ ἡμέρᾳ",
               prompt: "Translate.",
