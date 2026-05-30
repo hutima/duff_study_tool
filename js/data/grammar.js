@@ -887,14 +887,14 @@
                 "anywhere — position is free"
               ],
               note: "οὐ λέγω = 'I am not speaking'." },
-            { form: "οὐκ ἔστιν",
+            { form: "οὐκ ἀκούει",
               prompt: "Translate.",
-              answer: "'he/she/it is not' — οὐκ + ἐστίν (smooth-breathing vowel)",
+              answer: "'he/she/it does not hear' — οὐκ before a smooth-breathing vowel (ἀ)",
               choices: [
-                "'he/she/it is not' — οὐκ + ἐστίν (smooth-breathing vowel)",
-                "'he is' — οὐκ is enclitic and means 'truly'",
-                "'they are not' — οὐκ marks plural",
-                "'he was not' — οὐκ marks a former state"
+                "'he/she/it does not hear' — οὐκ before a smooth-breathing vowel (ἀ)",
+                "'he hears' — οὐκ is enclitic and means 'truly'",
+                "'they do not hear' — οὐκ marks plural",
+                "'he was not hearing' — οὐκ marks a former state"
               ] },
             { form: "οὐ βλέπει τὸν Χριστόν.",
               prompt: "Translate.",
@@ -2210,14 +2210,14 @@
                 "'this'; declines like οὗτος, with the τ-/breathing alternation"
               ],
               note: "Compare ἄλλο with English 'other' — the masc./fem. follow 2-1-2 endings normally (ἄλλος, ἄλλη)." },
-            { form: "αὐτὴ ἡ γυνή",
+            { form: "αὐτὴ ἡ ἀδελφή",
               prompt: "Translate (αὐτή in predicate position).",
-              answer: "'the woman herself' — emphatic / intensive αὐτός",
+              answer: "'the sister herself' — emphatic / intensive αὐτός",
               choices: [
-                "'the woman herself' — emphatic / intensive αὐτός",
-                "'the same woman' — attributive αὐτός",
-                "'this woman' — demonstrative",
-                "'her woman' — possessive"
+                "'the sister herself' — emphatic / intensive αὐτός",
+                "'the same sister' — attributive αὐτός",
+                "'this sister' — demonstrative",
+                "'her sister' — possessive"
               ],
               note: "Outside the article–noun bracket = 'self'." },
             { form: "αὐτός — position rule (emphatic)",
@@ -2737,14 +2737,14 @@
                 "'Is this the son?' (neutral)",
                 "'This is not the son.' (statement, not a question)"
               ] },
-            { form: "οὐκ οἴδατε;",
+            { form: "οὐκ ἀκούετε;",
               prompt: "Translate, capturing the slant.",
-              answer: "'You know, don't you?' / 'Don't you know?' (expecting 'yes')",
+              answer: "'You hear, don't you?' / 'Don't you hear?' (expecting 'yes')",
               choices: [
-                "'You know, don't you?' / 'Don't you know?' (expecting 'yes')",
-                "'You don't know, do you?' (expecting 'no')",
-                "'Do you know?' (neutral)",
-                "'You do not know.' (statement)"
+                "'You hear, don't you?' / 'Don't you hear?' (expecting 'yes')",
+                "'You don't hear, do you?' (expecting 'no')",
+                "'Do you hear?' (neutral)",
+                "'You do not hear.' (statement)"
               ] },
             { form: "οὐ slant — speaker's attitude",
               prompt: "If a speaker uses an οὐ-question, what is their attitude toward the answer?",
@@ -2842,14 +2842,14 @@
               prompt: "A third use of ὅτι, distinct from direct and indirect statement, is…",
               answer: "causal — 'because'",
               choices: ["causal — 'because'", "conditional — 'if'", "concessive — 'although'", "final — 'in order that'"] },
-            { form: "ἀπεκρίθη ὅτι Ἐγὼ οὐκ εἰμὶ ὁ Χριστός",
+            { form: "λέγει ὅτι Ἐγὼ οὐκ εἰμὶ ὁ Χριστός",
               prompt: "Translate, recognising ὅτι recitative.",
-              answer: "'He answered, “I am not the Christ.”' — ὅτι is left untranslated (opening quotation marks)",
+              answer: "'He says, “I am not the Christ.”' — ὅτι is left untranslated (opening quotation marks)",
               choices: [
-                "'He answered, “I am not the Christ.”' — ὅτι is left untranslated (opening quotation marks)",
-                "'He answered that I am not the Christ.' — indirect statement",
-                "'He answered because I am not the Christ.' — causal",
-                "'He answered in order that I might not be the Christ.' — purpose"
+                "'He says, “I am not the Christ.”' — ὅτι is left untranslated (opening quotation marks)",
+                "'He says that I am not the Christ.' — indirect statement",
+                "'He says because I am not the Christ.' — causal",
+                "'He says in order that I might not be the Christ.' — purpose"
               ],
               note: "Tell-tale: the embedded clause uses 1st-person 'I' — that's the original speaker, not the narrator." },
             { form: "direct vs indirect signal",
@@ -2870,14 +2870,14 @@
                 "'He says because I am.' — causal",
                 "'He says, “He is.”' — backshifted indirect"
               ] },
-            { form: "οἶδα ὅτι ὁ θεὸς ἀγαθός ἐστιν",
+            { form: "πιστεύω ὅτι ὁ θεὸς ἀγαθός ἐστιν",
               prompt: "Translate (indirect statement with ὅτι).",
-              answer: "'I know that God is good.'",
+              answer: "'I believe that God is good.'",
               choices: [
-                "'I know that God is good.'",
-                "'I know, because God is good.'",
-                "'I know, in order that God may be good.'",
-                "'I know, “God is good”' (direct quote)"
+                "'I believe that God is good.'",
+                "'I believe, because God is good.'",
+                "'I believe, in order that God may be good.'",
+                "'I believe, “God is good”' (direct quote)"
               ],
               note: "Indirect statement after verbs of knowing / saying / thinking." },
             { form: "εἶπεν ὅτι ἔρχεται",
@@ -2957,41 +2957,41 @@
                 "acc. = within which; gen. = point; dat. = duration",
                 "all three cases mean the same thing — case is purely stylistic"
               ] },
-            { form: "τρεῖς ἡμέρας",
+            { form: "πολλὰς ἡμέρας",
               prompt: "Translate this time expression.",
-              answer: "'for three days' — duration",
+              answer: "'for many days' — duration",
               choices: [
-                "'for three days' — duration",
-                "'on the third day' — point in time",
-                "'within three days' — time within which",
-                "'three days are…' — subject"
+                "'for many days' — duration",
+                "'on a certain day' — point in time",
+                "'within many days' — time within which",
+                "'many days are…' — subject"
               ] },
-            { form: "ὅλην τὴν νύκτα",
+            { form: "ὅλην τὴν ὥραν",
               prompt: "Translate this time expression.",
-              answer: "'all night long' / 'for the whole night' — duration",
+              answer: "'for the whole hour' / 'all hour long' — duration",
               choices: [
-                "'all night long' / 'for the whole night' — duration",
-                "'at the whole night' — point in time",
-                "'during the whole night' — time within which",
-                "'the whole night is…' — subject"
+                "'for the whole hour' / 'all hour long' — duration",
+                "'at the whole hour' — point in time",
+                "'during the whole hour' — time within which",
+                "'the whole hour is…' — subject"
               ],
               note: "Whenever the question is 'for how long?', look for the accusative." },
-            { form: "ἡμέρας καὶ νυκτός",
+            { form: "ἡμέρας καὶ ὥρας",
               prompt: "Translate this paired time expression.",
-              answer: "'by day and by night' / 'during day and night' — time within which",
+              answer: "'by day and by hour' / 'during day and hour' — time within which",
               choices: [
-                "'by day and by night' / 'during day and night' — time within which",
-                "'for a day and a night' — duration",
-                "'on day and night' — point in time",
-                "'the day and night' — subjects"
+                "'by day and by hour' / 'during day and hour' — time within which",
+                "'for a day and an hour' — duration",
+                "'on day and hour' — point in time",
+                "'the day and hour' — subjects"
               ] },
-            { form: "νυκτὸς καὶ ἡμέρας",
+            { form: "ὥρας καὶ ἡμέρας",
               prompt: "Which case is being used here for time, and why?",
-              answer: "genitive — the time within which the action takes place ('during day and night')",
+              answer: "genitive — the time within which the action takes place ('during hour and day')",
               choices: [
-                "genitive — the time within which the action takes place ('during day and night')",
-                "accusative — duration ('for a day and a night')",
-                "dative — point in time ('at day and night')",
+                "genitive — the time within which the action takes place ('during hour and day')",
+                "accusative — duration ('for an hour and a day')",
+                "dative — point in time ('at hour and day')",
                 "nominative — subject of the verb"
               ] },
             { form: "τῇ ἡμέρᾳ",
