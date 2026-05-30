@@ -362,6 +362,10 @@ export function renderCard() {
   const greekDisplay = `${prepStar}${host.formatGreekHeadword(card.g)}`;
   const englishDisplay = `${prepStar}${card.e || '—'}`;
   const requiredLabelHTML = `<span class="card-required-label card-required-label-${card.required ? 'req' : 'opt'}">(${card.required ? 'req.' : 'opt.'})</span>`;
+  // Second-aorist / liquid-future verbs get their aorist and/or future forms
+  // shown in small bracketed rows under the Greek headword so the present is
+  // learned together with the forms that look nothing like it.
+  const verbStemAltHTML = verbStemAltHtml(card);
 
   // Stem-flip cards (second-aorist supplement set): both faces show Greek +
   // English gloss subtitle, with the differing characters highlighted so the
@@ -369,13 +373,20 @@ export function renderCard() {
   let frontHTML, backHTML;
   if (card.stemFlip) {
     const diff = diffHighlightPair(card.g, card.aorist);
-    const flipHint = '<div class="flip-hint">click to reveal aorist →</div>';
+    // The "other form" face is the aorist for second-aorist flips and the
+    // future for liquid-future flips; key off the back-face label override.
+    const revealWord = /future/i.test(card.stemFlipAorist || '') ? 'future' : 'aorist';
+    const flipHint = `<div class="flip-hint">click to reveal ${revealWord} →</div>`;
+    const keyBadge = card.keyVerb
+      ? '<div class="card-key-verb">★ key verb</div>'
+      : '';
     const noteHtml = card.stemNote
       ? `<div class="card-stem-note">${escapeHtml(card.stemNote)}</div>`
       : '';
     frontHTML = `
         <div class="card-face card-front card-stem-flip">
           ${requiredLabelHTML}
+          ${keyBadge}
           <span class="card-label">Present</span>
           <div class="card-greek card-stem-flip-form">${diff.aHtml}</div>
           <div class="card-stem-flip-gloss">${escapeHtml(card.e || '')}</div>
@@ -385,6 +396,7 @@ export function renderCard() {
     backHTML = `
         <div class="card-face card-back card-stem-flip">
           ${requiredLabelHTML}
+          ${keyBadge}
           <span class="card-label">${escapeHtml(card.stemFlipAorist || 'Aorist (1st sg.)')}</span>
           <div class="card-greek card-stem-flip-form">${diff.bHtml}</div>
           <div class="card-stem-flip-gloss">${escapeHtml(card.aoristGloss || '')}</div>
@@ -409,6 +421,7 @@ export function renderCard() {
           ${requiredLabelHTML}
           <span class="card-label">Greek</span>
           <div class="card-greek">${greekDisplay}</div>
+          ${verbStemAltHTML}
           <div class="card-hint">${sourceLabelDisplay}</div>
           <div class="flip-hint">click to reveal →</div>
         </div>`;
@@ -418,6 +431,7 @@ export function renderCard() {
           <span class="card-label">English</span>
           <div class="card-english">${englishDisplay}</div>
           <div class="card-greek-small">${host.formatGreekHeadword(card.g)}</div>
+          ${verbStemAltHTML}
           <div class="card-hint">${host.transliterateGreek(host.formatGreekHeadword(card.g))}${advancedCountSuffix}</div>
           <div class="card-pos">${host.detectPartOfSpeech(card)}</div>
         </div>`;
@@ -435,6 +449,7 @@ export function renderCard() {
           ${requiredLabelHTML}
           <span class="card-label">Greek</span>
           <div class="card-greek">${greekDisplay}</div>
+          ${verbStemAltHTML}
           <div class="card-hint">${host.transliterateGreek(host.formatGreekHeadword(card.g))}${advancedCountSuffix}</div>
           <div class="card-pos">${host.detectPartOfSpeech(card)}</div>
         </div>`;
@@ -502,6 +517,63 @@ function escapeHtml(s) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+// Lazily-built lookup of present-stem lemma → its second-aorist (1st sg.)
+// form, derived from the W4_SECOND_AORIST_FLIP supplemental set so the data
+// keeps a single source. The present and 2nd-aorist stems of these verbs
+// often look nothing alike (e.g. λέγω → εἶπον, ἔρχομαι → ἦλθον), so the
+// standard chapter-vocab card surfaces the aorist as a small second row to
+// help associate the pair.
+let secondAoristByLemma = null;
+function getSecondAoristByLemma() {
+  if (secondAoristByLemma) return secondAoristByLemma;
+  const map = {};
+  const flip = window.SUPPLEMENTAL_VOCAB_SETS && window.SUPPLEMENTAL_VOCAB_SETS.W4_SECOND_AORIST_FLIP;
+  if (flip && Array.isArray(flip.cards)) {
+    for (const c of flip.cards) {
+      if (c && c.stemFlip && c.g && c.aorist) map[c.g] = c.aorist;
+    }
+  }
+  // Only cache once populated, in case this runs before the data file loads.
+  if (Object.keys(map).length) secondAoristByLemma = map;
+  return map;
+}
+
+// Same idea for liquid futures (derived from W4_LIQUID_FUTURE_FLIP): present
+// lemma → liquid-future (1st sg.) form. A verb can be both a second aorist and
+// a liquid future (e.g. βάλλω → ἔβαλον / βαλῶ, ἀποθνῄσκω → ἀπέθανον /
+// ἀποθανοῦμαι), so its chapter card can carry three rows.
+let liquidFutureByLemma = null;
+function getLiquidFutureByLemma() {
+  if (liquidFutureByLemma) return liquidFutureByLemma;
+  const map = {};
+  const flip = window.SUPPLEMENTAL_VOCAB_SETS && window.SUPPLEMENTAL_VOCAB_SETS.W4_LIQUID_FUTURE_FLIP;
+  if (flip && Array.isArray(flip.cards)) {
+    for (const c of flip.cards) {
+      if (c && c.stemFlip && c.g && c.aorist) map[c.g] = c.aorist;
+    }
+  }
+  if (Object.keys(map).length) liquidFutureByLemma = map;
+  return map;
+}
+
+// Small second-/third-row stem annotations for a standard chapter-vocab verb:
+// its second-aorist and/or liquid-future form in brackets under the headword,
+// so the present is learned together with the forms that look nothing like it.
+// Returns '' for supplemental/advanced/flip cards and for lemmas with neither.
+function verbStemAltHtml(card) {
+  if (!card || card.advanced || card.supplemental || card.stemFlip) return '';
+  let html = '';
+  const aorist = getSecondAoristByLemma()[card.g];
+  if (aorist) {
+    html += `<div class="card-aorist-alt"><span class="card-aorist-alt-label">2 aor.</span> [${escapeHtml(aorist)}]</div>`;
+  }
+  const future = getLiquidFutureByLemma()[card.g];
+  if (future) {
+    html += `<div class="card-future-alt"><span class="card-future-alt-label">fut.</span> [${escapeHtml(future)}]</div>`;
+  }
+  return html;
 }
 
 // Heuristic: does any Greek head-token in the family lemma string appear

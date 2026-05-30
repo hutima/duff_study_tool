@@ -180,14 +180,184 @@
       { g: 'μένεις',    e: 'you remain (Present indicative active, 2nd person sg.)',         required: true },
       { g: 'μένει',     e: 'he/she/it remains (Present indicative active, 3rd person sg.)',  required: true },
       { g: 'μένομεν',   e: 'we remain (Present indicative active, 1st person pl.)',          required: true },
-      { g: 'μένετε',    e: 'you (pl.) remain (Present indicative active, 2nd person pl.)',   required: true },
+      { g: 'μένετε',    e: 'you all remain (Present indicative active, 2nd person pl.)',   required: true },
       { g: 'μένουσι(ν)', e: 'they remain (Present indicative active, 3rd person pl.)',       required: true },
       { g: 'μενῶ',      e: 'I will remain (Future indicative active, 1st person sg.)',           required: true },
       { g: 'μενεῖς',    e: 'you will remain (Future indicative active, 2nd person sg.)',         required: true },
       { g: 'μενεῖ',     e: 'he/she/it will remain (Future indicative active, 3rd person sg.)',  required: true },
       { g: 'μενοῦμεν',  e: 'we will remain (Future indicative active, 1st person pl.)',          required: true },
-      { g: 'μενεῖτε',   e: 'you (pl.) will remain (Future indicative active, 2nd person pl.)',   required: true },
+      { g: 'μενεῖτε',   e: 'you all will remain (Future indicative active, 2nd person pl.)',   required: true },
       { g: 'μενοῦσι(ν)', e: 'they will remain (Future indicative active, 3rd person pl.)',      required: true }
+    ]
+  });
+
+  // ── Full second-aorist active paradigms (through chapter 11) for the
+  //    high-frequency verbs the professor flagged as most important (ἄγω, ἔχω,
+  //    γινώσκω, ἔρχομαι, λέγω, ὁράω). Same shape as W4_BALLO_SECOND_AORIST:
+  //    6 indicative + 2 imperative (2nd person) + infinitive + masc. nom.
+  //    participle (sg + pl) — every aorist mood in scope by ch 11. NOT
+  //    included: subjunctive (ch 17), passive (ch 15), perfect (ch 16), and
+  //    3rd-person imperative (ch 17) — none are taught yet, and the regular
+  //    present/imperfect/future of these verbs is drilled via the standard
+  //    λύω paradigm. The famous-five aorist imperatives keep their final
+  //    accent (εἰπέ, ἐλθέ, ἰδέ); γινώσκω is athematic (γνῶθι, γνῶναι, γνούς).
+  //    The auto-generator (paradigm_morphology.js) mirrors each into a
+  //    parsing-quiz morphology set, and paradigm_focus.js groups them under
+  //    "Verbs · second aorist". The 1sg/3pl syncretism (e.g. ἤγαγον, ἦλθον,
+  //    εἶπον, εἶδον, ἔσχον) is listed at both ends as in the βάλλω/λαμβάνω
+  //    sets. ──────────────────────────────────────────────────────────────
+
+  window.registerSupplementalVocabSet('W4_AGO_SECOND_AORIST', {
+    label: 'ἄγω — second-aorist active forms',
+    week: 4,
+    cards: [
+      { g: 'ἤγαγον',   e: 'I led (Aorist indicative, 1st person sg.)',          required: true },
+      { g: 'ἤγαγες',   e: 'you led (Aorist indicative, 2nd person sg.)',        required: true },
+      { g: 'ἤγαγεν',   e: 'he/she/it led (Aorist indicative, 3rd person sg.)',  required: true },
+      { g: 'ἠγάγομεν', e: 'we led (Aorist indicative, 1st person pl.)',         required: true },
+      { g: 'ἠγάγετε',  e: 'you led (Aorist indicative, 2nd person pl.)',        required: true },
+      { g: 'ἤγαγον',   e: 'they led (Aorist indicative, 3rd person pl.)',       required: true },
+      { g: 'ἄγαγε',    e: 'lead! (Aorist imperative, 2nd person sg.)',          required: true },
+      { g: 'ἀγάγετε',  e: 'lead! (Aorist imperative, 2nd person pl.)',          required: true },
+      { g: 'ἀγαγεῖν',  e: 'to lead (Aorist infinitive)',                        required: true },
+      { g: 'ἀγαγών',   e: 'having led (Aorist participle, masc. Nom. sg.)',     required: true },
+      { g: 'ἀγαγόντες', e: 'having led (Aorist participle, masc. Nom. pl.)',    required: true }
+    ]
+  });
+
+  window.registerSupplementalVocabSet('W4_ECHO_SECOND_AORIST', {
+    label: 'ἔχω — second-aorist active forms',
+    week: 4,
+    cards: [
+      { g: 'ἔσχον',   e: 'I had (Aorist indicative, 1st person sg.)',          required: true },
+      { g: 'ἔσχες',   e: 'you had (Aorist indicative, 2nd person sg.)',        required: true },
+      { g: 'ἔσχεν',   e: 'he/she/it had (Aorist indicative, 3rd person sg.)',  required: true },
+      { g: 'ἔσχομεν', e: 'we had (Aorist indicative, 1st person pl.)',         required: true },
+      { g: 'ἔσχετε',  e: 'you had (Aorist indicative, 2nd person pl.)',        required: true },
+      { g: 'ἔσχον',   e: 'they had (Aorist indicative, 3rd person pl.)',       required: true },
+      { g: 'σχές',    e: 'have! (Aorist imperative, 2nd person sg.)',          required: true },
+      { g: 'σχέτε',   e: 'have! (Aorist imperative, 2nd person pl.)',          required: true },
+      { g: 'σχεῖν',   e: 'to have (Aorist infinitive)',                        required: true },
+      { g: 'σχών',    e: 'having had (Aorist participle, masc. Nom. sg.)',     required: true },
+      { g: 'σχόντες', e: 'having had (Aorist participle, masc. Nom. pl.)',     required: true }
+    ]
+  });
+
+  // γινώσκω — athematic (root) 2nd aorist: the endings attach straight to the
+  // long-vowel stem γνω- (ἔγνων, ἔγνως, ἔγνω, …, ἔγνωσαν), so no two forms
+  // collide and all six are distinct.
+  window.registerSupplementalVocabSet('W4_GINOSKO_SECOND_AORIST', {
+    label: 'γινώσκω — second-aorist active forms',
+    week: 4,
+    cards: [
+      { g: 'ἔγνων',   e: 'I knew (Aorist indicative, 1st person sg.)',          required: true },
+      { g: 'ἔγνως',   e: 'you knew (Aorist indicative, 2nd person sg.)',        required: true },
+      { g: 'ἔγνω',    e: 'he/she/it knew (Aorist indicative, 3rd person sg.)',  required: true },
+      { g: 'ἔγνωμεν', e: 'we knew (Aorist indicative, 1st person pl.)',         required: true },
+      { g: 'ἔγνωτε',  e: 'you knew (Aorist indicative, 2nd person pl.)',        required: true },
+      { g: 'ἔγνωσαν', e: 'they knew (Aorist indicative, 3rd person pl.)',       required: true },
+      { g: 'γνῶθι',   e: 'know! (Aorist imperative, 2nd person sg.)',           required: true },
+      { g: 'γνῶτε',   e: 'know! (Aorist imperative, 2nd person pl.)',           required: true },
+      { g: 'γνῶναι',  e: 'to know (Aorist infinitive)',                         required: true },
+      { g: 'γνούς',   e: 'having known (Aorist participle, masc. Nom. sg.)',    required: true },
+      { g: 'γνόντες', e: 'having known (Aorist participle, masc. Nom. pl.)',    required: true }
+    ]
+  });
+
+  // ἔρχομαι — deponent in the present, but the 2nd aorist ἦλθον takes ACTIVE
+  // endings (stem ἐλθ-), so it parses as aorist active indicative.
+  window.registerSupplementalVocabSet('W4_ERCHOMAI_SECOND_AORIST', {
+    label: 'ἔρχομαι — second-aorist active forms',
+    week: 4,
+    cards: [
+      { g: 'ἦλθον',   e: 'I came (Aorist indicative, 1st person sg.)',          required: true },
+      { g: 'ἦλθες',   e: 'you came (Aorist indicative, 2nd person sg.)',        required: true },
+      { g: 'ἦλθεν',   e: 'he/she/it came (Aorist indicative, 3rd person sg.)',  required: true },
+      { g: 'ἤλθομεν', e: 'we came (Aorist indicative, 1st person pl.)',         required: true },
+      { g: 'ἤλθετε',  e: 'you came (Aorist indicative, 2nd person pl.)',        required: true },
+      { g: 'ἦλθον',   e: 'they came (Aorist indicative, 3rd person pl.)',       required: true },
+      { g: 'ἐλθέ',    e: 'come! (Aorist imperative, 2nd person sg.)',           required: true },
+      { g: 'ἔλθετε',  e: 'come! (Aorist imperative, 2nd person pl.)',           required: true },
+      { g: 'ἐλθεῖν',  e: 'to come (Aorist infinitive)',                         required: true },
+      { g: 'ἐλθών',   e: 'having come (Aorist participle, masc. Nom. sg.)',     required: true },
+      { g: 'ἐλθόντες', e: 'having come (Aorist participle, masc. Nom. pl.)',    required: true }
+    ]
+  });
+
+  // λέγω — 2nd aorist on the suppletive stem εἰπ-. NT also attests the
+  // 1st-aorist (α) endings (εἶπα, εἶπας …); the regular 2nd-aorist endings
+  // are drilled here as the textbook paradigm.
+  window.registerSupplementalVocabSet('W4_LEGO_SECOND_AORIST', {
+    label: 'λέγω — second-aorist active forms',
+    week: 4,
+    cards: [
+      { g: 'εἶπον',   e: 'I said (Aorist indicative, 1st person sg.)',          required: true },
+      { g: 'εἶπες',   e: 'you said (Aorist indicative, 2nd person sg.)',        required: true },
+      { g: 'εἶπεν',   e: 'he/she/it said (Aorist indicative, 3rd person sg.)',  required: true },
+      { g: 'εἴπομεν', e: 'we said (Aorist indicative, 1st person pl.)',         required: true },
+      { g: 'εἴπετε',  e: 'you said (Aorist indicative, 2nd person pl.)',        required: true },
+      { g: 'εἶπον',   e: 'they said (Aorist indicative, 3rd person pl.)',       required: true },
+      { g: 'εἰπέ',    e: 'say! / tell! (Aorist imperative, 2nd person sg.)',    required: true },
+      { g: 'εἴπετε',  e: 'say! / tell! (Aorist imperative, 2nd person pl.)',    required: true },
+      { g: 'εἰπεῖν',  e: 'to say (Aorist infinitive)',                          required: true },
+      { g: 'εἰπών',   e: 'having said (Aorist participle, masc. Nom. sg.)',     required: true },
+      { g: 'εἰπόντες', e: 'having said (Aorist participle, masc. Nom. pl.)',    required: true }
+    ]
+  });
+
+  // ὁράω — 2nd aorist on the suppletive stem ἰδ- (εἶδον).
+  window.registerSupplementalVocabSet('W4_HORAO_SECOND_AORIST', {
+    label: 'ὁράω — second-aorist active forms',
+    week: 4,
+    cards: [
+      { g: 'εἶδον',   e: 'I saw (Aorist indicative, 1st person sg.)',          required: true },
+      { g: 'εἶδες',   e: 'you saw (Aorist indicative, 2nd person sg.)',        required: true },
+      { g: 'εἶδεν',   e: 'he/she/it saw (Aorist indicative, 3rd person sg.)',  required: true },
+      { g: 'εἴδομεν', e: 'we saw (Aorist indicative, 1st person pl.)',         required: true },
+      { g: 'εἴδετε',  e: 'you saw (Aorist indicative, 2nd person pl.)',        required: true },
+      { g: 'εἶδον',   e: 'they saw (Aorist indicative, 3rd person pl.)',       required: true },
+      { g: 'ἰδέ',     e: 'see! / behold! (Aorist imperative, 2nd person sg.)',  required: true },
+      { g: 'ἴδετε',   e: 'see! (Aorist imperative, 2nd person pl.)',            required: true },
+      { g: 'ἰδεῖν',   e: 'to see (Aorist infinitive)',                          required: true },
+      { g: 'ἰδών',    e: 'having seen (Aorist participle, masc. Nom. sg.)',     required: true },
+      { g: 'ἰδόντες', e: 'having seen (Aorist participle, masc. Nom. pl.)',     required: true }
+    ]
+  });
+
+  // κρίνω — the second professor-flagged liquid-future verb (alongside μένω).
+  // Full active paradigm through chapter 11: present + liquid future + liquid
+  // aorist, all the way across the moods in scope by ch 11 (indicative,
+  // 2nd-person imperative, infinitive, masc. participle — no subjunctive,
+  // passive, perfect, or 3rd-person imperative yet). The liquid stem (-ν)
+  // drops the σ in both the future (κρινῶ, circumflex ending) and the aorist
+  // (ἔκρινα, α-aorist with no σ).
+  window.registerSupplementalVocabSet('W4_KRINO_LIQUID_FUTURE', {
+    label: 'κρίνω — present, future, and aorist active',
+    week: 4,
+    cards: [
+      { g: 'κρίνω',      e: 'I judge (Present indicative active, 1st person sg.)',           required: true },
+      { g: 'κρίνεις',    e: 'you judge (Present indicative active, 2nd person sg.)',         required: true },
+      { g: 'κρίνει',     e: 'he/she/it judges (Present indicative active, 3rd person sg.)',  required: true },
+      { g: 'κρίνομεν',   e: 'we judge (Present indicative active, 1st person pl.)',          required: true },
+      { g: 'κρίνετε',    e: 'you all judge (Present indicative active, 2nd person pl.)',   required: true },
+      { g: 'κρίνουσι(ν)', e: 'they judge (Present indicative active, 3rd person pl.)',       required: true },
+      { g: 'κρινῶ',      e: 'I will judge (Future indicative active, 1st person sg.)',           required: true },
+      { g: 'κρινεῖς',    e: 'you will judge (Future indicative active, 2nd person sg.)',         required: true },
+      { g: 'κρινεῖ',     e: 'he/she/it will judge (Future indicative active, 3rd person sg.)',  required: true },
+      { g: 'κρινοῦμεν',  e: 'we will judge (Future indicative active, 1st person pl.)',          required: true },
+      { g: 'κρινεῖτε',   e: 'you all will judge (Future indicative active, 2nd person pl.)',   required: true },
+      { g: 'κρινοῦσι(ν)', e: 'they will judge (Future indicative active, 3rd person pl.)',      required: true },
+      { g: 'ἔκρινα',   e: 'I judged (Aorist indicative active, 1st person sg.)',          required: true },
+      { g: 'ἔκρινας',  e: 'you judged (Aorist indicative active, 2nd person sg.)',        required: true },
+      { g: 'ἔκρινεν',  e: 'he/she/it judged (Aorist indicative active, 3rd person sg.)',  required: true },
+      { g: 'ἐκρίναμεν', e: 'we judged (Aorist indicative active, 1st person pl.)',         required: true },
+      { g: 'ἐκρίνατε',  e: 'you judged (Aorist indicative active, 2nd person pl.)',        required: true },
+      { g: 'ἔκριναν',   e: 'they judged (Aorist indicative active, 3rd person pl.)',       required: true },
+      { g: 'κρῖνον',   e: 'judge! (Aorist imperative active, 2nd person sg.)',          required: true },
+      { g: 'κρίνατε',  e: 'judge! (Aorist imperative active, 2nd person pl.)',          required: true },
+      { g: 'κρῖναι',   e: 'to judge (Aorist infinitive active)',                        required: true },
+      { g: 'κρίνας',   e: 'having judged (Aorist participle active, masc. Nom. sg.)',   required: true },
+      { g: 'κρίναντες', e: 'having judged (Aorist participle active, masc. Nom. pl.)',  required: true }
     ]
   });
 
