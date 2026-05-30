@@ -100,7 +100,7 @@ data files are plain `defer` globals that publish onto `window`.
 Groups, in order:
 
 - **Core data (698–702):** `words.js`, `morphology.js`, `lemma_inventory.js`, `supplemental.js`, `grammar.js`
-- **Per-week supplementals + paradigms (703–722):** `week_N_supplemental.js`, `week_N_paradigms.js`, plus stem-change flips (`second_aorist_flip.js`, `w6_aorist_passive_flip.js`, `w6_perfect_active_flip.js`, `w8_mi_verb_principal_parts_flip.js`), `adj_paradigms.js`, `wNo_supplemental.js`, `paradigm_morphology.js`, `stem_change_drills.js`
+- **Per-week supplementals + paradigms (703–722):** `week_N_supplemental.js`, `week_N_paradigms.js`, plus stem-change flips (`second_aorist_flip.js`, `liquid_future_flip.js`, `w6_aorist_passive_flip.js`, `w6_perfect_active_flip.js`, `w8_mi_verb_principal_parts_flip.js`), `adj_paradigms.js`, `wNo_supplemental.js`, `paradigm_morphology.js`, `stem_change_drills.js`
 - **Advanced vocabulary buckets (723–747):** `advanced/advanced_NN.js` (currently 01–25)
 - **Reader (748–750):** `reader.js`, `reader_verse_literals.js`, `reader_translations.js`
 - **Logic (751):** `pos_logic.js` (intentionally loaded before main)
