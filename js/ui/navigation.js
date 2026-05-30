@@ -819,6 +819,26 @@ export function toggleExcludeKnownMorphs() {
   loadDeckFromKeys(keysToLoad, runtime.currentSession ? runtime.currentSession.id : null);
 }
 
+// English → Greek parsing direction. Flips parsing between the forward
+// dimensional walk and the reverse "pick the form for this parse" MC. Only
+// meaningful in parsing mode. Drops any in-flight walk / reverse cache /
+// answer feedback so the current card restarts cleanly in the new direction,
+// then rebuilds the deck (same focused-paradigm pool, rendered the other way).
+export function toggleParsingReverse() {
+  if (!host.isParsingMode()) return;
+  runtime.parsingReverse = !runtime.parsingReverse;
+  host.resetMorphStepState();
+  runtime.parsingReverseState = { cardId: null, options: [], correctForm: '' };
+  host.resetMorphAnswerState();
+  host.syncToggleButtons();
+  if (!runtime.selectedKeys.length) {
+    host.saveState();
+    return;
+  }
+  const keysToLoad = runtime.currentSession ? expandSessionSets(runtime.currentSession) : runtime.selectedKeys;
+  loadDeckFromKeys(keysToLoad, runtime.currentSession ? runtime.currentSession.id : null);
+}
+
 // Reset every form's per-form tally to 0/2 — drops the `recent` attempts
 // (and the seen count) on a lemma's forms map. Per-paradigm rolling
 // %, the completed bucket history, in-progress counters, and the
