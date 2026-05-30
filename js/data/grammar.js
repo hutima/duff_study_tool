@@ -2708,7 +2708,7 @@
                 "neither — it is a neutral question",
                 "either, depending on tone"
               ],
-              note: "οὐκ οἴδατε; = 'You know, don't you?' (expecting 'yes')." },
+              note: "οὐκ ἀκούεις; = 'You hear, don't you?' (expecting 'yes')." },
             { form: "μή + question",
               prompt: "A question introduced by μή expects what answer?",
               answer: "'no' — the questioner expects (or hopes for) a negative answer",
@@ -2718,7 +2718,7 @@
                 "neither — it is a neutral question",
                 "always 'yes', regardless of context"
               ],
-              note: "μὴ σὺ μείζων εἶ; = 'You're not greater, are you?' (expecting 'no')." },
+              note: "μὴ σὺ ἀγαθὸς εἶ; = 'You're not good, are you?' (expecting 'no')." },
             { form: "neutral question",
               prompt: "How is a neutral yes-or-no question (with no slant) marked in Greek?",
               answer: "by intonation and the Greek question mark (·;·) alone, with no introductory particle",
