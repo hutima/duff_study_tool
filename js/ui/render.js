@@ -1189,20 +1189,44 @@ function renderMorphStepCard(area, card) {
   renderProgress();
 }
 
+// Split a string into "letter units" — a base character plus any combining
+// diacritics that follow it (accents, breathings, iota subscript, diaeresis).
+// `base` is the bare letter used for comparison; `full` keeps the accent(s)
+// for display (re-composed to NFC so it renders normally).
+function toLetterUnits(s) {
+  const units = [];
+  for (const ch of String(s || '').normalize('NFD')) {
+    if (/[̀-ͯ]/.test(ch) && units.length) {
+      // Combining mark — attach to the preceding base letter.
+      units[units.length - 1].full += ch;
+    } else {
+      units.push({ base: ch, full: ch });
+    }
+  }
+  // Display form keeps the accents but renders as a normal precomposed glyph.
+  units.forEach((u) => { u.full = u.full.normalize('NFC'); });
+  return units;
+}
+
 // LCS-based diff between two strings (typically a present and an aorist
-// Greek form). Returns {aHtml, bHtml} where matching characters render
-// plain and differing characters get wrapped in <span class="stem-diff">.
+// Greek form). Returns {aHtml, bHtml} where matching letters render plain and
+// differing letters get wrapped in <span class="stem-diff">.
 // Used by the second-aorist flip-card supplement to visualize stem changes.
+//
+// The diff compares bare letters with accents stripped, so an accent-only
+// difference never lights up — our class doesn't cover the full accent rules,
+// and highlighting accent shifts would distract from the actual stem change.
+// Accents are still shown on the letters; they just don't drive the highlight.
 function diffHighlightPair(a, b) {
-  const A = [...String(a || '')];
-  const B = [...String(b || '')];
+  const A = toLetterUnits(a);
+  const B = toLetterUnits(b);
   if (!A.length || !B.length) return { aHtml: escapeHtml(a || ''), bHtml: escapeHtml(b || '') };
-  // Standard LCS DP table.
+  // Standard LCS DP table over the accent-stripped base letters.
   const m = A.length, n = B.length;
   const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
   for (let i = 0; i < m; i++) {
     for (let j = 0; j < n; j++) {
-      dp[i + 1][j + 1] = A[i] === B[j] ? dp[i][j] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+      dp[i + 1][j + 1] = A[i].base === B[j].base ? dp[i][j] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
     }
   }
   // Walk back to mark which positions in A and B are part of the common
@@ -1211,7 +1235,7 @@ function diffHighlightPair(a, b) {
   const inLCS_B = new Array(n).fill(false);
   let i = m, j = n;
   while (i > 0 && j > 0) {
-    if (A[i - 1] === B[j - 1]) {
+    if (A[i - 1].base === B[j - 1].base) {
       inLCS_A[i - 1] = true;
       inLCS_B[j - 1] = true;
       i--; j--;
@@ -1221,8 +1245,8 @@ function diffHighlightPair(a, b) {
       j--;
     }
   }
-  const wrap = (chars, mask) => chars.map((ch, idx) =>
-    mask[idx] ? escapeHtml(ch) : `<span class="stem-diff">${escapeHtml(ch)}</span>`
+  const wrap = (units, mask) => units.map((u, idx) =>
+    mask[idx] ? escapeHtml(u.full) : `<span class="stem-diff">${escapeHtml(u.full)}</span>`
   ).join('');
   return { aHtml: wrap(A, inLCS_A), bHtml: wrap(B, inLCS_B) };
 }
