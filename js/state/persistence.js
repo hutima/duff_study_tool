@@ -121,6 +121,19 @@ function sanitizeParsingChapter(input) {
   return 20;
 }
 
+// Per-section spaced-repetition preference. Newer saves carry a `spacedByMode`
+// object; legacy saves only have the single global `spacedRepetition`, which
+// maps onto vocab (the only section it ever governed in practice). Grammar
+// (morph) defaults to unspaced for everyone — it's the new section default.
+function sanitizeSpacedByMode(input, legacySpaced) {
+  const legacyVocab = legacySpaced !== false;
+  const src = (input && typeof input === 'object') ? input : {};
+  return {
+    vocab: typeof src.vocab === 'boolean' ? src.vocab : legacyVocab,
+    morph: typeof src.morph === 'boolean' ? src.morph : false
+  };
+}
+
 // Legacy paradigm-lemma renames. Old saves may reference lemma strings
 // that no longer exist (e.g. the combined 'πόλις & βασιλεύς' lemma is
 // now split into two separate paradigm entries). Map each retired key
@@ -227,6 +240,11 @@ export function buildPersistedStatePayload(options = {}) {
       currentSessionId: runtime.currentSession ? runtime.currentSession.id : null
     };
   }
+  // spacedRepetition is the live mirror of the current section's setting —
+  // fold it back into spacedByMode so the per-section preference persists.
+  if (runtime.studyMode === 'vocab' || runtime.studyMode === 'morph') {
+    runtime.spacedByMode[runtime.studyMode] = runtime.spacedRepetition;
+  }
   const usage = host.ensureUsageStats();
   // Trim the live runtime stores first (in place, so references like
   // runtime.marks stay valid): getWordProgress re-seeds a default entry for
@@ -245,6 +263,7 @@ export function buildPersistedStatePayload(options = {}) {
     srsIntervalCapAlignedV1: true,
     directionToGreek: runtime.directionToGreek,
     spacedRepetition: runtime.spacedRepetition,
+    spacedByMode: runtime.spacedByMode,
     hardVocabReviewMode: runtime.hardVocabReviewMode,
     studyMode: runtime.studyMode,
     appProfile: runtime.appProfile,
@@ -258,6 +277,7 @@ export function buildPersistedStatePayload(options = {}) {
     dimValueFilters: runtime.dimValueFilters,
     includeOptionalForms: runtime.includeOptionalForms,
     excludeKnownMorphs: runtime.excludeKnownMorphs,
+    parsingReverse: runtime.parsingReverse,
     optionalFormFilters: runtime.optionalFormFilters,
     analyticsVocabDirection: runtime.analyticsVocabDirection,
     analyticsVocabScope: runtime.analyticsVocabScope,
@@ -314,6 +334,7 @@ function sanitizeImportedState(candidate) {
   state.requiredOnly = candidate.requiredOnly !== false;
   state.directionToGreek = !!candidate.directionToGreek;
   state.spacedRepetition = candidate.spacedRepetition !== false;
+  state.spacedByMode = sanitizeSpacedByMode(candidate.spacedByMode, candidate.spacedRepetition);
   state.hardVocabReviewMode = !!candidate.hardVocabReviewMode;
   state.splitSelection = !!candidate.splitSelection;
   state.modeSelections = isPlainObject(candidate.modeSelections) ? candidate.modeSelections : {};
@@ -347,6 +368,7 @@ function sanitizeImportedState(candidate) {
   // strict 2/2 — the form's last two recorded attempts were both fully
   // correct under the current dim toggles.
   state.excludeKnownMorphs = !!candidate.excludeKnownMorphs;
+  state.parsingReverse = !!candidate.parsingReverse;
   // Sub-filters default to true (every category included) so toggling
   // the parent on without touching filters reproduces the original
   // "all optional forms" behavior. Missing keys from older exports
@@ -1016,6 +1038,13 @@ export function restoreState() {
     const hadSavedAchievementSnapshot = Array.isArray(saved?.gamification?.lastEarnedAchievementIds);
     runtime.appGamification = sanitizeGamificationState(saved.gamification);
     runtime.studyMode = host.normalizeStudyMode(saved.studyMode);
+    // Per-section spaced flag: restore both sections' settings, then mirror the
+    // active mode's value into the live `spacedRepetition` the rest of the load
+    // (deck build, cursor clamp) reads below.
+    runtime.spacedByMode = sanitizeSpacedByMode(saved.spacedByMode, saved.spacedRepetition);
+    if (runtime.studyMode === 'vocab' || runtime.studyMode === 'morph') {
+      runtime.spacedRepetition = runtime.spacedByMode[runtime.studyMode];
+    }
     runtime.morphSelfCheck = !!saved.morphSelfCheck;
     runtime.morphStepByStep = !!saved.morphStepByStep;
     runtime.morphFocusedParadigm = typeof saved.morphFocusedParadigm === 'string'
@@ -1041,6 +1070,8 @@ export function restoreState() {
     runtime.includeOptionalForms = !!saved.includeOptionalForms;
     // Exclude-known-morphs filter: rehydrate the toggle (default false).
     runtime.excludeKnownMorphs = !!saved.excludeKnownMorphs;
+    // English → Greek parsing direction (default false).
+    runtime.parsingReverse = !!saved.parsingReverse;
     // Per-category sub-filters: default each to true if missing.
     const OPTIONAL_FILTER_KEYS = ['imperative', 'subjunctive', 'infinitive', 'participle', 'thirdPerson', 'futureTense', 'perfectTense'];
     const savedFilters = (saved.optionalFormFilters && typeof saved.optionalFormFilters === 'object') ? saved.optionalFormFilters : {};

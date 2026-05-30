@@ -249,7 +249,7 @@
               answer: "in the verb ending (3rd singular)",
               choices: ["in the verb ending (3rd singular)", "in τὸν ἄνθρωπον", "the sentence has no subject", "in the article τόν"],
               note: "Greek finite verbs encode person and number, so an explicit pronoun is often omitted unless needed for emphasis, contrast, or clarity." },
-            { form: "accusative",
+            { form: "the direct object",
               prompt: "Which Greek case typically marks the direct object?",
               answer: "accusative",
               choices: ["accusative", "nominative", "genitive", "dative"],
@@ -426,7 +426,7 @@
                 "the indirect-object case (Greek's term for the dative)"
               ],
               note: "Many of the prepositions taught in Ch 4 (ἀπό, ἐκ, παρά) take genitives of source." },
-            { form: "dative of means / instrument",
+            { form: "the bare dative",
               prompt: "How is the bare dative often used to express HOW something is done?",
               answer: "dative of means / instrument — 'by, with, by means of'",
               choices: [
@@ -4095,6 +4095,97 @@
               ],
               note: "γίνομαι ('I become') is a middle-deponent; 2nd-aorist ἐγενόμην is active in meaning." }
           ]
+        },
+        {
+          family: "15.8 Middle Paradigm of λύω — present and imperfect",
+          lemma: "λύομαι",
+          gloss: "present and imperfect middle/passive paradigm",
+          questions: [
+            { form: "λύομαι",
+              prompt: "Parse this form.",
+              answer: "present middle/passive indicative, 1st sg.",
+              choices: [
+                "present middle/passive indicative, 1st sg.",
+                "present middle/passive indicative, 3rd sg.",
+                "imperfect middle/passive indicative, 1st sg.",
+                "future middle indicative, 1st sg."
+              ] },
+            { form: "λύῃ",
+              prompt: "Parse this form (M/P reading).",
+              answer: "present middle/passive indicative, 2nd sg.",
+              choices: [
+                "present middle/passive indicative, 2nd sg.",
+                "present active indicative, 3rd sg.",
+                "imperfect middle/passive indicative, 2nd sg.",
+                "future middle indicative, 2nd sg."
+              ],
+              note: "2nd-sg M/P ending -ῃ comes from σαι: λύεσαι → λύῃ." },
+            { form: "λύονται",
+              prompt: "Parse this form.",
+              answer: "present middle/passive indicative, 3rd pl.",
+              choices: [
+                "present middle/passive indicative, 3rd pl.",
+                "present active indicative, 3rd pl.",
+                "future middle indicative, 3rd pl.",
+                "imperfect middle/passive indicative, 3rd pl."
+              ] },
+            { form: "ἐλυόμην",
+              prompt: "Parse this form.",
+              answer: "imperfect middle/passive indicative, 1st sg.",
+              choices: [
+                "imperfect middle/passive indicative, 1st sg.",
+                "present middle/passive indicative, 1st sg.",
+                "aorist middle indicative, 1st sg.",
+                "imperfect active indicative, 1st sg."
+              ],
+              note: "augment + present stem + middle/passive secondary endings = imperfect M/P." },
+            { form: "ἐλύου",
+              prompt: "Parse this form.",
+              answer: "imperfect middle/passive indicative, 2nd sg.",
+              choices: [
+                "imperfect middle/passive indicative, 2nd sg.",
+                "imperfect middle/passive indicative, 3rd sg.",
+                "present middle/passive indicative, 2nd sg.",
+                "aorist middle indicative, 2nd sg."
+              ],
+              note: "Secondary 2nd-sg M/P -ου comes from -εσο (σ drops, ε + ο → ου)." }
+          ]
+        },
+        {
+          family: "15.9 Middle Paradigm of λύω — future and aorist",
+          lemma: "λύσομαι / ἐλυσάμην",
+          gloss: "future middle and aorist middle paradigm",
+          questions: [
+            { form: "λύσομαι",
+              prompt: "Parse this form.",
+              answer: "future middle indicative, 1st sg.",
+              choices: [
+                "future middle indicative, 1st sg.",
+                "future active indicative, 1st sg.",
+                "present middle/passive indicative, 1st sg.",
+                "aorist middle indicative, 1st sg."
+              ],
+              note: "λύω stem + σ + middle endings = future middle. (Many active verbs have middle-form futures.)" },
+            { form: "λύσεται",
+              prompt: "Parse this form.",
+              answer: "future middle indicative, 3rd sg.",
+              choices: [
+                "future middle indicative, 3rd sg.",
+                "present middle/passive indicative, 3rd sg.",
+                "aorist middle indicative, 3rd sg.",
+                "future active indicative, 3rd sg."
+              ] },
+            { form: "ἐλυσάμην",
+              prompt: "Parse this form.",
+              answer: "aorist middle indicative, 1st sg.",
+              choices: [
+                "aorist middle indicative, 1st sg.",
+                "imperfect middle/passive indicative, 1st sg.",
+                "aorist active indicative, 1st sg.",
+                "future middle indicative, 1st sg."
+              ],
+              note: "ἐ-λυ-σα-μην: augment + stem + σα + 1st-sg middle ending." }
+          ]
         }
       ]
     },
@@ -5540,99 +5631,8 @@
 
     "W3O": {
       label: "Week 3 — Course Supplement Grammar",
-      notes: "Middle voice indicative · complete εἰμί · demonstrative paradigms · personal pronouns",
+      notes: "Complete εἰμί · demonstrative paradigms · personal pronouns",
       items: [
-        {
-          family: "Middle/passive indicative — λύομαι",
-          lemma: "λύομαι",
-          gloss: "present and imperfect middle/passive paradigm",
-          questions: [
-            { form: "λύομαι",
-              prompt: "Parse this form.",
-              answer: "present middle/passive indicative, 1st sg.",
-              choices: [
-                "present middle/passive indicative, 1st sg.",
-                "present middle/passive indicative, 3rd sg.",
-                "imperfect middle/passive indicative, 1st sg.",
-                "future middle indicative, 1st sg."
-              ] },
-            { form: "λύῃ",
-              prompt: "Parse this form (M/P reading).",
-              answer: "present middle/passive indicative, 2nd sg.",
-              choices: [
-                "present middle/passive indicative, 2nd sg.",
-                "present active indicative, 3rd sg.",
-                "imperfect middle/passive indicative, 2nd sg.",
-                "future middle indicative, 2nd sg."
-              ],
-              note: "2nd-sg M/P ending -ῃ comes from σαι: λύεσαι → λύῃ." },
-            { form: "λύονται",
-              prompt: "Parse this form.",
-              answer: "present middle/passive indicative, 3rd pl.",
-              choices: [
-                "present middle/passive indicative, 3rd pl.",
-                "present active indicative, 3rd pl.",
-                "future middle indicative, 3rd pl.",
-                "imperfect middle/passive indicative, 3rd pl."
-              ] },
-            { form: "ἐλυόμην",
-              prompt: "Parse this form.",
-              answer: "imperfect middle/passive indicative, 1st sg.",
-              choices: [
-                "imperfect middle/passive indicative, 1st sg.",
-                "present middle/passive indicative, 1st sg.",
-                "aorist middle indicative, 1st sg.",
-                "imperfect active indicative, 1st sg."
-              ],
-              note: "augment + present stem + middle/passive secondary endings = imperfect M/P." },
-            { form: "ἐλύου",
-              prompt: "Parse this form.",
-              answer: "imperfect middle/passive indicative, 2nd sg.",
-              choices: [
-                "imperfect middle/passive indicative, 2nd sg.",
-                "imperfect middle/passive indicative, 3rd sg.",
-                "present middle/passive indicative, 2nd sg.",
-                "aorist middle indicative, 2nd sg."
-              ],
-              note: "Secondary 2nd-sg M/P -ου comes from -εσο (σ drops, ε + ο → ου)." }
-          ]
-        },
-        {
-          family: "Middle/passive future and aorist — λύομαι",
-          lemma: "λύσομαι / ἐλυσάμην",
-          gloss: "future middle and aorist middle paradigm",
-          questions: [
-            { form: "λύσομαι",
-              prompt: "Parse this form.",
-              answer: "future middle indicative, 1st sg.",
-              choices: [
-                "future middle indicative, 1st sg.",
-                "future active indicative, 1st sg.",
-                "present middle/passive indicative, 1st sg.",
-                "aorist middle indicative, 1st sg."
-              ],
-              note: "λύω stem + σ + middle endings = future middle. (Many active verbs have middle-form futures.)" },
-            { form: "λύσεται",
-              prompt: "Parse this form.",
-              answer: "future middle indicative, 3rd sg.",
-              choices: [
-                "future middle indicative, 3rd sg.",
-                "present middle/passive indicative, 3rd sg.",
-                "aorist middle indicative, 3rd sg.",
-                "future active indicative, 3rd sg."
-              ] },
-            { form: "ἐλυσάμην",
-              prompt: "Parse this form.",
-              answer: "aorist middle indicative, 1st sg.",
-              choices: [
-                "aorist middle indicative, 1st sg.",
-                "imperfect middle/passive indicative, 1st sg.",
-                "aorist active indicative, 1st sg.",
-                "future middle indicative, 1st sg."
-              ],
-              note: "ἐ-λυ-σα-μην: augment + stem + σα + 1st-sg middle ending." }
-          ]
-        },
         {
           family: "Complete εἰμί paradigm",
           lemma: "εἰμί",

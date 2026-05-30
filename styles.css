@@ -1346,11 +1346,13 @@
   .morph-dontknow-row {
     display: flex;
     justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
     margin: 8px 0 16px;
   }
 
   .morph-dontknow-btn {
-    min-width: 180px;
+    min-width: 160px;
     background: rgba(107, 98, 60, 0.10);
     border: 1px solid var(--gold-dim);
     color: var(--muted);
@@ -1358,6 +1360,20 @@
 
   .morph-dontknow-btn:hover {
     border-color: var(--gold);
+    color: var(--cream);
+  }
+
+  /* "I give up" — bails the whole parse (all dimensions wrong). Styled a
+     touch more severe than "I don't know" (which only fails one step). */
+  .morph-giveup-btn {
+    min-width: 160px;
+    background: rgba(150, 60, 60, 0.10);
+    border: 1px solid rgba(170, 90, 90, 0.55);
+    color: var(--muted);
+  }
+
+  .morph-giveup-btn:hover {
+    border-color: rgba(200, 110, 110, 0.9);
     color: var(--cream);
   }
 
