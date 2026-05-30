@@ -86,6 +86,17 @@ function saveModeSelection(mode) {
   };
 }
 
+// Spaced-repetition is remembered per section (vocab vs grammar). Only those
+// two modes carry a setting; grammar (morph) defaults to unspaced, vocab to
+// spaced. Parsing/reader don't use the SRS deck, so they're left out.
+function spacedDefaultForMode(mode) {
+  return mode !== 'morph';
+}
+function effectiveSpacedForMode(mode) {
+  const v = runtime.spacedByMode && runtime.spacedByMode[mode];
+  return typeof v === 'boolean' ? v : spacedDefaultForMode(mode);
+}
+
 function restoreModeSelection(mode) {
   if (mode !== 'vocab' && mode !== 'morph' && mode !== 'parsing') return;
   const saved = runtime.modeSelections[mode];
@@ -488,6 +499,16 @@ export function setStudyMode(mode) {
     }
     restoreModeSelection(nextMode);
   }
+  // Swap the spaced-repetition flag to the section we're entering. Save the
+  // mode we're leaving back into spacedByMode first (vocab/morph each keep
+  // their own), then mirror the destination's value into the live flag so the
+  // deck build below and the toggle UI reflect this section's setting.
+  if (prevMode === 'vocab' || prevMode === 'morph') {
+    runtime.spacedByMode[prevMode] = runtime.spacedRepetition;
+  }
+  if (nextMode === 'vocab' || nextMode === 'morph') {
+    runtime.spacedRepetition = effectiveSpacedForMode(nextMode);
+  }
   runtime.studyMode = nextMode;
   // Entering parsing: the dropdown is the source of truth, so overwrite
   // selectedKeys with [parsingChapter] (a chapter-keyed string, which
@@ -675,6 +696,10 @@ export function toggleDirection() {
 export function toggleSpacedRepetition() {
   if (host.isReaderMode()) return;
   runtime.spacedRepetition = !runtime.spacedRepetition;
+  // Persist this section's choice so vocab and grammar keep diverging.
+  if (runtime.studyMode === 'vocab' || runtime.studyMode === 'morph') {
+    runtime.spacedByMode[runtime.studyMode] = runtime.spacedRepetition;
+  }
   host.clearSpacedUndoSnapshot();
   host.resetUnspacedCycleState();
   host.syncToggleButtons();
