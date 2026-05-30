@@ -359,7 +359,7 @@ export function renderCard() {
   // Prepositions that govern more than one case get a star on both faces as a
   // reminder that the meaning depends on the case of the object.
   const prepStar = host.isMultiCasePreposition(card) ? '★ ' : '';
-  const greekDisplay = `${prepStar}${host.formatGreekHeadword(card.g)}`;
+  const greekDisplay = `${prepStar}${host.formatGreekHeadword(card.g)}${verbStemInlineHtml(card)}`;
   const englishDisplay = `${prepStar}${card.e || '—'}`;
   const requiredLabelHTML = `<span class="card-required-label card-required-label-${card.required ? 'req' : 'opt'}">(${card.required ? 'req.' : 'opt.'})</span>`;
   // Second-aorist / liquid-future verbs get their aorist and/or future forms
@@ -565,6 +565,28 @@ function getLiquidFutureByLemma() {
   return map;
 }
 
+// Lazily-built lookup of present-stem lemma → its bare verbal stem (e.g.
+// ἀποθνῄσκω → ἀποθαν-), merged from both flip sets. A verb that is both a
+// second aorist and a liquid future carries the same stem in each set
+// (ἀποθαν- in both), so the merge is order-independent. Used to print the
+// stem inline after the headword on standard chapter-vocab cards.
+let verbStemByLemma = null;
+function getVerbStemByLemma() {
+  if (verbStemByLemma) return verbStemByLemma;
+  const map = {};
+  const sets = window.SUPPLEMENTAL_VOCAB_SETS;
+  for (const key of ['W4_SECOND_AORIST_FLIP', 'W4_LIQUID_FUTURE_FLIP']) {
+    const flip = sets && sets[key];
+    if (flip && Array.isArray(flip.cards)) {
+      for (const c of flip.cards) {
+        if (c && c.stemFlip && c.g && c.stem) map[c.g] = c.stem;
+      }
+    }
+  }
+  if (Object.keys(map).length) verbStemByLemma = map;
+  return map;
+}
+
 // Small second-/third-row stem annotations for a standard chapter-vocab verb:
 // its second-aorist and/or liquid-future form in brackets under the headword,
 // so the present is learned together with the forms that look nothing like it.
@@ -581,6 +603,17 @@ function verbStemAltHtml(card) {
     html += `<div class="card-future-alt"><span class="card-future-alt-label">fut.</span> [${escapeHtml(future)}]</div>`;
   }
   return html;
+}
+
+// Inline verbal-stem suffix (", ἀποθαν-") for a standard chapter-vocab verb,
+// printed in smaller muted letters right after the headword — the same lexical
+// treatment the stem-flip cards use, so the present is read together with the
+// stem its 2nd-aorist / liquid-future forms are built on. Returns '' for
+// supplemental/advanced/flip cards and lemmas without a recorded stem.
+function verbStemInlineHtml(card) {
+  if (!card || card.advanced || card.supplemental || card.stemFlip) return '';
+  const stem = getVerbStemByLemma()[card.g];
+  return stem ? `<span class="card-stem-inline">, ${escapeHtml(stem)}</span>` : '';
 }
 
 // Heuristic: does any Greek head-token in the family lemma string appear
