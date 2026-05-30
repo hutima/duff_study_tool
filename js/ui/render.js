@@ -41,14 +41,14 @@ export function configureRender(deps) {
 // of λαμβάνω?") rather than canonical paradigm forms. Parsing mode can't
 // dimension-walk them — they have no tense/voice/mood/case/etc. parse —
 // so we surface a redirect card that, when clicked, hops the student into
-// the matching stem-pair Vocab supplemental. Second-aorist gets the
-// stem-FLIP set (W4_SECOND_AORIST_FLIP, with diff-highlighted changing
-// letters). The liquid-future group does NOT redirect — parsing mode
-// substitutes the auto-generated μένω paradigm (W4_MENO_LIQUID_FUTURE),
-// which carries the distinctive liquid-future pattern in parseable form;
-// that swap happens in syncParadigmFocusUi (main.js).
+// the matching stem-FLIP Vocab supplemental (diff-highlighted changing
+// letters). Second-aorist → W4_SECOND_AORIST_FLIP; liquid-future →
+// W4_LIQUID_FUTURE_FLIP. The parseable liquid-future paradigms (μένω, κρίνω)
+// still appear in the dropdown on their own — this entry is just the
+// stem-recall link, parallel to the second-aorist one.
 const PARSING_INCOMPATIBLE_LEMMAS = {
-  'Second-aorist stems': 'W4_SECOND_AORIST_FLIP'
+  'Second-aorist stems': 'W4_SECOND_AORIST_FLIP',
+  'Liquid-stem futures': 'W4_LIQUID_FUTURE_FLIP'
 };
 
 // The "nothing selected" placeholder — the same markup index.html ships in
@@ -383,12 +383,19 @@ export function renderCard() {
     const noteHtml = card.stemNote
       ? `<div class="card-stem-note">${escapeHtml(card.stemNote)}</div>`
       : '';
+    // The verbal stem is printed after a comma on BOTH faces (same stem each
+    // side), anchoring the present↔aorist/future pair to the stem that links
+    // them. Appended outside the diff HTML so it doesn't perturb the
+    // char-by-char form highlighting.
+    const stemSuffix = card.stem
+      ? `<span class="card-stem-inline">, ${escapeHtml(card.stem)}</span>`
+      : '';
     frontHTML = `
         <div class="card-face card-front card-stem-flip">
           ${requiredLabelHTML}
           ${keyBadge}
           <span class="card-label">Present</span>
-          <div class="card-greek card-stem-flip-form">${diff.aHtml}</div>
+          <div class="card-greek card-stem-flip-form">${diff.aHtml}${stemSuffix}</div>
           <div class="card-stem-flip-gloss">${escapeHtml(card.e || '')}</div>
           <div class="card-hint">${sourceLabelDisplay}</div>
           ${flipHint}
@@ -398,7 +405,7 @@ export function renderCard() {
           ${requiredLabelHTML}
           ${keyBadge}
           <span class="card-label">${escapeHtml(card.stemFlipAorist || 'Aorist (1st sg.)')}</span>
-          <div class="card-greek card-stem-flip-form">${diff.bHtml}</div>
+          <div class="card-greek card-stem-flip-form">${diff.bHtml}${stemSuffix}</div>
           <div class="card-stem-flip-gloss">${escapeHtml(card.aoristGloss || '')}</div>
           ${noteHtml}
           <div class="card-hint">${escapeHtml(card.g)} → ${escapeHtml(card.aorist)}</div>

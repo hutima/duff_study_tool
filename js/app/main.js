@@ -1064,12 +1064,13 @@ function syncParadigmFocusUi() {
   if (!select) return;
   if (!isParsingMode()) return;
   const aggregateKeys = getAggregateSelectionKeys();
-  // "Liquid-stem futures" is a stem-recall drill (no parse dimensions); in
-  // parsing mode we surface the auto-generated μένω paradigm instead, which
-  // carries the liquid-future pattern in parseable form. Hide the stem-recall
-  // lemma from the dropdown so the user can't pick it back, and remap an
-  // already-focused selection forward to μένω.
-  const PARSING_DROPDOWN_SUBSTITUTIONS = { 'Liquid-stem futures': 'μένω' };
+  // Stem-recall drills ("Second-aorist stems", "Liquid-stem futures") have no
+  // parse dimensions, so they stay in the dropdown as stem-recall links that
+  // render a redirect card to the matching flip-card supplemental (see
+  // PARSING_INCOMPATIBLE_LEMMAS in render.js). The parseable liquid-future
+  // paradigms (μένω, κρίνω) are listed separately under "Verbs · liquid
+  // future", so nothing needs hiding or substituting here.
+  const PARSING_DROPDOWN_SUBSTITUTIONS = {};
   const isHiddenFromParsing = (lemma) => Object.prototype.hasOwnProperty.call(PARSING_DROPDOWN_SUBSTITUTIONS, lemma);
   const available = listAvailableParadigms(aggregateKeys).filter((p) => !isHiddenFromParsing(p.lemma));
   if (!available.length) {

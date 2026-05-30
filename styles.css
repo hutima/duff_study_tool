@@ -795,6 +795,14 @@
     margin-bottom: 2px;
     opacity: 0.9;
   }
+  /* Verbal stem printed inline after the form (", λαβ-") on both faces of a
+   * stem-flip card. Smaller and muted so the inflected form stays dominant. */
+  .card-stem-inline {
+    font-size: 0.6em;
+    color: var(--gold-dim);
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
 
   .flip-hint {
     position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
