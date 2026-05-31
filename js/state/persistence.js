@@ -278,6 +278,7 @@ export function buildPersistedStatePayload(options = {}) {
     includeOptionalForms: runtime.includeOptionalForms,
     excludeKnownMorphs: runtime.excludeKnownMorphs,
     parsingReverse: runtime.parsingReverse,
+    accentLookalikes: runtime.accentLookalikes,
     optionalFormFilters: runtime.optionalFormFilters,
     analyticsVocabDirection: runtime.analyticsVocabDirection,
     analyticsVocabScope: runtime.analyticsVocabScope,
@@ -369,6 +370,7 @@ function sanitizeImportedState(candidate) {
   // correct under the current dim toggles.
   state.excludeKnownMorphs = !!candidate.excludeKnownMorphs;
   state.parsingReverse = !!candidate.parsingReverse;
+  state.accentLookalikes = !!candidate.accentLookalikes;
   // Sub-filters default to true (every category included) so toggling
   // the parent on without touching filters reproduces the original
   // "all optional forms" behavior. Missing keys from older exports
@@ -1072,6 +1074,8 @@ export function restoreState() {
     runtime.excludeKnownMorphs = !!saved.excludeKnownMorphs;
     // English → Greek parsing direction (default false).
     runtime.parsingReverse = !!saved.parsingReverse;
+    // Accent/breathing look-alike distractors in the reverse drill (default false).
+    runtime.accentLookalikes = !!saved.accentLookalikes;
     // Per-category sub-filters: default each to true if missing.
     const OPTIONAL_FILTER_KEYS = ['imperative', 'subjunctive', 'infinitive', 'participle', 'thirdPerson', 'futureTense', 'perfectTense'];
     const savedFilters = (saved.optionalFormFilters && typeof saved.optionalFormFilters === 'object') ? saved.optionalFormFilters : {};

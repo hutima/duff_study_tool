@@ -839,6 +839,19 @@ export function toggleParsingReverse() {
   loadDeckFromKeys(keysToLoad, runtime.currentSession ? runtime.currentSession.id : null);
 }
 
+// Toggle the curated accent/breathing look-alike distractors in the reverse
+// (English → Greek) drill. Off by default. Only the reverse drill reads it, so
+// flipping it just drops the cached MC options for the current card and
+// re-renders — no deck reload needed.
+export function toggleAccentLookalikes() {
+  runtime.accentLookalikes = !runtime.accentLookalikes;
+  runtime.parsingReverseState = { cardId: null, options: [], correctForm: '' };
+  host.resetMorphAnswerState();
+  host.syncToggleButtons();
+  renderCard();
+  host.saveState();
+}
+
 // Reset every form's per-form tally to 0/2 — drops the `recent` attempts
 // (and the seen count) on a lemma's forms map. Per-paradigm rolling
 // %, the completed bucket history, in-progress counters, and the
