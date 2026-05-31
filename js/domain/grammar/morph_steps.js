@@ -329,9 +329,10 @@ export function isSecondPluralPresentMoodAmbiguity(answer, parsedDims) {
 //
 // Kept to patterns whose distinguishing marker is genuinely systematic:
 // present↔future σ, the imperfect augment (+ the ‑ον 1sg/3pl syncretism),
-// the aorist-passive ‑θη‑, perfect/pluperfect reduplication, and the
-// infinitive endings. (The aorist's ‑σα‑ is intentionally NOT hinted — κ-aorists
-// ἔδωκα, 2nd aorists, and liquid aorists ἔμεινα all break it.)
+// the aorist-passive ‑θη‑, perfect/pluperfect reduplication, the participle
+// suffix/declension tells, and the infinitive endings. (The aorist's ‑σα‑ is
+// intentionally NOT hinted — κ-aorists ἔδωκα, 2nd aorists, and liquid aorists
+// ἔμεινα all break it.)
 export function confusableFormHints(answer, parsedDims, form) {
   const dims = parsedDims || parseAnswerDimensions(answer || '');
   if (!dims) return [];
@@ -363,6 +364,12 @@ export function confusableFormHints(answer, parsedDims, form) {
   // Perfect / pluperfect: reduplication is the signature.
   if (tense === 'perfect' || tense === 'pluperfect') {
     hints.push('Perfect/pluperfect: the reduplication (usually the initial consonant + ε — λέ‑λυκα, λέ‑λυμαι) marks the stem, and the active usually adds a ‑κ‑ (λέλυκα). The pluperfect prefixes an augment on top (ἐ‑λελύκειν).');
+  }
+  // Participle: the suffix carries voice, and the declension pattern tells you
+  // where case/gender live. ‑μενος is never active; the aorist passive (‑θείς)
+  // is the one voice-marked participle that isn't ‑μενος.
+  if (mood === 'participle') {
+    hints.push('Participle voice is in the suffix: ‑μενος/‑μένη/‑μενον is middle or middle/passive (λυόμενος, λυσάμενος, λελυμένος) — never active. The aorist passive is the exception, ending ‑(θ)είς (λυθείς; a few verbs drop the θ — γραφείς). The active ‑ων/‑ας/‑ώς types and ‑θείς decline 3rd-declension in the masc./neut. and 1st-declension in the fem. (λύων, λύουσα, λῦον; gen. λύοντος, λυούσης), so case and gender show in the ending; ‑μενος types decline like a 2-1-2 adjective.');
   }
   // Infinitive endings: four shapes, three of them ending in ‑αι.
   if (mood === 'infinitive') {
