@@ -222,6 +222,15 @@
       // Done BEFORE the seenForms dedup so each declined form registers
       // once under its bare-noun key.
       form = stripLeadingArticle(form);
+      // Some paradigm cards list an equally-valid alternate spelling in a
+      // trailing "(or …)" parenthetical — Duff gives two forms for εἰμί's
+      // 2nd-sg and 1st-pl imperfect ("ἦς (or ἦσθα)", "ἦμεν (or ἤμεθα)").
+      // Key parsing on the primary (first) form and drop the alternate so
+      // the space/parens don't trip the multi-word filter below — which
+      // would otherwise discard the whole form, leaving its parse with no
+      // resolvable Greek form (the "your parse → —" bug).
+      form = form.replace(/\s*\(\s*or\b[^)]*\)\s*$/i, '').trim();
+      if (!form) return;
       if (seenForms.has(form)) return;
       // Multi-word "forms" — principal-parts cards like
       // "τιθείς, -εῖσα, -έν" or constructions like "ὅς ἄν + subjunctive"

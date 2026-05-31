@@ -1204,12 +1204,25 @@ function renderMorphStepSummary(card, state) {
     ? `<div class="morph-step-ambig-note"><span class="morph-step-ambig-label">Ambiguous form</span> 2nd-plural present is spelt the same in the indicative and the imperative — only context picks the mood. Either reading is accepted.</div>`
     : '';
 
+  // Inferred-person note: an imperative form has no person contrast in Koine
+  // (it's 2nd person by default), so its walk omits the Person step entirely.
+  // When the student instead picks a finite mood (indicative/subjunctive), we
+  // inject an ungraded Person step so their picks still resolve to a single
+  // form — but the resulting row carries no ✓/✗, which reads like a bug
+  // without explanation. Name why the row is ungraded.
+  const gradedMoodStep = state.steps.find((s) => s.key === 'mood' && !s.inferred);
+  const hasInferredPerson = state.steps.some((s) => s.key === 'person' && s.inferred);
+  const personInferredNote = (hasInferredPerson && gradedMoodStep && gradedMoodStep.correct === 'imperative')
+    ? `<div class="morph-step-person-note"><span class="morph-step-person-label">Person not graded</span> the imperative is 2nd person by default, so ${escapeHtml(card.form || card.lemma)} is parsed without a person — picking a finite mood is what added the Person step, so it isn't scored.</div>`
+    : '';
+
   return `
     <div class="morph-step-summary">
       <div class="morph-step-summary-title">Parse complete — ${escapeHtml(totalStr)}</div>
       <div class="morph-step-summary-body">${rows}</div>
       ${youParseLine}
       ${ambigNote}
+      ${personInferredNote}
       ${stemChangeNote}
       ${recentLine}
       <div class="morph-step-summary-meta">${escapeHtml(card.lemma)}${card.family ? ' · ' + escapeHtml(card.family) : ''}</div>
