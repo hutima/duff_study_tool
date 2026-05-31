@@ -327,24 +327,46 @@ export function isSecondPluralPresentMoodAmbiguity(answer, parsedDims) {
 // Shown in the forward (Greek → English) walk summary, alongside the
 // ambiguous-imperative note. Returns [] when nothing applies.
 //
-// Kept deliberately small and high-confidence: only patterns whose
-// distinguishing marker is genuinely systematic. (The aorist's ‑σα‑ is
-// intentionally NOT hinted — κ-aorists ἔδωκα, 2nd aorists, and liquid aorists
-// ἔμεινα all break it.)
-export function confusableFormHints(answer, parsedDims) {
+// Kept to patterns whose distinguishing marker is genuinely systematic:
+// present↔future σ, the imperfect augment (+ the ‑ον 1sg/3pl syncretism),
+// the aorist-passive ‑θη‑, perfect/pluperfect reduplication, and the
+// infinitive endings. (The aorist's ‑σα‑ is intentionally NOT hinted — κ-aorists
+// ἔδωκα, 2nd aorists, and liquid aorists ἔμεινα all break it.)
+export function confusableFormHints(answer, parsedDims, form) {
   const dims = parsedDims || parseAnswerDimensions(answer || '');
   if (!dims) return [];
   const { tense, voice, mood } = dims;
   const isMiddlePassive = voice === 'middle' || voice === 'passive' || voice === 'middle/passive';
+  const formNfc = form ? String(form).normalize('NFC').trim() : '';
   const hints = [];
-  // Present ↔ future middle/passive: the tense-forming σ. The 2 pl. is the
-  // cleanest tell — λύεσθε (one σ) vs λύσεσθε (two σ).
-  if (isMiddlePassive && (tense === 'present' || tense === 'future') && mood !== 'participle') {
-    hints.push('Present vs future middle/passive: the future slots a σ before the ending — λύομαι → λύσομαι, and 2 pl. λύεσθε (one σ) → λύσεσθε (two σ). Liquid/nasal stems (μένω, κρίνω) hide the σ and contract instead: μενοῦμαι.');
+  // Present ↔ future: the tense-forming σ — the single most-confused contrast
+  // in the regular paradigm (λύει vs λύσει). Holds for active and
+  // middle/passive; the 2 pl. m/p is the cleanest tell (one σ vs two).
+  if ((tense === 'present' || tense === 'future') && mood === 'indicative') {
+    hints.push(isMiddlePassive
+      ? 'Present vs future middle/passive: the future slots a σ before the ending — λύομαι → λύσομαι, and 2 pl. λύεσθε (one σ) → λύσεσθε (two σ). Liquid/nasal stems (μένω, κρίνω) hide the σ and contract instead: μενοῦμαι.'
+      : 'Present vs future active: the future slots a σ between stem and ending — λύω → λύσω, λύει → λύσει. Liquid/nasal stems (μένω, κρίνω) hide the σ and contract instead: μενῶ.');
+  }
+  // Imperfect: built on the present stem, so the augment is what tells it from
+  // the present. The thematic ‑ον ending (ἔλυον) is also identical in the
+  // 1 sg. and 3 pl. — flag that only when the form actually shows it, so it
+  // never misfires on a μι-verb (ἐδίδουν 1 sg. ≠ ἐδίδοσαν 3 pl.).
+  if (tense === 'imperfect' && mood === 'indicative') {
+    hints.push(/ον$/.test(formNfc)
+      ? 'Imperfect active ‑ον is spelt the same in the 1 sg. and the 3 pl. (ἔλυον = “I was untying” or “they were untying”) — only context tells them apart. The augment (ἔ‑) marks it off from the present λύω.'
+      : 'Imperfect = present stem + an augment (ἐ‑/ἔ‑ prefix, or a lengthened initial vowel) — that augment, present only in the indicative, is what separates it from the present.');
   }
   // Aorist passive: the ‑θη‑ infix.
   if (tense === 'aorist' && voice === 'passive') {
     hints.push('Aorist passive: the ‑θη‑ infix is the tell (ἐ‑λύ‑θη‑ν, ἐ‑λύ‑θη‑ς …). A few verbs take a bare ‑η‑ instead — the 2nd aorist passive, e.g. ἐ‑γράφ‑η‑ν.');
+  }
+  // Perfect / pluperfect: reduplication is the signature.
+  if (tense === 'perfect' || tense === 'pluperfect') {
+    hints.push('Perfect/pluperfect: the reduplication (usually the initial consonant + ε — λέ‑λυκα, λέ‑λυμαι) marks the stem, and the active usually adds a ‑κ‑ (λέλυκα). The pluperfect prefixes an augment on top (ἐ‑λελύκειν).');
+  }
+  // Infinitive endings: four shapes, three of them ending in ‑αι.
+  if (mood === 'infinitive') {
+    hints.push('Infinitives end in ‑ειν, ‑σαι, ‑ναι, or ‑σθαι — three of the four close in ‑αι. ‑σθαι is middle/passive (λύεσθαι); ‑ναι covers the aorist passive (λυθῆναι), perfect active (λελυκέναι), and μι-verbs/εἰμί (διδόναι, εἶναι); ‑σαι is the 1st-aorist active (λῦσαι); ‑ειν is the present/future and 2nd-aorist active (λύειν, εἰπεῖν).');
   }
   return hints;
 }

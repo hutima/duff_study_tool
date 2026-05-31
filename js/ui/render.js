@@ -1226,7 +1226,7 @@ function renderMorphStepSummary(card, state) {
   // "How to tell it apart" hints for forms that are easy to confuse with a
   // neighbouring parse (e.g. present vs future middle/passive — the σ). Shown
   // on every walk of a matching form, like the ambiguity note above.
-  const tellApartHints = confusableFormHints(card.parsedAnswer || card.answer, parseAnswerDimensions(card.parsedAnswer || card.answer))
+  const tellApartHints = confusableFormHints(card.parsedAnswer || card.answer, parseAnswerDimensions(card.parsedAnswer || card.answer), card.form)
     .map((hint) => `<div class="morph-step-ambig-note"><span class="morph-step-ambig-label">How to tell</span> ${escapeHtml(hint)}</div>`)
     .join('');
 
