@@ -410,6 +410,27 @@ export function structuralImpossibilityReason(pickedDims) {
 // them and nothing is gated.
 const PERSON_GLOSS = { first: 'first', second: 'second', third: 'third' };
 
+// Curated structural gaps asserted from Greek morphology — NOT inferred from
+// drilled data. Used only for gaps that present-values can't safely detect,
+// because the missing value is also undrilled for paradigms that DO have it
+// (e.g. most nouns never drill their vocative — λόγος has λόγε — so
+// absence-in-data ≠ no-such-form). Keyed by focused-paradigm lemma → the dim
+// values that genuinely don't exist for it. Kept to certain, lemma-stable
+// gaps, same bar as lemma_inventory's impossible* lists.
+//
+// The Greek article and every pronoun inflect for the nominative, accusative,
+// genitive, and dative only — they have NO vocative case. Nouns and adjectives
+// DO have a vocative, so they are deliberately absent here and never gated.
+const PARADIGM_STRUCTURAL_GAPS = {
+  'ὁ, ἡ, τό':                           { case: ['vocative'] }, // the article
+  'First and second personal pronouns': { case: ['vocative'] }, // ἐγώ / σύ
+  'αὐτός, αὐτή, αὐτό':                  { case: ['vocative'] }, // intensive / 3rd-person
+  'οὗτος, αὕτη, τοῦτο':                 { case: ['vocative'] }, // demonstrative "this"
+  'ἐκεῖνος, ἐκείνη, ἐκεῖνο':            { case: ['vocative'] }, // demonstrative "that"
+  'ὅς, ἥ, ὅ':                           { case: ['vocative'] }, // relative
+  'τίς, τί':                            { case: ['vocative'] }  // interrogative / indefinite
+};
+
 // Set of values the focused paradigm actually carries per dimension, derived
 // from its full (unfiltered) card pool. Composite values split so a paradigm
 // tagged "first/second" registers both members. Consumed by paradigmGapReason.
@@ -433,8 +454,24 @@ export function computeParadigmPresentValues(cards) {
 // comes from computeParadigmPresentValues over the paradigm's full pool. A
 // paradigm with no person dimension (every noun/adjective) has an empty
 // person set and is never gated; one that carries the picked person passes.
-export function paradigmGapReason(pickedDims, presentValues) {
+export function paradigmGapReason(pickedDims, presentValues, lemma) {
   if (!pickedDims || !presentValues) return null;
+  // 1) Person on a person-bearing, tenseless paradigm (the 1st/2nd personal
+  //    pronouns) that lacks the picked person — derived from drilled forms.
+  const personGap = personGapReason(pickedDims, presentValues);
+  if (personGap) return personGap;
+  // 2) Curated structural gaps (currently case=vocative on the article and
+  //    pronouns), asserted from morphology and guarded against the paradigm
+  //    actually drilling the value.
+  const curated = lemma ? PARADIGM_STRUCTURAL_GAPS[lemma] : null;
+  if (curated) {
+    const curatedGap = curatedGapReason(pickedDims, presentValues, curated);
+    if (curatedGap) return curatedGap;
+  }
+  return null;
+}
+
+function personGapReason(pickedDims, presentValues) {
   const picked = pickedDims.person;
   const pool = presentValues.person;
   if (!picked || !pool || pool.size === 0) return null; // no person dim → nothing to gate
@@ -460,6 +497,34 @@ export function paradigmGapReason(pickedDims, presentValues) {
     short: `no ${pickedGloss}-person form in this paradigm`,
     note
   };
+}
+
+// The picked value for some dim is in the paradigm's declared-lacking list AND
+// isn't actually drilled (the guard trusts data over a stale curated entry).
+// Currently only case=vocative for the article + pronouns.
+function curatedGapReason(pickedDims, presentValues, curated) {
+  for (const dim of Object.keys(curated)) {
+    const pickedVal = pickedDims[dim];
+    const lacking = curated[dim];
+    if (!pickedVal || !Array.isArray(lacking) || !lacking.includes(pickedVal)) continue;
+    const dimPool = presentValues[dim];
+    if (dimPool && dimPool.has(pickedVal)) continue; // paradigm actually drills it → trust data
+    if (dim === 'case' && pickedVal === 'vocative') {
+      return {
+        dim,
+        picked: pickedVal,
+        short: 'no vocative in this paradigm',
+        note: 'Pronouns and the article have no vocative case — they inflect for the nominative, accusative, genitive, and dative only.'
+      };
+    }
+    return {
+      dim,
+      picked: pickedVal,
+      short: `no ${pickedVal} ${dim} in this paradigm`,
+      note: `This paradigm has no ${pickedVal} ${dim}.`
+    };
+  }
+  return null;
 }
 
 // Pedagogical hints appended to a lemma's inventory-gap note, keyed by lemma.

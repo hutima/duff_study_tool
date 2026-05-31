@@ -932,8 +932,8 @@ function detectParadigmGap(state, card) {
     picked[s.key] = s.choices[ans.selectedIdx];
   });
   if (state.paradigmPresentValues) {
-    const personGap = paradigmGapReason(picked, state.paradigmPresentValues);
-    if (personGap) return personGap;
+    const pGap = paradigmGapReason(picked, state.paradigmPresentValues, card && card.lemma);
+    if (pGap) return pGap;
   }
   const inv = (card && card.lemma && typeof window !== 'undefined' && window.LEMMA_INVENTORY)
     ? window.LEMMA_INVENTORY[card.lemma] : null;
