@@ -8,7 +8,7 @@
 import { runtime } from '../state/runtime.js';
 import { buildGrammarSupportHtml } from '../domain/grammar/explanations.js';
 import { renderProgress, renderReview } from './progress.js';
-import { buildMorphSteps, summarizeLemmaStats, getParadigmStepAttemptWindow, computeAccessibleDimensionPools, parseAnswerDimensions, aspectMistakeNote, isSecondPluralPresentMoodAmbiguity, computeParadigmPresentValues, accentLookalikesFor } from '../domain/grammar/morph_steps.js';
+import { buildMorphSteps, summarizeLemmaStats, getParadigmStepAttemptWindow, computeAccessibleDimensionPools, parseAnswerDimensions, aspectMistakeNote, isSecondPluralPresentMoodAmbiguity, computeParadigmPresentValues, accentLookalikesFor, confusableFormHints } from '../domain/grammar/morph_steps.js';
 import { getAccessibleMorphCards, deriveSelectionLevels, buildMultiGenderLemmas, MIXED_FORM_NOUN_LEMMAS } from '../domain/grammar/paradigm_focus.js';
 
 let host = {
@@ -1223,6 +1223,13 @@ function renderMorphStepSummary(card, state) {
     ? `<div class="morph-step-ambig-note"><span class="morph-step-ambig-label">Ambiguous form</span> 2nd-plural present is spelt the same in the indicative and the imperative — only context picks the mood. Either reading is accepted.</div>`
     : '';
 
+  // "How to tell it apart" hints for forms that are easy to confuse with a
+  // neighbouring parse (e.g. present vs future middle/passive — the σ). Shown
+  // on every walk of a matching form, like the ambiguity note above.
+  const tellApartHints = confusableFormHints(card.parsedAnswer || card.answer, parseAnswerDimensions(card.parsedAnswer || card.answer))
+    .map((hint) => `<div class="morph-step-ambig-note"><span class="morph-step-ambig-label">How to tell</span> ${escapeHtml(hint)}</div>`)
+    .join('');
+
   // Inferred-person note: an imperative form has no person contrast in Koine
   // (it's 2nd person by default), so its walk omits the Person step entirely.
   // When the student instead picks a finite mood (indicative/subjunctive), we
@@ -1249,6 +1256,7 @@ function renderMorphStepSummary(card, state) {
       ${youParseLine}
       ${paradigmGapNote}
       ${ambigNote}
+      ${tellApartHints}
       ${personInferredNote}
       ${stemChangeNote}
       ${recentLine}

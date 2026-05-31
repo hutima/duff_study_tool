@@ -319,6 +319,36 @@ export function isSecondPluralPresentMoodAmbiguity(answer, parsedDims) {
   return false;
 }
 
+// Short "how to tell it apart" hints for forms that are easy to confuse with a
+// neighbouring parse. Triggered off the parsed dimensions (reliable) and worded
+// to stay true across the regular ω-verb, contract, μι-, and deponent
+// paradigms the drill covers — each hint names the exception where the simple
+// rule breaks (liquid futures, 2nd-aorist passives) rather than overclaiming.
+// Shown in the forward (Greek → English) walk summary, alongside the
+// ambiguous-imperative note. Returns [] when nothing applies.
+//
+// Kept deliberately small and high-confidence: only patterns whose
+// distinguishing marker is genuinely systematic. (The aorist's ‑σα‑ is
+// intentionally NOT hinted — κ-aorists ἔδωκα, 2nd aorists, and liquid aorists
+// ἔμεινα all break it.)
+export function confusableFormHints(answer, parsedDims) {
+  const dims = parsedDims || parseAnswerDimensions(answer || '');
+  if (!dims) return [];
+  const { tense, voice, mood } = dims;
+  const isMiddlePassive = voice === 'middle' || voice === 'passive' || voice === 'middle/passive';
+  const hints = [];
+  // Present ↔ future middle/passive: the tense-forming σ. The 2 pl. is the
+  // cleanest tell — λύεσθε (one σ) vs λύσεσθε (two σ).
+  if (isMiddlePassive && (tense === 'present' || tense === 'future') && mood !== 'participle') {
+    hints.push('Present vs future middle/passive: the future slots a σ before the ending — λύομαι → λύσομαι, and 2 pl. λύεσθε (one σ) → λύσεσθε (two σ). Liquid/nasal stems (μένω, κρίνω) hide the σ and contract instead: μενοῦμαι.');
+  }
+  // Aorist passive: the ‑θη‑ infix.
+  if (tense === 'aorist' && voice === 'passive') {
+    hints.push('Aorist passive: the ‑θη‑ infix is the tell (ἐ‑λύ‑θη‑ν, ἐ‑λύ‑θη‑ς …). A few verbs take a bare ‑η‑ instead — the 2nd aorist passive, e.g. ἐ‑γράφ‑η‑ν.');
+  }
+  return hints;
+}
+
 // When the student picks a mood that requires more dimensions than the
 // source card's parse class supplied, returns the dim keys to inject as
 // ungraded follow-up steps. Example: card λῦε is a 2-singular imperative
