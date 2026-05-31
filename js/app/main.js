@@ -166,7 +166,7 @@ import { getSelectedVocabCards, getSelectedGrammarCards, getAllVocabKeys, getAll
 
 // Domain — Grammar
 import { buildGrammarSupportHtml } from '../domain/grammar/explanations.js';
-import { recordParadigmAttempt, inferredFollowupDims, buildInferredStep, structuralImpossibilityReason, paradigmGapReason, isLemmaFormKnown, parseAnswerDimensions } from '../domain/grammar/morph_steps.js';
+import { recordParadigmAttempt, inferredFollowupDims, buildInferredStep, structuralImpossibilityReason, paradigmGapReason, lemmaInventoryGapReason, isLemmaFormKnown, parseAnswerDimensions } from '../domain/grammar/morph_steps.js';
 import { listAvailableParadigms, listAvailableParadigmsByCategory, getCardsForFocusedParadigm } from '../domain/grammar/paradigm_focus.js';
 
 // UI
@@ -863,7 +863,7 @@ function answerMorphologyStep(choiceIdx) {
   // forms for (e.g. third person for ἐγώ/σύ). Like a structural impossibility,
   // there's no form to resolve and no point asking the remaining dimensions —
   // cut the walk off and let the summary explain the gap.
-  const gap = detectParadigmGap(state);
+  const gap = detectParadigmGap(state, card);
   if (gap) {
     state.paradigmGap = gap;
     state.stepIdx = state.steps.length;
@@ -914,11 +914,16 @@ function detectStructuralImpossibility(state) {
 }
 
 // Walks the graded picks so far and asks morph_steps whether any names a value
-// the focused paradigm structurally lacks (currently: a person the paradigm
-// has no forms for, e.g. third person on ἐγώ/σύ). Returns the gap descriptor
-// { dim, picked, short, note } or null. Ignores ungraded inferred steps.
-function detectParadigmGap(state) {
-  if (!state || !Array.isArray(state.steps) || !state.paradigmPresentValues) return null;
+// the focused paradigm / lemma structurally lacks. Returns a gap descriptor
+// { dim, picked, short, note } or null. Two sources, both conservative:
+//   1) Person on a person-bearing nominal paradigm that lacks it — third
+//      person on ἐγώ/σύ — derived from the paradigm's own drilled forms
+//      (guarded to non-verbs so it can't misfire on undrilled conjugations).
+//   2) A tense/voice/mood from the lemma's hand-reviewed negative inventory
+//      (lemma_inventory.js) — e.g. the non-existent aorist of εἰμί.
+// Ignores ungraded inferred steps.
+function detectParadigmGap(state, card) {
+  if (!state || !Array.isArray(state.steps)) return null;
   const picked = {};
   state.steps.forEach((s, idx) => {
     if (!s || s.inferred) return;
@@ -926,7 +931,17 @@ function detectParadigmGap(state) {
     if (!ans || ans.selectedIdx < 0) return;
     picked[s.key] = s.choices[ans.selectedIdx];
   });
-  return paradigmGapReason(picked, state.paradigmPresentValues);
+  if (state.paradigmPresentValues) {
+    const personGap = paradigmGapReason(picked, state.paradigmPresentValues);
+    if (personGap) return personGap;
+  }
+  const inv = (card && card.lemma && typeof window !== 'undefined' && window.LEMMA_INVENTORY)
+    ? window.LEMMA_INVENTORY[card.lemma] : null;
+  if (inv) {
+    const invGap = lemmaInventoryGapReason(picked, inv, card.lemma);
+    if (invGap) return invGap;
+  }
+  return null;
 }
 
 // English → Greek parsing answer. choiceIdx === -1 is the "I don't know"

@@ -438,6 +438,14 @@ export function paradigmGapReason(pickedDims, presentValues) {
   const picked = pickedDims.person;
   const pool = presentValues.person;
   if (!picked || !pool || pool.size === 0) return null; // no person dim → nothing to gate
+  // Only gate person for a person-bearing paradigm that is NOT a verb — i.e.
+  // it has no tense in any of its forms. That's the 1st/2nd personal pronouns
+  // (ἐγώ, σύ), which genuinely lack a third person. Verbs always conjugate all
+  // three persons, so we never flag a person on them: a verb paradigm that
+  // happened to drill only some persons must not look like it "lacks" one it
+  // actually has. This keeps the gap bulletproof against undrilled verb forms.
+  const tensePool = presentValues.tense;
+  if (tensePool && tensePool.size > 0) return null;
   if (pool.has(picked)) return null;                     // picked person exists here → fine
   const pickedGloss = PERSON_GLOSS[picked] || picked;
   const have = ['first', 'second', 'third'].filter((p) => pool.has(p)).map((p) => PERSON_GLOSS[p] || p);
@@ -452,6 +460,51 @@ export function paradigmGapReason(pickedDims, presentValues) {
     short: `no ${pickedGloss}-person form in this paradigm`,
     note
   };
+}
+
+// Pedagogical hints appended to a lemma's inventory-gap note, keyed by lemma.
+// Kept tiny and explicit — only verbs with a genuinely suppletive / defective
+// paradigm worth a one-line explanation.
+const LEMMA_GAP_HINTS = {
+  'εἰμί': 'εἰμί is suppletive — its aorist and perfect senses come from other verbs (e.g. ἐγενόμην, γέγονα).'
+};
+
+// Gap descriptor from a lemma's reviewed negative inventory
+// (impossibleTenses / impossibleVoices / impossibleMoods in
+// js/data/lemma_inventory.js): a tense/voice/mood the lemma genuinely lacks in
+// Greek — e.g. the non-existent aorist of εἰμί. Returns { dim, picked, short,
+// note } or null. Reads ONLY the hand-curated inventory; it never infers a gap
+// from forms that merely aren't drilled, so it can't misfire on an incomplete
+// paradigm. Mirrors render.js's isParseImpossibleForLemma, but produces the
+// early-cutoff reason rather than the end-of-walk "[no morph exists]" verdict.
+export function lemmaInventoryGapReason(pickedDims, inv, lemma) {
+  if (!pickedDims || !inv) return null;
+  const lemmaName = lemma || 'this verb';
+  const checks = [
+    ['tense', inv.impossibleTenses],
+    ['voice', inv.impossibleVoices],
+    ['mood',  inv.impossibleMoods]
+  ];
+  for (const [dim, list] of checks) {
+    const picked = pickedDims[dim];
+    if (!picked || !Array.isArray(list) || !list.length) continue;
+    // A picked value can be syncretic ('middle/passive'); any component
+    // landing in the impossible list disqualifies the combination.
+    const parts = String(picked).split('/').filter(Boolean);
+    const bad = parts.find((p) => list.includes(p));
+    if (!bad) continue;
+    const norm = bad.replace(/^(first |second )/, ''); // "first aorist" → "aorist"
+    let note = `${lemmaName} has no ${norm} forms in Koine.`;
+    const hint = LEMMA_GAP_HINTS[lemma];
+    if (hint) note += ` ${hint}`;
+    return {
+      dim,
+      picked: bad,
+      short: `no ${norm} ${dim} for ${lemmaName}`,
+      note
+    };
+  }
+  return null;
 }
 
 // Builds an ungraded follow-up step for the given dimension. Choices come
