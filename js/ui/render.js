@@ -1224,11 +1224,16 @@ function renderMorphStepSummary(card, state) {
     : '';
 
   // "How to tell it apart" hints for forms that are easy to confuse with a
-  // neighbouring parse (e.g. present vs future middle/passive — the σ). Shown
-  // on every walk of a matching form, like the ambiguity note above.
-  const tellApartHints = confusableFormHints(card.parsedAnswer || card.answer, parseAnswerDimensions(card.parsedAnswer || card.answer), card.form)
-    .map((hint) => `<div class="morph-step-ambig-note"><span class="morph-step-ambig-label">How to tell</span> ${escapeHtml(hint)}</div>`)
-    .join('');
+  // neighbouring parse (e.g. present vs future — the σ). Tucked behind a
+  // collapsed "Hint" disclosure so the summary stays short; the ambiguity note
+  // above is deliberately NOT collapsed (it explains why a mark was accepted).
+  const tellApartItems = confusableFormHints(card.parsedAnswer || card.answer, parseAnswerDimensions(card.parsedAnswer || card.answer), card.form);
+  const tellApartHints = tellApartItems.length
+    ? `<details class="morph-step-hint">
+         <summary class="morph-step-hint-summary">Hint</summary>
+         <div class="morph-step-hint-body">${tellApartItems.map((hint) => `<div class="morph-step-hint-note">${escapeHtml(hint)}</div>`).join('')}</div>
+       </details>`
+    : '';
 
   // Inferred-person note: an imperative form has no person contrast in Koine
   // (it's 2nd person by default), so its walk omits the Person step entirely.
