@@ -166,7 +166,7 @@ import { getSelectedVocabCards, getSelectedGrammarCards, getAllVocabKeys, getAll
 
 // Domain — Grammar
 import { buildGrammarSupportHtml } from '../domain/grammar/explanations.js';
-import { recordParadigmAttempt, inferredFollowupDims, buildInferredStep, structuralImpossibilityReason, isLemmaFormKnown, parseAnswerDimensions } from '../domain/grammar/morph_steps.js';
+import { recordParadigmAttempt, inferredFollowupDims, buildInferredStep, structuralImpossibilityReason, paradigmGapReason, isLemmaFormKnown, parseAnswerDimensions } from '../domain/grammar/morph_steps.js';
 import { listAvailableParadigms, listAvailableParadigmsByCategory, getCardsForFocusedParadigm } from '../domain/grammar/paradigm_focus.js';
 
 // UI
@@ -412,7 +412,22 @@ configureRender({
   transliterateGreek: (s) => typeof window !== 'undefined' && typeof window.transliterateGreek === 'function' ? window.transliterateGreek(s) : s,
   detectPartOfSpeech: (card) => typeof window !== 'undefined' && typeof window.detectPartOfSpeech === 'function' ? window.detectPartOfSpeech(card) : '',
   isMultiCasePreposition: (card) => typeof window !== 'undefined' && typeof window.isMultiCasePreposition === 'function' ? window.isMultiCasePreposition(card) : false,
-  getEnabledParsingDims: () => getEnabledParsingDims()
+  getEnabledParsingDims: () => getEnabledParsingDims(),
+  // Full focused-paradigm pool for paradigm-gap detection: chapter-gated, but
+  // deliberately NOT pruned by exclude-known or per-value dim filters, so the
+  // present-values truth reflects the whole paradigm (e.g. ἐγώ/σύ has only
+  // 1st/2nd person regardless of which forms the user has mastered/excluded).
+  getFocusedParadigmAllCards: () => {
+    if (!isParsingMode() || !runtime.morphFocusedParadigm) return [];
+    return getCardsForFocusedParadigm(
+      getAggregateSelectionKeys(),
+      runtime.morphFocusedParadigm,
+      {
+        includeOptional: !!runtime.includeOptionalForms,
+        optionalFilters: runtime.optionalFormFilters
+      }
+    );
+  }
 });
 configureSelectors({
   getSessions: () => getSessions(),
@@ -844,6 +859,22 @@ function answerMorphologyStep(choiceIdx) {
     return;
   }
 
+  // Paradigm value gap: the pick names a value the focused paradigm has no
+  // forms for (e.g. third person for ἐγώ/σύ). Like a structural impossibility,
+  // there's no form to resolve and no point asking the remaining dimensions —
+  // cut the walk off and let the summary explain the gap.
+  const gap = detectParadigmGap(state);
+  if (gap) {
+    state.paradigmGap = gap;
+    state.stepIdx = state.steps.length;
+    state.completed = true;
+    finalizeMorphStepAttempt(card, state);
+    renderCard();
+    renderProgress();
+    saveState();
+    return;
+  }
+
   const injectedCount = maybeInjectInferredSteps(state, step.key, picked);
   if (injectedCount > 0) {
     // Defer this step's correctness reveal until the injected follow-ups
@@ -880,6 +911,22 @@ function detectStructuralImpossibility(state) {
   });
   const reason = structuralImpossibilityReason(picked);
   return reason ? { reason } : null;
+}
+
+// Walks the graded picks so far and asks morph_steps whether any names a value
+// the focused paradigm structurally lacks (currently: a person the paradigm
+// has no forms for, e.g. third person on ἐγώ/σύ). Returns the gap descriptor
+// { dim, picked, short, note } or null. Ignores ungraded inferred steps.
+function detectParadigmGap(state) {
+  if (!state || !Array.isArray(state.steps) || !state.paradigmPresentValues) return null;
+  const picked = {};
+  state.steps.forEach((s, idx) => {
+    if (!s || s.inferred) return;
+    const ans = state.answers[idx];
+    if (!ans || ans.selectedIdx < 0) return;
+    picked[s.key] = s.choices[ans.selectedIdx];
+  });
+  return paradigmGapReason(picked, state.paradigmPresentValues);
 }
 
 // English → Greek parsing answer. choiceIdx === -1 is the "I don't know"

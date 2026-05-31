@@ -8,7 +8,7 @@
 import { runtime } from '../state/runtime.js';
 import { buildGrammarSupportHtml } from '../domain/grammar/explanations.js';
 import { renderProgress, renderReview } from './progress.js';
-import { buildMorphSteps, summarizeLemmaStats, getParadigmStepAttemptWindow, computeAccessibleDimensionPools, parseAnswerDimensions, aspectMistakeNote, isSecondPluralPresentMoodAmbiguity } from '../domain/grammar/morph_steps.js';
+import { buildMorphSteps, summarizeLemmaStats, getParadigmStepAttemptWindow, computeAccessibleDimensionPools, parseAnswerDimensions, aspectMistakeNote, isSecondPluralPresentMoodAmbiguity, computeParadigmPresentValues } from '../domain/grammar/morph_steps.js';
 import { getAccessibleMorphCards, deriveSelectionLevels, buildMultiGenderLemmas, MIXED_FORM_NOUN_LEMMAS } from '../domain/grammar/paradigm_focus.js';
 
 let host = {
@@ -30,7 +30,12 @@ let host = {
   transliterateGreek: (s) => s,
   detectPartOfSpeech: () => '',
   isMultiCasePreposition: () => false,
-  getEnabledParsingDims: () => null
+  getEnabledParsingDims: () => null,
+  // Full focused-paradigm card pool (chapter-gated, but NOT pruned by the
+  // exclude-known filter or per-value dim filters) — the structural truth of
+  // what forms the paradigm owns. Used to detect value gaps like ἐγώ/σύ
+  // having no third-person forms. Returns [] outside parsing mode.
+  getFocusedParadigmAllCards: () => []
 };
 
 export function configureRender(deps) {
@@ -532,12 +537,24 @@ function ensureStepStateForCard(card) {
     multiGenderLemmas,
     mixedFormNouns: MIXED_FORM_NOUN_LEMMAS
   });
+  // Values the focused paradigm actually carries per dimension, from its full
+  // (unfiltered) pool. Lets answerMorphologyStep cut the walk off when a pick
+  // names a value the paradigm structurally lacks — e.g. "third person" for
+  // ἐγώ/σύ, which has only 1st/2nd-person forms. Falls back to the current
+  // card's own dims so a present-only-truth still includes the right answer
+  // when the full pool is unavailable.
+  const paradigmCards = host.getFocusedParadigmAllCards();
+  const paradigmPresentValues = computeParadigmPresentValues(
+    Array.isArray(paradigmCards) && paradigmCards.length ? paradigmCards : [card]
+  );
   runtime.morphStepState = {
     cardId: card.id,
     steps,
     stepIdx: 0,
     answers: new Array(steps.length).fill(null),
     completed: steps.length === 0,
+    // Per-dimension value sets for the focused paradigm (gap detection).
+    paradigmPresentValues,
     // Kept on state so answerMorphologyStep can build ungraded follow-up
     // steps with the same chapter-gated MC choices the original steps
     // were drawn from (avoids re-computing on every answer).
@@ -1084,9 +1101,9 @@ function renderMorphStepSummary(card, state) {
       ? step.displayChoices[answer.selectedIdx]
       : '—';
     // A null answer means the walk ended before this step (structural
-    // impossibility short-circuit). Render neutral, no ✓/✗ — these were
-    // never asked, so they're not graded.
-    if (!answer && state.structuralImpossibility) {
+    // impossibility or a paradigm value gap short-circuited it). Render
+    // neutral, no ✓/✗ — these were never asked, so they're not graded.
+    if (!answer && (state.structuralImpossibility || state.paradigmGap)) {
       return `
         <div class="morph-step-summary-row morph-step-inferred">
           <span class="morph-step-summary-dim">${escapeHtml(step.label)}</span>
@@ -1148,10 +1165,12 @@ function renderMorphStepSummary(card, state) {
     return ans && ans.selectedIdx >= 0 ? step.choices[ans.selectedIdx] : '';
   });
   const correctValues = state.steps.map((step) => step.correct);
-  // A structural impossibility (e.g. future imperative) trumps any lemma
-  // lookup — show the specific reason instead of the generic "[no morph
-  // exists]" we'd fall back to from the inventory check.
-  const structReason = state.structuralImpossibility && state.structuralImpossibility.reason;
+  // A structural impossibility (e.g. future imperative) or a paradigm value
+  // gap (e.g. third person for ἐγώ/σύ) trumps any lemma lookup — show the
+  // specific reason instead of the generic "[no morph exists]" we'd fall back
+  // to from the inventory check.
+  const structReason = (state.structuralImpossibility && state.structuralImpossibility.reason)
+    || (state.paradigmGap && state.paradigmGap.short);
   let yourFormHtml;
   if (structReason) {
     yourFormHtml = `<div class="morph-step-parse-match morph-step-parse-match-impossible">[${escapeHtml(structReason)}]</div>`;
@@ -1216,11 +1235,19 @@ function renderMorphStepSummary(card, state) {
     ? `<div class="morph-step-person-note"><span class="morph-step-person-label">Person not graded</span> the imperative is 2nd person by default, so ${escapeHtml(card.form || card.lemma)} is parsed without a person — picking a finite mood is what added the Person step, so it isn't scored.</div>`
     : '';
 
+  // Paradigm-gap note: the student picked a value the focused paradigm has no
+  // forms for (e.g. third person for ἐγώ/σύ), so the walk cut off early. Name
+  // the gap so the dropped downstream steps don't read as a bug.
+  const paradigmGapNote = state.paradigmGap
+    ? `<div class="morph-step-gap-note"><span class="morph-step-gap-label">No such form</span> ${escapeHtml(state.paradigmGap.note)}</div>`
+    : '';
+
   return `
     <div class="morph-step-summary">
       <div class="morph-step-summary-title">Parse complete — ${escapeHtml(totalStr)}</div>
       <div class="morph-step-summary-body">${rows}</div>
       ${youParseLine}
+      ${paradigmGapNote}
       ${ambigNote}
       ${personInferredNote}
       ${stemChangeNote}

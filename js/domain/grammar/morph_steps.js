@@ -390,6 +390,70 @@ export function structuralImpossibilityReason(pickedDims) {
   return null;
 }
 
+// ─── Paradigm-level value gaps ───────────────────────────────────────────
+//
+// Some paradigms own a dimension but carry only a subset of its values. The
+// first/second personal pronouns (ἐγώ, σύ) inflect for person — but only
+// first and second; the third-person personal pronoun is a separate paradigm
+// (αὐτός, αὐτή, αὐτό). The person step still offers "third" as a distractor
+// (any verb in scope seeds all three persons into the shared pool), so a
+// student can pick a person the focused paradigm structurally lacks. When
+// that happens there's no form to resolve and no point marching through the
+// remaining dimensions — the walk should cut off and explain the gap, the
+// same way structuralImpossibilityReason ends an impossible tense/mood walk.
+//
+// Scoped to `person` deliberately. Person is the one dimension where a
+// paradigm legitimately owns the category yet lacks specific values without
+// that being a chapter-gating artifact (chapter gating already prunes
+// tense/mood/case distractors the textbook hasn't introduced). Nouns and
+// adjectives have no person at all, so `presentValues.person` is empty for
+// them and nothing is gated.
+const PERSON_GLOSS = { first: 'first', second: 'second', third: 'third' };
+
+// Set of values the focused paradigm actually carries per dimension, derived
+// from its full (unfiltered) card pool. Composite values split so a paradigm
+// tagged "first/second" registers both members. Consumed by paradigmGapReason.
+export function computeParadigmPresentValues(cards) {
+  const dimKeys = ['aspect', 'tense', 'voice', 'mood', 'person', 'case', 'number', 'gender'];
+  const present = {};
+  dimKeys.forEach((k) => { present[k] = new Set(); });
+  (cards || []).forEach((card) => {
+    if (!card) return;
+    const dims = parseAnswerDimensions(card.parsedAnswer || card.answer || '');
+    dimKeys.forEach((k) => {
+      if (!dims[k]) return;
+      String(dims[k]).split('/').forEach((v) => { if (v) present[k].add(v); });
+    });
+  });
+  return present;
+}
+
+// Returns { dim, picked, short, note } when the student's picks name a person
+// the focused paradigm has no forms for, or null otherwise. `presentValues`
+// comes from computeParadigmPresentValues over the paradigm's full pool. A
+// paradigm with no person dimension (every noun/adjective) has an empty
+// person set and is never gated; one that carries the picked person passes.
+export function paradigmGapReason(pickedDims, presentValues) {
+  if (!pickedDims || !presentValues) return null;
+  const picked = pickedDims.person;
+  const pool = presentValues.person;
+  if (!picked || !pool || pool.size === 0) return null; // no person dim → nothing to gate
+  if (pool.has(picked)) return null;                     // picked person exists here → fine
+  const pickedGloss = PERSON_GLOSS[picked] || picked;
+  const have = ['first', 'second', 'third'].filter((p) => pool.has(p)).map((p) => PERSON_GLOSS[p] || p);
+  const haveList = have.length <= 1 ? `${have[0] || ''} person` : `${have.join(' and ')} person`;
+  let note = `This paradigm has no ${pickedGloss}-person forms — only ${haveList}.`;
+  if (picked === 'third') {
+    note += ' The third-person personal pronoun is a separate paradigm (αὐτός, αὐτή, αὐτό).';
+  }
+  return {
+    dim: 'person',
+    picked,
+    short: `no ${pickedGloss}-person form in this paradigm`,
+    note
+  };
+}
+
 // Builds an ungraded follow-up step for the given dimension. Choices come
 // from the chapter-gated accessible pool when available; falls back to
 // the full DIM_POOLS. The returned step has `inferred: true` and no
