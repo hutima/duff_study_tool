@@ -572,6 +572,58 @@ export function lemmaInventoryGapReason(pickedDims, inv, lemma) {
   return null;
 }
 
+// ─── Accent / breathing look-alike distractors ──────────────────────────
+//
+// Curated minimal pairs: a drilled paradigm form and another Greek word that
+// is spelled identically except for accent or breathing. In the reverse drill
+// (English → Greek, pick the form) the look-alike is a clean "did you read the
+// accent?" distractor — the focused paradigm tells the student WHICH word they
+// want, and they must pick the correctly-accented spelling. Toggle-optional,
+// off by default. Hand-authored: auto-generating wrong-accent forms risks
+// emitting a real-but-mislabeled word.
+//
+// Keyed by the tested form (NFC). Each twin carries the wrong-spelling form
+// plus a one-line note naming the distinction. Bidirectional where both sides
+// are drilled paradigms (article ↔ relative; intensive αὐτός ↔ demonstrative
+// οὗτος).
+const ACCENT_LOOKALIKES_RAW = {
+  // Article (proclitic, unaccented) ↔ relative pronoun (accented) — accent only
+  'ὁ':  [{ form: 'ὅ',  note: 'ὅ (accented) is the relative pronoun (neut.); ὁ is the masculine article.' }],
+  'ὅ':  [{ form: 'ὁ',  note: 'ὁ (unaccented) is the masculine article; ὅ is the relative pronoun (neut.).' }],
+  'ἡ':  [{ form: 'ἥ',  note: 'ἥ (accented) is the relative pronoun (fem.); ἡ is the feminine article.' }],
+  'ἥ':  [{ form: 'ἡ',  note: 'ἡ (unaccented) is the feminine article; ἥ is the relative pronoun (fem.).' }],
+  'οἱ': [{ form: 'οἵ', note: 'οἵ (accented) is the relative pronoun (masc. pl.); οἱ is the masculine article.' }],
+  'οἵ': [{ form: 'οἱ', note: 'οἱ (unaccented) is the masculine article; οἵ is the relative pronoun (masc. pl.).' }],
+  'αἱ': [{ form: 'αἵ', note: 'αἵ (accented) is the relative pronoun (fem. pl.); αἱ is the feminine article.' }],
+  'αἵ': [{ form: 'αἱ', note: 'αἱ (unaccented) is the feminine article; αἵ is the relative pronoun (fem. pl.).' }],
+  // Intensive αὐτός ↔ near demonstrative οὗτος — breathing (+ accent placement)
+  'αὐτή': [{ form: 'αὕτη', note: 'αὕτη (rough breathing) is the demonstrative “this”; αὐτή (smooth) is αὐτός “she / herself”.' }],
+  'αὕτη': [{ form: 'αὐτή', note: 'αὐτή (smooth breathing) is αὐτός “she / herself”; αὕτη (rough) is the demonstrative “this”.' }],
+  // Interrogative (accented) ↔ indefinite (enclitic, unaccented) — accent only
+  'τίς': [{ form: 'τις', note: 'τις (unaccented enclitic) is the indefinite “someone”; τίς (accented) is the interrogative “who?”.' }],
+  'τί':  [{ form: 'τι',  note: 'τι (unaccented enclitic) is the indefinite “something”; τί (accented) is the interrogative “what? / why?”.' }],
+  // εἰμί 2 sg. ↔ conjunction — accent only
+  'εἶ':  [{ form: 'εἰ',  note: 'εἰ is the conjunction “if”; εἶ (circumflex) is εἰμί “you are”.' }]
+};
+
+// NFC-normalized index, built once, so lookups match regardless of the
+// composed/decomposed form of the incoming card's Greek string.
+const ACCENT_LOOKALIKES = (() => {
+  const out = {};
+  for (const [key, twins] of Object.entries(ACCENT_LOOKALIKES_RAW)) {
+    out[key.normalize('NFC')] = twins.map((t) => ({ form: String(t.form).normalize('NFC'), note: t.note }));
+  }
+  return out;
+})();
+
+// Returns the curated accent/breathing look-alikes for a tested form
+// ([{ form, note }, …]), or [] when none. NFC-normalizes the query.
+export function accentLookalikesFor(form) {
+  if (!form) return [];
+  const key = String(form).trim().normalize('NFC');
+  return ACCENT_LOOKALIKES[key] || [];
+}
+
 // Builds an ungraded follow-up step for the given dimension. Choices come
 // from the chapter-gated accessible pool when available; falls back to
 // the full DIM_POOLS. The returned step has `inferred: true` and no

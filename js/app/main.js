@@ -258,6 +258,7 @@ import {
   toggleDimValueFilter,
   toggleExcludeKnownMorphs,
   toggleParsingReverse,
+  toggleAccentLookalikes,
   toggleUnspacedDailyReset,
   reshuffleEligible,
   fastForwardOneDay,
@@ -1330,6 +1331,10 @@ function syncToggleButtons() {
   if (parsingReverseSwitch) parsingReverseSwitch.classList.toggle('on', !!runtime.parsingReverse);
   const parsingReverseToggle = document.getElementById('parsingReverseToggle');
   if (parsingReverseToggle) parsingReverseToggle.setAttribute('aria-checked', runtime.parsingReverse ? 'true' : 'false');
+  const accentLookalikeSwitch = document.getElementById('accentLookalikeBtn');
+  if (accentLookalikeSwitch) accentLookalikeSwitch.classList.toggle('on', !!runtime.accentLookalikes);
+  const accentLookalikeToggle = document.getElementById('accentLookalikeToggle');
+  if (accentLookalikeToggle) accentLookalikeToggle.setAttribute('aria-checked', runtime.accentLookalikes ? 'true' : 'false');
   // The toggles read as "Exclude X" — ON in the UI means the value is
   // excluded (sub[value] === false in the model). Default is all values
   // included → all toggles OFF in the UI.
@@ -1469,6 +1474,10 @@ function syncLayoutVisibility() {
   if (excludeKnownMorphsToggle) excludeKnownMorphsToggle.style.display = isParsingMode() ? 'flex' : 'none';
   const parsingReverseToggle = document.getElementById('parsingReverseToggle');
   if (parsingReverseToggle) parsingReverseToggle.style.display = isParsingMode() ? 'flex' : 'none';
+  // Accent/breathing look-alike distractors only do anything in the reverse
+  // drill, so the toggle only shows once English → Greek is on.
+  const accentLookalikeToggle = document.getElementById('accentLookalikeToggle');
+  if (accentLookalikeToggle) accentLookalikeToggle.style.display = (isParsingMode() && runtime.parsingReverse) ? 'flex' : 'none';
   // Spaced repetition writes confidence stats — parsing mode is explicitly
   // off-the-record, so the toggle is irrelevant there and gets hidden.
   if (spacedToggle) spacedToggle.style.display = (reviewDeckMode && !isParsingMode()) ? 'flex' : 'none';
@@ -2730,7 +2739,7 @@ const GLOBAL_CLICK_HANDLERS = {
   restoreSpacedUndo, setAppProfile, setStudyMode, setThemeMode, setFontFamily, setTextSize,
   showDisclaimerModal, startStudying, toggleDirection, toggleMorphSelfCheck,
   toggleMorphStepByStep, setMorphFocusedParadigm, setParsingChapter, goToStemDrillFromParsing,
-  toggleRequiredOnly, toggleHardVocabReview, toggleShuffle, toggleSpacedRepetition, toggleSplitSelection, toggleAspectStep, toggleDimStep, toggleOptionalForms, toggleOptionalFormFilter, toggleDimValueFilter, toggleExcludeKnownMorphs, toggleParsingReverse, resetKnownMorphs, closeResetKnownModal, confirmResetKnownFocused, confirmResetKnownAll, clearParsingStats, toggleUnspacedDailyReset, triggerImportProgress,
+  toggleRequiredOnly, toggleHardVocabReview, toggleShuffle, toggleSpacedRepetition, toggleSplitSelection, toggleAspectStep, toggleDimStep, toggleOptionalForms, toggleOptionalFormFilter, toggleDimValueFilter, toggleExcludeKnownMorphs, toggleParsingReverse, toggleAccentLookalikes, resetKnownMorphs, closeResetKnownModal, confirmResetKnownFocused, confirmResetKnownAll, clearParsingStats, toggleUnspacedDailyReset, triggerImportProgress,
   openReaderTab, selectReaderDrillChoice, advanceReaderDrill,
   closeWhatsNewV1_5Modal
 };

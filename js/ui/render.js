@@ -8,7 +8,7 @@
 import { runtime } from '../state/runtime.js';
 import { buildGrammarSupportHtml } from '../domain/grammar/explanations.js';
 import { renderProgress, renderReview } from './progress.js';
-import { buildMorphSteps, summarizeLemmaStats, getParadigmStepAttemptWindow, computeAccessibleDimensionPools, parseAnswerDimensions, aspectMistakeNote, isSecondPluralPresentMoodAmbiguity, computeParadigmPresentValues } from '../domain/grammar/morph_steps.js';
+import { buildMorphSteps, summarizeLemmaStats, getParadigmStepAttemptWindow, computeAccessibleDimensionPools, parseAnswerDimensions, aspectMistakeNote, isSecondPluralPresentMoodAmbiguity, computeParadigmPresentValues, accentLookalikesFor } from '../domain/grammar/morph_steps.js';
 import { getAccessibleMorphCards, deriveSelectionLevels, buildMultiGenderLemmas, MIXED_FORM_NOUN_LEMMAS } from '../domain/grammar/paradigm_focus.js';
 
 let host = {
@@ -1315,6 +1315,22 @@ function ensureReverseChoices(card) {
   const targetKey = reverseParseKey(card, enabledDims);
   const seenForms = new Set([String(correctForm).trim()]);
   const distractors = [];
+  let lookalikeNote = '';
+  // Accent / breathing look-alike distractor (toggle-optional, off by default):
+  // a curated twin that differs from the tested form only by accent/breathing
+  // and is a different word. Added before the pool distractors so it survives
+  // the 3-distractor cap, and never via the pool's same-parse filter (its whole
+  // point is that it shares the dimensions but not the spelling).
+  if (runtime.accentLookalikes) {
+    for (const twin of accentLookalikesFor(correctForm)) {
+      if (distractors.length >= 3) break;
+      const tform = String(twin.form).trim();
+      if (!tform || seenForms.has(tform)) continue;
+      seenForms.add(tform);
+      distractors.push(twin.form);
+      if (!lookalikeNote) lookalikeNote = twin.note;
+    }
+  }
   shuffleInPlace([...pool]).forEach((c) => {
     if (distractors.length >= 3) return;
     if (!c || !c.form) return;
@@ -1325,7 +1341,7 @@ function ensureReverseChoices(card) {
     distractors.push(c.form);
   });
   const options = shuffleInPlace([correctForm, ...distractors]);
-  const state = { cardId: card.id, options, correctForm };
+  const state = { cardId: card.id, options, correctForm, lookalikeNote };
   runtime.parsingReverseState = state;
   return state;
 }
@@ -1333,7 +1349,7 @@ function ensureReverseChoices(card) {
 function renderParsingReverseCard(area, card) {
   const enabledDims = host.getEnabledParsingDims();
   const parseLine = reverseParseLine(card, enabledDims);
-  const { options, correctForm } = ensureReverseChoices(card);
+  const { options, correctForm, lookalikeNote } = ensureReverseChoices(card);
   const answered = runtime.morphAnswerState.answered;
   const selectedIdx = runtime.morphAnswerState.selectedIndex;
 
@@ -1362,11 +1378,18 @@ function renderParsingReverseCard(area, card) {
     const glossLine = (card.gloss || card.lemmaGloss)
       ? `<div class="morph-gloss">Gloss: “${escapeHtml(card.gloss || card.lemmaGloss)}”</div>`
       : '';
+    // When an accent/breathing look-alike was offered, name the distinction
+    // after the answer (whether they hit or missed) so the spelling contrast
+    // is reinforced.
+    const lookalikeHtml = lookalikeNote
+      ? `<div class="morph-step-ambig-note"><span class="morph-step-ambig-label">Accent / breathing</span> ${escapeHtml(lookalikeNote)}</div>`
+      : '';
     resultHtml = `<div class="morph-result ${isCorrect ? 'correct' : 'incorrect'}">
         <div class="morph-result-title">${isCorrect ? 'Correct' : 'Not quite'}</div>
         <div class="morph-result-body">${escapeHtml(parseLine)} = ${escapeHtml(correctForm)}</div>
         <div class="morph-result-meta">${escapeHtml(card.lemma || '')}${card.family ? ` · ${escapeHtml(card.family)}` : ''}</div>
         ${glossLine}
+        ${lookalikeHtml}
       </div>`;
   }
 
