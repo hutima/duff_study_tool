@@ -230,6 +230,16 @@
       // would otherwise discard the whole form, leaving its parse with no
       // resolvable Greek form (the "your parse → —" bug).
       form = form.replace(/\s*\(\s*or\b[^)]*\)\s*$/i, '').trim();
+      // Some cards give two equally-valid spellings separated by a slash —
+      // an accented and an enclitic pronoun (ἐμέ / με, ἐμοῦ / μου, ἐμοί /
+      // μοι) or a movable-ν verb pair (λύουσιν / λύουσι, ἐστιν / ἐστί). Key
+      // parsing on the primary (first) form and drop the alternate, exactly
+      // as with the "(or …)" case above. Without this the embedded spaces
+      // trip the multi-word filter below and the whole form is discarded,
+      // leaving its parse with no resolvable Greek form (the "your parse →
+      // —" bug — e.g. picking 1st-person singular on ἡμᾶς couldn't surface
+      // ἐμέ because that form had been dropped from the paradigm).
+      if (form.includes('/')) form = form.split('/')[0].trim();
       if (!form) return;
       if (seenForms.has(form)) return;
       // Multi-word "forms" — principal-parts cards like
