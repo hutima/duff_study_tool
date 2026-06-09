@@ -401,7 +401,10 @@ export function renderCard() {
   // Prepositions that govern more than one case get a star on both faces as a
   // reminder that the meaning depends on the case of the object.
   const prepStar = host.isMultiCasePreposition(card) ? '★ ' : '';
-  const greekDisplay = `${prepStar}${host.formatGreekHeadword(card.g)}${verbStemInlineHtml(card)}`;
+  // A card carries at most one inline stem: the verbal stem for second-aorist /
+  // liquid-future verbs, or the third-declension noun stem (never both).
+  const stemInline = verbStemInlineHtml(card) || nounStemInlineHtml(card);
+  const greekDisplay = `${prepStar}${host.formatGreekHeadword(card.g)}${stemInline}`;
   const englishDisplay = `${prepStar}${card.e || '—'}`;
   const requiredLabelHTML = `<span class="card-required-label card-required-label-${card.required ? 'req' : 'opt'}">(${card.required ? 'req.' : 'opt.'})</span>`;
   // Second-aorist / liquid-future verbs get their aorist and/or future forms
@@ -667,6 +670,35 @@ function verbStemAltHtml(card) {
 function verbStemInlineHtml(card) {
   if (!card || card.advanced || card.supplemental || card.stemFlip) return '';
   const stem = getVerbStemByLemma()[card.g];
+  return stem ? `<span class="card-stem-inline">, ${escapeHtml(stem)}</span>` : '';
+}
+
+// Bare third-declension noun stem (e.g. σαρκ-) derived from a headword that
+// prints its full genitive singular ("σάρξ, σαρκός, ἡ") — Duff's rule: the
+// stem is the genitive singular minus -ος. Only full consonant-stem genitives
+// qualify; the abbreviated ch. 13 contract tails ("-εως", "-ους") yield ''
+// since their bare stem never surfaces uncontracted in a real form. Pitch
+// accents (acute/grave/circumflex) are stripped so the stem prints unaccented
+// like the verbal stems; breathing marks are kept (σωτῆρος → σωτηρ-,
+// ὕδατος → ὑδατ-).
+function thirdDeclensionStemFromHeadword(greek) {
+  // Mirrors pos_logic's primary "<nom>, <gen>, <article>" nominal pattern —
+  // the only shape full third-declension genitives are written in.
+  const m = String(greek || '').match(/^.*?,\s*([^,]+),\s*(?:ὁ|ἡ|τό)$/u);
+  const gen = m ? m[1].trim() : '';
+  if (!gen || gen.startsWith('-')) return '';
+  const bare = gen.normalize('NFD').replace(/[\u0300\u0301\u0342]/g, '').normalize('NFC');
+  return bare.endsWith('ος') ? `${bare.slice(0, -2)}-` : '';
+}
+
+// Inline noun-stem suffix (", νυκτ-") for a standard chapter-vocab
+// third-declension noun — the same smaller muted treatment the verb cards
+// give their verbal stem, so νύξ is read together with the νυκτ- its other
+// cases are built on. Returns '' for supplemental/advanced/flip cards and
+// for headwords without a full genitive in -ος.
+function nounStemInlineHtml(card) {
+  if (!card || card.advanced || card.supplemental || card.stemFlip) return '';
+  const stem = thirdDeclensionStemFromHeadword(card.g);
   return stem ? `<span class="card-stem-inline">, ${escapeHtml(stem)}</span>` : '';
 }
 
