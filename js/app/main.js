@@ -2377,14 +2377,21 @@ function getMorphSpacedOutcome(card, isCorrect) {
 }
 
 function answerMorphologyChoice(choiceIndex) {
-  if (!isMorphologyMode()) return;
-  noteStudyInteraction();
+  // Multiple-choice answers are only valid in quiz mode; in self-check mode
+  // the choices are hidden, so grading against them (e.g. from the 1-4
+  // keyboard shortcuts) would silently mark the card against an invisible
+  // option.
+  if (!isMorphologyMode() || runtime.morphSelfCheck) return;
   const card = runtime.deck[runtime.currentIdx];
   if (!card || runtime.morphAnswerState.answered) return;
 
   const reversed = reverseDisplayActive(card);
   const choices = reversed ? card.reverseChoices : card.choices;
   if (!Array.isArray(choices)) return;
+  // An out-of-range index (a digit key beyond the rendered options) must be
+  // ignored, not graded as a wrong answer against `undefined`.
+  if (!Number.isInteger(choiceIndex) || choiceIndex < 0 || choiceIndex >= choices.length) return;
+  noteStudyInteraction();
 
   captureSpacedUndoSnapshot();
 
@@ -2715,11 +2722,13 @@ installKeyboardShortcuts({
   isStudySelectorOpen, closeStudySelector,
   isShortcutsModalOpen, closeShortcutsModal,
   isWhatsNewV1_5ModalOpen, closeWhatsNewV1_5Modal,
-  isDisclaimerModalOpen, isTransferModalOpen,
+  isDisclaimerModalOpen, isTransferModalOpen, closeTransferModal,
   isReviewDeckMode,
   getSelectedKeys: () => runtime.selectedKeys,
   isMorphologyMode,
-  navigate, answerMorphologyChoice, flipCard, markCard
+  isMorphSelfCheck: () => !!runtime.morphSelfCheck,
+  navigate, answerMorphologyChoice, revealMorphologyAnswer, rateMorphologySelfCheck,
+  flipCard, markCard
 });
 
 // ═══════════════════════════════════════════════════════
