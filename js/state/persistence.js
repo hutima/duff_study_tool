@@ -273,6 +273,7 @@ export function buildPersistedStatePayload(options = {}) {
     parsingChapter: runtime.parsingChapter,
     paradigmStepStats: runtime.paradigmStepStats,
     aspectStep: runtime.aspectStep,
+    stemNotes: runtime.stemNotes,
     dimToggles: runtime.dimToggles,
     dimValueFilters: runtime.dimValueFilters,
     includeOptionalForms: runtime.includeOptionalForms,
@@ -348,6 +349,8 @@ function sanitizeImportedState(candidate) {
   state.paradigmStepStats = sanitizeParadigmStepStats(candidate.paradigmStepStats);
   // aspectStep defaults to true; only an explicit `false` flips it off.
   state.aspectStep = candidate.aspectStep !== false;
+  // Same default-true contract for the vocab-card stem/declension notes.
+  state.stemNotes = candidate.stemNotes !== false;
   // Per-dim toggles default to true. Missing keys (e.g. an older import
   // predating this field) hydrate to true so existing decks keep
   // drilling every dim as before.
@@ -1094,6 +1097,7 @@ export function restoreState() {
     }
     runtime.paradigmStepStats = sanitizeParadigmStepStats(saved.paradigmStepStats);
     runtime.aspectStep = saved.aspectStep !== false;
+    runtime.stemNotes = saved.stemNotes !== false;
     const DIM_TOGGLE_KEYS = ['tense', 'voice', 'mood', 'person', 'number', 'case', 'gender'];
     const savedDt = (saved.dimToggles && typeof saved.dimToggles === 'object') ? saved.dimToggles : {};
     runtime.dimToggles = {};
