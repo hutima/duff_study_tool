@@ -274,6 +274,7 @@ export function buildPersistedStatePayload(options = {}) {
     paradigmStepStats: runtime.paradigmStepStats,
     aspectStep: runtime.aspectStep,
     stemNotes: runtime.stemNotes,
+    secondAoristCards: runtime.secondAoristCards,
     dimToggles: runtime.dimToggles,
     dimValueFilters: runtime.dimValueFilters,
     includeOptionalForms: runtime.includeOptionalForms,
@@ -351,6 +352,8 @@ function sanitizeImportedState(candidate) {
   state.aspectStep = candidate.aspectStep !== false;
   // Same default-true contract for the vocab-card stem/declension notes.
   state.stemNotes = candidate.stemNotes !== false;
+  // Second-aorists-as-cards defaults off; only an explicit `true` enables it.
+  state.secondAoristCards = candidate.secondAoristCards === true;
   // Per-dim toggles default to true. Missing keys (e.g. an older import
   // predating this field) hydrate to true so existing decks keep
   // drilling every dim as before.
@@ -1098,6 +1101,7 @@ export function restoreState() {
     runtime.paradigmStepStats = sanitizeParadigmStepStats(saved.paradigmStepStats);
     runtime.aspectStep = saved.aspectStep !== false;
     runtime.stemNotes = saved.stemNotes !== false;
+    runtime.secondAoristCards = saved.secondAoristCards === true;
     const DIM_TOGGLE_KEYS = ['tense', 'voice', 'mood', 'person', 'number', 'case', 'gender'];
     const savedDt = (saved.dimToggles && typeof saved.dimToggles === 'object') ? saved.dimToggles : {};
     runtime.dimToggles = {};
