@@ -104,13 +104,19 @@ export function getSelectedVocabCards(keys, requiredFlag = false) {
 
 // Second-aorist expansion (the "Second aorists as cards" advanced toggle):
 // for every standard chapter-vocab verb with a recorded second aorist in the
-// W4 flip set, insert a standalone card for the aorist form right after its
-// present-stem parent (e.g. εἶπον "I said" after λέγω). The derived card
-// keeps the parent's set metadata and required flag so required-only and
-// hard-review scoping treat the pair alike, and gets a stable `::2aor` id
-// suffix for deck mechanics — while its stats land on the parent's progress
-// entry via progressCardId above. Supplemental, advanced, and flip cards are
-// left alone — same rule as the render-side stem annotations.
+// W4 flip set, add a standalone card for the aorist form (e.g. εἶπον "I said"
+// for λέγω). The derived card keeps the parent's set metadata and required
+// flag so required-only and hard-review scoping treat the pair alike, and
+// gets a stable `::2aor` id suffix for deck mechanics — while its stats land
+// on the parent's progress entry via progressCardId above. Supplemental,
+// advanced, and flip cards are left alone — same rule as the render-side
+// stem annotations.
+//
+// Placement: each aorist is woven into its own chapter's run of cards about
+// half the run away from its present-stem parent (circularly), not appended
+// right after it — back-to-back the present gives the aorist away in an
+// unshuffled deck. The offset is deterministic, so the unshuffled order is
+// stable across rebuilds; shuffled decks randomize it anyway.
 export function expandSecondAoristCards(cards) {
   if (!Array.isArray(cards) || !cards.length) return cards || [];
   const flip = window.SUPPLEMENTAL_VOCAB_SETS && window.SUPPLEMENTAL_VOCAB_SETS.W4_SECOND_AORIST_FLIP;
@@ -121,20 +127,42 @@ export function expandSecondAoristCards(cards) {
     if (c && c.stemFlip && c.g && c.aorist) byLemma[c.g] = c;
   }
   const out = [];
+  // Current contiguous same-sourceKey run, plus the aorists derived from it
+  // (with each parent's index within the run) awaiting placement.
+  let run = [];
+  let runKey;
+  let pending = [];
+  const flushRun = () => {
+    pending.forEach(({ card, parentIdx }) => {
+      const target = (parentIdx + Math.ceil(run.length / 2)) % (run.length + 1);
+      run.splice(target, 0, card);
+    });
+    out.push(...run);
+    run = [];
+    pending = [];
+  };
   cards.forEach(card => {
-    out.push(card);
+    const key = card ? card.sourceKey : undefined;
+    if (run.length && key !== runKey) flushRun();
+    runKey = key;
+    const parentIdx = run.length;
+    run.push(card);
     if (!card || card.advanced || card.supplemental || card.stemFlip || card.secondAoristOf) return;
     const entry = byLemma[card.g];
     if (!entry) return;
-    out.push({
-      ...card,
-      g: entry.aorist,
-      e: entry.aoristGloss || card.e,
-      secondAoristOf: card.g,
-      secondAoristStem: entry.stem || '',
-      id: `${card.id}${SECOND_AORIST_ID_SUFFIX}`
+    pending.push({
+      parentIdx,
+      card: {
+        ...card,
+        g: entry.aorist,
+        e: entry.aoristGloss || card.e,
+        secondAoristOf: card.g,
+        secondAoristStem: entry.stem || '',
+        id: `${card.id}${SECOND_AORIST_ID_SUFFIX}`
+      }
     });
   });
+  flushRun();
   return out;
 }
 
