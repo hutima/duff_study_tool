@@ -166,6 +166,21 @@ export function expandSecondAoristCards(cards) {
   return out;
 }
 
+// Which face of a shared base/second-aorist progress entry a card is:
+// 'aorist' for the derived `::2aor` card, 'present' for a base chapter-vocab
+// verb that has one (same eligibility rule as the expansion above), null for
+// every other card — those have no sibling face and no shared-entry concern.
+// The spaced scheduler uses this to grade the shared entry by its weaker
+// face (see resolveSharedFaceOutcome in js/app/main.js).
+export function secondAoristFaceKey(card) {
+  if (!card) return null;
+  if (card.secondAoristOf || String(card.id || '').endsWith(SECOND_AORIST_ID_SUFFIX)) return 'aorist';
+  if (card.advanced || card.supplemental || card.stemFlip) return null;
+  const flip = window.SUPPLEMENTAL_VOCAB_SETS && window.SUPPLEMENTAL_VOCAB_SETS.W4_SECOND_AORIST_FLIP;
+  const flipCards = flip && Array.isArray(flip.cards) ? flip.cards : [];
+  return flipCards.some(c => c && c.stemFlip && c.aorist && c.g === card.g) ? 'present' : null;
+}
+
 export function getSelectedGrammarCards(keys) {
   const morphCards = window.buildMorphologyCardsForKeys ? window.buildMorphologyCardsForKeys(keys || []) : [];
   const grammarCards = window.buildGrammarCardsForKeys ? window.buildGrammarCardsForKeys(keys || []) : [];
