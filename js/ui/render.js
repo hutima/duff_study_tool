@@ -423,6 +423,11 @@ export function renderCard() {
   // Verbs with irregular principal parts get them in one small bracketed line
   // under the Greek headword (2 aor. / fut. / aor. pass. / pf.).
   const verbStemAltHTML = notesOn ? verbStemAltHtml(card, maxCh) : '';
+  // On a standalone second-aorist card ("Second aorists as cards" toggle)
+  // that line reads "2 aor. of [parent]" — and the parent's present stem IS
+  // the answer being drilled, so it must not appear until the flip. Question
+  // face gets nothing; the back keeps the full line as the reveal payoff.
+  const verbStemAltQuestionHTML = card.secondAoristOf ? '' : verbStemAltHTML;
   // Third-declension nouns carry a "declines like σάρξ" pointer in the hint
   // line of the Greek-bearing face, anchoring each noun to its model paradigm.
   const declModelTag = notesOn ? nounDeclensionModelSuffix(card, maxCh) : '';
@@ -488,7 +493,7 @@ export function renderCard() {
           ${requiredLabelHTML}
           <span class="card-label">Greek</span>
           <div class="card-greek">${greekDisplay}</div>
-          ${verbStemAltHTML}
+          ${verbStemAltQuestionHTML}
           <div class="card-hint">${sourceLabelDisplay}${declModelTag}</div>
           <div class="flip-hint">click to reveal →</div>
         </div>`;
