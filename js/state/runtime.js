@@ -44,10 +44,11 @@ export const runtime = {
   // all-paradigms summary row, or null when nothing is expanded.
   analyticsParadigmExpanded: null,
   parsingReviewExpanded: null,
-  // Sort order of the per-deck progress card list. Defaults to alphabetical
-  // because that's the predictable "find a word" lookup; confidence flips it
-  // to lowest-raw-pct-first for the "what should I drill next" view.
-  reviewSortMode: 'alphabetical', // 'alphabetical' | 'confidence'
+  // Sort order of the per-deck progress card list. Defaults to last-seen
+  // (most recently reviewed first) so the words just studied sit on top;
+  // alphabetical is the predictable "find a word" lookup, and confidence
+  // flips it to lowest-raw-pct-first for the "what should I drill next" view.
+  reviewSortMode: 'lastSeen', // 'lastSeen' | 'alphabetical' | 'confidence'
   // Word IDs currently expanded inside the stubborn / improved / slipping
   // lists. Keyed by the list's collapseKey so each list tracks its own
   // expansion independently — opening a row in "Most stubborn" doesn't
