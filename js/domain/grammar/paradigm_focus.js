@@ -270,7 +270,15 @@ function sourcePassesLevel(sourceKey, levels) {
 // extension content). choices/reverseChoices are left as the single-item
 // arrays the form-lookup feedback uses; the parsing walk doesn't read
 // these.
-function buildOptionalMorphCardsForLemma(lemma, levels, filters) {
+// `select` partitions the lemma's optionalFormGroups:
+//   'core'  — only groups tagged `core: true` (participle declensions that
+//             are required curriculum; included regardless of the toggle).
+//   'extra' — only non-core groups (subjunctives, perfect/future
+//             participles, etc.; included only under the toggle).
+//   'all'   — every group (legacy callers).
+// Core groups bypass the per-category optional filters — those filters
+// belong to the optional drill pool, and core forms are no longer optional.
+function buildOptionalMorphCardsForLemma(lemma, levels, filters, select = 'all') {
   if (!lemma || !levels || levels.maxEffectiveChapter == null) return [];
   const inv = (typeof window !== 'undefined' && window.LEMMA_INVENTORY)
     ? window.LEMMA_INVENTORY[lemma]
@@ -297,13 +305,16 @@ function buildOptionalMorphCardsForLemma(lemma, levels, filters) {
   const out = [];
   inv.optionalFormGroups.forEach((group, groupIdx) => {
     if (!group || !group.forms || typeof group.chapter !== 'number') return;
+    const isCore = !!group.core;
+    if (select === 'core' && !isCore) return;
+    if (select === 'extra' && isCore) return;
     if (group.chapter > levels.maxEffectiveChapter) return;
     const sourceKey = `OPT_${group.chapter}`;
     const sourceLabel = group.family || `${lemma} — optional (ch ${group.chapter})`;
     const entries = Object.entries(group.forms);
     entries.forEach(([form, parsedAnswer], formIdx) => {
       if (!form || !parsedAnswer) return;
-      if (!filterCard(parsedAnswer)) return;
+      if (!isCore && !filterCard(parsedAnswer)) return;
       out.push({
         id: `morph-OPT-${stableMorphKey(lemma)}-${group.chapter}-${groupIdx}-${formIdx}-${stableMorphKey(form)}`,
         kind: 'morph',
@@ -449,18 +460,23 @@ export function getCardsForFocusedParadigm(selectedKeys, focusedLemma, options =
     return set.items.some((item) => item && item.lemma === focusedLemma);
   });
 
-  // Optional paradigm extensions: when the user has toggled them on in
-  // settings, append synthetic cards for any LEMMA_INVENTORY group whose
-  // chapter gate is in scope. Doing this BEFORE the per-form dedup means
-  // an extension form that happens to collide with a Duff-curriculum form
-  // (rare — extensions exist precisely because the curriculum doesn't
-  // drill them) collapses to the richer-parse winner like any other
-  // duplicate. When the toggle is off, no extension cards are added —
-  // but the fallback form-lookup in render.js still consults
-  // LEMMA_INVENTORY.extraForms, so wrong-pick feedback stays canonical.
-  const optionalCards = options.includeOptional
-    ? buildOptionalMorphCardsForLemma(focusedLemma, levels, options.optionalFilters)
+  // Optional paradigm extensions: synthesize cards from LEMMA_INVENTORY
+  // groups whose chapter gate is in scope. Two tiers:
+  //   - Core groups (participle declensions — Duff Ch 14) are required
+  //     curriculum, so they enter the pool unconditionally.
+  //   - Extra groups (subjunctives, perfect/future participles, εἰμί's
+  //     deponent future participle, etc.) are off-textbook and only join
+  //     when the "Optional paradigm" toggle is on.
+  // Doing this BEFORE the per-form dedup means an extension form that
+  // happens to collide with a Duff-curriculum form (rare) collapses to the
+  // richer-parse winner like any other duplicate. The fallback form-lookup
+  // in render.js still consults LEMMA_INVENTORY.extraForms regardless, so
+  // wrong-pick feedback stays canonical even for toggle-off extras.
+  const coreOptionalCards = buildOptionalMorphCardsForLemma(focusedLemma, levels, options.optionalFilters, 'core');
+  const extraOptionalCards = options.includeOptional
+    ? buildOptionalMorphCardsForLemma(focusedLemma, levels, options.optionalFilters, 'extra')
     : [];
+  const optionalCards = coreOptionalCards.concat(extraOptionalCards);
 
   if (!eligibleSourceKeys.length && !optionalCards.length) return [];
   const drilledCards = eligibleSourceKeys.length
