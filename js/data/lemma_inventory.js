@@ -52,12 +52,21 @@
   // chapter gate the toggle is supposed to respect.
   const PARTICIPLE_DECLENSION_CHAPTER = 14;
 
-  // Splits a participle declension into chapter-gated optional groups:
+  // Splits a participle declension into chapter-gated groups:
   // the nominative-singular rows (all genders, incl. the syncretic
   // "nominative/accusative singular neuter" slot) stay drillable at the
   // early `introChapter`, while every other case/number form waits for
   // Ch 14 (or `introChapter` itself, whichever is later).
-  function participleOptionalGroups(introChapter, familyBase, forms) {
+  //
+  // By default these groups are tagged `core: true` — the present/aorist
+  // active & middle participle declensions are required curriculum (Duff
+  // teaches the participle paradigm in Ch 14), so parsing pulls them into
+  // the pool regardless of the "Optional paradigm" toggle. Pass
+  // `{ core: false }` for genuinely off-textbook participles (e.g. εἰμί's
+  // deponent future participle) that should stay behind the toggle.
+  function participleOptionalGroups(introChapter, familyBase, forms, opts = {}) {
+    const core = opts.core !== false;
+    const tag = core ? 'required' : 'optional';
     const nomSg = {};
     const rest = {};
     Object.entries(forms).forEach(([form, parse]) => {
@@ -68,14 +77,16 @@
     if (Object.keys(nomSg).length) {
       groups.push({
         chapter: introChapter,
-        family: `${familyBase} — nominative singular (optional)`,
+        family: `${familyBase} — nominative singular (${tag})`,
+        core,
         forms: nomSg
       });
     }
     if (Object.keys(rest).length) {
       groups.push({
         chapter: Math.max(introChapter, PARTICIPLE_DECLENSION_CHAPTER),
-        family: `${familyBase} — full declension (optional)`,
+        family: `${familyBase} — full declension (${tag})`,
+        core,
         forms: rest
       });
     }
@@ -148,7 +159,7 @@
     { chapter: 8, family: 'εἰμί — future middle infinitive (optional)',
       forms: EIMI_FUTURE_MIDDLE_INFINITIVE },
     ...participleOptionalGroups(8, 'εἰμί — future middle participle',
-      EIMI_FUTURE_MIDDLE_PARTICIPLE)
+      EIMI_FUTURE_MIDDLE_PARTICIPLE, { core: false })
   ];
 
   // ─── λύω (model regular ω-verb) ────────────────────────────────────
