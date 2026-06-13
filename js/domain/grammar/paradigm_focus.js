@@ -219,8 +219,14 @@ function sourceLevel(sourceKey) {
   const weekMatch = str.match(/^W(\d+)_/);
   if (weekMatch) {
     const wk = Number(weekMatch[1]);
+    // A set may carry an explicit `chapter` when its material is introduced
+    // later in the week than the week's first chapter — e.g. the participle
+    // paradigms live in week 5 (Ch 12–14) but Duff doesn't teach them until
+    // Ch 14, so they must not unlock with the rest of week 5 at Ch 12.
+    const set = safeMorphSets()[str];
+    const explicit = set && Number.isInteger(set.chapter) ? set.chapter : null;
     const firstCh = WEEK_FIRST_CHAPTER[wk];
-    return { kind: 'week', week: wk, effectiveChapter: firstCh || (wk * 2 - 1) };
+    return { kind: 'week', week: wk, effectiveChapter: explicit != null ? explicit : (firstCh || (wk * 2 - 1)) };
   }
   // OPT_<chapter>[_<suffix>] — synthetic source key for optional paradigm
   // forms injected from LEMMA_INVENTORY.optionalFormGroups when the user

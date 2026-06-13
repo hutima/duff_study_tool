@@ -304,6 +304,7 @@
     return {
       label: set.label || key,
       week: set.week ?? null,
+      chapter: Number.isInteger(set.chapter) ? set.chapter : null,
       items: [
         {
           family: set.label || key,
