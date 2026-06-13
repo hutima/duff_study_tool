@@ -45,6 +45,43 @@
 // hasn't introduced it yet.
 
 (function () {
+  // Duff's dedicated participle chapter (Ch 14). Before it the textbook
+  // shows participles only at recognition level — bare nominative-
+  // singular stem shapes like ὤν or βαλών — so a full case/number
+  // declension landing in the optional drill pool any earlier breaks the
+  // chapter gate the toggle is supposed to respect.
+  const PARTICIPLE_DECLENSION_CHAPTER = 14;
+
+  // Splits a participle declension into chapter-gated optional groups:
+  // the nominative-singular rows (all genders, incl. the syncretic
+  // "nominative/accusative singular neuter" slot) stay drillable at the
+  // early `introChapter`, while every other case/number form waits for
+  // Ch 14 (or `introChapter` itself, whichever is later).
+  function participleOptionalGroups(introChapter, familyBase, forms) {
+    const nomSg = {};
+    const rest = {};
+    Object.entries(forms).forEach(([form, parse]) => {
+      if (/nominative(?:\/accusative)? singular/.test(parse)) nomSg[form] = parse;
+      else rest[form] = parse;
+    });
+    const groups = [];
+    if (Object.keys(nomSg).length) {
+      groups.push({
+        chapter: introChapter,
+        family: `${familyBase} — nominative singular (optional)`,
+        forms: nomSg
+      });
+    }
+    if (Object.keys(rest).length) {
+      groups.push({
+        chapter: Math.max(introChapter, PARTICIPLE_DECLENSION_CHAPTER),
+        family: `${familyBase} — full declension (optional)`,
+        forms: rest
+      });
+    }
+    return groups;
+  }
+
   // εἰμί's future middle participle (ἐσόμενος, -ομένη, -όμενον). Declines
   // like λυόμενος. Pedagogically rare — Duff drills only the present
   // participle (ὤν / ὄντες) — but the future participle exists in Koine,
@@ -99,18 +136,19 @@
 
   // εἰμί's optional-drill groups. Chapter gates:
   // - Ch 7: present imperative (imperative mood is introduced in Ch 7).
-  // - Ch 8: future middle infinitive + future middle participle
-  //   (W3_EIMI_COMPLETE introduces the future at ch 8 and the student
-  //   knows εἰμί's infinitive/participle via W3_EIMI_INFINITIVE_PARTICIPLE
-  //   from the same week, so the future-extension of those moods is in
-  //   foundational scope).
+  // - Ch 8: future middle infinitive + the future participle's nominative
+  //   singular (W3_EIMI_COMPLETE introduces the future at ch 8 and the
+  //   student knows εἰμί's participle via W3_EIMI_INFINITIVE_PARTICIPLE
+  //   from the same week — but only as ὤν / ὄντες recognition forms, so
+  //   the participle's full declension waits for Ch 14 via
+  //   participleOptionalGroups).
   const EIMI_OPTIONAL_GROUPS = [
     { chapter: 7, family: 'εἰμί — present active imperative (optional)',
       forms: EIMI_PRESENT_ACTIVE_IMPERATIVE },
     { chapter: 8, family: 'εἰμί — future middle infinitive (optional)',
       forms: EIMI_FUTURE_MIDDLE_INFINITIVE },
-    { chapter: 8, family: 'εἰμί — future middle participle (optional)',
-      forms: EIMI_FUTURE_MIDDLE_PARTICIPLE }
+    ...participleOptionalGroups(8, 'εἰμί — future middle participle',
+      EIMI_FUTURE_MIDDLE_PARTICIPLE)
   ];
 
   // ─── λύω (model regular ω-verb) ────────────────────────────────────
@@ -1537,21 +1575,22 @@
   };
 
   // Optional groups for the participle additions. Chapter gates:
-  // - Aorist participles (γενόμενος, βαλών): ch 12 (W5 — when aorist
-  //   participles are introduced via λύσας).
+  // - Aorist participles (γενόμενος, βαλών): nominative singulars at
+  //   ch 12 (W5 — when the participle stems first show up), the rest of
+  //   each declension at ch 14 (Duff's participle chapter) via
+  //   participleOptionalGroups.
   // - Perfect participles (γεγονώς, λελυκώς, λελυμένος): ch 15 (W6 —
-  //   when the perfect system is introduced + ch 12 participles
-  //   already in scope; max(12,15)=15).
+  //   when the perfect system is introduced + ch 14 participles
+  //   already in scope; max(14,15)=15).
   const GINOMAI_PARTICIPLE_OPTIONAL = [
-    { chapter: 12, family: 'γίνομαι — aorist middle participle γενόμενος (optional)',
-      forms: GINOMAI_AORIST_MIDDLE_PARTICIPLE },
+    ...participleOptionalGroups(12, 'γίνομαι — aorist middle participle γενόμενος',
+      GINOMAI_AORIST_MIDDLE_PARTICIPLE),
     { chapter: 15, family: 'γίνομαι — perfect active participle γεγονώς (optional)',
       forms: GINOMAI_PERFECT_ACTIVE_PARTICIPLE }
   ];
-  const BALLO_PARTICIPLE_OPTIONAL = [
-    { chapter: 12, family: 'βάλλω — aorist active participle βαλών full declension (optional)',
-      forms: BALLO_AORIST_ACTIVE_PARTICIPLE }
-  ];
+  const BALLO_PARTICIPLE_OPTIONAL =
+    participleOptionalGroups(12, 'βάλλω — aorist active participle βαλών',
+      BALLO_AORIST_ACTIVE_PARTICIPLE);
   const LUO_PARTICIPLE_OPTIONAL = [
     { chapter: 15, family: 'λύω — perfect active participle λελυκώς (optional)',
       forms: LUO_PERFECT_ACTIVE_PARTICIPLE },
@@ -1591,14 +1630,12 @@
   const LAMBANO_AORIST_ACTIVE_PARTICIPLE = aoristActiveParticipleParadigm('λαβ');
   const LEIPO_AORIST_ACTIVE_PARTICIPLE   = aoristActiveParticipleParadigm('λιπ');
 
-  const LAMBANO_PARTICIPLE_OPTIONAL = [
-    { chapter: 12, family: 'λαμβάνω — aorist active participle λαβών full declension (optional)',
-      forms: LAMBANO_AORIST_ACTIVE_PARTICIPLE }
-  ];
-  const LEIPO_PARTICIPLE_OPTIONAL = [
-    { chapter: 12, family: 'λείπω — aorist active participle λιπών full declension (optional)',
-      forms: LEIPO_AORIST_ACTIVE_PARTICIPLE }
-  ];
+  const LAMBANO_PARTICIPLE_OPTIONAL =
+    participleOptionalGroups(12, 'λαμβάνω — aorist active participle λαβών',
+      LAMBANO_AORIST_ACTIVE_PARTICIPLE);
+  const LEIPO_PARTICIPLE_OPTIONAL =
+    participleOptionalGroups(12, 'λείπω — aorist active participle λιπών',
+      LEIPO_AORIST_ACTIVE_PARTICIPLE);
 
   // ─── μι-verb participle full declensions ──────────────────────────
   //
@@ -1767,26 +1804,27 @@
   };
 
   // Optional groups for the μι-verb participle additions. Chapter
-  // gates: present participles at ch 12 (W5 — participles introduced);
-  // aorist participles at ch 12 (same); perfect active participle at
+  // gates: present + aorist participle nominative singulars at ch 12
+  // (W5 — participle stems introduced), the rest of each declension at
+  // ch 14 via participleOptionalGroups; perfect active participle at
   // ch 15 (perfect intro at W6).
   const DIDOMI_PARTICIPLE_OPTIONAL = [
-    { chapter: 12, family: 'δίδωμι — present active participle διδούς full declension (optional)',
-      forms: DIDOMI_PRESENT_ACTIVE_PARTICIPLE },
-    { chapter: 12, family: 'δίδωμι — aorist active participle δούς full declension (optional)',
-      forms: DIDOMI_AORIST_ACTIVE_PARTICIPLE }
+    ...participleOptionalGroups(12, 'δίδωμι — present active participle διδούς',
+      DIDOMI_PRESENT_ACTIVE_PARTICIPLE),
+    ...participleOptionalGroups(12, 'δίδωμι — aorist active participle δούς',
+      DIDOMI_AORIST_ACTIVE_PARTICIPLE)
   ];
   const TITHEMI_PARTICIPLE_OPTIONAL = [
-    { chapter: 12, family: 'τίθημι — present active participle τιθείς full declension (optional)',
-      forms: TITHEMI_PRESENT_ACTIVE_PARTICIPLE },
-    { chapter: 12, family: 'τίθημι — aorist active participle θείς full declension (optional)',
-      forms: TITHEMI_AORIST_ACTIVE_PARTICIPLE }
+    ...participleOptionalGroups(12, 'τίθημι — present active participle τιθείς',
+      TITHEMI_PRESENT_ACTIVE_PARTICIPLE),
+    ...participleOptionalGroups(12, 'τίθημι — aorist active participle θείς',
+      TITHEMI_AORIST_ACTIVE_PARTICIPLE)
   ];
   const HISTEMI_PARTICIPLE_OPTIONAL = [
-    { chapter: 12, family: 'ἵστημι — present active participle ἱστάς full declension (optional)',
-      forms: HISTEMI_PRESENT_ACTIVE_PARTICIPLE },
-    { chapter: 12, family: 'ἵστημι — 2nd aorist active participle στάς full declension (optional)',
-      forms: HISTEMI_SECOND_AORIST_ACTIVE_PARTICIPLE },
+    ...participleOptionalGroups(12, 'ἵστημι — present active participle ἱστάς',
+      HISTEMI_PRESENT_ACTIVE_PARTICIPLE),
+    ...participleOptionalGroups(12, 'ἵστημι — 2nd aorist active participle στάς',
+      HISTEMI_SECOND_AORIST_ACTIVE_PARTICIPLE),
     { chapter: 15, family: 'ἵστημι — perfect active participle ἑστηκώς full declension (optional)',
       forms: HISTEMI_PERFECT_ACTIVE_PARTICIPLE }
   ];
@@ -1842,10 +1880,10 @@
   };
 
   const PHILEO_PARTICIPLE_OPTIONAL = [
-    { chapter: 12, family: 'φιλέω — present active participle φιλῶν full declension (optional)',
-      forms: PHILEO_PRESENT_ACTIVE_PARTICIPLE },
-    { chapter: 12, family: 'φιλέω — aorist active participle φιλήσας full declension (optional)',
-      forms: PHILEO_AORIST_ACTIVE_PARTICIPLE }
+    ...participleOptionalGroups(12, 'φιλέω — present active participle φιλῶν',
+      PHILEO_PRESENT_ACTIVE_PARTICIPLE),
+    ...participleOptionalGroups(12, 'φιλέω — aorist active participle φιλήσας',
+      PHILEO_AORIST_ACTIVE_PARTICIPLE)
   ];
 
   // ─── λύω future participles (active, middle, passive) ─────────────
