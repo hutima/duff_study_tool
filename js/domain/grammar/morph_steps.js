@@ -716,16 +716,28 @@ export function buildInferredStep(dimKey, accessiblePools) {
   };
 }
 
-// Chapter at which Duff formally introduces voice contrasts (the
-// active vs middle/passive distinction). Before this chapter the voice
-// step is suppressed for active-tagged cards, since the only voice
-// in scope is active and the step would be a no-info "pick active".
-// Non-active voice (the deponent middle/passive of ἔρχομαι etc.,
-// introduced ch 8/9) keeps the voice step regardless — the whole
-// point of teaching deponents is the middle/passive form/active meaning
-// contrast, so naming voice on those cards is on-curriculum even
-// before ch 15.
+// Chapter at which Duff makes voice a parsing decision. Before the gate
+// the voice step is suppressed (regardless of the card's own voice) and
+// the value is silently filled in for the form lookup, since the only
+// thing the step could ask is "pick active" or "name the voice of a
+// deponent" — neither of which Duff treats as a parse the student
+// commits to yet.
+//
+// The gate is form-type aware, because Duff introduces the voice
+// contrast for participles a chapter before the finite system:
+//   • Participles (Ch 14, "Participles") are taught across all voices at
+//     once — present active λύων vs. present mid/pass λυόμενος vs. aorist
+//     passive λυθείς — so distinguishing the voice IS the parse from Ch 14.
+//   • Finite verbs (Ch 15, "The Passive and Voices") only get the full
+//     active/middle/passive system — and the rule that a deponent's
+//     middle/passive form counts as functionally active — at Ch 15.
+// Gating both to 15 would hide voice exactly when a Ch-14 student starts
+// drilling middle/passive participles; gating both to 14 would wrongly
+// start asking "what voice is ἔρχεται?" for finite deponents a chapter
+// early. So participle cards use the earlier gate, everything else the
+// later one.
 const VOICE_INTRODUCED_AT_CHAPTER = 15;
+const VOICE_INTRODUCED_AT_CHAPTER_PARTICIPLE = 14;
 
 // Returns ordered dimension steps for this card. Each step:
 //   { key, label, correct, choices, displayChoices, displayCorrect }
@@ -796,18 +808,26 @@ export function buildMorphSteps(card, accessiblePools = null, options = {}) {
     // imperatives (e.g. "active imperative singular" with no "second person"
     // tag).
     if (dimKey === 'person' && dims.mood === 'imperative') continue;
-    // Voice step: gate on chapter regardless of card voice. Duff
-    // doesn't ask the student to choose a voice until ch 15, and the
-    // deponent forms covered at ch 8/9 are taught as functionally
-    // active (middle/passive in form, active in meaning) — so asking
-    // "what voice is ἔρχομαι?" at ch 9 is a question Duff doesn't
-    // expect a single right answer to. The voice gets silently filled
-    // in (skippedCorrect) so the form lookup still resolves; at ch 15+
-    // the step appears, with the deponent-accepts-active rule applied
-    // when the step is built below.
-    if (dimKey === 'voice' && maxChapter < VOICE_INTRODUCED_AT_CHAPTER) {
-      skippedCorrect[dimKey] = correct;
-      continue;
+    // Voice step: gate on chapter, with an earlier gate for participles.
+    // Duff doesn't ask the student to choose a voice for finite verbs
+    // until ch 15 — the deponent forms covered at ch 8/9 are taught as
+    // functionally active (middle/passive in form, active in meaning),
+    // so asking "what voice is ἔρχεται?" at ch 9 is a question Duff
+    // doesn't expect a single right answer to. Participles, though, are
+    // introduced at ch 14 across active / middle / passive at once
+    // (λύων / λυόμενος / λυθείς), so naming a participle's voice is the
+    // parse from ch 14. Below the relevant gate the voice gets silently
+    // filled in (skippedCorrect) so the form lookup still resolves; at
+    // or after it the step appears, with the deponent-accepts-active
+    // rule applied when the step is built below.
+    if (dimKey === 'voice') {
+      const voiceGateChapter = dims.mood === 'participle'
+        ? VOICE_INTRODUCED_AT_CHAPTER_PARTICIPLE
+        : VOICE_INTRODUCED_AT_CHAPTER;
+      if (maxChapter < voiceGateChapter) {
+        skippedCorrect[dimKey] = correct;
+        continue;
+      }
     }
     // Per-dim toggle: user-controlled opt-out. Off → step skipped, dim
     // doesn't contribute to stats, omitted from the parse summary; the
@@ -874,7 +894,8 @@ export function buildMorphSteps(card, accessiblePools = null, options = {}) {
     // Deponent voice handling. Duff treats deponent verbs (lemmas
     // ending in -μαι and εἰμί's future ἔσομαι family) as functionally
     // active even though the form is middle / middle-passive — so
-    // when voice IS asked (ch 15+), both 'active' and the formal
+    // when voice IS asked (ch 14+ for participles, ch 15+ otherwise),
+    // both 'active' and the formal
     // middle voice should grade as correct. Genuine passives
     // (voice='passive') stay strict: passive isn't active in meaning.
     if (dimKey === 'voice' && (correct === 'middle' || correct === 'middle/passive')) {

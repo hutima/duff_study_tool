@@ -19,11 +19,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Greek Cards">
-<link rel="manifest" href="manifest.json?v=246">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=246">
-<link rel="icon" type="image/svg+xml" href="favicon.svg?v=246">
+<link rel="manifest" href="manifest.json?v=247">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=247">
+<link rel="icon" type="image/svg+xml" href="favicon.svg?v=247">
 <title>Elementary NT Greek — Flashcards</title>
-<link rel="stylesheet" href="styles.css?v=246">
+<link rel="stylesheet" href="styles.css?v=247">
 <script>
 (function(){
   try {
@@ -217,7 +217,7 @@
           <span class="toggle-switch" id="dimValueFilter_tense_pluperfect_Btn" aria-hidden="true"></span>
         </button>
       </details>
-      <button class="toggle-label" id="voiceStepToggle" type="button" role="switch" aria-checked="true" onclick="toggleDimStep('voice')" title="Ask Voice as a parsing step. Off: skipped silently, doesn't count toward stats, omitted from the parse summary. (Also chapter-gated: voice step only appears from ch 15+, or earlier for deponent verbs.)">
+      <button class="toggle-label" id="voiceStepToggle" type="button" role="switch" aria-checked="true" onclick="toggleDimStep('voice')" title="Ask Voice as a parsing step. Off: skipped silently, doesn't count toward stats, omitted from the parse summary. (Also chapter-gated: voice step appears from ch 14 for participles, ch 15 for finite verbs — before then the voice is filled in silently.)">
         <span class="toggle-text">Voice step (parsing)</span>
         <span class="toggle-switch" id="voiceStepBtn" aria-hidden="true"></span>
       </button>
@@ -228,11 +228,11 @@
           <span class="toggle-switch" id="dimValueFilter_voice_active_Btn" aria-hidden="true"></span>
         </button>
         <button class="toggle-label" id="dimValueFilter_voice_middle_Toggle" type="button" role="switch" aria-checked="false" onclick="toggleDimValueFilter('voice','middle')" title="Middle/passive composite cards are excluded only when both middle AND passive are excluded.">
-          <span class="toggle-text">Middle (Ch. 15)</span>
+          <span class="toggle-text">Middle (Ch. 14)</span>
           <span class="toggle-switch" id="dimValueFilter_voice_middle_Btn" aria-hidden="true"></span>
         </button>
         <button class="toggle-label" id="dimValueFilter_voice_passive_Toggle" type="button" role="switch" aria-checked="false" onclick="toggleDimValueFilter('voice','passive')">
-          <span class="toggle-text">Passive (Ch. 15)</span>
+          <span class="toggle-text">Passive (Ch. 14)</span>
           <span class="toggle-switch" id="dimValueFilter_voice_passive_Btn" aria-hidden="true"></span>
         </button>
       </details>
@@ -746,6 +746,7 @@
         <details class="user-guide-changelog-version" open>
           <summary>Version 1.6 &middot; 2026-06-14</summary>
           <ul class="user-guide-list">
+            <li><strong>Voice is now a parsing step.</strong> The dimensional walk asks <em>Voice</em> (active / middle / passive) once the course makes it a real parsing decision &mdash; from <strong>Ch.&nbsp;14</strong> for participles, where Duff teaches the present active <em>&lambda;&#973;&omega;&nu;</em>, present middle/passive <em>&lambda;&upsilon;&#972;&mu;&epsilon;&nu;&omicron;&sigmaf;</em>, and aorist passive <em>&lambda;&upsilon;&theta;&epsilon;&#943;&sigmaf;</em> side by side, and from <strong>Ch.&nbsp;15</strong> for finite verbs, where the full passive system arrives. Before those chapters the voice is still filled in silently (so the form looks up correctly) but isn&rsquo;t asked &mdash; the only voice in scope is active, or a deponent Duff treats as functionally active. Deponents stay lenient when the step does appear: a middle/passive form accepts <em>active</em> as correct too. Turn the step off (or exclude individual voices) under <em>Parsing options</em>.</li>
             <li><strong>New &ldquo;NT Book Vocab&rdquo; section.</strong> Under <em>Choose session</em>, below Advanced vocabulary, every book of the New Testament now has its own collapsible list of vocabulary &mdash; each book&rsquo;s lexemes grouped into sets of 50 by how often the word occurs <em>in that book</em> (so the first group is the 50 words you meet most while reading it). These are not new cards: each entry links to the word&rsquo;s existing card, so studying a book&rsquo;s vocabulary shares progress with that word&rsquo;s home chapter or advanced bucket. Per-book frequencies come from the SBLGNT, and word identity was cross-checked against Strong&rsquo;s numbers (the same source the advanced buckets were built from); the few lexemes that have no card in the app (a handful of rare words) are simply left out.</li>
             <li><strong>Supplemental is collapsible.</strong> The <em>Supplemental</em> section in <em>Choose session</em> now folds up the same way as Advanced vocabulary and NT Book Vocab &mdash; tap the header to expand it, then each week opens to its &ldquo;Select all&rdquo; button and sets. Chapters and sessions are unchanged.</li>
             <li><strong>No more stuck highlight on touch.</strong> On iOS, tapping a select/deselect button (or a section header) used to leave a lingering &ldquo;hover&rdquo; tint until you tapped elsewhere; hover feedback is now gated to devices with a real pointer, so a tap just selects and moves on.</li>
@@ -1009,62 +1010,62 @@
   </div>
 </div>
 
-<script defer src="js/data/words.js?v=246"></script>
-<script defer src="js/data/morphology.js?v=246"></script>
-<script defer src="js/data/lemma_inventory.js?v=246"></script>
-<script defer src="js/data/supplemental.js?v=246"></script>
-<script defer src="js/data/grammar.js?v=246"></script>
-<script defer src="js/data/supplementals/week_1_supplemental.js?v=246"></script>
-<script defer src="js/data/supplementals/week_1_paradigms.js?v=246"></script>
-<script defer src="js/data/supplementals/week_2_paradigms.js?v=246"></script>
-<script defer src="js/data/supplementals/week_3_paradigms.js?v=246"></script>
-<script defer src="js/data/supplementals/week_4_paradigms.js?v=246"></script>
-<script defer src="js/data/supplementals/second_aorist_flip.js?v=246"></script>
-<script defer src="js/data/supplementals/liquid_future_flip.js?v=246"></script>
-<script defer src="js/data/supplementals/week_5_paradigms.js?v=246"></script>
-<script defer src="js/data/supplementals/w6_aorist_passive_flip.js?v=246"></script>
-<script defer src="js/data/supplementals/w6_perfect_active_flip.js?v=246"></script>
-<script defer src="js/data/supplementals/w8_mi_verb_principal_parts_flip.js?v=246"></script>
-<script defer src="js/data/supplementals/week_6_paradigms.js?v=246"></script>
-<script defer src="js/data/supplementals/week_7_paradigms.js?v=246"></script>
-<script defer src="js/data/supplementals/week_8_paradigms.js?v=246"></script>
-<script defer src="js/data/supplementals/adj_paradigms.js?v=246"></script>
-<script defer src="js/data/supplementals/w3o_supplemental.js?v=246"></script>
-<script defer src="js/data/supplementals/w6o_supplemental.js?v=246"></script>
-<script defer src="js/data/supplementals/w7o_supplemental.js?v=246"></script>
-<script defer src="js/data/supplementals/w8o_supplemental.js?v=246"></script>
-<script defer src="js/data/supplementals/paradigm_morphology.js?v=246"></script>
-<script defer src="js/data/supplementals/stem_change_drills.js?v=246"></script>
-<script defer src="js/data/advanced/advanced_01.js?v=246"></script>
-<script defer src="js/data/advanced/advanced_02.js?v=246"></script>
-<script defer src="js/data/advanced/advanced_03.js?v=246"></script>
-<script defer src="js/data/advanced/advanced_04.js?v=246"></script>
-<script defer src="js/data/advanced/advanced_05.js?v=246"></script>
-<script defer src="js/data/advanced/advanced_06.js?v=246"></script>
-<script defer src="js/data/advanced/advanced_07.js?v=246"></script>
-<script defer src="js/data/advanced/advanced_08.js?v=246"></script>
-<script defer src="js/data/advanced/advanced_09.js?v=246"></script>
-<script defer src="js/data/advanced/advanced_10.js?v=246"></script>
-<script defer src="js/data/advanced/advanced_11.js?v=246"></script>
-<script defer src="js/data/advanced/advanced_12.js?v=246"></script>
-<script defer src="js/data/advanced/advanced_13.js?v=246"></script>
-<script defer src="js/data/advanced/advanced_14.js?v=246"></script>
-<script defer src="js/data/advanced/advanced_15.js?v=246"></script>
-<script defer src="js/data/advanced/advanced_16.js?v=246"></script>
-<script defer src="js/data/advanced/advanced_17.js?v=246"></script>
-<script defer src="js/data/advanced/advanced_18.js?v=246"></script>
-<script defer src="js/data/advanced/advanced_19.js?v=246"></script>
-<script defer src="js/data/advanced/advanced_20.js?v=246"></script>
-<script defer src="js/data/advanced/advanced_21.js?v=246"></script>
-<script defer src="js/data/advanced/advanced_22.js?v=246"></script>
-<script defer src="js/data/advanced/advanced_23.js?v=246"></script>
-<script defer src="js/data/advanced/advanced_24.js?v=246"></script>
-<script defer src="js/data/advanced/advanced_25.js?v=246"></script>
-<script defer src="js/data/nt_book_vocab.js?v=246"></script>
-<script defer src="js/data/reader.js?v=246"></script>
-<script defer src="js/data/reader_verse_literals.js?v=246"></script>
-<script defer src="js/data/reader_translations.js?v=246"></script>
-<script defer src="js/logic/pos_logic.js?v=246"></script>
-<script type="module" src="js/app/main.js?v=246"></script>
+<script defer src="js/data/words.js?v=247"></script>
+<script defer src="js/data/morphology.js?v=247"></script>
+<script defer src="js/data/lemma_inventory.js?v=247"></script>
+<script defer src="js/data/supplemental.js?v=247"></script>
+<script defer src="js/data/grammar.js?v=247"></script>
+<script defer src="js/data/supplementals/week_1_supplemental.js?v=247"></script>
+<script defer src="js/data/supplementals/week_1_paradigms.js?v=247"></script>
+<script defer src="js/data/supplementals/week_2_paradigms.js?v=247"></script>
+<script defer src="js/data/supplementals/week_3_paradigms.js?v=247"></script>
+<script defer src="js/data/supplementals/week_4_paradigms.js?v=247"></script>
+<script defer src="js/data/supplementals/second_aorist_flip.js?v=247"></script>
+<script defer src="js/data/supplementals/liquid_future_flip.js?v=247"></script>
+<script defer src="js/data/supplementals/week_5_paradigms.js?v=247"></script>
+<script defer src="js/data/supplementals/w6_aorist_passive_flip.js?v=247"></script>
+<script defer src="js/data/supplementals/w6_perfect_active_flip.js?v=247"></script>
+<script defer src="js/data/supplementals/w8_mi_verb_principal_parts_flip.js?v=247"></script>
+<script defer src="js/data/supplementals/week_6_paradigms.js?v=247"></script>
+<script defer src="js/data/supplementals/week_7_paradigms.js?v=247"></script>
+<script defer src="js/data/supplementals/week_8_paradigms.js?v=247"></script>
+<script defer src="js/data/supplementals/adj_paradigms.js?v=247"></script>
+<script defer src="js/data/supplementals/w3o_supplemental.js?v=247"></script>
+<script defer src="js/data/supplementals/w6o_supplemental.js?v=247"></script>
+<script defer src="js/data/supplementals/w7o_supplemental.js?v=247"></script>
+<script defer src="js/data/supplementals/w8o_supplemental.js?v=247"></script>
+<script defer src="js/data/supplementals/paradigm_morphology.js?v=247"></script>
+<script defer src="js/data/supplementals/stem_change_drills.js?v=247"></script>
+<script defer src="js/data/advanced/advanced_01.js?v=247"></script>
+<script defer src="js/data/advanced/advanced_02.js?v=247"></script>
+<script defer src="js/data/advanced/advanced_03.js?v=247"></script>
+<script defer src="js/data/advanced/advanced_04.js?v=247"></script>
+<script defer src="js/data/advanced/advanced_05.js?v=247"></script>
+<script defer src="js/data/advanced/advanced_06.js?v=247"></script>
+<script defer src="js/data/advanced/advanced_07.js?v=247"></script>
+<script defer src="js/data/advanced/advanced_08.js?v=247"></script>
+<script defer src="js/data/advanced/advanced_09.js?v=247"></script>
+<script defer src="js/data/advanced/advanced_10.js?v=247"></script>
+<script defer src="js/data/advanced/advanced_11.js?v=247"></script>
+<script defer src="js/data/advanced/advanced_12.js?v=247"></script>
+<script defer src="js/data/advanced/advanced_13.js?v=247"></script>
+<script defer src="js/data/advanced/advanced_14.js?v=247"></script>
+<script defer src="js/data/advanced/advanced_15.js?v=247"></script>
+<script defer src="js/data/advanced/advanced_16.js?v=247"></script>
+<script defer src="js/data/advanced/advanced_17.js?v=247"></script>
+<script defer src="js/data/advanced/advanced_18.js?v=247"></script>
+<script defer src="js/data/advanced/advanced_19.js?v=247"></script>
+<script defer src="js/data/advanced/advanced_20.js?v=247"></script>
+<script defer src="js/data/advanced/advanced_21.js?v=247"></script>
+<script defer src="js/data/advanced/advanced_22.js?v=247"></script>
+<script defer src="js/data/advanced/advanced_23.js?v=247"></script>
+<script defer src="js/data/advanced/advanced_24.js?v=247"></script>
+<script defer src="js/data/advanced/advanced_25.js?v=247"></script>
+<script defer src="js/data/nt_book_vocab.js?v=247"></script>
+<script defer src="js/data/reader.js?v=247"></script>
+<script defer src="js/data/reader_verse_literals.js?v=247"></script>
+<script defer src="js/data/reader_translations.js?v=247"></script>
+<script defer src="js/logic/pos_logic.js?v=247"></script>
+<script type="module" src="js/app/main.js?v=247"></script>
 </body>
 </html>
