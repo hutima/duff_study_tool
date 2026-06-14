@@ -48,6 +48,11 @@
   window.registerSupplementalVocabSet('W6_LUTHEIS_PARTICIPLE', {
     label: 'λυθείς, λυθεῖσα, λυθέν — aorist passive participle',
     week: 6,
+    // Duff teaches the aorist passive participle (-θείς) in Ch 14 with the
+    // rest of the participle paradigm, not with the finite passive system
+    // (Ch 15). Gate to Ch 14 and surface it under λύω like the active forms.
+    chapter: 14,
+    parsingLemma: 'λύω',
     cards: [
       { g: 'λυθείς', e: 'having been untied (masc. Nom. sg.)', required: true },
       { g: 'λυθέντα', e: 'having been untied (masc. Acc. sg.; neut. Nom./Acc. pl.)', required: true },
