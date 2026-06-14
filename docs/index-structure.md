@@ -1,7 +1,11 @@
 # `index.html` structure notes
 
-Navigation map for the root `index.html` (currently ~753 lines). Keep this in
+Navigation map for the root `index.html` (currently ~1055 lines). Keep this in
 sync when you change the file — see "Maintenance" at the bottom.
+
+> The line numbers throughout this doc are historical and have drifted (the
+> `<script>` block now lives around 988–1043, the overlays well past line 700).
+> Grep for the `id` rather than trusting a line number.
 
 Line numbers are approximate (drift a few lines between edits). When in doubt,
 grep for the `id` rather than jumping to a line.
@@ -74,7 +78,7 @@ All use `class="consent-overlay"` + an `aria-hidden` toggle. Most use
 |---------:|------------------------------|---------|
 | 198–214  | `#transferOverlay`           | Import/export progress (textarea + file picker) |
 | 216–424  | `#analyticsOverlay`          | "Progress and study time". Large; contains many `<details class="analytics-collapse" data-collapse-key="…">` sections — achievements, totalVocab, selectedVocab, totalGrammar (incl. `#analyticsParadigmStepStatsBody` — per-paradigm rows that expand to a per-value mood/tense/voice breakdown, chapter-gated, derived live from `forms`), selectedGrammar, etc. Each section has a `…SummaryStatus` element JS updates. |
-| 426–471  | `#studySelectorOverlay`      | "Choose session" — deselect buttons, `#sessionsGrid`, `#chaptersGrid`, `#supplementalGrid`, `#advancedGrid` (inside `#advancedSectionShell` `<details>`) |
+| 426–471  | `#studySelectorOverlay`      | "Choose session" — deselect buttons (incl. "Deselect book vocab" → `deselectAllBooks()`), `#sessionsGrid`, `#chaptersGrid`, `#supplementalGrid`, `#advancedGrid` (inside `#advancedSectionShell` `<details>`), then `#bookVocabSection` → `#bookVocabSectionShell` `<details>` → `#bookVocabGrid` (**NT Book Vocab**: per-book vocab grouped in 50s by in-book frequency; built by `buildBookVocabSelector()`; entries are `NTB::<BOOK>` / `NTB::<BOOK>::g::<N>` pseudo-keys that link to existing cards rather than carrying their own) |
 | 473–597  | `#shortcutsOverlay`          | User guide. **Contains the inline changelog** (`details.user-guide-changelog` → one `details.user-guide-changelog-version` per release). Add new release entries at the top. |
 | 599–617  | `#consentOverlay`            | First-run "Before you begin" consent |
 | 619–641  | `#resetSpacedOverlay`        | Confirm reset of spaced review. Three actions: "Set all to now" (`confirmResetSpacedTimingOnly`), "Smooth schedule" (`confirmResetSpacedSmooth` — levels a due-date pile-up by pulling cards due >3 study-days out to earlier days so a similar number come due each day; never delays a card, never touches the 0–3-day window), and the danger-row "Reset progress" (`confirmResetSpacedProgress`) |
@@ -102,6 +106,7 @@ Groups, in order:
 - **Core data (698–702):** `words.js`, `morphology.js`, `lemma_inventory.js`, `supplemental.js`, `grammar.js`
 - **Per-week supplementals + paradigms (703–722):** `week_N_supplemental.js`, `week_N_paradigms.js`, plus stem-change flips (`second_aorist_flip.js`, `liquid_future_flip.js`, `w6_aorist_passive_flip.js`, `w6_perfect_active_flip.js`, `w8_mi_verb_principal_parts_flip.js`), `adj_paradigms.js`, `wNo_supplemental.js`, `paradigm_morphology.js`, `stem_change_drills.js`
 - **Advanced vocabulary buckets (723–747):** `advanced/advanced_NN.js` (currently 01–25)
+- **NT Book Vocab (after the advanced buckets):** `nt_book_vocab.js` — generated; per-book lexeme lists that link to existing cards (no new cards). See header in the file for provenance (SBLGNT/MorphGNT frequencies, Strong's-checked identity). Regenerate with `tools/gen_nt_book_vocab.js`.
 - **Reader (748–750):** `reader.js`, `reader_verse_literals.js`, `reader_translations.js`
 - **Logic (751):** `pos_logic.js` (intentionally loaded before main)
 - **Entry point (752):** `js/app/main.js` — the only ES module
