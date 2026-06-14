@@ -399,7 +399,9 @@
     letter-spacing: 0.04em;
   }
 
-  .supplemental-week-summary:hover { background: rgba(201,168,76,0.08); }
+  /* Hover gated to hover-capable pointers — on iOS the :hover tint otherwise
+     sticks to the last-tapped row/button after a tap (see the .choice-btn note). */
+  @media (hover: hover) { .supplemental-week-summary:hover { background: rgba(201,168,76,0.08); } }
   .supplemental-week-summary .chapter-count { color: var(--muted); font-family: var(--font-body); font-size: 12px; font-weight: normal; letter-spacing: 0; }
 
   .supplemental-week-body {
@@ -428,7 +430,7 @@
     line-height: 1.25;
   }
 
-  .supplemental-summary:hover { background: rgba(201,168,76,0.06); }
+  @media (hover: hover) { .supplemental-summary:hover { background: rgba(201,168,76,0.06); } }
   .supplemental-summary .chapter-count { color: var(--muted); font-family: var(--font-body); font-size: 12px; }
 
   .supplemental-paradigm-list {
@@ -447,7 +449,7 @@
     font-family: var(--font-display);
     letter-spacing: 0.03em;
   }
-  .supplemental-select-all-week:hover { background: rgba(201,168,76,0.1); }
+  @media (hover: hover) { .supplemental-select-all-week:hover { background: rgba(201,168,76,0.1); } }
 
   .supplemental-set-flat {
     display: flex;
@@ -489,7 +491,7 @@
     letter-spacing: 0.04em;
   }
   .advanced-section-summary::-webkit-details-marker { display: none; }
-  .advanced-section-summary:hover { background: rgba(201,168,76,0.06); }
+  @media (hover: hover) { .advanced-section-summary:hover { background: rgba(201,168,76,0.06); } }
   .advanced-section-meta {
     color: var(--muted);
     font-family: var(--font-body);
@@ -543,7 +545,7 @@
     transition: all 0.08s;
     line-height: 1.3;
   }
-  .session-btn:hover { border-color: var(--gold-dim); background: #1e2030; }
+  @media (hover: hover) { .session-btn:hover { border-color: var(--gold-dim); background: #1e2030; } }
   .session-btn.active { border-color: var(--gold); background: #1e1e2a; color: var(--gold-light); }
   .session-btn .session-tag {
     display: block;
@@ -571,7 +573,9 @@
     transition: all 0.08s;
     line-height: 1.2;
   }
-  .chapter-btn:hover { border-color: var(--gold-dim); background: #1e2030; }
+  /* Select/deselect buttons share .chapter-btn; gate hover so the highlight
+     doesn't stick after a tap on iOS (see the .choice-btn hover note). */
+  @media (hover: hover) { .chapter-btn:hover { border-color: var(--gold-dim); background: #1e2030; } }
   .chapter-btn.active { border-color: var(--gold); background: #1e1e2a; color: var(--gold-light); }
   .chapter-btn .chapter-count {
     display: block;
@@ -3069,9 +3073,11 @@
   }
 
   html[data-theme="light"] body::before { opacity: 0.015; }
-  html[data-theme="light"] .session-btn:hover,
-  html[data-theme="light"] .chapter-btn:hover {
-    background: #f5eddc;
+  @media (hover: hover) {
+    html[data-theme="light"] .session-btn:hover,
+    html[data-theme="light"] .chapter-btn:hover {
+      background: #f5eddc;
+    }
   }
   /* See the hover-capability note on .choice-btn above — same iOS sticky-hover
      fix, applied to the light theme's choice-button hover tint. */
