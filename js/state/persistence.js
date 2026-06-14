@@ -75,15 +75,18 @@ export function configurePersistence(deps) {
 const PARADIGM_STEP_ATTEMPT_CAP = 20;
 // Per-card recent-attempts map. Lives next to attempts on a lemma entry;
 // used by the parsing-review testable-forms list to dot each form
-// grey/green/yellow/red based on the last 2 attempts. Each recent entry
-// carries either per-dim results (so disabled dims can be filtered out at
-// read time) or a legacy allDims fallback from pre-2-of-2 saves.
-const FORM_RECENT_CAP = 2;
+// grey/green/yellow/red based on the last 2 attempts. The dots and the
+// exclude-known "2/2 known" filter only ever read those last 2 (FORM_RECENT_CAP
+// in morph_steps.js); we persist a deeper window (FORM_HISTORY_CAP) so the
+// confidence breakdown has more than two attempts per form to average. Each
+// recent entry carries either per-dim results (so disabled dims can be
+// filtered out at read time) or a legacy allDims fallback from pre-2-of-2 saves.
+const FORM_HISTORY_CAP = 10;
 function sanitizeFormRecentList(input, legacyLastCorrect) {
   if (Array.isArray(input)) {
     return input
       .filter((a) => isPlainObject(a))
-      .slice(-FORM_RECENT_CAP)
+      .slice(-FORM_HISTORY_CAP)
       .map((a) => {
         if (typeof a.allDims === 'boolean') return { allDims: a.allDims };
         const dims = isPlainObject(a.dims)
@@ -279,6 +282,7 @@ export function buildPersistedStatePayload(options = {}) {
     dimValueFilters: runtime.dimValueFilters,
     includeOptionalForms: runtime.includeOptionalForms,
     excludeKnownMorphs: runtime.excludeKnownMorphs,
+    parsingShuffleAll: runtime.parsingShuffleAll,
     parsingReverse: runtime.parsingReverse,
     accentLookalikes: runtime.accentLookalikes,
     optionalFormFilters: runtime.optionalFormFilters,
@@ -375,6 +379,8 @@ function sanitizeImportedState(candidate) {
   // strict 2/2 — the form's last two recorded attempts were both fully
   // correct under the current dim toggles.
   state.excludeKnownMorphs = !!candidate.excludeKnownMorphs;
+  // "Shuffle all paradigms" parsing toggle defaults to false (off).
+  state.parsingShuffleAll = !!candidate.parsingShuffleAll;
   state.parsingReverse = !!candidate.parsingReverse;
   state.accentLookalikes = !!candidate.accentLookalikes;
   // Sub-filters default to true (every category included) so toggling
@@ -1111,6 +1117,8 @@ export function restoreState() {
     runtime.includeOptionalForms = !!saved.includeOptionalForms;
     // Exclude-known-morphs filter: rehydrate the toggle (default false).
     runtime.excludeKnownMorphs = !!saved.excludeKnownMorphs;
+    // "Shuffle all paradigms" parsing toggle (default false).
+    runtime.parsingShuffleAll = !!saved.parsingShuffleAll;
     // English → Greek parsing direction (default false).
     runtime.parsingReverse = !!saved.parsingReverse;
     // Accent/breathing look-alike distractors in the reverse drill (default false).
