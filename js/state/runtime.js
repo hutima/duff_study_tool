@@ -166,6 +166,12 @@ export const runtime = {
   // deck so the user still verifies it). Default off so the full
   // focused-paradigm pool is the baseline.
   excludeKnownMorphs: false,
+  // "Shuffle all paradigms" parsing toggle. When on, parsing ignores the
+  // focused paradigm and draws its deck from EVERY in-scope paradigm up to
+  // the current chapter gate, shuffled together — a continuous mixed drill
+  // rather than one paradigm at a time. Off by default; only parsing mode
+  // reads it. The focused-paradigm dropdown is hidden while it's on.
+  parsingShuffleAll: false,
   // Per-category sub-filters on the optional-form drill pool. Each key
   // defaults to true (the category is INCLUDED); flipping a key to false
   // excludes any optional-form card whose canonical parse mentions the

@@ -859,6 +859,27 @@ export function toggleExcludeKnownMorphs() {
   loadDeckFromKeys(keysToLoad, runtime.currentSession ? runtime.currentSession.id : null);
 }
 
+// "Shuffle all paradigms": ignore the focused paradigm and draw the parsing
+// deck from every in-scope paradigm up to the current chapter gate, shuffled
+// together. Off by default. Only parsing mode reads it; outside parsing the
+// flag still flips and persists but no rebuild happens. Drops any in-flight
+// walk so the next card starts clean, hides the focused-paradigm dropdown
+// (handled in syncLayoutVisibility), then rebuilds the deck.
+export function toggleParsingShuffleAll() {
+  if (!host.isParsingMode()) return;
+  runtime.parsingShuffleAll = !runtime.parsingShuffleAll;
+  host.resetMorphStepState();
+  host.resetMorphAnswerState();
+  host.syncToggleButtons();
+  host.syncLayoutVisibility();
+  if (!runtime.selectedKeys.length) {
+    host.saveState();
+    return;
+  }
+  const keysToLoad = runtime.currentSession ? expandSessionSets(runtime.currentSession) : runtime.selectedKeys;
+  loadDeckFromKeys(keysToLoad, runtime.currentSession ? runtime.currentSession.id : null);
+}
+
 // English → Greek parsing direction. Flips parsing between the forward
 // dimensional walk and the reverse "pick the form for this parse" MC. Only
 // meaningful in parsing mode. Drops any in-flight walk / reverse cache /

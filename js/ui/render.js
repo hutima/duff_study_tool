@@ -9,7 +9,7 @@ import { runtime } from '../state/runtime.js';
 import { buildGrammarSupportHtml } from '../domain/grammar/explanations.js';
 import { renderProgress, renderReview } from './progress.js';
 import { buildMorphSteps, summarizeLemmaStats, getParadigmStepAttemptWindow, computeAccessibleDimensionPools, parseAnswerDimensions, aspectMistakeNote, isSecondPluralPresentMoodAmbiguity, computeParadigmPresentValues, accentLookalikesFor, confusableFormHints } from '../domain/grammar/morph_steps.js';
-import { getAccessibleMorphCards, deriveSelectionLevels, buildMultiGenderLemmas, MIXED_FORM_NOUN_LEMMAS } from '../domain/grammar/paradigm_focus.js';
+import { getAccessibleMorphCards, deriveSelectionLevels, buildMultiGenderLemmas, MIXED_FORM_NOUN_LEMMAS, THIRD_DECLENSION_NOUN_LEMMAS } from '../domain/grammar/paradigm_focus.js';
 
 let host = {
   saveState: () => {},
@@ -136,9 +136,11 @@ export function renderCard() {
       // already picked. Focused paradigms always have forms in scope (they
       // come from listAvailableParadigms), so an empty deck here is the
       // exclude-known case, not a genuinely empty paradigm.
-      emptyMessage = (runtime.morphFocusedParadigm && runtime.excludeKnownMorphs)
-        ? 'Every form in this paradigm is mastered (both of the last two attempts correct under your current parsing toggles). Pick another paradigm above, clear a form’s tally with the ✕ in the progress panel below, or turn off “Exclude known morphs” to drill them again.'
-        : 'Pick a focused paradigm from the dropdown above to start parsing.';
+      emptyMessage = (runtime.parsingShuffleAll && runtime.excludeKnownMorphs)
+        ? 'Every parseable form in scope is mastered (both of the last two attempts correct under your current parsing toggles). Widen the chapter, clear a form’s tally with the ✕ in the progress panel below, or turn off “Exclude known morphs” to drill them again.'
+        : (runtime.morphFocusedParadigm && runtime.excludeKnownMorphs)
+          ? 'Every form in this paradigm is mastered (both of the last two attempts correct under your current parsing toggles). Pick another paradigm above, clear a form’s tally with the ✕ in the progress panel below, or turn off “Exclude known morphs” to drill them again.'
+          : 'Pick a focused paradigm from the dropdown above to start parsing.';
     } else if (host.isMorphologyMode()) {
       emptyMessage = host.isReverseGrammarActive()
         ? 'No reversible grammar items in this selection. Toggle “English → Greek” off to see all questions.'
@@ -558,7 +560,8 @@ function ensureStepStateForCard(card) {
     dimToggles: runtime.dimToggles,
     dimValueFilters: runtime.dimValueFilters,
     multiGenderLemmas,
-    mixedFormNouns: MIXED_FORM_NOUN_LEMMAS
+    mixedFormNouns: MIXED_FORM_NOUN_LEMMAS,
+    thirdDeclensionNouns: THIRD_DECLENSION_NOUN_LEMMAS
   });
   // Values the focused paradigm actually carries per dimension, from its full
   // (unfiltered) pool. Lets answerMorphologyStep cut the walk off when a pick
@@ -566,7 +569,7 @@ function ensureStepStateForCard(card) {
   // ἐγώ/σύ, which has only 1st/2nd-person forms. Falls back to the current
   // card's own dims so a present-only-truth still includes the right answer
   // when the full pool is unavailable.
-  const paradigmCards = host.getFocusedParadigmAllCards();
+  const paradigmCards = host.getFocusedParadigmAllCards(card);
   const paradigmPresentValues = computeParadigmPresentValues(
     Array.isArray(paradigmCards) && paradigmCards.length ? paradigmCards : [card]
   );
