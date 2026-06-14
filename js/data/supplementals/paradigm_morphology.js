@@ -262,7 +262,16 @@
       // cards in the set are conjunctions / relative pronouns — those
       // shouldn't inherit subjunctive as their parse.
       let raw = rawAnswer;
-      const isNominalCard = /\b(nom\.?|acc\.?|gen\.?|dat\.?|voc\.?|nominative|accusative|genitive|dative|vocative|masc\.?|fem\.?|neut\.?|masculine|feminine|neuter)\b/i.test(raw)
+      // Participles decline like nominals, so a participle card's parse
+      // ("masc. Nom. sg.") matches the nominal shape below even though it
+      // needs the set's tense/voice/participle defaults. A set whose label
+      // names the participle mood is, by construction, all participles —
+      // so don't treat its cards as bare nominals; let the defaults apply.
+      // (Without this, λυθείς's cards parse as case/number/gender only and
+      // never register as aorist passive participles.)
+      const isParticipleSet = defaults.mood === 'participle';
+      const isNominalCard = !isParticipleSet
+        && /\b(nom\.?|acc\.?|gen\.?|dat\.?|voc\.?|nominative|accusative|genitive|dative|vocative|masc\.?|fem\.?|neut\.?|masculine|feminine|neuter)\b/i.test(raw)
         && !/\b(1st|2nd|3rd|first|second|third)\s+(person|sg\.?|pl\.?|singular|plural)\b/i.test(raw)
         && !/\b(present|future|imperfect|aorist|perfect|pluperfect|indicative|subjunctive|imperative|infinitive|participle|active|middle|passive)\b/i.test(raw);
       if (!isNominalCard) {
@@ -299,7 +308,12 @@
     const distinctAnswers = new Set(questions.map((q) => q.answer));
     if (distinctAnswers.size < 2) return null;
 
-    const lemma = extractLemma(set.label) || key;
+    // `parsingLemma` lets a set attribute its parsing cards to a parent
+    // verb instead of the form-string its label parses to. The dedicated
+    // participle paradigm sets (λύων…, λυθείς…) use this so their forms
+    // surface under λύω / ῥύομαι when that verb is the focused paradigm,
+    // rather than as standalone "λύων, λύουσα, λῦον" dropdown entries.
+    const lemma = set.parsingLemma || extractLemma(set.label) || key;
     const gloss = extractLemmaGloss(set);
     return {
       label: set.label || key,

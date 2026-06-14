@@ -135,6 +135,7 @@
     label: 'λύων, λύουσα, λῦον — present active participle',
     week: 5,
     chapter: 14,
+    parsingLemma: 'λύω',
     cards: [
       { g: 'λύων', e: 'untying (Present active participle, masc. Nom. sg.)', required: true },
       { g: 'λύοντα', e: 'untying (Present active participle, masc. Acc. sg.; neut. Nom./Acc. pl.)', required: true },
@@ -160,6 +161,7 @@
     label: 'λύσας, λύσασα, λῦσαν — aorist active participle',
     week: 5,
     chapter: 14,
+    parsingLemma: 'λύω',
     cards: [
       { g: 'λύσας', e: 'having untied (Aorist active participle, masc. Nom. sg.)', required: true },
       { g: 'λύσαντα', e: 'having untied (Aorist active participle, masc. Acc. sg.; neut. Nom./Acc. pl.)', required: true },
@@ -185,6 +187,7 @@
     label: 'ῥυόμενος, -η, -ον — present middle participle',
     week: 5,
     chapter: 14,
+    parsingLemma: 'ῥύομαι',
     cards: [
       { g: 'ῥυόμενος', e: 'rescuing (Present middle participle, masc. Nom. sg.)', required: true },
       { g: 'ῥυόμενον', e: 'rescuing (Present middle participle, masc. Acc. sg.; neut. Nom./Acc. sg.)', required: true },
@@ -209,6 +212,7 @@
     label: 'ῥυσάμενος, -η, -ον — aorist middle participle',
     week: 5,
     chapter: 14,
+    parsingLemma: 'ῥύομαι',
     cards: [
       { g: 'ῥυσάμενος', e: 'having rescued (Aorist middle participle, masc. Nom. sg.)', required: true },
       { g: 'ῥυσάμενον', e: 'having rescued (Aorist middle participle, masc. Acc. sg.; neut. Nom./Acc. sg.)', required: true },

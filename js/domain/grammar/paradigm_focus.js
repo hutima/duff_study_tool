@@ -136,14 +136,15 @@ const PARADIGM_CATEGORIES = {
   'δίδομαι':                             'Verbs · μι-verbs',
   'ἵστημι':                              'Verbs · μι-verbs',
   'τίθημι':                              'Verbs · μι-verbs',
-  '-μι verbs':                           'Verbs · μι-verbs',
+  '-μι verbs':                           'Verbs · μι-verbs'
 
-  // ─── Participles (case-marked verbals; their own group) ───
-  'λύων, λύουσα, λῦον':                  'Participles',
-  'λύσας, λύσασα, λῦσαν':                'Participles',
-  'λυθείς, λυθεῖσα, λυθέν':              'Participles',
-  'ῥυόμενος, -η, -ον':                   'Participles',
-  'ῥυσάμενος, -η, -ον':                  'Participles'
+  // ─── Participles ───
+  // The dedicated participle paradigm sets (λύων…, λύσας…, λυθείς…,
+  // ῥυόμενος…, ῥυσάμενος…) no longer register as standalone lemmas: each
+  // declares a `parsingLemma` so its forms fold into the parent verb (λύω
+  // for the active + aorist passive, ῥύομαι for the middle), the same way
+  // γίνομαι/βάλλω/etc. carry their own participle declensions — so there
+  // is no separate "Participles" category here.
 };
 
 const PARADIGM_DISPLAY_OVERRIDES = {
@@ -178,7 +179,6 @@ const CATEGORY_ORDER = [
   'Verbs · second aorist',
   'Verbs · liquid future',
   'Verbs · μι-verbs',
-  'Participles',
   'Other constructions'
 ];
 
