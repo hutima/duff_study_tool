@@ -1156,6 +1156,10 @@ function syncFontFamilyButtons() {
 
 function setFontFamily(value) {
   applyFontFamily(value, true);
+  // Swapping serif/sans changes glyph metrics, so the layout reflows and a
+  // button can slide under the finger before the iOS ghost click lands. Same
+  // document-wide guard the modal closers use.
+  shieldClicksBriefly();
 }
 
 function initializeFontFamily() {
@@ -1187,6 +1191,10 @@ function syncTextSizeButtons() {
 
 function setTextSize(value) {
   applyTextSize(value, true);
+  // Changing text size grows the glyphs and reflows spacing, so a button can
+  // slide under the finger between the tap and the iOS ghost click ~300 ms
+  // later. Shield clicks document-wide to absorb that stray press.
+  shieldClicksBriefly();
 }
 
 function initializeTextSize() {
