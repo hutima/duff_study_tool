@@ -108,7 +108,12 @@ export function renderCard() {
     return;
   }
 
-  if (host.isParsingMode() && runtime.morphFocusedParadigm && Object.prototype.hasOwnProperty.call(PARSING_INCOMPATIBLE_LEMMAS, runtime.morphFocusedParadigm)) {
+  // The stem-recall redirect is about the single focused lemma. When the deck
+  // mixes paradigms (shuffle-all or the custom set) morphFocusedParadigm may
+  // still hold a stem-recall lemma the user last focused, but the deck has real
+  // cards — so don't hijack it with the redirect.
+  const mixingParadigms = runtime.parsingShuffleAll || runtime.parsingCustomReview;
+  if (host.isParsingMode() && !mixingParadigms && runtime.morphFocusedParadigm && Object.prototype.hasOwnProperty.call(PARSING_INCOMPATIBLE_LEMMAS, runtime.morphFocusedParadigm)) {
     const lemma = runtime.morphFocusedParadigm;
     const drillKey = PARSING_INCOMPATIBLE_LEMMAS[lemma];
     area.innerHTML = `
@@ -136,11 +141,24 @@ export function renderCard() {
       // already picked. Focused paradigms always have forms in scope (they
       // come from listAvailableParadigms), so an empty deck here is the
       // exclude-known case, not a genuinely empty paradigm.
-      emptyMessage = (runtime.parsingShuffleAll && runtime.excludeKnownMorphs)
-        ? 'Every parseable form in scope is mastered (both of the last two attempts correct under your current parsing toggles). Widen the chapter, clear a form’s tally with the ✕ in the progress panel below, or turn off “Exclude known morphs” to drill them again.'
-        : (runtime.morphFocusedParadigm && runtime.excludeKnownMorphs)
-          ? 'Every form in this paradigm is mastered (both of the last two attempts correct under your current parsing toggles). Pick another paradigm above, clear a form’s tally with the ✕ in the progress panel below, or turn off “Exclude known morphs” to drill them again.'
-          : 'Pick a focused paradigm from the dropdown above to start parsing.';
+      if (runtime.parsingCustomReview) {
+        // Custom paradigm set: the dropdown is hidden, so steer the student to
+        // the checklist instead. Distinguish "nothing ticked yet" from "ticked
+        // but the pool came back empty" (everything mastered / out of scope).
+        const anySelected = !!(runtime.parsingCustomParadigms
+          && Object.values(runtime.parsingCustomParadigms).some(Boolean));
+        emptyMessage = !anySelected
+          ? 'Custom paradigm set is on, but no paradigms are ticked yet. Tick one or more paradigms in the selector above to build your review deck.'
+          : runtime.excludeKnownMorphs
+            ? 'Every parseable form in your selected paradigms is mastered (both of the last two attempts correct under your current parsing toggles). Tick more paradigms above, clear a form’s tally with the ✕ in the progress panel below, or turn off “Exclude known morphs” to drill them again.'
+            : 'No parseable forms are in scope for the selected paradigms at the current chapter. Tick different paradigms above or raise the parsing chapter.';
+      } else {
+        emptyMessage = (runtime.parsingShuffleAll && runtime.excludeKnownMorphs)
+          ? 'Every parseable form in scope is mastered (both of the last two attempts correct under your current parsing toggles). Widen the chapter, clear a form’s tally with the ✕ in the progress panel below, or turn off “Exclude known morphs” to drill them again.'
+          : (runtime.morphFocusedParadigm && runtime.excludeKnownMorphs)
+            ? 'Every form in this paradigm is mastered (both of the last two attempts correct under your current parsing toggles). Pick another paradigm above, clear a form’s tally with the ✕ in the progress panel below, or turn off “Exclude known morphs” to drill them again.'
+            : 'Pick a focused paradigm from the dropdown above to start parsing.';
+      }
     } else if (host.isMorphologyMode()) {
       emptyMessage = host.isReverseGrammarActive()
         ? 'No reversible grammar items in this selection. Toggle “English → Greek” off to see all questions.'

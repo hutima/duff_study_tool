@@ -167,7 +167,7 @@ import { getSelectedVocabCards, getSelectedGrammarCards, getAllVocabKeys, getAll
 // Domain — Grammar
 import { buildGrammarSupportHtml } from '../domain/grammar/explanations.js';
 import { recordParadigmAttempt, inferredFollowupDims, buildInferredStep, structuralImpossibilityReason, paradigmGapReason, lemmaInventoryGapReason, isLemmaFormKnown, parseAnswerDimensions } from '../domain/grammar/morph_steps.js';
-import { listAvailableParadigms, listAvailableParadigmsByCategory, getCardsForFocusedParadigm, getCardsForParadigmCategory, getAllParsingCards, parseCategoryShuffleValue, makeCategoryShuffleValue } from '../domain/grammar/paradigm_focus.js';
+import { listAvailableParadigms, listAvailableParadigmsByCategory, getCardsForFocusedParadigm, getCardsForParadigmCategory, getCardsForParadigmLemmas, getAllParsingCards, parseCategoryShuffleValue, makeCategoryShuffleValue } from '../domain/grammar/paradigm_focus.js';
 
 // UI
 import {
@@ -262,6 +262,9 @@ import {
   toggleDimValueFilter,
   toggleExcludeKnownMorphs,
   toggleParsingShuffleAll,
+  toggleParsingCustomReview,
+  toggleParsingCustomParadigm,
+  setAllParsingCustomParadigms,
   toggleParsingReverse,
   toggleAccentLookalikes,
   toggleUnspacedDailyReset,
@@ -431,7 +434,7 @@ configureRender({
     // category "shuffle all of type" selection — the gap-detection pool must
     // key off the CURRENT card's own lemma, since morphFocusedParadigm holds
     // a sentinel, not a lemma. Otherwise use the focused lemma as before.
-    const mixing = runtime.parsingShuffleAll || !!parseCategoryShuffleValue(runtime.morphFocusedParadigm);
+    const mixing = runtime.parsingShuffleAll || runtime.parsingCustomReview || !!parseCategoryShuffleValue(runtime.morphFocusedParadigm);
     const lemma = mixing ? (card && card.lemma) : runtime.morphFocusedParadigm;
     if (!lemma) return [];
     return getCardsForFocusedParadigm(
@@ -508,7 +511,10 @@ configureNavigation({
   resetMorphStepState: () => resetMorphStepState(),
   ensureMorphFocusedParadigm: () => ensureMorphFocusedParadigm(),
   rebuildMorphDeckForStepMode: () => rebuildMorphDeckForStepMode(),
-  rebuildParsingCycle: (opts) => rebuildParsingCycle(opts)
+  rebuildParsingCycle: (opts) => rebuildParsingCycle(opts),
+  // In-scope paradigm lemmas at the current selection — used by the custom
+  // paradigm set's "Select all" action.
+  listAvailableParadigmLemmas: () => listAvailableParadigms(getAggregateSelectionKeys()).map((p) => p.lemma)
 });
 configureAnalytics({
   ensureUsageStats: () => ensureUsageStats(),
@@ -1290,6 +1296,47 @@ function escapeAttr(s) {
     .replace(/>/g, '&gt;');
 }
 
+// Populate the "custom paradigm set" checkbox selector from the current
+// selection's in-scope paradigms, grouped by category to mirror the
+// focused-paradigm dropdown. Each checkbox reflects (and writes back via its
+// onchange) runtime.parsingCustomParadigms[lemma]. The list is hidden outside
+// parsing mode / when the toggle is off (syncLayoutVisibility), so this only
+// needs to keep the markup current. Scroll position is preserved across the
+// re-render so ticking a box deep in the list doesn't jump it to the top.
+function syncParsingCustomParadigmsUi() {
+  const list = document.getElementById('parsingCustomParadigmsList');
+  const countEl = document.getElementById('parsingCustomParadigmsCount');
+  if (!list) return;
+  if (!isParsingMode()) return;
+  const aggregateKeys = getAggregateSelectionKeys();
+  const grouped = listAvailableParadigmsByCategory(aggregateKeys);
+  const selected = runtime.parsingCustomParadigms || {};
+  if (!grouped.length) {
+    list.innerHTML = '<div class="paradigm-custom-empty">No paradigms in the current selection. Choose a chapter (or raise the parsing chapter) to pick paradigms.</div>';
+    if (countEl) countEl.textContent = 'none selected';
+    return;
+  }
+  let checkedInScope = 0;
+  const html = grouped.map((g) => {
+    const items = g.lemmas.map((p) => {
+      const isChecked = !!selected[p.lemma];
+      if (isChecked) checkedInScope += 1;
+      return `<label class="paradigm-custom-item">`
+        + `<input type="checkbox" value="${escapeAttr(p.lemma)}"${isChecked ? ' checked' : ''} onchange="toggleParsingCustomParadigm(this.value, this.checked)">`
+        + `<span class="paradigm-custom-item-text">${escapeAttr(p.displayLabel)}</span>`
+        + `</label>`;
+    }).join('');
+    return `<div class="paradigm-custom-group">`
+      + `<div class="paradigm-custom-group-label">${escapeAttr(g.category)}</div>`
+      + `<div class="paradigm-custom-group-items">${items}</div>`
+      + `</div>`;
+  }).join('');
+  const prevScroll = list.scrollTop;
+  list.innerHTML = html;
+  list.scrollTop = prevScroll;
+  if (countEl) countEl.textContent = checkedInScope ? `${checkedInScope} selected` : 'none selected';
+}
+
 function syncToggleButtons() {
   const requiredSwitch  = document.getElementById('requiredBtn');
   const shuffleSwitch   = document.getElementById('shuffleBtn');
@@ -1381,6 +1428,10 @@ function syncToggleButtons() {
   if (parsingShuffleAllSwitch) parsingShuffleAllSwitch.classList.toggle('on', !!runtime.parsingShuffleAll);
   const parsingShuffleAllToggle = document.getElementById('parsingShuffleAllToggle');
   if (parsingShuffleAllToggle) parsingShuffleAllToggle.setAttribute('aria-checked', runtime.parsingShuffleAll ? 'true' : 'false');
+  const parsingCustomReviewSwitch = document.getElementById('parsingCustomReviewBtn');
+  if (parsingCustomReviewSwitch) parsingCustomReviewSwitch.classList.toggle('on', !!runtime.parsingCustomReview);
+  const parsingCustomReviewToggle = document.getElementById('parsingCustomReviewToggle');
+  if (parsingCustomReviewToggle) parsingCustomReviewToggle.setAttribute('aria-checked', runtime.parsingCustomReview ? 'true' : 'false');
   const parsingReverseSwitch = document.getElementById('parsingReverseBtn');
   if (parsingReverseSwitch) parsingReverseSwitch.classList.toggle('on', !!runtime.parsingReverse);
   const parsingReverseToggle = document.getElementById('parsingReverseToggle');
@@ -1408,6 +1459,7 @@ function syncToggleButtons() {
   });
   syncParsingChapterUi();
   syncParadigmFocusUi();
+  syncParsingCustomParadigmsUi();
   if (dailyResetSwitch) dailyResetSwitch.classList.toggle('on', !!runtime.unspacedAutoResetEnabled);
   if (shuffleToggle)   shuffleToggle.setAttribute('aria-checked',   runtime.shuffled ? 'true' : 'false');
   if (requiredToggle)  requiredToggle.setAttribute('aria-checked',  runtime.requiredOnly ? 'true' : 'false');
@@ -1525,9 +1577,14 @@ function syncLayoutVisibility() {
   const parsingChapterRow = document.getElementById('parsingChapterRow');
   if (parsingChapterRow) parsingChapterRow.style.display = isParsingMode() ? 'flex' : 'none';
   const paradigmFocusRowPrimary = document.getElementById('paradigmFocusRowPrimary');
-  // Shuffle-all parsing turns the focused paradigm off, so hide its dropdown
-  // while it's on (the deck is then a mix of every in-scope paradigm).
-  if (paradigmFocusRowPrimary) paradigmFocusRowPrimary.style.display = (isParsingMode() && !runtime.parsingShuffleAll) ? 'flex' : 'none';
+  // Shuffle-all and the custom paradigm set both turn the single focused
+  // paradigm off, so hide its dropdown whenever either is on (the deck is
+  // then a mix of multiple paradigms).
+  if (paradigmFocusRowPrimary) paradigmFocusRowPrimary.style.display = (isParsingMode() && !runtime.parsingShuffleAll && !runtime.parsingCustomReview) ? 'flex' : 'none';
+  // Custom paradigm set: the checkbox selector takes the dropdown's place
+  // while the toggle is on.
+  const parsingCustomParadigmsRow = document.getElementById('parsingCustomParadigmsRow');
+  if (parsingCustomParadigmsRow) parsingCustomParadigmsRow.style.display = (isParsingMode() && runtime.parsingCustomReview) ? 'flex' : 'none';
   if (shuffleToggle) shuffleToggle.style.display = reviewDeckMode ? 'flex' : 'none';
   // Exclude-known-morphs is a parsing-only filter on the deck pool —
   // promoted from inside Parsing options to a top-level toggle next to
@@ -1537,6 +1594,9 @@ function syncLayoutVisibility() {
   // Shuffle-all-paradigms: parsing-only, sits next to Exclude known morphs.
   const parsingShuffleAllToggle = document.getElementById('parsingShuffleAllToggle');
   if (parsingShuffleAllToggle) parsingShuffleAllToggle.style.display = isParsingMode() ? 'flex' : 'none';
+  // Custom paradigm set: parsing-only, sits next to Shuffle all paradigms.
+  const parsingCustomReviewToggle = document.getElementById('parsingCustomReviewToggle');
+  if (parsingCustomReviewToggle) parsingCustomReviewToggle.style.display = isParsingMode() ? 'flex' : 'none';
   const parsingReverseToggle = document.getElementById('parsingReverseToggle');
   if (parsingReverseToggle) parsingReverseToggle.style.display = isParsingMode() ? 'flex' : 'none';
   // Accent/breathing look-alike distractors only do anything in the reverse
@@ -1863,6 +1923,16 @@ function applyExcludeKnownMorphsFilter(cards) {
   return cards.filter((c) => !isLemmaFormKnown(stats, c.lemma, c.id, enabledDims));
 }
 
+// The lemmas the user has ticked for the custom paradigm set — the truthy
+// keys of runtime.parsingCustomParadigms. Order is irrelevant here; the pool
+// builder re-orders by course progression. Out-of-scope lemmas can be in the
+// map (a saved tick from a higher chapter); the builder drops them.
+function getSelectedCustomParadigmLemmas() {
+  const map = runtime.parsingCustomParadigms;
+  if (!map || typeof map !== 'object') return [];
+  return Object.keys(map).filter((lemma) => map[lemma]);
+}
+
 // The focused paradigm's in-scope, chapter-gated pool with the
 // exclude-known-morphs filter applied — the single source of truth for what
 // parsing mode should be drilling right now. Used at deck-build time
@@ -1876,6 +1946,15 @@ function buildFilteredFocusedParadigmCards() {
     optionalFilters: runtime.optionalFormFilters,
     dimValueFilters: runtime.dimValueFilters
   };
+  // "Custom paradigm set" wins over everything else: pool only the
+  // paradigms the user has ticked, shuffled together. (Mutually exclusive
+  // with shuffle-all — the handlers keep only one on at a time — but checked
+  // first regardless so it takes precedence if both somehow end up set.)
+  if (runtime.parsingCustomReview) {
+    return applyExcludeKnownMorphsFilter(
+      getCardsForParadigmLemmas(keys, getSelectedCustomParadigmLemmas(), opts)
+    );
+  }
   // Global "shuffle all paradigms" toggle wins over the focused paradigm:
   // pool every in-scope paradigm up to the chapter gate, shuffled together.
   if (runtime.parsingShuffleAll) {
@@ -2888,7 +2967,7 @@ const GLOBAL_CLICK_HANDLERS = {
   restoreSpacedUndo, setAppProfile, setStudyMode, setThemeMode, setFontFamily, setTextSize,
   showDisclaimerModal, startStudying, toggleDirection, toggleMorphSelfCheck,
   toggleMorphStepByStep, setMorphFocusedParadigm, setParsingChapter, goToStemDrillFromParsing,
-  toggleRequiredOnly, toggleHardVocabReview, toggleStemNotes, toggleSecondAoristCards, toggleShuffle, toggleSpacedRepetition, toggleSplitSelection, toggleAspectStep, toggleDimStep, toggleOptionalForms, toggleOptionalFormFilter, toggleDimValueFilter, toggleExcludeKnownMorphs, toggleParsingShuffleAll, toggleParsingReverse, toggleAccentLookalikes, resetKnownMorphs, closeResetKnownModal, confirmResetKnownFocused, confirmResetKnownAll, clearParsingStats, toggleUnspacedDailyReset, triggerImportProgress,
+  toggleRequiredOnly, toggleHardVocabReview, toggleStemNotes, toggleSecondAoristCards, toggleShuffle, toggleSpacedRepetition, toggleSplitSelection, toggleAspectStep, toggleDimStep, toggleOptionalForms, toggleOptionalFormFilter, toggleDimValueFilter, toggleExcludeKnownMorphs, toggleParsingShuffleAll, toggleParsingCustomReview, toggleParsingCustomParadigm, setAllParsingCustomParadigms, toggleParsingReverse, toggleAccentLookalikes, resetKnownMorphs, closeResetKnownModal, confirmResetKnownFocused, confirmResetKnownAll, clearParsingStats, toggleUnspacedDailyReset, triggerImportProgress,
   openReaderTab, selectReaderDrillChoice, advanceReaderDrill,
   closeWhatsNewV1_5Modal
 };

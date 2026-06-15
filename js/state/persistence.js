@@ -232,6 +232,18 @@ function sanitizeDimValueFilters(input) {
   return out;
 }
 
+// Normalizes a persisted "lemma → true" map (the custom paradigm set) to a
+// plain object keeping only truthy entries. Tolerates a missing/garbage value
+// (returns {}). Keys are kept verbatim — paradigm lemmas are matched against
+// catalog lemma strings, so they must survive the round trip unchanged.
+function sanitizeParadigmKeyMap(input) {
+  const out = {};
+  if (input && typeof input === 'object') {
+    Object.keys(input).forEach((key) => { if (input[key]) out[String(key)] = true; });
+  }
+  return out;
+}
+
 // ── Persisted-state payload + sanitization for import ────────────────────
 
 export function buildPersistedStatePayload(options = {}) {
@@ -283,6 +295,8 @@ export function buildPersistedStatePayload(options = {}) {
     includeOptionalForms: runtime.includeOptionalForms,
     excludeKnownMorphs: runtime.excludeKnownMorphs,
     parsingShuffleAll: runtime.parsingShuffleAll,
+    parsingCustomReview: runtime.parsingCustomReview,
+    parsingCustomParadigms: runtime.parsingCustomParadigms,
     parsingReverse: runtime.parsingReverse,
     accentLookalikes: runtime.accentLookalikes,
     optionalFormFilters: runtime.optionalFormFilters,
@@ -381,6 +395,11 @@ function sanitizeImportedState(candidate) {
   state.excludeKnownMorphs = !!candidate.excludeKnownMorphs;
   // "Shuffle all paradigms" parsing toggle defaults to false (off).
   state.parsingShuffleAll = !!candidate.parsingShuffleAll;
+  // "Custom paradigm set" parsing toggle + the ticked-lemma map (default off
+  // / empty). Both shuffle-all and the custom set hide the focused dropdown;
+  // they're kept independent in storage even though the UI keeps only one on.
+  state.parsingCustomReview = !!candidate.parsingCustomReview;
+  state.parsingCustomParadigms = sanitizeParadigmKeyMap(candidate.parsingCustomParadigms);
   state.parsingReverse = !!candidate.parsingReverse;
   state.accentLookalikes = !!candidate.accentLookalikes;
   // Sub-filters default to true (every category included) so toggling
@@ -1119,6 +1138,10 @@ export function restoreState() {
     runtime.excludeKnownMorphs = !!saved.excludeKnownMorphs;
     // "Shuffle all paradigms" parsing toggle (default false).
     runtime.parsingShuffleAll = !!saved.parsingShuffleAll;
+    // "Custom paradigm set" parsing toggle + ticked-lemma map (default
+    // off / empty).
+    runtime.parsingCustomReview = !!saved.parsingCustomReview;
+    runtime.parsingCustomParadigms = sanitizeParadigmKeyMap(saved.parsingCustomParadigms);
     // English → Greek parsing direction (default false).
     runtime.parsingReverse = !!saved.parsingReverse;
     // Accent/breathing look-alike distractors in the reverse drill (default false).
