@@ -1161,6 +1161,14 @@
     background: rgba(201,168,76,0.12);
     outline: none;
   }
+  /* Advanced review settings: stack the master toggles in a single vertical
+     column with the switch on the LEFT of the label, so every switch lines up
+     at the same left edge instead of trailing each label at a ragged offset.
+     Scoped to direct children of #controlsBar so the nested Parsing-options
+     sub-toggles (which align their switches to the right) are unaffected. */
+  #controlsBar { flex-direction: column; align-items: stretch; gap: 10px; }
+  #controlsBar > .toggle-label { justify-content: flex-start; gap: 10px; }
+  #controlsBar > .toggle-label > .toggle-switch { order: -1; }
   /* Due-by-day histogram (collapsible) in the spaced review panel. */
   .due-histogram { margin-top: 14px; }
   .due-hist-summary {
