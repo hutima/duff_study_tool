@@ -911,7 +911,12 @@ export function toggleParsingShuffleAll() {
 export function toggleParsingCustomReview() {
   if (!host.isParsingMode()) return;
   runtime.parsingCustomReview = !runtime.parsingCustomReview;
-  if (runtime.parsingCustomReview) runtime.parsingShuffleAll = false;
+  if (runtime.parsingCustomReview) {
+    runtime.parsingShuffleAll = false;
+    // Expand the (collapsible) checklist fresh each time it's switched on.
+    const customRow = document.getElementById('parsingCustomParadigmsRow');
+    if (customRow) customRow.open = true;
+  }
   host.resetMorphStepState();
   host.resetMorphAnswerState();
   host.syncToggleButtons();
@@ -1446,26 +1451,39 @@ function performSpacedScheduleSmooth(requiredOnly) {
   entries.sort((a, b) => a.dueAt - b.dueAt);
 
   // Smoothing can only move a card EARLIER (never delay one), so each card's
-  // reachable window is [day 4 .. its own due-day]. The old approach handed
-  // cards index-evenly-spaced targets across [4 .. latest-scheduled-day],
-  // which silently assumed the whole pile sat on that latest day. When the
-  // pile-up actually sat on an *earlier* day (a mid-range lump plus a few
-  // outliers further out), every target it computed beyond a lump card's own
-  // due-day was rejected by the earlier-only guard — so the lump stayed put
-  // and the days past it stayed empty.
-  //
-  // Instead, process cards earliest-due first (so each card's window is a
-  // growing prefix [4 .. dueDay]) and place each on the LEAST-loaded day
-  // within its own window, ties to the earliest day. That flattens whichever
-  // day is busiest, wherever the pile-up sits, and never delays a card.
+  // reachable window is [day 4 .. its own due-day]. Aim for the average daily
+  // load A = (cards due day 4+) / (max due-day - 3), and only relieve genuine
+  // pile-ups: a day whose card-count is at or below that average (or that holds
+  // just a lone card) is left exactly where it is, so an isolated far-out card
+  // is never dragged earlier for no benefit. The cards on over-average days are
+  // the movable ones; place each (earliest-due first, so its window is a
+  // growing prefix) on the LEAST-loaded day within its own window, ties to the
+  // earliest day. That flattens the busiest day wherever the pile sits, every
+  // filled day ends at the average or higher, and no card is ever delayed.
   const FIRST_DAY = 4;
   const MAX_SMOOTH_DAY = 366;  // bound the bucket array against any corrupt far-future dueAt
   const dayOf = (dueAt) => Math.min(MAX_SMOOTH_DAY, Math.max(FIRST_DAY, Math.ceil((dueAt - now) / SRS_DAY_MS)));
   const lastDay = dayOf(entries[entries.length - 1].dueAt);
   if (lastDay - FIRST_DAY < 1) return;  // everything already lands within one day-slot
 
+  // Per-day counts and the target average over [day 4 .. lastDay].
+  const dayCounts = {};
+  entries.forEach((p) => { const d = dayOf(p.dueAt); dayCounts[d] = (dayCounts[d] || 0) + 1; });
+  const average = entries.length / (lastDay - FIRST_DAY + 1);  // = N / (max due-day - 3)
+  const pileThreshold = Math.max(1, average);
+
+  // Split into frozen (at-or-below-average days, and any lone card — left in
+  // place) and movable (the over-average pile-ups). Frozen cards still occupy
+  // their day so the redistribution below counts them.
   const counts = new Array(lastDay + 1).fill(0);
+  const movable = [];
   entries.forEach((p) => {
+    const d = dayOf(p.dueAt);
+    if (dayCounts[d] <= pileThreshold) counts[d] += 1;
+    else movable.push(p);
+  });
+
+  movable.forEach((p) => {
     const ceilingDay = dayOf(p.dueAt);
     let best = FIRST_DAY;
     for (let day = FIRST_DAY + 1; day <= ceilingDay; day++) {
