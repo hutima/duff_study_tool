@@ -13,6 +13,51 @@ export const SRS_UNSPACED_RECOVERY_MS = 60 * 60 * 1000;    // 1h
 // has 5+ recent flips AND ≥50% confidence. Then confidence-scaled growth
 // ramps 1 → 3 → 8 → 14 at top confidence rather than jumping to the cap.
 export const SRS_MAX_INTERVAL_DAYS = 14;
+
+// ── Spacing-cadence presets ──────────────────────────────────────────────
+// The "easy" interval growth and the hard cap are tuned to how long the
+// course runs. A 2-month intensive wants tight intervals so everything
+// resurfaces before the next weekly quiz; an 8-month course can let
+// well-known cards rest far longer between reviews. Each preset supplies:
+//   maxIntervalDays      — hard cap on any scheduled interval (in 20 h days)
+//   uncertainCeilingDays — ceiling that scales pass/uncertain intervals
+//   easyCurve            — confidence → "easy" growth multiplier, piecewise:
+//                          ≥90% → high; 70–89% → midBase+(pct-70)/midDiv;
+//                          50–69% → lowBase+(pct-50)/lowDiv
+// `intensive` reproduces the historical hard-coded behaviour exactly, so it
+// stays the default and existing schedules are unchanged.
+export const SRS_CADENCE_PRESETS = {
+  intensive: {
+    id: 'intensive',
+    label: '2-month intensive',
+    maxIntervalDays: SRS_MAX_INTERVAL_DAYS,      // top-confidence ramp 1 → 3 → 8 → 14
+    uncertainCeilingDays: 7,
+    easyCurve: { high: 2.5, midBase: 1.5, midDiv: 40, lowBase: 1.2, lowDiv: 100 },
+    // Course is short — a global confidence curve is enough; per-card
+    // difficulty doesn't have time to matter. Off keeps this preset
+    // byte-identical to the original scheduler.
+    useCardDifficulty: false
+  },
+  relaxed: {
+    id: 'relaxed',
+    label: '8-month / continuous review',
+    maxIntervalDays: 120,                         // base (neutral-ease) ramp 1 → 4 → 14 → 49 → 120
+    uncertainCeilingDays: 30,
+    easyCurve: { high: 3.5, midBase: 2.0, midDiv: 20, lowBase: 1.3, lowDiv: 40 },
+    // Long horizon → blend each card's persistent ease (1.3–3.0) into the easy
+    // growth: a stubborn card crawls, a consistently-easy one stretches out
+    // fast. With the longer cap this lets the 8-month mode double as an
+    // indefinite retention deck (mastered cards drop to a low review load).
+    // Neutral at the default ease (2.3) so a fresh card matches the base curve.
+    useCardDifficulty: true,
+    difficultyNeutralEase: 2.3
+  }
+};
+export const DEFAULT_SRS_CADENCE = 'intensive';
+export function getCadencePreset(id) {
+  return SRS_CADENCE_PRESETS[id] || SRS_CADENCE_PRESETS[DEFAULT_SRS_CADENCE];
+}
+
 export const SRS_NEAR_WINDOW_MS = 30 * 60 * 1000;
 export const SRS_CYCLE_ADVANCE_MS = 60 * 60 * 1000;
 // Idle gap that ends a study session. Used by spaced-mode buildStudyDeck to

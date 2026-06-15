@@ -138,7 +138,7 @@ import { getStorage, isLikelyIOS } from '../utils/storage.js';
 import { compareGreekAlphabetical } from '../utils/greekSort.js';
 
 // Domain — SRS
-import { SRS_DAY_MS, SRS_NEAR_WINDOW_MS, SRS_CYCLE_ADVANCE_MS, SESSION_IDLE_RESET_MS } from '../domain/srs/constants.js';
+import { SRS_DAY_MS, SRS_NEAR_WINDOW_MS, SRS_CYCLE_ADVANCE_MS, SESSION_IDLE_RESET_MS, getCadencePreset } from '../domain/srs/constants.js';
 import { msFromDays, setProgressDelay,
          getSrsEase, getSrsStage, getLastEasyIntervalDays, getNextEasyIntervalDays,
          getEasyDelayMs, getUncertainDelayMs, formatRemainingForTable } from '../domain/srs/scheduler.js';
@@ -254,6 +254,7 @@ import {
   toggleSecondAoristCards,
   toggleDirection,
   toggleSpacedRepetition,
+  toggleSpacingCadence,
   toggleSplitSelection,
   toggleAspectStep,
   toggleDimStep,
@@ -1406,6 +1407,12 @@ function syncToggleButtons() {
   if (secondAoristCardsSwitch) secondAoristCardsSwitch.classList.toggle('on', !!runtime.secondAoristCards);
   const secondAoristCardsToggleEl = document.getElementById('secondAoristCardsToggle');
   if (secondAoristCardsToggleEl) secondAoristCardsToggleEl.setAttribute('aria-checked', runtime.secondAoristCards ? 'true' : 'false');
+  // Spacing cadence: ON = relaxed (8-month course), OFF = intensive (2-month, default).
+  const cadenceRelaxed = runtime.spacingCadence === 'relaxed';
+  const cadenceSwitch = document.getElementById('cadenceBtn');
+  if (cadenceSwitch) cadenceSwitch.classList.toggle('on', cadenceRelaxed);
+  const cadenceToggleEl = document.getElementById('cadenceToggle');
+  if (cadenceToggleEl) cadenceToggleEl.setAttribute('aria-checked', cadenceRelaxed ? 'true' : 'false');
   if (splitSelectionSwitch) splitSelectionSwitch.classList.toggle('on', !!runtime.splitSelection);
   if (selfCheckBtn)    selfCheckBtn.classList.toggle('on',    !!runtime.morphSelfCheck && isMorphologyMode());
   if (aspectStepSwitch) aspectStepSwitch.classList.toggle('on', runtime.aspectStep !== false);
@@ -1557,6 +1564,10 @@ function syncLayoutVisibility() {
   if (ffRow) ffRow.style.display = reviewDeckMode && runtime.selectedKeys.length && runtime.spacedRepetition && !isParsingMode() ? 'flex' : 'none';
   if (directionToggle) directionToggle.style.display = (runtime.studyMode === 'vocab' || runtime.studyMode === 'morph') ? 'flex' : 'none';
   if (requiredToggle) requiredToggle.style.display = runtime.studyMode === 'vocab' ? 'flex' : 'none';
+  // Spacing cadence only affects the spaced scheduler, so show it only when
+  // spaced review is on for the current (vocab/grammar) mode.
+  const cadenceToggle = document.getElementById('cadenceToggle');
+  if (cadenceToggle) cadenceToggle.style.display = (runtime.spacedRepetition && (runtime.studyMode === 'vocab' || runtime.studyMode === 'morph')) ? 'flex' : 'none';
   if (hardReviewToggle) hardReviewToggle.style.display = runtime.studyMode === 'vocab' ? 'flex' : 'none';
   // Stem & declension notes annotate standard vocab cards only.
   const stemNotesToggleVis = document.getElementById('stemNotesToggle');
@@ -2455,9 +2466,16 @@ function recordStudyOutcome(cardId, outcome, reviewedAt = Date.now()) {
   return progress;
 }
 
+// Active SRS spacing-cadence preset (2-month intensive vs 8-month). Read by
+// the schedulers so the same flip lands a shorter or longer next interval
+// depending on the course-length toggle in Advanced settings.
+function getActiveCadence() {
+  return getCadencePreset(runtime.spacingCadence);
+}
+
 function seedMinimumUncertainSchedule(cardId, reviewedAt = Date.now()) {
   const progress = getWordProgress(cardId, { persist: true });
-  const minimumDelayMs = getUncertainDelayMs(progress);
+  const minimumDelayMs = getUncertainDelayMs(progress, getActiveCadence());
   const minimumDueAt = reviewedAt + minimumDelayMs;
   if (!progress.dueAt || progress.dueAt < minimumDueAt) {
     setProgressDelay(progress, minimumDelayMs, reviewedAt);
@@ -2514,8 +2532,9 @@ function applySpacedReview(card, outcome) {
   const normalizedOutcome = resolveSharedFaceOutcome(card, ratedOutcome);
   const progress = recordStudyOutcome(card.id, normalizedOutcome, now);
 
+  const cadence = getActiveCadence();
   if (normalizedOutcome === 'easy') {
-    const nextIntervalDays = getNextEasyIntervalDays(progress);
+    const nextIntervalDays = getNextEasyIntervalDays(progress, cadence);
     progress.streak += 1;
     progress.easyStreak = (progress.easyStreak || 0) + 1;
     progress.srsStage = getSrsStage(progress) + 1;
@@ -2529,7 +2548,7 @@ function applySpacedReview(card, outcome) {
     progress.easyStreak = 0;
     progress.ease = clamp(getSrsEase(progress) - 0.05, 1.3, 3.0);
     progress.lastEasyIntervalDays = Math.max(getLastEasyIntervalDays(progress), progress.intervalDays || 0);
-    setProgressDelay(progress, getUncertainDelayMs(progress), now);
+    setProgressDelay(progress, getUncertainDelayMs(progress, cadence), now);
     getDirectionalMarksStore()[card.id] = 'unsure';
   } else {
     // 'again' (default for any unknown outcome)
@@ -2967,7 +2986,7 @@ const GLOBAL_CLICK_HANDLERS = {
   restoreSpacedUndo, setAppProfile, setStudyMode, setThemeMode, setFontFamily, setTextSize,
   showDisclaimerModal, startStudying, toggleDirection, toggleMorphSelfCheck,
   toggleMorphStepByStep, setMorphFocusedParadigm, setParsingChapter, goToStemDrillFromParsing,
-  toggleRequiredOnly, toggleHardVocabReview, toggleStemNotes, toggleSecondAoristCards, toggleShuffle, toggleSpacedRepetition, toggleSplitSelection, toggleAspectStep, toggleDimStep, toggleOptionalForms, toggleOptionalFormFilter, toggleDimValueFilter, toggleExcludeKnownMorphs, toggleParsingShuffleAll, toggleParsingCustomReview, toggleParsingCustomParadigm, setAllParsingCustomParadigms, toggleParsingReverse, toggleAccentLookalikes, resetKnownMorphs, closeResetKnownModal, confirmResetKnownFocused, confirmResetKnownAll, clearParsingStats, toggleUnspacedDailyReset, triggerImportProgress,
+  toggleRequiredOnly, toggleHardVocabReview, toggleStemNotes, toggleSecondAoristCards, toggleShuffle, toggleSpacedRepetition, toggleSpacingCadence, toggleSplitSelection, toggleAspectStep, toggleDimStep, toggleOptionalForms, toggleOptionalFormFilter, toggleDimValueFilter, toggleExcludeKnownMorphs, toggleParsingShuffleAll, toggleParsingCustomReview, toggleParsingCustomParadigm, setAllParsingCustomParadigms, toggleParsingReverse, toggleAccentLookalikes, resetKnownMorphs, closeResetKnownModal, confirmResetKnownFocused, confirmResetKnownAll, clearParsingStats, toggleUnspacedDailyReset, triggerImportProgress,
   openReaderTab, selectReaderDrillChoice, advanceReaderDrill,
   closeWhatsNewV1_5Modal
 };

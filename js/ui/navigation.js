@@ -763,6 +763,21 @@ export function toggleSpacedRepetition() {
   host.saveState();
 }
 
+// Switch the spaced-review spacing cadence between the 2-month intensive
+// default ('intensive') and the relaxed 8-month course pace ('relaxed').
+// This only changes how *future* flips are scheduled (the easy-interval
+// growth curve and the max-interval cap) — already-scheduled cards keep
+// their due dates, so the deck and current due states are untouched and
+// there's nothing to rebuild. Use "Smooth schedule" / a timing reset to
+// rebalance existing due dates if desired.
+export function toggleSpacingCadence() {
+  runtime.spacingCadence = runtime.spacingCadence === 'relaxed' ? 'intensive' : 'relaxed';
+  host.syncToggleButtons();
+  renderProgress();
+  renderReview();
+  host.saveState();
+}
+
 // Toggle the unspaced "Daily archive reset" preference. When on, the next
 // time the app sees the 5 AM-cutoff day key has rolled over from the last
 // archive activity it wipes the unspaced 'known' marks. When off,
@@ -1250,6 +1265,14 @@ export function fastForwardOneDay() {
 }
 
 export function fastForwardOneWeek() {
+  // A full week pulls every scheduled card 7 days earlier in one step, which
+  // can dump a large batch into "due now" and effectively collapse the
+  // spacing — and fast-forward has no undo. Confirm before applying. (Skip
+  // the prompt when there's nothing scheduled to advance.)
+  if (!runtime.spacedRepetition || !runtime.originalDeck.length) return;
+  if (!window.confirm('Fast-forward the review schedule by 1 week?\n\nEvery card\'s due date moves 7 days earlier, so a large batch may come due at once. This can\'t be undone.')) {
+    return;
+  }
   fastForwardScheduling(7 * SRS_DAY_MS);
 }
 
@@ -1422,16 +1445,35 @@ function performSpacedScheduleSmooth(requiredOnly) {
   if (entries.length < 2) return;
   entries.sort((a, b) => a.dueAt - b.dueAt);
 
-  // Spread across study-days 4..lastDay, where lastDay is the latest
-  // currently-scheduled day — smoothing flattens the curve, it never
-  // extends it.
-  const lastDay = Math.ceil((entries[entries.length - 1].dueAt - now) / SRS_DAY_MS);
-  const spreadDays = lastDay - 3;
-  if (spreadDays < 2) return;
-  entries.forEach((p, i) => {
-    const targetDay = 4 + Math.floor((i * spreadDays) / entries.length);
-    const targetDueAt = now + targetDay * SRS_DAY_MS;
-    if (targetDueAt < p.dueAt) p.dueAt = targetDueAt;
+  // Smoothing can only move a card EARLIER (never delay one), so each card's
+  // reachable window is [day 4 .. its own due-day]. The old approach handed
+  // cards index-evenly-spaced targets across [4 .. latest-scheduled-day],
+  // which silently assumed the whole pile sat on that latest day. When the
+  // pile-up actually sat on an *earlier* day (a mid-range lump plus a few
+  // outliers further out), every target it computed beyond a lump card's own
+  // due-day was rejected by the earlier-only guard — so the lump stayed put
+  // and the days past it stayed empty.
+  //
+  // Instead, process cards earliest-due first (so each card's window is a
+  // growing prefix [4 .. dueDay]) and place each on the LEAST-loaded day
+  // within its own window, ties to the earliest day. That flattens whichever
+  // day is busiest, wherever the pile-up sits, and never delays a card.
+  const FIRST_DAY = 4;
+  const MAX_SMOOTH_DAY = 366;  // bound the bucket array against any corrupt far-future dueAt
+  const dayOf = (dueAt) => Math.min(MAX_SMOOTH_DAY, Math.max(FIRST_DAY, Math.ceil((dueAt - now) / SRS_DAY_MS)));
+  const lastDay = dayOf(entries[entries.length - 1].dueAt);
+  if (lastDay - FIRST_DAY < 1) return;  // everything already lands within one day-slot
+
+  const counts = new Array(lastDay + 1).fill(0);
+  entries.forEach((p) => {
+    const ceilingDay = dayOf(p.dueAt);
+    let best = FIRST_DAY;
+    for (let day = FIRST_DAY + 1; day <= ceilingDay; day++) {
+      if (counts[day] < counts[best]) best = day;
+    }
+    counts[best] += 1;
+    const targetDueAt = now + best * SRS_DAY_MS;
+    if (targetDueAt < p.dueAt) p.dueAt = targetDueAt;  // earlier-only guard
   });
 
   // Nothing becomes due immediately (earliest target is day 4), so the

@@ -12,7 +12,7 @@ import { getStorage, isLikelyIOS } from '../utils/storage.js';
 import { shieldClicksBriefly } from '../utils/clickShield.js';
 import { sortSetKeys } from '../domain/deck/ordering.js';
 import { filterHardVocabCards } from '../domain/deck/filters.js';
-import { SESSION_IDLE_RESET_MS } from '../domain/srs/constants.js';
+import { SESSION_IDLE_RESET_MS, SRS_CADENCE_PRESETS, DEFAULT_SRS_CADENCE } from '../domain/srs/constants.js';
 import { STATE_MIGRATIONS, summarizePersistedState, formatPersistedStateSummary, compactPersistedState, compactRuntimeStores } from './migrations.js';
 import {
   sanitizeGamificationState,
@@ -135,6 +135,13 @@ function sanitizeSpacedByMode(input, legacySpaced) {
     vocab: typeof src.vocab === 'boolean' ? src.vocab : legacyVocab,
     morph: typeof src.morph === 'boolean' ? src.morph : false
   };
+}
+
+// SRS spacing-cadence preset. Validate against the known presets so an old
+// save (no field) or a bad value falls back to the 2-month intensive default
+// rather than handing the scheduler an undefined preset.
+function sanitizeSpacingCadence(value) {
+  return (typeof value === 'string' && SRS_CADENCE_PRESETS[value]) ? value : DEFAULT_SRS_CADENCE;
 }
 
 // Legacy paradigm-lemma renames. Old saves may reference lemma strings
@@ -279,6 +286,7 @@ export function buildPersistedStatePayload(options = {}) {
     directionToGreek: runtime.directionToGreek,
     spacedRepetition: runtime.spacedRepetition,
     spacedByMode: runtime.spacedByMode,
+    spacingCadence: runtime.spacingCadence,
     hardVocabReviewMode: runtime.hardVocabReviewMode,
     studyMode: runtime.studyMode,
     appProfile: runtime.appProfile,
@@ -356,6 +364,7 @@ function sanitizeImportedState(candidate) {
   state.directionToGreek = !!candidate.directionToGreek;
   state.spacedRepetition = candidate.spacedRepetition !== false;
   state.spacedByMode = sanitizeSpacedByMode(candidate.spacedByMode, candidate.spacedRepetition);
+  state.spacingCadence = sanitizeSpacingCadence(candidate.spacingCadence);
   state.hardVocabReviewMode = !!candidate.hardVocabReviewMode;
   state.splitSelection = !!candidate.splitSelection;
   state.modeSelections = isPlainObject(candidate.modeSelections) ? candidate.modeSelections : {};
@@ -1106,6 +1115,7 @@ export function restoreState() {
     // active mode's value into the live `spacedRepetition` the rest of the load
     // (deck build, cursor clamp) reads below.
     runtime.spacedByMode = sanitizeSpacedByMode(saved.spacedByMode, saved.spacedRepetition);
+    runtime.spacingCadence = sanitizeSpacingCadence(saved.spacingCadence);
     if (runtime.studyMode === 'vocab' || runtime.studyMode === 'morph') {
       runtime.spacedRepetition = runtime.spacedByMode[runtime.studyMode];
     }

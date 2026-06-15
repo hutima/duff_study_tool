@@ -19,11 +19,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Greek Cards">
-<link rel="manifest" href="manifest.json?v=248">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=248">
-<link rel="icon" type="image/svg+xml" href="favicon.svg?v=248">
+<link rel="manifest" href="manifest.json?v=249">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=249">
+<link rel="icon" type="image/svg+xml" href="favicon.svg?v=249">
 <title>Elementary NT Greek — Flashcards</title>
-<link rel="stylesheet" href="styles.css?v=248">
+<link rel="stylesheet" href="styles.css?v=249">
 <script>
 (function(){
   try {
@@ -160,6 +160,10 @@
     <button class="toggle-label" id="spacedToggle" type="button" role="switch" aria-checked="false" onclick="toggleSpacedRepetition()">
       <span class="toggle-text">Spaced review</span>
       <span class="toggle-switch" id="spacedBtn" aria-hidden="true"></span>
+    </button>
+    <button class="toggle-label" id="cadenceToggle" type="button" role="switch" aria-checked="false" onclick="toggleSpacingCadence()" title="Spacing cadence. Off = 2-month intensive: tighter intervals, ~2-week cap. On = 8-month / continuous review: intervals grow faster, adapt to each card's difficulty, and rest up to ~3 months — also works as an ongoing retention deck. Affects spaced review only; switching reschedules future reviews, not cards already due.">
+      <span class="toggle-text">8-month pace</span>
+      <span class="toggle-switch" id="cadenceBtn" aria-hidden="true"></span>
     </button>
     <button class="toggle-label" id="unspacedDailyResetToggle" type="button" role="switch" aria-checked="false" onclick="toggleUnspacedDailyReset()" title="Auto-clear archived (Easy) cards once a day around 5 AM local time so you wake up to a fresh deck.">
       <span class="toggle-text">Daily archive reset</span>
@@ -760,6 +764,14 @@
       <details class="user-guide-changelog">
         <summary>Changelog</summary>
         <details class="user-guide-changelog-version" open>
+          <summary>Version 1.8 &middot; 2026-06-15</summary>
+          <ul class="user-guide-list">
+            <li><strong>Spacing cadence for your course length.</strong> A new <em>8-month pace</em> toggle in Advanced settings (next to <em>Spaced review</em>) retunes how spaced review schedules cards you know well. Off &mdash; the default &mdash; keeps the <strong>2-month intensive</strong> pace: tight intervals that top out around two weeks, so everything resurfaces before the next weekly quiz. On switches to an <strong>8-month course</strong> pace that doubles as an ongoing retention deck: intervals grow faster, rest longer (up to about three months), and adapt to each card&rsquo;s own difficulty &mdash; a word you keep finding easy stretches out quickly, while a stubborn one is held back &mdash; so once a course ends you can keep the vocabulary warm indefinitely without drilling everything daily. It changes only how <em>future</em> reviews are scheduled &mdash; cards already due are untouched &mdash; and it&rsquo;s saved with the rest of your settings.</li>
+            <li><strong>&ldquo;Smooth schedule&rdquo; now flattens mid-range pile-ups too.</strong> The <em>Smooth schedule</em> reset re-spreads a clump of cards that all came due on the same future day so a steadier number come due each day. It used to assume the clump sat on the very last scheduled day; when the pile-up was on an <em>earlier</em> day &mdash; with only a few cards scheduled further out &mdash; most of the clump stayed put. It now evens out whichever day is busiest across the days leading up to it, while still only ever moving a card earlier, never later.</li>
+            <li><strong>Fast-forward 1 week asks first.</strong> The <em>Fast-forward 1 week</em> button pulls every card&rsquo;s due date seven days earlier in one step, which can bring a large batch due at once and can&rsquo;t be undone &mdash; so it now confirms before running.</li>
+          </ul>
+        </details>
+        <details class="user-guide-changelog-version">
           <summary>Version 1.7 &middot; 2026-06-15</summary>
           <ul class="user-guide-list">
             <li><strong>Custom paradigm set (parsing).</strong> A new <em>Custom paradigm set</em> toggle in Advanced settings lets you build a review deck from exactly the paradigms you choose. Turn it on and the focused-paradigm dropdown is replaced by a category-grouped checklist &mdash; tick any mix of paradigms (say, the article, all three demonstratives, and the &mu;&iota;-verbs) and parsing draws a shuffled deck from just those, chapter-gated as usual. <em>Select all</em> / <em>Clear</em> shortcuts start you from everything or nothing, and a running count shows how many you&rsquo;ve picked. It works alongside the other parsing toggles (<em>Exclude known morphs</em>, <em>English &rarr; Greek</em>), and is mutually exclusive with <em>Shuffle all paradigms</em> &mdash; that one mixes <em>every</em> paradigm in scope, this one mixes only your selection. Your picks are saved with the rest of your progress.</li>
@@ -1032,62 +1044,62 @@
   </div>
 </div>
 
-<script defer src="js/data/words.js?v=248"></script>
-<script defer src="js/data/morphology.js?v=248"></script>
-<script defer src="js/data/lemma_inventory.js?v=248"></script>
-<script defer src="js/data/supplemental.js?v=248"></script>
-<script defer src="js/data/grammar.js?v=248"></script>
-<script defer src="js/data/supplementals/week_1_supplemental.js?v=248"></script>
-<script defer src="js/data/supplementals/week_1_paradigms.js?v=248"></script>
-<script defer src="js/data/supplementals/week_2_paradigms.js?v=248"></script>
-<script defer src="js/data/supplementals/week_3_paradigms.js?v=248"></script>
-<script defer src="js/data/supplementals/week_4_paradigms.js?v=248"></script>
-<script defer src="js/data/supplementals/second_aorist_flip.js?v=248"></script>
-<script defer src="js/data/supplementals/liquid_future_flip.js?v=248"></script>
-<script defer src="js/data/supplementals/week_5_paradigms.js?v=248"></script>
-<script defer src="js/data/supplementals/w6_aorist_passive_flip.js?v=248"></script>
-<script defer src="js/data/supplementals/w6_perfect_active_flip.js?v=248"></script>
-<script defer src="js/data/supplementals/w8_mi_verb_principal_parts_flip.js?v=248"></script>
-<script defer src="js/data/supplementals/week_6_paradigms.js?v=248"></script>
-<script defer src="js/data/supplementals/week_7_paradigms.js?v=248"></script>
-<script defer src="js/data/supplementals/week_8_paradigms.js?v=248"></script>
-<script defer src="js/data/supplementals/adj_paradigms.js?v=248"></script>
-<script defer src="js/data/supplementals/w3o_supplemental.js?v=248"></script>
-<script defer src="js/data/supplementals/w6o_supplemental.js?v=248"></script>
-<script defer src="js/data/supplementals/w7o_supplemental.js?v=248"></script>
-<script defer src="js/data/supplementals/w8o_supplemental.js?v=248"></script>
-<script defer src="js/data/supplementals/paradigm_morphology.js?v=248"></script>
-<script defer src="js/data/supplementals/stem_change_drills.js?v=248"></script>
-<script defer src="js/data/advanced/advanced_01.js?v=248"></script>
-<script defer src="js/data/advanced/advanced_02.js?v=248"></script>
-<script defer src="js/data/advanced/advanced_03.js?v=248"></script>
-<script defer src="js/data/advanced/advanced_04.js?v=248"></script>
-<script defer src="js/data/advanced/advanced_05.js?v=248"></script>
-<script defer src="js/data/advanced/advanced_06.js?v=248"></script>
-<script defer src="js/data/advanced/advanced_07.js?v=248"></script>
-<script defer src="js/data/advanced/advanced_08.js?v=248"></script>
-<script defer src="js/data/advanced/advanced_09.js?v=248"></script>
-<script defer src="js/data/advanced/advanced_10.js?v=248"></script>
-<script defer src="js/data/advanced/advanced_11.js?v=248"></script>
-<script defer src="js/data/advanced/advanced_12.js?v=248"></script>
-<script defer src="js/data/advanced/advanced_13.js?v=248"></script>
-<script defer src="js/data/advanced/advanced_14.js?v=248"></script>
-<script defer src="js/data/advanced/advanced_15.js?v=248"></script>
-<script defer src="js/data/advanced/advanced_16.js?v=248"></script>
-<script defer src="js/data/advanced/advanced_17.js?v=248"></script>
-<script defer src="js/data/advanced/advanced_18.js?v=248"></script>
-<script defer src="js/data/advanced/advanced_19.js?v=248"></script>
-<script defer src="js/data/advanced/advanced_20.js?v=248"></script>
-<script defer src="js/data/advanced/advanced_21.js?v=248"></script>
-<script defer src="js/data/advanced/advanced_22.js?v=248"></script>
-<script defer src="js/data/advanced/advanced_23.js?v=248"></script>
-<script defer src="js/data/advanced/advanced_24.js?v=248"></script>
-<script defer src="js/data/advanced/advanced_25.js?v=248"></script>
-<script defer src="js/data/nt_book_vocab.js?v=248"></script>
-<script defer src="js/data/reader.js?v=248"></script>
-<script defer src="js/data/reader_verse_literals.js?v=248"></script>
-<script defer src="js/data/reader_translations.js?v=248"></script>
-<script defer src="js/logic/pos_logic.js?v=248"></script>
-<script type="module" src="js/app/main.js?v=248"></script>
+<script defer src="js/data/words.js?v=249"></script>
+<script defer src="js/data/morphology.js?v=249"></script>
+<script defer src="js/data/lemma_inventory.js?v=249"></script>
+<script defer src="js/data/supplemental.js?v=249"></script>
+<script defer src="js/data/grammar.js?v=249"></script>
+<script defer src="js/data/supplementals/week_1_supplemental.js?v=249"></script>
+<script defer src="js/data/supplementals/week_1_paradigms.js?v=249"></script>
+<script defer src="js/data/supplementals/week_2_paradigms.js?v=249"></script>
+<script defer src="js/data/supplementals/week_3_paradigms.js?v=249"></script>
+<script defer src="js/data/supplementals/week_4_paradigms.js?v=249"></script>
+<script defer src="js/data/supplementals/second_aorist_flip.js?v=249"></script>
+<script defer src="js/data/supplementals/liquid_future_flip.js?v=249"></script>
+<script defer src="js/data/supplementals/week_5_paradigms.js?v=249"></script>
+<script defer src="js/data/supplementals/w6_aorist_passive_flip.js?v=249"></script>
+<script defer src="js/data/supplementals/w6_perfect_active_flip.js?v=249"></script>
+<script defer src="js/data/supplementals/w8_mi_verb_principal_parts_flip.js?v=249"></script>
+<script defer src="js/data/supplementals/week_6_paradigms.js?v=249"></script>
+<script defer src="js/data/supplementals/week_7_paradigms.js?v=249"></script>
+<script defer src="js/data/supplementals/week_8_paradigms.js?v=249"></script>
+<script defer src="js/data/supplementals/adj_paradigms.js?v=249"></script>
+<script defer src="js/data/supplementals/w3o_supplemental.js?v=249"></script>
+<script defer src="js/data/supplementals/w6o_supplemental.js?v=249"></script>
+<script defer src="js/data/supplementals/w7o_supplemental.js?v=249"></script>
+<script defer src="js/data/supplementals/w8o_supplemental.js?v=249"></script>
+<script defer src="js/data/supplementals/paradigm_morphology.js?v=249"></script>
+<script defer src="js/data/supplementals/stem_change_drills.js?v=249"></script>
+<script defer src="js/data/advanced/advanced_01.js?v=249"></script>
+<script defer src="js/data/advanced/advanced_02.js?v=249"></script>
+<script defer src="js/data/advanced/advanced_03.js?v=249"></script>
+<script defer src="js/data/advanced/advanced_04.js?v=249"></script>
+<script defer src="js/data/advanced/advanced_05.js?v=249"></script>
+<script defer src="js/data/advanced/advanced_06.js?v=249"></script>
+<script defer src="js/data/advanced/advanced_07.js?v=249"></script>
+<script defer src="js/data/advanced/advanced_08.js?v=249"></script>
+<script defer src="js/data/advanced/advanced_09.js?v=249"></script>
+<script defer src="js/data/advanced/advanced_10.js?v=249"></script>
+<script defer src="js/data/advanced/advanced_11.js?v=249"></script>
+<script defer src="js/data/advanced/advanced_12.js?v=249"></script>
+<script defer src="js/data/advanced/advanced_13.js?v=249"></script>
+<script defer src="js/data/advanced/advanced_14.js?v=249"></script>
+<script defer src="js/data/advanced/advanced_15.js?v=249"></script>
+<script defer src="js/data/advanced/advanced_16.js?v=249"></script>
+<script defer src="js/data/advanced/advanced_17.js?v=249"></script>
+<script defer src="js/data/advanced/advanced_18.js?v=249"></script>
+<script defer src="js/data/advanced/advanced_19.js?v=249"></script>
+<script defer src="js/data/advanced/advanced_20.js?v=249"></script>
+<script defer src="js/data/advanced/advanced_21.js?v=249"></script>
+<script defer src="js/data/advanced/advanced_22.js?v=249"></script>
+<script defer src="js/data/advanced/advanced_23.js?v=249"></script>
+<script defer src="js/data/advanced/advanced_24.js?v=249"></script>
+<script defer src="js/data/advanced/advanced_25.js?v=249"></script>
+<script defer src="js/data/nt_book_vocab.js?v=249"></script>
+<script defer src="js/data/reader.js?v=249"></script>
+<script defer src="js/data/reader_verse_literals.js?v=249"></script>
+<script defer src="js/data/reader_translations.js?v=249"></script>
+<script defer src="js/logic/pos_logic.js?v=249"></script>
+<script type="module" src="js/app/main.js?v=249"></script>
 </body>
 </html>
