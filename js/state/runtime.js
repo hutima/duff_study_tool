@@ -236,6 +236,11 @@ export const runtime = {
   // SRS deck — while vocab stays spaced. setStudyMode swaps the active value
   // into `spacedRepetition`; toggleSpacedRepetition writes back here.
   spacedByMode: { vocab: true, morph: false },
+  // SRS spacing-cadence preset: 'intensive' (2-month course, default) keeps the
+  // tight easy-interval growth + ~2-week cap; 'relaxed' (8-month course)
+  // stretches both. Read by applySpacedReview via getActiveCadence(); changing
+  // it only affects how future flips schedule, not already-due cards.
+  spacingCadence: 'intensive',
   hardVocabReviewMode: false, // restrict vocab deck to cards missed >10× and still under 40% confidence
   activeDeckCount: 0,
   // Cards in the "middle deck" — currently due but not yet seen this session.
