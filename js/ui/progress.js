@@ -85,6 +85,54 @@ export function renderProgress() {
   if (isAnalyticsModalOpen()) host.renderAnalyticsOverlay();
 }
 
+// Compact "cards due by day" histogram for the spaced review panel. Buckets
+// scheduled cards (those with a dueAt) by calendar-day offset from today —
+// day 0 = "now" (due/overdue), then one bar per day out to two weeks, with a
+// final "14d+" overflow bar so a long-cadence (8-month) tail stays bounded.
+// Unscheduled (never-seen) cards aren't on the schedule yet, so they're left
+// out. Returns '' in unspaced mode or when nothing is scheduled.
+function buildDueHistogramHtml() {
+  if (!runtime.spacedRepetition) return '';
+  const now = Date.now();
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  const startOfToday = new Date(now); startOfToday.setHours(0, 0, 0, 0);
+  const OVERFLOW = 14;                       // bars 0..13 + a "14d+" overflow at index 14
+  const counts = new Array(OVERFLOW + 1).fill(0);
+  let total = 0;
+  let lastIdx = 0;
+  (runtime.originalDeck || []).forEach(card => {
+    const p = host.getWordProgress(card.id);
+    if (!p.dueAt) return;                    // unscheduled / never seen
+    total += 1;
+    let offset;
+    if (p.dueAt <= now) offset = 0;
+    else {
+      const sod = new Date(p.dueAt); sod.setHours(0, 0, 0, 0);
+      offset = Math.max(0, Math.round((sod.getTime() - startOfToday.getTime()) / DAY_MS));
+    }
+    const idx = Math.min(offset, OVERFLOW);
+    counts[idx] += 1;
+    if (idx > lastIdx) lastIdx = idx;
+  });
+  if (!total) return '';
+  const maxCount = Math.max(...counts.slice(0, lastIdx + 1), 1);
+  let bars = '';
+  for (let i = 0; i <= lastIdx; i++) {
+    const c = counts[i];
+    const h = c === 0 ? 2 : Math.max(4, Math.round((c / maxCount) * 48));
+    const label = i === 0 ? 'now' : (i === OVERFLOW ? `${OVERFLOW}d+` : `${i}`);
+    const title = i === 0 ? `Due now: ${c}`
+      : i === OVERFLOW ? `Due in ${OVERFLOW} or more days: ${c}`
+      : `Due in ${i} day${i === 1 ? '' : 's'}: ${c}`;
+    bars += `<div class="due-hist-col${i === 0 ? ' due-hist-now' : ''}" title="${title}">`
+      + `<span class="due-hist-count">${c || ''}</span>`
+      + `<span class="due-hist-bar" style="height:${h}px"></span>`
+      + `<span class="due-hist-label">${label}</span></div>`;
+  }
+  return `<div class="due-histogram"><div class="due-hist-title">Due by day</div>`
+    + `<div class="due-hist-bars">${bars}</div></div>`;
+}
+
 export function renderReview() {
   const panel = document.getElementById('reviewPanel');
   if (!panel) return;
@@ -147,7 +195,8 @@ export function renderReview() {
       <div class="review-stats-row">
         <span class="stat-known">✓ High confidence: ${highCount}</span>
         <span class="stat-unsure">○ Low confidence: ${lowCount}</span>
-      </div>`;
+      </div>
+      ${buildDueHistogramHtml()}`;
 
   const sortMode = runtime.reviewSortMode === 'confidence' ? 'confidence'
     : runtime.reviewSortMode === 'alphabetical' ? 'alphabetical'

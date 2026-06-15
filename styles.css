@@ -1143,6 +1143,42 @@
     transform: translateX(16px);
     background: var(--gold);
   }
+  /* (i) info button injected into each master toggle (opens a describe-modal). */
+  .toggle-info {
+    flex-shrink: 0;
+    width: 15px; height: 15px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border: 1px solid var(--gold-dim); border-radius: 50%;
+    color: var(--gold-dim);
+    font-family: var(--font-display);
+    font-size: 10px; font-style: italic; line-height: 1;
+    letter-spacing: 0; text-transform: none;
+    cursor: pointer;
+    transition: color 0.1s, border-color 0.1s, background 0.1s;
+  }
+  .toggle-info:hover, .toggle-info:focus-visible {
+    color: var(--gold); border-color: var(--gold);
+    background: rgba(201,168,76,0.12);
+    outline: none;
+  }
+  /* Due-by-day histogram in the spaced review panel. */
+  .due-histogram { margin-top: 14px; }
+  .due-hist-title {
+    font-family: var(--font-display); font-size: 11px; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
+  }
+  .due-hist-bars { display: flex; align-items: flex-end; gap: 3px; min-height: 64px; }
+  .due-hist-col {
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+    flex: 1 1 0; min-width: 0;
+  }
+  .due-hist-count { font-size: 9px; color: var(--muted); line-height: 1; margin-bottom: 2px; min-height: 10px; }
+  .due-hist-bar {
+    width: 100%; max-width: 22px;
+    background: var(--gold-dim); border-radius: 3px 3px 0 0;
+  }
+  .due-hist-now .due-hist-bar { background: var(--gold); }
+  .due-hist-label { font-size: 9px; color: var(--muted); margin-top: 4px; white-space: nowrap; }
 
   @media (max-width: 500px) {
     .sessions-grid { grid-template-columns: 1fr 1fr; }
@@ -2006,6 +2042,27 @@
     align-items: center;
     gap: 10px;
     width: 100%;
+  }
+  /* Collapsible: the row is a <details>, its head the <summary>. */
+  .paradigm-custom-row > summary {
+    cursor: pointer;
+    list-style: none;
+  }
+  .paradigm-custom-row > summary::-webkit-details-marker { display: none; }
+  .paradigm-custom-row > summary .paradigm-focus-label::before {
+    content: '\25B8';            /* ▸ */
+    display: inline-block;
+    margin-right: 6px;
+    color: var(--gold-dim);
+    transition: transform 0.15s;
+  }
+  .paradigm-custom-row[open] > summary .paradigm-focus-label::before {
+    transform: rotate(90deg);
+  }
+  .paradigm-custom-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
   }
   .paradigm-custom-meta {
     font-size: 12px;

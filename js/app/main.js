@@ -1338,6 +1338,61 @@ function syncParsingCustomParadigmsUi() {
   if (countEl) countEl.textContent = checkedInScope ? `${checkedInScope} selected` : 'none selected';
 }
 
+// ── Per-toggle info modal ────────────────────────────────────────────────
+// Each Advanced-settings master toggle gets a small (i) button that opens a
+// modal describing what it does — sourced from the toggle's own `title`, so
+// there's one description that also serves as the desktop tooltip and, more
+// importantly, surfaces on touch devices where hover tooltips never appear.
+// The per-value exclude sub-filters (dimValueFilter_* / optionalFilter_*) are
+// skipped: their labels already name the value (e.g. "Aorist (Ch. 6)").
+function installToggleInfoButtons() {
+  const bar = document.getElementById('controlsBar');
+  if (!bar) return;
+  bar.querySelectorAll('.toggle-label').forEach(label => {
+    if (/^(dimValueFilter_|optionalFilter_)/.test(label.id)) return;
+    if (!label.getAttribute('title')) return;
+    if (label.querySelector('.toggle-info')) return; // idempotent
+    const info = document.createElement('span');
+    info.className = 'toggle-info';
+    info.setAttribute('role', 'button');
+    info.setAttribute('tabindex', '0');
+    info.setAttribute('aria-label', 'What this setting does');
+    info.textContent = 'i';
+    const open = (e) => { e.preventDefault(); e.stopPropagation(); showToggleInfo(label); };
+    info.addEventListener('click', open);
+    info.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') open(e); });
+    const textEl = label.querySelector('.toggle-text');
+    if (textEl) textEl.insertAdjacentElement('afterend', info);
+    else label.appendChild(info);
+  });
+}
+
+function showToggleInfo(label) {
+  const overlay = document.getElementById('toggleInfoOverlay');
+  if (!label || !overlay) return;
+  const textEl = label.querySelector('.toggle-text');
+  const titleEl = document.getElementById('toggleInfoTitle');
+  const bodyEl = document.getElementById('toggleInfoBody');
+  if (titleEl) titleEl.textContent = textEl ? textEl.textContent.trim() : 'Setting';
+  if (bodyEl) bodyEl.textContent = label.getAttribute('title') || '';
+  overlay.classList.add('show');
+  overlay.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('modal-open');
+}
+
+function closeToggleInfoModal() {
+  const overlay = document.getElementById('toggleInfoOverlay');
+  if (!overlay) return;
+  overlay.classList.remove('show');
+  overlay.setAttribute('aria-hidden', 'true');
+  if (!document.querySelector('.consent-overlay.show')) document.body.classList.remove('modal-open');
+}
+
+function isToggleInfoModalOpen() {
+  const overlay = document.getElementById('toggleInfoOverlay');
+  return !!overlay && overlay.classList.contains('show');
+}
+
 function syncToggleButtons() {
   const requiredSwitch  = document.getElementById('requiredBtn');
   const shuffleSwitch   = document.getElementById('shuffleBtn');
@@ -2950,6 +3005,8 @@ installKeyboardShortcuts({
   isStudySelectorOpen, closeStudySelector,
   isShortcutsModalOpen, closeShortcutsModal,
   isWhatsNewV1_5ModalOpen, closeWhatsNewV1_5Modal,
+  isToggleInfoModalOpen, closeToggleInfoModal,
+  isToggleInfoModalOpen, closeToggleInfoModal,
   isDisclaimerModalOpen, isTransferModalOpen, closeTransferModal,
   isReviewDeckMode,
   getSelectedKeys: () => runtime.selectedKeys,
@@ -2988,10 +3045,11 @@ const GLOBAL_CLICK_HANDLERS = {
   toggleMorphStepByStep, setMorphFocusedParadigm, setParsingChapter, goToStemDrillFromParsing,
   toggleRequiredOnly, toggleHardVocabReview, toggleStemNotes, toggleSecondAoristCards, toggleShuffle, toggleSpacedRepetition, toggleSpacingCadence, toggleSplitSelection, toggleAspectStep, toggleDimStep, toggleOptionalForms, toggleOptionalFormFilter, toggleDimValueFilter, toggleExcludeKnownMorphs, toggleParsingShuffleAll, toggleParsingCustomReview, toggleParsingCustomParadigm, setAllParsingCustomParadigms, toggleParsingReverse, toggleAccentLookalikes, resetKnownMorphs, closeResetKnownModal, confirmResetKnownFocused, confirmResetKnownAll, clearParsingStats, toggleUnspacedDailyReset, triggerImportProgress,
   openReaderTab, selectReaderDrillChoice, advanceReaderDrill,
-  closeWhatsNewV1_5Modal
+  closeWhatsNewV1_5Modal, closeToggleInfoModal
 };
 if (typeof globalThis !== 'undefined') Object.assign(globalThis, GLOBAL_CLICK_HANDLERS);
 if (typeof window !== 'undefined' && window !== globalThis) Object.assign(window, GLOBAL_CLICK_HANDLERS);
+installToggleInfoButtons(); // add (i) info buttons to Advanced-settings toggles
 
 initializeThemeMode();
 initializeFontFamily();

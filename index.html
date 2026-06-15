@@ -19,11 +19,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Greek Cards">
-<link rel="manifest" href="manifest.json?v=249">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=249">
-<link rel="icon" type="image/svg+xml" href="favicon.svg?v=249">
+<link rel="manifest" href="manifest.json?v=250">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=250">
+<link rel="icon" type="image/svg+xml" href="favicon.svg?v=250">
 <title>Elementary NT Greek — Flashcards</title>
-<link rel="stylesheet" href="styles.css?v=249">
+<link rel="stylesheet" href="styles.css?v=250">
 <script>
 (function(){
   try {
@@ -113,7 +113,7 @@
       </div>
     </div>
 <div class="controls-bar" id="controlsBar">
-<button class="toggle-label" id="shuffleToggle" type="button" role="switch" aria-checked="false" onclick="toggleShuffle()">
+<button class="toggle-label" id="shuffleToggle" type="button" role="switch" aria-checked="false" onclick="toggleShuffle()" title="Shuffle the deck order. Off keeps a fixed order (by chapter, then frequency); on randomises the order each time the deck is built or reshuffled.">
       <span class="toggle-text">Shuffle</span>
       <span class="toggle-switch" id="shuffleBtn" aria-hidden="true"></span>
     </button>
@@ -137,7 +137,7 @@
       <span class="toggle-text">Accent/breathing look-alike distractors</span>
       <span class="toggle-switch" id="accentLookalikeBtn" aria-hidden="true"></span>
     </button>
-    <button class="toggle-label" id="requiredToggle" type="button" role="switch" aria-checked="false" onclick="toggleRequiredOnly()">
+    <button class="toggle-label" id="requiredToggle" type="button" role="switch" aria-checked="false" onclick="toggleRequiredOnly()" title="Limit the deck to required (graded) vocabulary for your selection, leaving out optional and supplemental words.">
       <span class="toggle-text">Required only</span>
       <span class="toggle-switch" id="requiredBtn" aria-hidden="true"></span>
     </button>
@@ -153,11 +153,11 @@
       <span class="toggle-text">Second aorists as cards</span>
       <span class="toggle-switch" id="secondAoristCardsBtn" aria-hidden="true"></span>
     </button>
-    <button class="toggle-label" id="directionToggle" type="button" role="switch" aria-checked="false" onclick="toggleDirection()">
+    <button class="toggle-label" id="directionToggle" type="button" role="switch" aria-checked="false" onclick="toggleDirection()" title="Card direction. Off shows the Greek first (you recall the English meaning); on shows the English first (you recall the Greek form).">
       <span class="toggle-text">Eng → Gk</span>
       <span class="toggle-switch" id="directionBtn" aria-hidden="true"></span>
     </button>
-    <button class="toggle-label" id="spacedToggle" type="button" role="switch" aria-checked="false" onclick="toggleSpacedRepetition()">
+    <button class="toggle-label" id="spacedToggle" type="button" role="switch" aria-checked="false" onclick="toggleSpacedRepetition()" title="Spaced review. On schedules each card by how well you know it and only resurfaces it when it's due; off is a plain flip-through deck you mark until it's cleared.">
       <span class="toggle-text">Spaced review</span>
       <span class="toggle-switch" id="spacedBtn" aria-hidden="true"></span>
     </button>
@@ -173,7 +173,7 @@
       <span class="toggle-text">Split vocab/grammar selection</span>
       <span class="toggle-switch" id="splitSelectionBtn" aria-hidden="true"></span>
     </button>
-    <button class="toggle-label" id="selfCheckToggle" type="button" role="switch" aria-checked="false" onclick="toggleMorphSelfCheck()" style="display:none">
+    <button class="toggle-label" id="selfCheckToggle" type="button" role="switch" aria-checked="false" onclick="toggleMorphSelfCheck()" style="display:none" title="Self-check. Hides the multiple-choice options so you answer in your head, reveal the answer, then rate whether you got it — instead of picking from a list.">
       <span class="toggle-text">Self-check</span>
       <span class="toggle-switch" id="selfCheckBtn" aria-hidden="true"></span>
     </button>
@@ -412,17 +412,19 @@
     <select id="paradigmFocusSelectPrimary" class="paradigm-focus-select" onchange="setMorphFocusedParadigm(this.value)"></select>
   </div>
 
-  <div class="paradigm-focus-row paradigm-focus-row-primary paradigm-custom-row" id="parsingCustomParadigmsRow" style="display:none">
-    <div class="paradigm-custom-head">
+  <details class="paradigm-focus-row paradigm-focus-row-primary paradigm-custom-row" id="parsingCustomParadigmsRow" style="display:none">
+    <summary class="paradigm-custom-head">
       <span class="paradigm-focus-label">Custom paradigm set</span>
       <span class="paradigm-custom-meta" id="parsingCustomParadigmsCount">none selected</span>
+    </summary>
+    <div class="paradigm-custom-body">
       <span class="paradigm-custom-actions">
         <button type="button" class="paradigm-custom-btn" onclick="setAllParsingCustomParadigms(true)">Select all</button>
         <button type="button" class="paradigm-custom-btn" onclick="setAllParsingCustomParadigms(false)">Clear</button>
       </span>
+      <div class="paradigm-custom-list" id="parsingCustomParadigmsList"></div>
     </div>
-    <div class="paradigm-custom-list" id="parsingCustomParadigmsList"></div>
-  </div>
+  </details>
 
   <div class="card-area" id="cardArea">
     <div class="empty-state">
@@ -764,11 +766,21 @@
       <details class="user-guide-changelog">
         <summary>Changelog</summary>
         <details class="user-guide-changelog-version" open>
+          <summary>Version 1.9 &middot; 2026-06-15</summary>
+          <ul class="user-guide-list">
+            <li><strong>Info buttons on settings.</strong> Each Advanced-settings toggle now has an (i) that opens a short description &mdash; handy on touch, where tooltips don&rsquo;t show.</li>
+            <li><strong>Due-by-day histogram.</strong> The spaced review panel charts how many cards are due now and over the coming days.</li>
+            <li><strong>Collapsible custom paradigm set.</strong> The parsing custom-set checklist folds up (open when you switch it on).</li>
+            <li><strong>Rolling 60-day activity views.</strong> The study-activity calendar and cumulative charts now show the most recent 60 days.</li>
+            <li><strong>Smoothing leaves lone outliers alone.</strong> A single far-off card is no longer dragged earlier just to fill a gap.</li>
+          </ul>
+        </details>
+        <details class="user-guide-changelog-version">
           <summary>Version 1.8 &middot; 2026-06-15</summary>
           <ul class="user-guide-list">
-            <li><strong>Spacing cadence for your course length.</strong> A new <em>8-month pace</em> toggle in Advanced settings (next to <em>Spaced review</em>) retunes how spaced review schedules cards you know well. Off &mdash; the default &mdash; keeps the <strong>2-month intensive</strong> pace: tight intervals that top out around two weeks, so everything resurfaces before the next weekly quiz. On switches to an <strong>8-month course</strong> pace that doubles as an ongoing retention deck: intervals grow faster, rest longer (up to about three months), and adapt to each card&rsquo;s own difficulty &mdash; a word you keep finding easy stretches out quickly, while a stubborn one is held back &mdash; so once a course ends you can keep the vocabulary warm indefinitely without drilling everything daily. It changes only how <em>future</em> reviews are scheduled &mdash; cards already due are untouched &mdash; and it&rsquo;s saved with the rest of your settings.</li>
-            <li><strong>&ldquo;Smooth schedule&rdquo; now flattens mid-range pile-ups too.</strong> The <em>Smooth schedule</em> reset re-spreads a clump of cards that all came due on the same future day so a steadier number come due each day. It used to assume the clump sat on the very last scheduled day; when the pile-up was on an <em>earlier</em> day &mdash; with only a few cards scheduled further out &mdash; most of the clump stayed put. It now evens out whichever day is busiest across the days leading up to it, while still only ever moving a card earlier, never later.</li>
-            <li><strong>Fast-forward 1 week asks first.</strong> The <em>Fast-forward 1 week</em> button pulls every card&rsquo;s due date seven days earlier in one step, which can bring a large batch due at once and can&rsquo;t be undone &mdash; so it now confirms before running.</li>
+            <li><strong>Course-length spacing cadence.</strong> A new <em>8-month pace</em> toggle (Advanced settings) switches spaced review between the 2-month intensive default and a relaxed 8-month / continuous-review pace that grows intervals further, adapts to each card&rsquo;s difficulty, and doubles as a long-term retention deck. Affects only future reviews.</li>
+            <li><strong>Better &ldquo;Smooth schedule.&rdquo;</strong> Now flattens a due-date pile-up wherever it sits, not just on the last scheduled day &mdash; still only ever moving cards earlier.</li>
+            <li><strong>Fast-forward 1 week confirms first.</strong> It can&rsquo;t be undone and may bring many cards due at once.</li>
           </ul>
         </details>
         <details class="user-guide-changelog-version">
@@ -1044,62 +1056,74 @@
   </div>
 </div>
 
-<script defer src="js/data/words.js?v=249"></script>
-<script defer src="js/data/morphology.js?v=249"></script>
-<script defer src="js/data/lemma_inventory.js?v=249"></script>
-<script defer src="js/data/supplemental.js?v=249"></script>
-<script defer src="js/data/grammar.js?v=249"></script>
-<script defer src="js/data/supplementals/week_1_supplemental.js?v=249"></script>
-<script defer src="js/data/supplementals/week_1_paradigms.js?v=249"></script>
-<script defer src="js/data/supplementals/week_2_paradigms.js?v=249"></script>
-<script defer src="js/data/supplementals/week_3_paradigms.js?v=249"></script>
-<script defer src="js/data/supplementals/week_4_paradigms.js?v=249"></script>
-<script defer src="js/data/supplementals/second_aorist_flip.js?v=249"></script>
-<script defer src="js/data/supplementals/liquid_future_flip.js?v=249"></script>
-<script defer src="js/data/supplementals/week_5_paradigms.js?v=249"></script>
-<script defer src="js/data/supplementals/w6_aorist_passive_flip.js?v=249"></script>
-<script defer src="js/data/supplementals/w6_perfect_active_flip.js?v=249"></script>
-<script defer src="js/data/supplementals/w8_mi_verb_principal_parts_flip.js?v=249"></script>
-<script defer src="js/data/supplementals/week_6_paradigms.js?v=249"></script>
-<script defer src="js/data/supplementals/week_7_paradigms.js?v=249"></script>
-<script defer src="js/data/supplementals/week_8_paradigms.js?v=249"></script>
-<script defer src="js/data/supplementals/adj_paradigms.js?v=249"></script>
-<script defer src="js/data/supplementals/w3o_supplemental.js?v=249"></script>
-<script defer src="js/data/supplementals/w6o_supplemental.js?v=249"></script>
-<script defer src="js/data/supplementals/w7o_supplemental.js?v=249"></script>
-<script defer src="js/data/supplementals/w8o_supplemental.js?v=249"></script>
-<script defer src="js/data/supplementals/paradigm_morphology.js?v=249"></script>
-<script defer src="js/data/supplementals/stem_change_drills.js?v=249"></script>
-<script defer src="js/data/advanced/advanced_01.js?v=249"></script>
-<script defer src="js/data/advanced/advanced_02.js?v=249"></script>
-<script defer src="js/data/advanced/advanced_03.js?v=249"></script>
-<script defer src="js/data/advanced/advanced_04.js?v=249"></script>
-<script defer src="js/data/advanced/advanced_05.js?v=249"></script>
-<script defer src="js/data/advanced/advanced_06.js?v=249"></script>
-<script defer src="js/data/advanced/advanced_07.js?v=249"></script>
-<script defer src="js/data/advanced/advanced_08.js?v=249"></script>
-<script defer src="js/data/advanced/advanced_09.js?v=249"></script>
-<script defer src="js/data/advanced/advanced_10.js?v=249"></script>
-<script defer src="js/data/advanced/advanced_11.js?v=249"></script>
-<script defer src="js/data/advanced/advanced_12.js?v=249"></script>
-<script defer src="js/data/advanced/advanced_13.js?v=249"></script>
-<script defer src="js/data/advanced/advanced_14.js?v=249"></script>
-<script defer src="js/data/advanced/advanced_15.js?v=249"></script>
-<script defer src="js/data/advanced/advanced_16.js?v=249"></script>
-<script defer src="js/data/advanced/advanced_17.js?v=249"></script>
-<script defer src="js/data/advanced/advanced_18.js?v=249"></script>
-<script defer src="js/data/advanced/advanced_19.js?v=249"></script>
-<script defer src="js/data/advanced/advanced_20.js?v=249"></script>
-<script defer src="js/data/advanced/advanced_21.js?v=249"></script>
-<script defer src="js/data/advanced/advanced_22.js?v=249"></script>
-<script defer src="js/data/advanced/advanced_23.js?v=249"></script>
-<script defer src="js/data/advanced/advanced_24.js?v=249"></script>
-<script defer src="js/data/advanced/advanced_25.js?v=249"></script>
-<script defer src="js/data/nt_book_vocab.js?v=249"></script>
-<script defer src="js/data/reader.js?v=249"></script>
-<script defer src="js/data/reader_verse_literals.js?v=249"></script>
-<script defer src="js/data/reader_translations.js?v=249"></script>
-<script defer src="js/logic/pos_logic.js?v=249"></script>
-<script type="module" src="js/app/main.js?v=249"></script>
+<div class="consent-overlay" id="toggleInfoOverlay" aria-hidden="true">
+  <div class="consent-modal" role="dialog" aria-modal="true" aria-labelledby="toggleInfoTitle">
+    <h2 id="toggleInfoTitle">Setting</h2>
+    <div class="consent-copy">
+      <p id="toggleInfoBody"></p>
+    </div>
+    <div class="consent-actions">
+      <button class="ctrl-btn consent-primary" type="button" onclick="closeToggleInfoModal()">Got it</button>
+    </div>
+  </div>
+</div>
+
+<script defer src="js/data/words.js?v=250"></script>
+<script defer src="js/data/morphology.js?v=250"></script>
+<script defer src="js/data/lemma_inventory.js?v=250"></script>
+<script defer src="js/data/supplemental.js?v=250"></script>
+<script defer src="js/data/grammar.js?v=250"></script>
+<script defer src="js/data/supplementals/week_1_supplemental.js?v=250"></script>
+<script defer src="js/data/supplementals/week_1_paradigms.js?v=250"></script>
+<script defer src="js/data/supplementals/week_2_paradigms.js?v=250"></script>
+<script defer src="js/data/supplementals/week_3_paradigms.js?v=250"></script>
+<script defer src="js/data/supplementals/week_4_paradigms.js?v=250"></script>
+<script defer src="js/data/supplementals/second_aorist_flip.js?v=250"></script>
+<script defer src="js/data/supplementals/liquid_future_flip.js?v=250"></script>
+<script defer src="js/data/supplementals/week_5_paradigms.js?v=250"></script>
+<script defer src="js/data/supplementals/w6_aorist_passive_flip.js?v=250"></script>
+<script defer src="js/data/supplementals/w6_perfect_active_flip.js?v=250"></script>
+<script defer src="js/data/supplementals/w8_mi_verb_principal_parts_flip.js?v=250"></script>
+<script defer src="js/data/supplementals/week_6_paradigms.js?v=250"></script>
+<script defer src="js/data/supplementals/week_7_paradigms.js?v=250"></script>
+<script defer src="js/data/supplementals/week_8_paradigms.js?v=250"></script>
+<script defer src="js/data/supplementals/adj_paradigms.js?v=250"></script>
+<script defer src="js/data/supplementals/w3o_supplemental.js?v=250"></script>
+<script defer src="js/data/supplementals/w6o_supplemental.js?v=250"></script>
+<script defer src="js/data/supplementals/w7o_supplemental.js?v=250"></script>
+<script defer src="js/data/supplementals/w8o_supplemental.js?v=250"></script>
+<script defer src="js/data/supplementals/paradigm_morphology.js?v=250"></script>
+<script defer src="js/data/supplementals/stem_change_drills.js?v=250"></script>
+<script defer src="js/data/advanced/advanced_01.js?v=250"></script>
+<script defer src="js/data/advanced/advanced_02.js?v=250"></script>
+<script defer src="js/data/advanced/advanced_03.js?v=250"></script>
+<script defer src="js/data/advanced/advanced_04.js?v=250"></script>
+<script defer src="js/data/advanced/advanced_05.js?v=250"></script>
+<script defer src="js/data/advanced/advanced_06.js?v=250"></script>
+<script defer src="js/data/advanced/advanced_07.js?v=250"></script>
+<script defer src="js/data/advanced/advanced_08.js?v=250"></script>
+<script defer src="js/data/advanced/advanced_09.js?v=250"></script>
+<script defer src="js/data/advanced/advanced_10.js?v=250"></script>
+<script defer src="js/data/advanced/advanced_11.js?v=250"></script>
+<script defer src="js/data/advanced/advanced_12.js?v=250"></script>
+<script defer src="js/data/advanced/advanced_13.js?v=250"></script>
+<script defer src="js/data/advanced/advanced_14.js?v=250"></script>
+<script defer src="js/data/advanced/advanced_15.js?v=250"></script>
+<script defer src="js/data/advanced/advanced_16.js?v=250"></script>
+<script defer src="js/data/advanced/advanced_17.js?v=250"></script>
+<script defer src="js/data/advanced/advanced_18.js?v=250"></script>
+<script defer src="js/data/advanced/advanced_19.js?v=250"></script>
+<script defer src="js/data/advanced/advanced_20.js?v=250"></script>
+<script defer src="js/data/advanced/advanced_21.js?v=250"></script>
+<script defer src="js/data/advanced/advanced_22.js?v=250"></script>
+<script defer src="js/data/advanced/advanced_23.js?v=250"></script>
+<script defer src="js/data/advanced/advanced_24.js?v=250"></script>
+<script defer src="js/data/advanced/advanced_25.js?v=250"></script>
+<script defer src="js/data/nt_book_vocab.js?v=250"></script>
+<script defer src="js/data/reader.js?v=250"></script>
+<script defer src="js/data/reader_verse_literals.js?v=250"></script>
+<script defer src="js/data/reader_translations.js?v=250"></script>
+<script defer src="js/logic/pos_logic.js?v=250"></script>
+<script type="module" src="js/app/main.js?v=250"></script>
 </body>
 </html>
