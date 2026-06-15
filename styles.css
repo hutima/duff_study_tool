@@ -1161,13 +1161,21 @@
     background: rgba(201,168,76,0.12);
     outline: none;
   }
-  /* Due-by-day histogram in the spaced review panel. */
+  /* Due-by-day histogram (collapsible) in the spaced review panel. */
   .due-histogram { margin-top: 14px; }
-  .due-hist-title {
+  .due-hist-summary {
+    cursor: pointer; list-style: none;
+    display: flex; align-items: center; gap: 6px;
     font-family: var(--font-display); font-size: 11px; letter-spacing: 1px;
-    text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
+    text-transform: uppercase; color: var(--muted);
   }
-  .due-hist-bars { display: flex; align-items: flex-end; gap: 3px; min-height: 64px; }
+  .due-hist-summary::-webkit-details-marker { display: none; }
+  .due-hist-summary::before {
+    content: '\25B8'; color: var(--gold-dim); display: inline-block; transition: transform 0.15s;
+  }
+  .due-histogram[open] .due-hist-summary::before { transform: rotate(90deg); }
+  .due-hist-meta { color: var(--gold-dim); font-style: italic; text-transform: none; letter-spacing: 0; }
+  .due-hist-bars { display: flex; align-items: flex-end; gap: 3px; min-height: 64px; margin-top: 10px; }
   .due-hist-col {
     display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
     flex: 1 1 0; min-width: 0;
