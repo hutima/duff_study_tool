@@ -76,9 +76,18 @@ export function getNextEasyIntervalDays(progress, cadence = DEFAULT_CADENCE) {
 
   // Post-stabilization: confidence-scaled multiplier on the previous interval.
   // Growth is gradual rather than a hard jump to the cap; the cadence preset
-  // sets both the curve and the cap (intensive 1 → 3 → 8 → 14, relaxed
-  // 1 → 4 → 14 → 49 → 60 at top confidence).
-  const multiplier = easyMultiplierFor(recentPct, cadence.easyCurve);
+  // sets the curve and the cap (intensive 1 → 3 → 8 → 14; relaxed base
+  // 1 → 4 → 14 → 49 → 120, then modulated per-card below).
+  let multiplier = easyMultiplierFor(recentPct, cadence.easyCurve);
+  if (cadence.useCardDifficulty) {
+    // Blend the card's persistent ease (per-card difficulty, 1.3–3.0) into the
+    // confidence multiplier: a stubborn card grows slower, a consistently-easy
+    // one faster. Neutral at the cadence's reference ease so a fresh card still
+    // matches the base curve; the minNext floor below keeps even a hard card
+    // growing by at least 1 day rather than shrinking.
+    const neutralEase = cadence.difficultyNeutralEase || 2.3;
+    multiplier *= getSrsEase(progress) / neutralEase;
+  }
 
   const previousDays = Math.max(
     1,

@@ -32,14 +32,25 @@ export const SRS_CADENCE_PRESETS = {
     label: '2-month intensive',
     maxIntervalDays: SRS_MAX_INTERVAL_DAYS,      // top-confidence ramp 1 → 3 → 8 → 14
     uncertainCeilingDays: 7,
-    easyCurve: { high: 2.5, midBase: 1.5, midDiv: 40, lowBase: 1.2, lowDiv: 100 }
+    easyCurve: { high: 2.5, midBase: 1.5, midDiv: 40, lowBase: 1.2, lowDiv: 100 },
+    // Course is short — a global confidence curve is enough; per-card
+    // difficulty doesn't have time to matter. Off keeps this preset
+    // byte-identical to the original scheduler.
+    useCardDifficulty: false
   },
   relaxed: {
     id: 'relaxed',
-    label: '8-month course',
-    maxIntervalDays: 60,                          // top-confidence ramp 1 → 4 → 14 → 49 → 60
-    uncertainCeilingDays: 21,
-    easyCurve: { high: 3.5, midBase: 2.0, midDiv: 20, lowBase: 1.3, lowDiv: 40 }
+    label: '8-month / continuous review',
+    maxIntervalDays: 120,                         // base (neutral-ease) ramp 1 → 4 → 14 → 49 → 120
+    uncertainCeilingDays: 30,
+    easyCurve: { high: 3.5, midBase: 2.0, midDiv: 20, lowBase: 1.3, lowDiv: 40 },
+    // Long horizon → blend each card's persistent ease (1.3–3.0) into the easy
+    // growth: a stubborn card crawls, a consistently-easy one stretches out
+    // fast. With the longer cap this lets the 8-month mode double as an
+    // indefinite retention deck (mastered cards drop to a low review load).
+    // Neutral at the default ease (2.3) so a fresh card matches the base curve.
+    useCardDifficulty: true,
+    difficultyNeutralEase: 2.3
   }
 };
 export const DEFAULT_SRS_CADENCE = 'intensive';
