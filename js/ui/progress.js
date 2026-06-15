@@ -7,6 +7,7 @@ import { runtime } from '../state/runtime.js';
 import { compareGreekAlphabetical } from '../utils/greekSort.js';
 import { getConfidencePct } from '../domain/srs/confidence.js';
 import { formatRemainingForTable, getSrsStage } from '../domain/srs/scheduler.js';
+import { SRS_DAY_MS } from '../domain/srs/constants.js';
 import { getCardReviewLeft, getCardReviewRight, getCardMetaLine } from '../domain/deck/filters.js';
 import { isAnalyticsModalOpen } from './modals.js';
 import {
@@ -86,33 +87,38 @@ export function renderProgress() {
 }
 
 // Bar columns + total for the "cards due by day" histogram. Buckets cards by
-// calendar-day offset from today — day 0 = "now" (due/overdue AND never-seen
-// cards, which are immediately reviewable), then one bar per day out to two
-// weeks, with a final "14d+" overflow bar so a long-cadence (8-month) tail
-// stays bounded. The day-0 count therefore matches the "Due now" stat
-// (host.getDueCount), which also treats never-seen cards as due. Returns null
-// in unspaced mode or when the deck is empty. dueNow is the day-0 count.
+// STUDY days (SRS_DAY_MS — currently 22h), not calendar days, so an N-interval
+// card lands in the matching bucket: a 24h grid compresses them (14 study days
+// is only ~12.8 real days, so the far buckets never fill). Columns:
+//   now    — due right now / overdue, plus never-seen cards (all reviewable
+//            this session). Matches the "Due now" stat (host.getDueCount).
+//   today  — due in under one study day but not yet — e.g. an Uncertain card
+//            bumped a couple of hours: due today / next session, but not now.
+//   k      — due in [k, k+1) study days (k = 1..13), then a "14d+" overflow
+//            so a long-cadence (8-month) tail stays bounded.
+// Returns null in unspaced mode or when the deck is empty. dueNow is the
+// "now"-column count.
 function buildDueHistogramBars() {
   if (!runtime.spacedRepetition) return null;
   const now = Date.now();
-  const DAY_MS = 24 * 60 * 60 * 1000;
-  const startOfToday = new Date(now); startOfToday.setHours(0, 0, 0, 0);
-  const OVERFLOW = 14;                       // bars 0..13 + a "14d+" overflow at index 14
-  const counts = new Array(OVERFLOW + 1).fill(0);
+  const MAX_DAY = 14;                         // day bars 1..13, then a 14d+ overflow
+  const COL_NOW = 0, COL_TODAY = 1;
+  const COL_OVERFLOW = MAX_DAY + 1;           // index of the "14d+" bucket
+  const counts = new Array(COL_OVERFLOW + 1).fill(0);
   let total = 0;
   let lastIdx = 0;
   (runtime.originalDeck || []).forEach(card => {
     const p = host.getWordProgress(card.id);
     total += 1;
-    let offset;
-    if (!p.dueAt || p.dueAt <= now) offset = 0;   // never-seen or overdue → due now
-    else {
-      const sod = new Date(p.dueAt); sod.setHours(0, 0, 0, 0);
-      offset = Math.max(0, Math.round((sod.getTime() - startOfToday.getTime()) / DAY_MS));
+    let col;
+    if (!p.dueAt || p.dueAt <= now) {
+      col = COL_NOW;                          // never-seen or overdue → due now
+    } else {
+      const studyDays = Math.floor((p.dueAt - now) / SRS_DAY_MS);
+      col = studyDays === 0 ? COL_TODAY : Math.min(studyDays + 1, COL_OVERFLOW);
     }
-    const idx = Math.min(offset, OVERFLOW);
-    counts[idx] += 1;
-    if (idx > lastIdx) lastIdx = idx;
+    counts[col] += 1;
+    if (col > lastIdx) lastIdx = col;
   });
   if (!total) return null;
   const maxCount = Math.max(...counts.slice(0, lastIdx + 1), 1);
@@ -120,16 +126,21 @@ function buildDueHistogramBars() {
   for (let i = 0; i <= lastIdx; i++) {
     const c = counts[i];
     const h = c === 0 ? 2 : Math.max(4, Math.round((c / maxCount) * 48));
-    const label = i === 0 ? 'now' : (i === OVERFLOW ? `${OVERFLOW}d+` : `${i}`);
-    const title = i === 0 ? `Due now: ${c}`
-      : i === OVERFLOW ? `Due in ${OVERFLOW} or more days: ${c}`
-      : `Due in ${i} day${i === 1 ? '' : 's'}: ${c}`;
-    bars += `<div class="due-hist-col${i === 0 ? ' due-hist-now' : ''}" title="${title}">`
+    const days = i - 1;                       // i>=2 → that many study days
+    const label = i === COL_NOW ? 'now'
+      : i === COL_TODAY ? 'today'
+      : i === COL_OVERFLOW ? `${MAX_DAY}d+`
+      : `${days}`;
+    const title = i === COL_NOW ? `Due now: ${c}`
+      : i === COL_TODAY ? `Due later today: ${c}`
+      : i === COL_OVERFLOW ? `Due in ${MAX_DAY} or more days: ${c}`
+      : `Due in ${days} day${days === 1 ? '' : 's'}: ${c}`;
+    bars += `<div class="due-hist-col${i === COL_NOW ? ' due-hist-now' : ''}" title="${title}">`
       + `<span class="due-hist-count">${c || ''}</span>`
       + `<span class="due-hist-bar" style="height:${h}px"></span>`
       + `<span class="due-hist-label">${label}</span></div>`;
   }
-  return { total, bars, dueNow: counts[0] };
+  return { total, bars, dueNow: counts[COL_NOW] };
 }
 
 // Collapsible "Due by day" histogram. Two variants:
