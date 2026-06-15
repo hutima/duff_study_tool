@@ -172,6 +172,20 @@ export const runtime = {
   // rather than one paradigm at a time. Off by default; only parsing mode
   // reads it. The focused-paradigm dropdown is hidden while it's on.
   parsingShuffleAll: false,
+  // "Custom paradigm set" parsing toggle. When on, parsing ignores the
+  // single focused paradigm and instead pools the specific paradigms the
+  // user has hand-picked in the custom-set selector (parsingCustomParadigms),
+  // shuffled together — a tailored review deck. Off by default; only parsing
+  // mode reads it. Mutually exclusive with parsingShuffleAll (turning one on
+  // turns the other off). While on, the focused-paradigm dropdown is hidden
+  // and the checkbox selector is shown in its place.
+  parsingCustomReview: false,
+  // Map of lemma → true for the paradigms the user has checked for the
+  // custom set. Only consulted when parsingCustomReview is on. Lemmas that
+  // fall out of chapter scope are kept in the map (so re-raising the chapter
+  // restores the tick) but contribute no cards while out of scope. An empty
+  // map ⇒ an empty deck (the "pick at least one paradigm" prompt state).
+  parsingCustomParadigms: {},
   // Per-category sub-filters on the optional-form drill pool. Each key
   // defaults to true (the category is INCLUDED); flipping a key to false
   // excludes any optional-form card whose canonical parse mentions the

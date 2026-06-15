@@ -73,7 +73,8 @@ let host = {
   resetMorphStepState: () => {},
   ensureMorphFocusedParadigm: () => {},
   rebuildMorphDeckForStepMode: () => {},
-  rebuildParsingCycle: () => {}
+  rebuildParsingCycle: () => {},
+  listAvailableParadigmLemmas: () => []
 };
 
 // When split vocab/grammar selection is on, each mode keeps its own selected
@@ -870,11 +871,83 @@ export function toggleExcludeKnownMorphs() {
 export function toggleParsingShuffleAll() {
   if (!host.isParsingMode()) return;
   runtime.parsingShuffleAll = !runtime.parsingShuffleAll;
+  // Shuffle-all and the custom paradigm set are mutually exclusive deck
+  // sources — turning one on turns the other off.
+  if (runtime.parsingShuffleAll) runtime.parsingCustomReview = false;
   host.resetMorphStepState();
   host.resetMorphAnswerState();
   host.syncToggleButtons();
   host.syncLayoutVisibility();
   if (!runtime.selectedKeys.length) {
+    host.saveState();
+    return;
+  }
+  const keysToLoad = runtime.currentSession ? expandSessionSets(runtime.currentSession) : runtime.selectedKeys;
+  loadDeckFromKeys(keysToLoad, runtime.currentSession ? runtime.currentSession.id : null);
+}
+
+// "Custom paradigm set": ignore the single focused paradigm and draw the
+// parsing deck from the specific paradigms the user has ticked in the
+// checkbox selector, shuffled together. Off by default. Mutually exclusive
+// with shuffle-all. Only parsing mode reads it; outside parsing the flag
+// still flips and persists but no rebuild happens. Drops any in-flight walk,
+// swaps the focused-paradigm dropdown for the checklist (handled in
+// syncLayoutVisibility), then rebuilds the deck.
+export function toggleParsingCustomReview() {
+  if (!host.isParsingMode()) return;
+  runtime.parsingCustomReview = !runtime.parsingCustomReview;
+  if (runtime.parsingCustomReview) runtime.parsingShuffleAll = false;
+  host.resetMorphStepState();
+  host.resetMorphAnswerState();
+  host.syncToggleButtons();
+  host.syncLayoutVisibility();
+  if (!runtime.selectedKeys.length) {
+    host.saveState();
+    return;
+  }
+  const keysToLoad = runtime.currentSession ? expandSessionSets(runtime.currentSession) : runtime.selectedKeys;
+  loadDeckFromKeys(keysToLoad, runtime.currentSession ? runtime.currentSession.id : null);
+}
+
+// Tick / untick one paradigm in the custom set. `checked` comes straight from
+// the checkbox. Writes the lemma → true into runtime.parsingCustomParadigms
+// (deleting on untick so the map stays minimal), then rebuilds the deck so
+// the change takes effect immediately. Only meaningful while the custom-set
+// toggle is on (the only time the checkboxes are visible), but guarded so a
+// stray call outside parsing mode just records the tick and persists.
+export function toggleParsingCustomParadigm(lemma, checked) {
+  if (!lemma) return;
+  if (!runtime.parsingCustomParadigms || typeof runtime.parsingCustomParadigms !== 'object') {
+    runtime.parsingCustomParadigms = {};
+  }
+  if (checked) runtime.parsingCustomParadigms[lemma] = true;
+  else delete runtime.parsingCustomParadigms[lemma];
+  host.resetMorphStepState();
+  host.resetMorphAnswerState();
+  host.syncToggleButtons();
+  if (!host.isParsingMode() || !runtime.parsingCustomReview || !runtime.selectedKeys.length) {
+    host.saveState();
+    return;
+  }
+  const keysToLoad = runtime.currentSession ? expandSessionSets(runtime.currentSession) : runtime.selectedKeys;
+  loadDeckFromKeys(keysToLoad, runtime.currentSession ? runtime.currentSession.id : null);
+}
+
+// "Select all" / "Clear" for the custom set. `select` true ticks every
+// in-scope paradigm (so the set follows the current chapter scope); false
+// wipes the map. Then rebuilds the deck like a per-paradigm tick.
+export function setAllParsingCustomParadigms(select) {
+  if (select) {
+    const next = {};
+    host.listAvailableParadigmLemmas().forEach((lemma) => { if (lemma) next[lemma] = true; });
+    runtime.parsingCustomParadigms = next;
+  } else {
+    runtime.parsingCustomParadigms = {};
+  }
+  host.resetMorphStepState();
+  host.resetMorphAnswerState();
+  host.syncToggleButtons();
+  if (!host.isParsingMode() || !runtime.parsingCustomReview || !runtime.selectedKeys.length) {
     host.saveState();
     return;
   }

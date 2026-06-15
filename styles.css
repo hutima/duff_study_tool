@@ -1991,6 +1991,113 @@
     }
   }
 
+  /* "Custom paradigm set" checkbox selector — sits in the focused-paradigm
+   * dropdown's place (same framed primary box) while that toggle is on.
+   * Stacks a header row (label + count + actions) over a scrollable,
+   * category-grouped checklist. */
+  .paradigm-custom-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .paradigm-custom-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+  }
+  .paradigm-custom-meta {
+    font-size: 12px;
+    color: var(--muted);
+    font-style: italic;
+  }
+  .paradigm-custom-actions {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+  }
+  .paradigm-custom-btn {
+    background: var(--surface);
+    color: var(--gold-dim);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-family: var(--font-display);
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.08s;
+  }
+  .paradigm-custom-list {
+    width: 100%;
+    max-height: 320px;
+    overflow-y: auto;
+    box-sizing: border-box;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 12px 22px;
+    align-content: start;
+  }
+  .paradigm-custom-group {
+    min-width: 0;
+  }
+  .paradigm-custom-group-label {
+    font-family: var(--font-display);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin-bottom: 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--border);
+  }
+  .paradigm-custom-group-items {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .paradigm-custom-item {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 4px 4px;
+    border-radius: 5px;
+    cursor: pointer;
+    color: var(--cream);
+    font-size: 14px;
+    line-height: 1.3;
+  }
+  .paradigm-custom-item input[type="checkbox"] {
+    flex: 0 0 auto;
+    width: 15px;
+    height: 15px;
+    accent-color: var(--gold);
+    cursor: pointer;
+    position: relative;
+    top: 2px;
+  }
+  .paradigm-custom-item-text {
+    min-width: 0;
+    word-break: break-word;
+  }
+  .paradigm-custom-empty {
+    grid-column: 1 / -1;
+    color: var(--muted);
+    font-style: italic;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .paradigm-custom-btn:hover { border-color: var(--gold-dim); color: var(--gold); }
+    .paradigm-custom-item:hover { background: var(--surface); }
+  }
+
   .morph-step-breadcrumb {
     display: flex;
     gap: 6px;
