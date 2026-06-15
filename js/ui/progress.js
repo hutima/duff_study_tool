@@ -85,14 +85,14 @@ export function renderProgress() {
   if (isAnalyticsModalOpen()) host.renderAnalyticsOverlay();
 }
 
-// Compact "cards due by day" histogram for the spaced review panel. Buckets
-// scheduled cards (those with a dueAt) by calendar-day offset from today —
-// day 0 = "now" (due/overdue), then one bar per day out to two weeks, with a
-// final "14d+" overflow bar so a long-cadence (8-month) tail stays bounded.
-// Unscheduled (never-seen) cards aren't on the schedule yet, so they're left
-// out. Returns '' in unspaced mode or when nothing is scheduled.
-function buildDueHistogramHtml() {
-  if (!runtime.spacedRepetition) return '';
+// Bar columns + total for the "cards due by day" histogram. Buckets scheduled
+// cards (those with a dueAt) by calendar-day offset from today — day 0 = "now"
+// (due/overdue), then one bar per day out to two weeks, with a final "14d+"
+// overflow bar so a long-cadence (8-month) tail stays bounded. Unscheduled
+// (never-seen) cards aren't on the schedule yet, so they're left out. Returns
+// null in unspaced mode or when nothing is scheduled.
+function buildDueHistogramBars() {
+  if (!runtime.spacedRepetition) return null;
   const now = Date.now();
   const DAY_MS = 24 * 60 * 60 * 1000;
   const startOfToday = new Date(now); startOfToday.setHours(0, 0, 0, 0);
@@ -114,7 +114,7 @@ function buildDueHistogramHtml() {
     counts[idx] += 1;
     if (idx > lastIdx) lastIdx = idx;
   });
-  if (!total) return '';
+  if (!total) return null;
   const maxCount = Math.max(...counts.slice(0, lastIdx + 1), 1);
   let bars = '';
   for (let i = 0; i <= lastIdx; i++) {
@@ -129,8 +129,29 @@ function buildDueHistogramHtml() {
       + `<span class="due-hist-bar" style="height:${h}px"></span>`
       + `<span class="due-hist-label">${label}</span></div>`;
   }
-  return `<div class="due-histogram"><div class="due-hist-title">Due by day</div>`
-    + `<div class="due-hist-bars">${bars}</div></div>`;
+  return { total, bars };
+}
+
+// Collapsible "Due by day" histogram. Two variants:
+//   - default (review panel): a <details> that self-persists open/closed in
+//     runtime.analyticsCollapsed['dueByDayPanel'] via an inline ontoggle.
+//   - { collapseKey } (analytics overlay): a data-collapse-key <details> that
+//     the overlay's own collapse-sync manages + persists.
+// Both default to open.
+export function buildDueHistogramHtml(opts = {}) {
+  const data = buildDueHistogramBars();
+  if (!data) return '';
+  const { total, bars } = data;
+  if (opts.collapseKey) {
+    return `<details class="analytics-collapse due-histogram-collapse" data-collapse-key="${opts.collapseKey}">`
+      + `<summary class="analytics-collapse-summary"><span class="analytics-collapse-caret" aria-hidden="true">▾</span>`
+      + `<div class="analytics-collapse-title-wrap"><h4>Due by day <span class="analytics-collapse-meta">${total}</span></h4></div></summary>`
+      + `<div class="analytics-collapse-body"><div class="due-hist-bars">${bars}</div></div></details>`;
+  }
+  const collapsed = (runtime.analyticsCollapsed || {})['dueByDayPanel'] === true;
+  return `<details class="due-histogram"${collapsed ? '' : ' open'} ontoggle="onDueHistogramToggle('dueByDayPanel', this)">`
+    + `<summary class="due-hist-summary">Due by day <span class="due-hist-meta">${total}</span></summary>`
+    + `<div class="due-hist-bars">${bars}</div></details>`;
 }
 
 export function renderReview() {

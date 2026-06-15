@@ -1393,6 +1393,17 @@ function isToggleInfoModalOpen() {
   return !!overlay && overlay.classList.contains('show');
 }
 
+// Persist the review-panel due-histogram's collapsed state. Reuses the
+// already-persisted runtime.analyticsCollapsed map (so no extra save field is
+// needed); the analytics-overlay copy is handled by that overlay's own
+// collapse-sync. Called from the histogram <details>'s inline ontoggle.
+function onDueHistogramToggle(key, el) {
+  if (!key || !el) return;
+  if (!runtime.analyticsCollapsed || typeof runtime.analyticsCollapsed !== 'object') runtime.analyticsCollapsed = {};
+  runtime.analyticsCollapsed[key] = !el.open;
+  saveState();
+}
+
 function syncToggleButtons() {
   const requiredSwitch  = document.getElementById('requiredBtn');
   const shuffleSwitch   = document.getElementById('shuffleBtn');
@@ -3045,7 +3056,7 @@ const GLOBAL_CLICK_HANDLERS = {
   toggleMorphStepByStep, setMorphFocusedParadigm, setParsingChapter, goToStemDrillFromParsing,
   toggleRequiredOnly, toggleHardVocabReview, toggleStemNotes, toggleSecondAoristCards, toggleShuffle, toggleSpacedRepetition, toggleSpacingCadence, toggleSplitSelection, toggleAspectStep, toggleDimStep, toggleOptionalForms, toggleOptionalFormFilter, toggleDimValueFilter, toggleExcludeKnownMorphs, toggleParsingShuffleAll, toggleParsingCustomReview, toggleParsingCustomParadigm, setAllParsingCustomParadigms, toggleParsingReverse, toggleAccentLookalikes, resetKnownMorphs, closeResetKnownModal, confirmResetKnownFocused, confirmResetKnownAll, clearParsingStats, toggleUnspacedDailyReset, triggerImportProgress,
   openReaderTab, selectReaderDrillChoice, advanceReaderDrill,
-  closeWhatsNewV1_5Modal, closeToggleInfoModal
+  closeWhatsNewV1_5Modal, closeToggleInfoModal, onDueHistogramToggle
 };
 if (typeof globalThis !== 'undefined') Object.assign(globalThis, GLOBAL_CLICK_HANDLERS);
 if (typeof window !== 'undefined' && window !== globalThis) Object.assign(window, GLOBAL_CLICK_HANDLERS);

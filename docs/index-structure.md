@@ -66,7 +66,7 @@ In-document order (these all render in the main column):
 | 166–171  | `#navRow`                                 | Prev / `#spacedUndoBtn` / `#navResetBtn` / `#navNextBtn` |
 | 173–177  | `#markRow`                                | Mark buttons: Hard (`again`) / Uncertain (`pass`) / Easy |
 | 179–182  | `#ffRow`                                  | Fast-forward 1 day / 1 week (debug-ish; 1-week confirms first — irreversible, can dump a large batch due at once) |
-| 184–194  | `<section class="review-shell">`          | Bottom progress panel: `#reviewPanel` → `#reviewDeckTag`, `#reviewStats` (deck/confidence rows + a **due-by-day histogram** in spaced mode — `buildDueHistogramHtml` in `progress.js`), `#reviewSortRow`, `#reviewList` |
+| 184–194  | `<section class="review-shell">`          | Bottom progress panel: `#reviewPanel` → `#reviewDeckTag`, `#reviewStats` (deck/confidence rows + a collapsible **due-by-day histogram** in spaced mode — `buildDueHistogramHtml` in `progress.js`, also rendered into `#analyticsOverlay`'s `#analyticsDueHistogram`; collapse state in `runtime.analyticsCollapsed`), `#reviewSortRow`, `#reviewList` |
 
 ---
 
