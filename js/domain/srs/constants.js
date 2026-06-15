@@ -1,6 +1,6 @@
 // SRS scheduling constants
 
-export const SRS_DAY_MS = 20 * 60 * 60 * 1000;
+export const SRS_DAY_MS = 22 * 60 * 60 * 1000;
 export const SRS_AGAIN_MS = 5 * 60 * 1000;
 export const SRS_UNCERTAIN_MIN_MS = 2 * 60 * 60 * 1000;    // 2h floor for uncertain (spaced)
 export const SRS_UNCERTAIN_MAX_MS = 7 * 24 * 60 * 60 * 1000; // 1-week ceiling for uncertain cards (scaled by certainty)
