@@ -85,12 +85,13 @@ export function renderProgress() {
   if (isAnalyticsModalOpen()) host.renderAnalyticsOverlay();
 }
 
-// Bar columns + total for the "cards due by day" histogram. Buckets scheduled
-// cards (those with a dueAt) by calendar-day offset from today — day 0 = "now"
-// (due/overdue), then one bar per day out to two weeks, with a final "14d+"
-// overflow bar so a long-cadence (8-month) tail stays bounded. Unscheduled
-// (never-seen) cards aren't on the schedule yet, so they're left out. Returns
-// null in unspaced mode or when nothing is scheduled.
+// Bar columns + total for the "cards due by day" histogram. Buckets cards by
+// calendar-day offset from today — day 0 = "now" (due/overdue AND never-seen
+// cards, which are immediately reviewable), then one bar per day out to two
+// weeks, with a final "14d+" overflow bar so a long-cadence (8-month) tail
+// stays bounded. The day-0 count therefore matches the "Due now" stat
+// (host.getDueCount), which also treats never-seen cards as due. Returns null
+// in unspaced mode or when the deck is empty. dueNow is the day-0 count.
 function buildDueHistogramBars() {
   if (!runtime.spacedRepetition) return null;
   const now = Date.now();
@@ -102,10 +103,9 @@ function buildDueHistogramBars() {
   let lastIdx = 0;
   (runtime.originalDeck || []).forEach(card => {
     const p = host.getWordProgress(card.id);
-    if (!p.dueAt) return;                    // unscheduled / never seen
     total += 1;
     let offset;
-    if (p.dueAt <= now) offset = 0;
+    if (!p.dueAt || p.dueAt <= now) offset = 0;   // never-seen or overdue → due now
     else {
       const sod = new Date(p.dueAt); sod.setHours(0, 0, 0, 0);
       offset = Math.max(0, Math.round((sod.getTime() - startOfToday.getTime()) / DAY_MS));
@@ -129,7 +129,7 @@ function buildDueHistogramBars() {
       + `<span class="due-hist-bar" style="height:${h}px"></span>`
       + `<span class="due-hist-label">${label}</span></div>`;
   }
-  return { total, bars };
+  return { total, bars, dueNow: counts[0] };
 }
 
 // Collapsible "Due by day" histogram. Two variants:
@@ -139,7 +139,7 @@ function buildDueHistogramBars() {
 //     the overlay's own collapse-sync manages + persists.
 // Both default to open.
 export function buildDueHistogramHtml(opts = {}) {
-  const data = buildDueHistogramBars();
+  const data = opts.data || buildDueHistogramBars();
   if (!data) return '';
   const { total, bars } = data;
   if (opts.collapseKey) {
@@ -181,19 +181,25 @@ export function renderReview() {
     if (pct !== null && pct > 75) highCount += 1;
     else lowCount += 1;
   });
-  // Three-section deck breakdown reflecting buildStudyDeck's partitioning:
+  // Three-section deck breakdown:
   //   inDeck     — active section (the in-flight rotation the user is on)
-  //   sessionDue — active + middle (everything still eligible this session)
+  //   sessionDue — "Due now" (spaced) / "Unconfirmed" (unspaced)
   //   later      — deferred (spaced) / archived (unspaced)
-  // Row 1 surfaces all three so the learner sees both the immediate queue
-  // and the pending dump-in pile separately. Counts derive from the live
-  // partition state so they stay in sync with runtime.deck mid-session.
+  // In spaced mode "Due now" must reflect the cards that are actually due at
+  // render time — NOT the active + middle snapshot from the last
+  // buildStudyDeck, which goes stale as more cards come due mid-session (it
+  // would read low against the live histogram). Take it from the same live
+  // computation as the due-by-day histogram (its day-0 bucket) so the stat,
+  // the "Due later" remainder, and the histogram always agree.
   const inDeckCount = runtime.activeDeckCount;
   const middleCount = runtime.spacedRepetition
     ? (runtime.middleDeckCount || 0)
     : (runtime.unspacedMiddleCount || 0);
-  const sessionDueCount = inDeckCount + middleCount;
   const totalCount = runtime.originalDeck.length;
+  const histData = runtime.spacedRepetition ? buildDueHistogramBars() : null;
+  const sessionDueCount = runtime.spacedRepetition
+    ? (histData ? histData.dueNow : 0)
+    : inDeckCount + middleCount;
   const laterCount = runtime.spacedRepetition
     ? Math.max(totalCount - sessionDueCount, 0)
     : host.getKnownCount();
@@ -217,7 +223,7 @@ export function renderReview() {
         <span class="stat-known">✓ High confidence: ${highCount}</span>
         <span class="stat-unsure">○ Low confidence: ${lowCount}</span>
       </div>
-      ${buildDueHistogramHtml()}`;
+      ${buildDueHistogramHtml({ data: histData })}`;
 
   const sortMode = runtime.reviewSortMode === 'confidence' ? 'confidence'
     : runtime.reviewSortMode === 'alphabetical' ? 'alphabetical'
