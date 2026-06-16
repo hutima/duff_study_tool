@@ -166,7 +166,7 @@ import { getSelectedVocabCards, getSelectedGrammarCards, getAllVocabKeys, getAll
 
 // Domain — Grammar
 import { buildGrammarSupportHtml } from '../domain/grammar/explanations.js';
-import { recordParadigmAttempt, inferredFollowupDims, buildInferredStep, structuralImpossibilityReason, paradigmGapReason, lemmaInventoryGapReason, isLemmaFormKnown, parseAnswerDimensions } from '../domain/grammar/morph_steps.js';
+import { recordParadigmAttempt, inferredFollowupDims, buildInferredStep, structuralImpossibilityReason, paradigmGapReason, lemmaInventoryGapReason, isLemmaFormKnown, getLemmaFormStatus, parseAnswerDimensions } from '../domain/grammar/morph_steps.js';
 import { listAvailableParadigms, listAvailableParadigmsByCategory, getCardsForFocusedParadigm, getCardsForParadigmCategory, getCardsForParadigmLemmas, getAllParsingCards, parseCategoryShuffleValue, makeCategoryShuffleValue } from '../domain/grammar/paradigm_focus.js';
 
 // UI
@@ -2061,17 +2061,67 @@ function buildFilteredFocusedParadigmCards() {
   return applyExcludeKnownMorphsFilter(getCardsForFocusedParadigm(keys, sel, opts));
 }
 
+// Status-weighted ordering for the parsing deck. A plain shuffle treats a
+// form the student has never seen exactly like one they've already nailed
+// twice, so (especially with "Exclude known morphs" off) a review run can
+// open with a stack of mastered 2/2 forms while the unseen ones wait at the
+// back — random, but not purposeful. Instead we bias the shuffle by each
+// form's per-form recent status (the same 0/2 → 2/2 tally the dots and the
+// exclude-known filter read via getLemmaFormStatus):
+//   unseen    — never attempted          → highest priority
+//   wrong     — 0/n recent               → next
+//   uncertain — 1/2 recent               → middle
+//   right     — 1/1 recent               → low
+//   known     — 2/2 recent (mastered)    → lowest
+// It's a soft bias, not a hard sort: we use Efraimidis–Spirakis weighted
+// random ordering (key = random^(1/weight), sort descending), so for any two
+// forms P(a before b) = weight_a / (weight_a + weight_b). An unseen form
+// therefore leads a mastered one ~6:1 of the time, a wrong one leads a
+// mastered one ~4:1, but nothing is pinned — every form can still surface
+// anywhere, so the deck feels shuffled while leaning toward what needs review.
+// When the shuffle toggle is off the deck keeps strict paradigm order (no
+// reweighting) so the user can still walk a paradigm top-to-bottom.
+const PARSING_PRIORITY_WEIGHTS = {
+  unseen: 6,
+  wrong: 4,
+  uncertain: 3,
+  right: 1.5,
+  known: 1
+};
+function parsingFormPriorityWeight(card, stats, enabledDims) {
+  if (!card) return PARSING_PRIORITY_WEIGHTS.right;
+  const status = getLemmaFormStatus(stats, card.lemma, card.id, enabledDims);
+  return PARSING_PRIORITY_WEIGHTS[status] || PARSING_PRIORITY_WEIGHTS.right;
+}
+function orderParsingPool(pool) {
+  const list = Array.isArray(pool) ? [...pool] : [];
+  if (!runtime.shuffled || list.length < 2) return list;
+  const stats = runtime.paradigmStepStats || {};
+  const enabledDims = getEnabledParsingDims();
+  return list
+    .map((card) => {
+      const weight = parsingFormPriorityWeight(card, stats, enabledDims);
+      // Math.random() can return 0; clamp away from it so the log/pow stays
+      // finite (a 0 key would otherwise pin that card to the very end).
+      const r = Math.random() || Number.MIN_VALUE;
+      return { card, key: Math.pow(r, 1 / weight) };
+    })
+    .sort((a, b) => b.key - a.key)
+    .map((entry) => entry.card);
+}
+
 // Rebuild the parsing deck for a fresh cycle. Unlike startNextCycle's generic
 // 'remaining' path — which reshuffles the existing originalDeck and never
 // re-runs the exclude-known filter — this re-derives the filtered focused
 // pool so newly-mastered (2/2) forms are dropped. Honors the shuffle toggle
-// and avoidHeadId so the just-shown card doesn't lead the new cycle. When the
-// pool is empty (every form mastered), the deck drains and renderCard shows
-// the "paradigm mastered" empty state.
+// (via orderParsingPool's status weighting) and avoidHeadId so the just-shown
+// card doesn't lead the new cycle. When the pool is empty (every form
+// mastered), the deck drains and renderCard shows the "paradigm mastered"
+// empty state.
 function rebuildParsingCycle(options = {}) {
   const pool = buildFilteredFocusedParadigmCards();
   runtime.originalDeck = pool;
-  const ordered = runtime.shuffled ? shuffleArray([...pool]) : [...pool];
+  const ordered = orderParsingPool(pool);
   avoidHeadCollision(ordered, options.avoidHeadId);
   runtime.deck = ordered;
   runtime.activeDeckCount = ordered.length;
@@ -2392,6 +2442,18 @@ function avoidHeadCollision(deck, avoidHeadId) {
 }
 
 function buildStudyDeck(cards, options = {}) {
+  // Parsing owns its deck ordering: a status-weighted shuffle (orderParsingPool)
+  // that floats unseen/wrong forms ahead of mastered ones, rather than the
+  // spaced/unspaced pile machinery below. It carries no SRS schedule and no
+  // archive pile — every in-scope form is part of the active deck — so the
+  // ordered pool is the whole deck. (Cycle boundaries go through
+  // rebuildParsingCycle, which shares the same ordering.)
+  if (isParsingMode()) {
+    const ordered = orderParsingPool(cards || []);
+    avoidHeadCollision(ordered, options.avoidHeadId);
+    runtime.activeDeckCount = ordered.length;
+    return ordered;
+  }
   if (!runtime.spacedRepetition) {
     // Unspaced flip deck has three sections: [active..., middle..., known...].
     //   active — cards not yet seen this round (the in-flight pile).
