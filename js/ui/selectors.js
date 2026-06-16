@@ -35,6 +35,7 @@ let host = {
   getDueCount: () => 0,
   resetUnspacedCycleState: () => {},
   resetStudyState: () => {},
+  resetParsingShowCounts: () => {},
   syncToggleButtons: () => {},
   clearSpacedUndoSnapshot: () => {},
   saveCurrentDeckStateToBank: () => {},
@@ -702,6 +703,10 @@ export function loadDeckFromKeys(keys, sessionId = null, options = {}) {
   if (host.isMorphStepByStepActive()) {
     const focusedCards = host.getFocusedParadigmCards();
     if (Array.isArray(focusedCards)) scopedCards = focusedCards;
+    // New parsing scope (paradigm / chapter / pool-toggle change all land
+    // here) = a fresh run, so reset the per-session "shown at most twice"
+    // budget before the deck is ordered below.
+    host.resetParsingShowCounts();
   }
   runtime.originalDeck = scopedCards;
   host.resetMorphAnswerState();
