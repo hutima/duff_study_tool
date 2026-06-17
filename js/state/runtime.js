@@ -123,9 +123,9 @@ export const runtime = {
   paradigmStepStats: { byLemma: {} },
   // Whether the parsing walk asks an explicit Aspect step before Tense.
   // Aspect is derivable from tense (present/future → continuous/undefined,
-  // aorist → undefined, etc.), so for students who don't want to drill the
-  // composite-vs-single distinction it can be turned off. Default on.
-  aspectStep: true,
+  // aorist → undefined, etc.), so the extra composite-vs-single step is
+  // off by default; students who want to drill it can turn it on. Default off.
+  aspectStep: false,
   // Stem & declension notes on standard vocab cards: the inline verbal /
   // third-declension stem after the headword, the bracketed principal-parts
   // line under a verb, and the "declines like σάρξ" hint-line pointer.

@@ -194,6 +194,8 @@ import {
   openWhatsNewV1_5Modal,
   closeWhatsNewV1_5Modal,
   isWhatsNewV1_5ModalOpen,
+  closeAspectDefaultOffModal,
+  isAspectDefaultOffModalOpen,
   isTransferModalOpen,
   isStudySelectorOpen,
   openStudySelector,
@@ -3134,6 +3136,7 @@ installKeyboardShortcuts({
   isStudySelectorOpen, closeStudySelector,
   isShortcutsModalOpen, closeShortcutsModal,
   isWhatsNewV1_5ModalOpen, closeWhatsNewV1_5Modal,
+  isAspectDefaultOffModalOpen, closeAspectDefaultOffModal,
   isToggleInfoModalOpen, closeToggleInfoModal,
   isToggleInfoModalOpen, closeToggleInfoModal,
   isDisclaimerModalOpen, isTransferModalOpen, closeTransferModal,
@@ -3174,7 +3177,7 @@ const GLOBAL_CLICK_HANDLERS = {
   toggleMorphStepByStep, setMorphFocusedParadigm, setParsingChapter, goToStemDrillFromParsing,
   toggleRequiredOnly, toggleHardVocabReview, toggleStemNotes, toggleSecondAoristCards, toggleShuffle, toggleSpacedRepetition, toggleSpacingCadence, toggleSplitSelection, toggleAspectStep, toggleDimStep, toggleOptionalForms, toggleOptionalFormFilter, toggleDimValueFilter, toggleExcludeKnownMorphs, toggleParsingShuffleAll, toggleParsingCustomReview, toggleParsingCustomParadigm, setAllParsingCustomParadigms, toggleParsingReverse, toggleAccentLookalikes, resetKnownMorphs, closeResetKnownModal, confirmResetKnownFocused, confirmResetKnownAll, clearParsingStats, toggleUnspacedDailyReset, triggerImportProgress,
   openReaderTab, selectReaderDrillChoice, advanceReaderDrill,
-  closeWhatsNewV1_5Modal, closeToggleInfoModal, onDueHistogramToggle
+  closeWhatsNewV1_5Modal, closeAspectDefaultOffModal, closeToggleInfoModal, onDueHistogramToggle
 };
 if (typeof globalThis !== 'undefined') Object.assign(globalThis, GLOBAL_CLICK_HANDLERS);
 if (typeof window !== 'undefined' && window !== globalThis) Object.assign(window, GLOBAL_CLICK_HANDLERS);

@@ -9,7 +9,7 @@
 
 import { getStorage } from '../utils/storage.js';
 import { shieldClicksBriefly } from '../utils/clickShield.js';
-import { CONSENT_STORAGE_KEY, WHATS_NEW_V1_5_STORAGE_KEY } from '../state/store.js';
+import { CONSENT_STORAGE_KEY, WHATS_NEW_V1_5_STORAGE_KEY, ASPECT_DEFAULT_OFF_NOTICE_STORAGE_KEY } from '../state/store.js';
 
 let host = {
   // Defaults are intentional no-ops so the predicate functions can run before
@@ -87,6 +87,11 @@ export function handleConsentAction() {
     // First-time accepters already see the new features as part of the base
     // experience, so suppress the v1.4 announcement for them.
     storage.setItem(WHATS_NEW_V1_5_STORAGE_KEY, 'seen');
+    // Fresh installs never had the Aspect step on, so the "it's now off by
+    // default" notice would be meaningless — mark it seen so it never fires
+    // for them. Only returning users (who accepted in an earlier session,
+    // before this release) will see it.
+    storage.setItem(ASPECT_DEFAULT_OFF_NOTICE_STORAGE_KEY, 'seen');
   }
   closeDisclaimerModal();
   openStudySelector();
@@ -103,7 +108,9 @@ export function initializeConsentGate() {
     openDisclaimerModal(true);
   } else {
     updateConsentButtonState();
-    maybeShowWhatsNewV1_5Modal();
+    // The v1.5 "What's new" popup has run its course — no longer shown on
+    // load. The aspect-default notice fires lazily when a returning user
+    // enters parsing mode (see setStudyMode), not on initial load.
   }
 }
 
@@ -148,6 +155,45 @@ export function closeWhatsNewV1_5Modal() {
 
 export function isWhatsNewV1_5ModalOpen() {
   return !!document.getElementById('whatsNewV1_5Overlay')?.classList.contains('show');
+}
+
+// ── Aspect-step default-off notice ───────────────────────────────────────
+// One-time heads-up that the parsing Aspect step now defaults off. Triggered
+// when a returning user enters parsing mode (not on initial load), and only
+// if they haven't seen it yet. Fresh installs are marked seen on consent
+// accept, so this never fires for them.
+
+export function maybeShowAspectDefaultOffModal() {
+  if (!host.getHasAcceptedDisclaimer()) return;
+  const storage = getStorage();
+  if (!storage) return;
+  if (storage.getItem(ASPECT_DEFAULT_OFF_NOTICE_STORAGE_KEY) === 'seen') return;
+  openAspectDefaultOffModal();
+}
+
+export function openAspectDefaultOffModal() {
+  const overlay = document.getElementById('aspectDefaultOffOverlay');
+  if (!overlay) return;
+  overlay.classList.add('show');
+  overlay.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('modal-open');
+}
+
+export function closeAspectDefaultOffModal() {
+  const overlay = document.getElementById('aspectDefaultOffOverlay');
+  if (!overlay) return;
+  overlay.classList.remove('show');
+  overlay.setAttribute('aria-hidden', 'true');
+  const storage = getStorage();
+  if (storage) storage.setItem(ASPECT_DEFAULT_OFF_NOTICE_STORAGE_KEY, 'seen');
+  if (!isDisclaimerModalOpen() && !isTransferModalOpen() && !isAnalyticsModalOpen() && !isStudySelectorOpen() && !isShortcutsModalOpen()) {
+    document.body.classList.remove('modal-open');
+  }
+  shieldClicksBriefly();
+}
+
+export function isAspectDefaultOffModalOpen() {
+  return !!document.getElementById('aspectDefaultOffOverlay')?.classList.contains('show');
 }
 
 // ── Transfer modal (open-state only — open/close lives with the import/
