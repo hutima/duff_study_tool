@@ -814,6 +814,13 @@ function setParsingChapter(value) {
 function maybeInjectInferredSteps(state, stepKey, picked) {
   if (!state || !Array.isArray(state.steps)) return 0;
   const existing = new Set(state.steps.map((s) => s.key));
+  // Dims that were auto-resolved (chapter-gated, user-toggled off, or the
+  // single-gender auto-skip) count as already present: their value is
+  // filled in silently and surfaced via impliedDims, so injecting an
+  // inferred step for them would re-ask a dim we deliberately didn't ask —
+  // and double-count it in the parse summary (e.g. a single-gender lemma's
+  // gender showing twice when the student picks mood=participle).
+  Object.keys(state.autoFilledDims || {}).forEach((k) => existing.add(k));
   const needs = inferredFollowupDims(stepKey, picked, existing);
   if (!needs.length) return 0;
   const pools = state.accessiblePools || {};

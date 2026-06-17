@@ -77,6 +77,11 @@
   window.registerSupplementalVocabSet('W6_LUO_PERFECT', {
     label: 'λύω — perfect active indicative',
     week: 6,
+    // Duff introduces the perfect tense in Ch 16, the second chapter of week
+    // 6 (Ch 15–16). Without this the set would inherit the week's first
+    // chapter (15) and unlock — and seed 'perfect'/'completed' parsing
+    // distractors — a chapter early.
+    chapter: 16,
     cards: [
       { g: 'λέλυκα', e: 'Perfect: I have untied (1st person sg.)', required: true },
       { g: 'λέλυκας', e: 'Perfect: you have untied (2nd person sg.)', required: true },
@@ -90,6 +95,10 @@
   window.registerSupplementalVocabSet('W6_LUO_PLUPERFECT', {
     label: 'λύω — pluperfect active indicative',
     week: 6,
+    // Same as the perfect: the pluperfect is part of the Ch 16 perfect
+    // system, so pin it to 16 rather than letting it inherit week 6's first
+    // chapter (15).
+    chapter: 16,
     cards: [
       { g: 'ἐλελύκειν', e: 'Pluperfect: I had untied (1st person sg.)', required: true },
       { g: 'ἐλελύκεις', e: 'Pluperfect: you had untied (2nd person sg.)', required: true },

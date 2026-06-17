@@ -168,6 +168,10 @@ export function maybeShowAspectDefaultOffModal() {
   const storage = getStorage();
   if (!storage) return;
   if (storage.getItem(ASPECT_DEFAULT_OFF_NOTICE_STORAGE_KEY) === 'seen') return;
+  // Mark seen the moment we decide to show it — not only on close — so a
+  // reload (or navigating away) while the modal is still open can never make
+  // it fire a second time. It is strictly a once-ever notice.
+  storage.setItem(ASPECT_DEFAULT_OFF_NOTICE_STORAGE_KEY, 'seen');
   openAspectDefaultOffModal();
 }
 
