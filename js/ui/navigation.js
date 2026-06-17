@@ -23,6 +23,7 @@ import {
 } from '../state/store.js';
 import { getStorage } from '../utils/storage.js';
 import { shieldClicksBriefly } from '../utils/clickShield.js';
+import { maybeShowAspectDefaultOffModal } from './modals.js';
 import { renderCard } from './render.js';
 import { renderProgress, renderReview } from './progress.js';
 import {
@@ -546,6 +547,11 @@ export function setStudyMode(mode) {
   host.ensureDirectionalStores();
   runtime.marks = host.getDirectionalMarksStore();
   host.syncToggleButtons();
+
+  // Entering parsing: one-time heads-up for returning users that the Aspect
+  // step now defaults off (and where to switch it back on). No-op for fresh
+  // installs and after it's been dismissed once.
+  if (nextMode === 'parsing') maybeShowAspectDefaultOffModal();
 
   if (host.isReaderMode()) {
     host.renderReaderModule();

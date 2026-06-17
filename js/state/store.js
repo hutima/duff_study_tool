@@ -5,6 +5,10 @@ import { isPlainObject } from '../utils/helpers.js';
 export const STORAGE_KEY = 'greekFlashcardsStateV18';
 export const CONSENT_STORAGE_KEY = 'greekFlashcardsConsentV1';
 export const WHATS_NEW_V1_5_STORAGE_KEY = 'greekFlashcardsWhatsNewV1_5Seen';
+// One-time notice that the parsing Aspect step is now off by default. Shown
+// once to returning users when they enter parsing mode; suppressed for fresh
+// installs (marked seen on first consent accept).
+export const ASPECT_DEFAULT_OFF_NOTICE_STORAGE_KEY = 'greekFlashcardsAspectDefaultOffNoticeSeen';
 export const THEME_STORAGE_KEY = 'greekFlashcardsThemeMode';
 export const FONT_FAMILY_STORAGE_KEY = 'greekFlashcardsFontFamily';
 export const TEXT_SIZE_STORAGE_KEY = 'greekFlashcardsTextSize';
@@ -97,7 +101,7 @@ export const S = {
   morphFocusedParadigm: null,
   morphStepState: { cardId: null, steps: [], stepIdx: 0, answers: [], completed: false },
   paradigmStepStats: { byLemma: {} },
-  aspectStep: true,
+  aspectStep: false,
   dimToggles: { tense: true, voice: true, mood: true, person: true, number: true, case: true, gender: true },
 
   // Deck / study state
