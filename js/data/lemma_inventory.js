@@ -451,6 +451,19 @@
     'βαλέτωσαν':  'aorist active imperative third person plural'
   };
 
+  // Present active imperative — the present-system imperative keeps the
+  // doubled λλ (stem βαλλ-), distinct from the drilled 2nd-aorist βάλε /
+  // βάλετε (single λ, stem βαλ-). That λλ/λ contrast is the whole point of
+  // the verb, so parsing the aorist βάλε as a present now reconstructs to
+  // βάλλε instead of a blank "—". (2pl βάλλετε is syncretic with the
+  // present indicative; the indicative keeps the shared lookup key.)
+  const BALLO_PRESENT_ACTIVE_IMPERATIVE = {
+    'βάλλε':       'present active imperative second person singular',
+    'βαλλέτω':     'present active imperative third person singular',
+    'βάλλετε':     'present active imperative second person plural',
+    'βαλλέτωσαν':  'present active imperative third person plural'
+  };
+
   // Chapter gates: βάλλω is introduced as a vocab word early but its
   // full paradigm depends on the broader tense/voice system. Gate
   // present/imperfect at ch 10 (W4 — when βάλλω itself becomes a focus
@@ -470,6 +483,8 @@
       forms: BALLO_PRESENT_INFINITIVE },
     { chapter: 10, family: 'βάλλω — 3rd-person aorist active imperative (optional)',
       forms: BALLO_AORIST_IMPERATIVE_3RD },
+    { chapter: 10, family: 'βάλλω — present active imperative (optional)',
+      forms: BALLO_PRESENT_ACTIVE_IMPERATIVE },
     { chapter: 15, family: 'βάλλω — aorist passive indicative (optional)',
       forms: BALLO_AORIST_PASSIVE_INDICATIVE },
     { chapter: 15, family: 'βάλλω — perfect active indicative (optional)',
@@ -479,6 +494,7 @@
   ];
 
   const BALLO_EXTRA_FORMS = {
+    ...BALLO_PRESENT_ACTIVE_IMPERATIVE,
     ...BALLO_PRESENT_ACTIVE_INDICATIVE,
     ...BALLO_IMPERFECT_ACTIVE_INDICATIVE,
     ...BALLO_FUTURE_ACTIVE_INDICATIVE,
@@ -576,6 +592,18 @@
     'γενέσθωσαν':  'aorist middle imperative third person plural'
   };
 
+  // Present middle imperative (γίνομαι is deponent middle in the present).
+  // The aorist middle imperative above shifts to the 2nd-aorist stem γεν-;
+  // the present keeps γιν-, so a "present imperative" parse of an aorist
+  // form reconstructs to γίνου rather than a blank "—". (2pl γίνεσθε is
+  // syncretic with the present indicative; the indicative keeps the key.)
+  const GINOMAI_PRESENT_MIDDLE_IMPERATIVE = {
+    'γίνου':       'present middle imperative second person singular',
+    'γινέσθω':     'present middle imperative third person singular',
+    'γίνεσθε':     'present middle imperative second person plural',
+    'γινέσθωσαν':  'present middle imperative third person plural'
+  };
+
   // Chapter gates: γίνομαι is a vocab introduction-era word (it appears
   // in early chapters as a deponent verb). The present/imperfect/
   // future middle indicatives gate at ch 8 (the chapter Duff
@@ -592,6 +620,8 @@
       forms: GINOMAI_FUTURE_MIDDLE_INDICATIVE },
     { chapter: 8,  family: 'γίνομαι — present middle infinitive (optional)',
       forms: GINOMAI_PRESENT_MIDDLE_INFINITIVE },
+    { chapter: 8,  family: 'γίνομαι — present middle imperative (optional)',
+      forms: GINOMAI_PRESENT_MIDDLE_IMPERATIVE },
     { chapter: 10, family: 'γίνομαι — aorist middle indicative (2nd aorist, optional)',
       forms: GINOMAI_AORIST_MIDDLE_INDICATIVE },
     { chapter: 10, family: 'γίνομαι — aorist middle infinitive γενέσθαι (optional)',
@@ -605,6 +635,7 @@
   ];
 
   const GINOMAI_EXTRA_FORMS = {
+    ...GINOMAI_PRESENT_MIDDLE_IMPERATIVE,
     ...GINOMAI_PRESENT_MIDDLE_INDICATIVE,
     ...GINOMAI_IMPERFECT_MIDDLE_INDICATIVE,
     ...GINOMAI_FUTURE_MIDDLE_INDICATIVE,
@@ -685,6 +716,23 @@
     'λαβεῖν': 'aorist active infinitive'
   };
 
+  // Present active imperative + infinitive. The drilled cards and the
+  // aorist forms above cover the βαλ-style 2nd-aorist stem (λαβ-); the
+  // present keeps the full λαμβαν- stem, so a "present imperative" /
+  // "present infinitive" parse reconstructs (λάμβανε / λαμβάνειν) rather
+  // than a blank "—". (2pl λαμβάνετε is syncretic with the present
+  // indicative; the indicative keeps the shared lookup key.)
+  const LAMBANO_PRESENT_ACTIVE_IMPERATIVE = {
+    'λάμβανε':       'present active imperative second person singular',
+    'λαμβανέτω':     'present active imperative third person singular',
+    'λαμβάνετε':     'present active imperative second person plural',
+    'λαμβανέτωσαν':  'present active imperative third person plural'
+  };
+
+  const LAMBANO_PRESENT_ACTIVE_INFINITIVE = {
+    'λαμβάνειν': 'present active infinitive'
+  };
+
   const LAMBANO_AORIST_ACTIVE_SUBJUNCTIVE = {
     'λάβω':    'aorist active subjunctive first person singular',
     'λάβῃς':   'aorist active subjunctive second person singular',
@@ -733,6 +781,10 @@
       forms: LAMBANO_AORIST_ACTIVE_IMPERATIVE },
     { chapter: 10, family: 'λαμβάνω — aorist active infinitive λαβεῖν (optional)',
       forms: LAMBANO_AORIST_ACTIVE_INFINITIVE },
+    { chapter: 10, family: 'λαμβάνω — present active imperative (optional)',
+      forms: LAMBANO_PRESENT_ACTIVE_IMPERATIVE },
+    { chapter: 10, family: 'λαμβάνω — present active infinitive λαμβάνειν (optional)',
+      forms: LAMBANO_PRESENT_ACTIVE_INFINITIVE },
     { chapter: 15, family: 'λαμβάνω — aorist passive indicative ἐλήμφθην (optional)',
       forms: LAMBANO_AORIST_PASSIVE_INDICATIVE },
     { chapter: 15, family: 'λαμβάνω — perfect active indicative εἴληφα (optional)',
@@ -742,6 +794,8 @@
   ];
 
   const LAMBANO_EXTRA_FORMS = {
+    ...LAMBANO_PRESENT_ACTIVE_IMPERATIVE,
+    ...LAMBANO_PRESENT_ACTIVE_INFINITIVE,
     ...LAMBANO_PRESENT_ACTIVE_INDICATIVE,
     ...LAMBANO_IMPERFECT_ACTIVE_INDICATIVE,
     ...LAMBANO_FUTURE_MIDDLE_INDICATIVE,
@@ -820,6 +874,22 @@
     'λιπεῖν': 'aorist active infinitive'
   };
 
+  // Present active imperative + infinitive. The aorist forms above use the
+  // shifted 2nd-aorist stem λιπ- (ει → ι); the present keeps λειπ-, so a
+  // "present imperative" / "present infinitive" parse reconstructs to
+  // λεῖπε / λείπειν rather than a blank "—". (2pl λείπετε is syncretic with
+  // the present indicative; the indicative keeps the shared lookup key.)
+  const LEIPO_PRESENT_ACTIVE_IMPERATIVE = {
+    'λεῖπε':       'present active imperative second person singular',
+    'λειπέτω':     'present active imperative third person singular',
+    'λείπετε':     'present active imperative second person plural',
+    'λειπέτωσαν':  'present active imperative third person plural'
+  };
+
+  const LEIPO_PRESENT_ACTIVE_INFINITIVE = {
+    'λείπειν': 'present active infinitive'
+  };
+
   const LEIPO_AORIST_ACTIVE_SUBJUNCTIVE = {
     'λίπω':    'aorist active subjunctive first person singular',
     'λίπῃς':   'aorist active subjunctive second person singular',
@@ -863,6 +933,10 @@
       forms: LEIPO_AORIST_ACTIVE_IMPERATIVE },
     { chapter: 10, family: 'λείπω — aorist active infinitive λιπεῖν (optional)',
       forms: LEIPO_AORIST_ACTIVE_INFINITIVE },
+    { chapter: 10, family: 'λείπω — present active imperative (optional)',
+      forms: LEIPO_PRESENT_ACTIVE_IMPERATIVE },
+    { chapter: 10, family: 'λείπω — present active infinitive λείπειν (optional)',
+      forms: LEIPO_PRESENT_ACTIVE_INFINITIVE },
     { chapter: 15, family: 'λείπω — aorist passive indicative ἐλείφθην (optional)',
       forms: LEIPO_AORIST_PASSIVE_INDICATIVE },
     { chapter: 15, family: 'λείπω — perfect active indicative λέλοιπα (optional)',
@@ -872,6 +946,8 @@
   ];
 
   const LEIPO_EXTRA_FORMS = {
+    ...LEIPO_PRESENT_ACTIVE_IMPERATIVE,
+    ...LEIPO_PRESENT_ACTIVE_INFINITIVE,
     ...LEIPO_PRESENT_ACTIVE_INDICATIVE,
     ...LEIPO_IMPERFECT_ACTIVE_INDICATIVE,
     ...LEIPO_FUTURE_ACTIVE_INDICATIVE,
