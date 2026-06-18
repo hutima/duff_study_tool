@@ -1665,9 +1665,9 @@ function syncLayoutVisibility() {
   const secondAoristCardsToggleVis = document.getElementById('secondAoristCardsToggle');
   if (secondAoristCardsToggleVis) secondAoristCardsToggleVis.style.display = runtime.studyMode === 'vocab' ? 'flex' : 'none';
   // Split vocab/grammar selection only makes sense between vocab and morph;
-  // parsing mode owns its chapter via the dedicated dropdown, so hide the
-  // toggle there entirely.
-  if (splitSelectionToggle) splitSelectionToggle.style.display = (canAccessGrammarUi() && !isParsingMode()) ? 'flex' : 'none';
+  // parsing mode owns its chapter via the dedicated dropdown, and reader mode
+  // doesn't use the deck selection at all, so hide the toggle in both.
+  if (splitSelectionToggle) splitSelectionToggle.style.display = (canAccessGrammarUi() && !isParsingMode() && !isReaderMode()) ? 'flex' : 'none';
   if (selfCheckToggle) selfCheckToggle.style.display = (isMorphologyMode() && canAccessGrammarUi()) ? 'flex' : 'none';
   // Parsing options apply only to parsing mode — keep them out of the
   // vocab / grammar / reader Advanced-settings panels where they have no
