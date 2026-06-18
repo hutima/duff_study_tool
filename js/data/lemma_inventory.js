@@ -2098,6 +2098,85 @@
   const LAMBANO_AORIST_PASSIVE_PARTICIPLE = aoristPassiveParticipleParadigm('λημφ');
   const LEIPO_AORIST_PASSIVE_PARTICIPLE   = aoristPassiveParticipleParadigm('λειφ');
 
+  // ─── Suppletive / 2nd-aorist participle declensions (lookup-only) ──
+  //
+  // λέγω (εἰπών), ὁράω (ἰδών), ἔρχομαι (ἐλθών), ἔχω (σχών), ἄγω (ἀγαγών),
+  // γινώσκω (γνούς) and κρίνω (κρίνας) drill only the masc nom sg + nom pl
+  // of their aorist participle (the W4_*_SECOND_AORIST sets). Every other
+  // case/number therefore resolved to a blank "—" in the parsing
+  // reconstruction ("Your parse"). These full declensions are added to
+  // extraForms ONLY (no optionalFormGroups) so a wrong-case parse
+  // reconstructs to the real form without injecting new quiz cards into
+  // the deck — the same lookup-only treatment the distinct vocatives get.
+  //
+  // The active participles follow the βαλών pattern (3rd-decl ντ-stem
+  // masc/neut + 1st-decl -οῦσα fem); γνούς overrides only the masc nom sg
+  // (root-aorist -ούς), and κρίνας is the 1st-aorist -ας/-αντος type. The
+  // aorist passive participles (ῥηθείς, ὀφθείς, …) are real Koine forms
+  // (τὸ ῥηθέν, ὁ ὀφθείς) Duff doesn't drill — included so a passive parse
+  // resolves rather than dashing. ἔρχομαι is deponent (no passive).
+
+  function secondAoristActiveNtParticiple(stem, nomSgMasc) {
+    const s = stem;
+    return {
+      [nomSgMasc || `${s}ών`]: 'aorist active participle nominative singular masculine',
+      [`${s}όντος`]:  'aorist active participle genitive singular masculine/neuter',
+      [`${s}όντι`]:   'aorist active participle dative singular masculine/neuter',
+      [`${s}όντα`]:   'aorist active participle accusative singular masculine',
+      [`${s}όντες`]:  'aorist active participle nominative plural masculine',
+      [`${s}όντων`]:  'aorist active participle genitive plural masculine/feminine/neuter',
+      [`${s}οῦσι`]:   'aorist active participle dative plural masculine/neuter',
+      [`${s}οῦσιν`]:  'aorist active participle dative plural masculine/neuter',
+      [`${s}όντας`]:  'aorist active participle accusative plural masculine',
+      [`${s}οῦσα`]:   'aorist active participle nominative singular feminine',
+      [`${s}ούσης`]:  'aorist active participle genitive singular feminine',
+      [`${s}ούσῃ`]:   'aorist active participle dative singular feminine',
+      [`${s}οῦσαν`]:  'aorist active participle accusative singular feminine',
+      [`${s}οῦσαι`]:  'aorist active participle nominative plural feminine',
+      [`${s}ουσῶν`]:  'aorist active participle genitive plural feminine',
+      [`${s}ούσαις`]: 'aorist active participle dative plural feminine',
+      [`${s}ούσας`]:  'aorist active participle accusative plural feminine',
+      [`${s}όν`]:     'aorist active participle nominative/accusative singular neuter'
+    };
+  }
+
+  const LEGO_AORIST_ACTIVE_PARTICIPLE     = secondAoristActiveNtParticiple('εἰπ');
+  const HORAO_AORIST_ACTIVE_PARTICIPLE    = secondAoristActiveNtParticiple('ἰδ');
+  const ERCHOMAI_AORIST_ACTIVE_PARTICIPLE = secondAoristActiveNtParticiple('ἐλθ');
+  const ECHO_AORIST_ACTIVE_PARTICIPLE     = secondAoristActiveNtParticiple('σχ');
+  const AGO_AORIST_ACTIVE_PARTICIPLE      = secondAoristActiveNtParticiple('ἀγαγ');
+  const GINOSKO_AORIST_ACTIVE_PARTICIPLE  = secondAoristActiveNtParticiple('γν', 'γνούς');
+
+  // κρίνω — 1st-aorist active participle κρίνας (-ας/-αντος), not the
+  // ντ-stem -ών type (κρίνω forms a liquid 1st aorist ἔκρινα).
+  const KRINO_AORIST_ACTIVE_PARTICIPLE = {
+    'κρίνας':     'aorist active participle nominative singular masculine',
+    'κρίναντος':  'aorist active participle genitive singular masculine/neuter',
+    'κρίναντι':   'aorist active participle dative singular masculine/neuter',
+    'κρίναντα':   'aorist active participle accusative singular masculine',
+    'κρίναντες':  'aorist active participle nominative plural masculine',
+    'κρινάντων':  'aorist active participle genitive plural masculine/feminine/neuter',
+    'κρίνασι':    'aorist active participle dative plural masculine/neuter',
+    'κρίνασιν':   'aorist active participle dative plural masculine/neuter',
+    'κρίναντας':  'aorist active participle accusative plural masculine',
+    'κρίνασα':    'aorist active participle nominative singular feminine',
+    'κρινάσης':   'aorist active participle genitive singular feminine',
+    'κρινάσῃ':    'aorist active participle dative singular feminine',
+    'κρίνασαν':   'aorist active participle accusative singular feminine',
+    'κρίνασαι':   'aorist active participle nominative plural feminine',
+    'κρινασῶν':   'aorist active participle genitive plural feminine',
+    'κρινάσαις':  'aorist active participle dative plural feminine',
+    'κρινάσας':   'aorist active participle accusative plural feminine',
+    'κρῖναν':     'aorist active participle nominative/accusative singular neuter'
+  };
+
+  const LEGO_AORIST_PASSIVE_PARTICIPLE    = aoristPassiveParticipleParadigm('ῥη');
+  const HORAO_AORIST_PASSIVE_PARTICIPLE   = aoristPassiveParticipleParadigm('ὀφ');
+  const ECHO_AORIST_PASSIVE_PARTICIPLE    = aoristPassiveParticipleParadigm('σχε');
+  const AGO_AORIST_PASSIVE_PARTICIPLE     = aoristPassiveParticipleParadigm('ἀχ');
+  const GINOSKO_AORIST_PASSIVE_PARTICIPLE = aoristPassiveParticipleParadigm('γνωσ');
+  const KRINO_AORIST_PASSIVE_PARTICIPLE   = aoristPassiveParticipleParadigm('κρι');
+
   const LEMMA_INVENTORY = {
     'εἰμί': {
       // εἰμί is suppletive: it has no aorist or perfect family — Greek
@@ -2191,6 +2270,50 @@
         { chapter: 15, family: 'λείπω — aorist passive participle λειφθείς (optional)',
           forms: LEIPO_AORIST_PASSIVE_PARTICIPLE }
       ]
+    },
+    // Suppletive / 2nd-aorist participle declensions — extraForms only,
+    // so the reconstruction resolves any case/number of these participles
+    // (and their lookup-only passives) without adding drill cards.
+    'λέγω': {
+      extraForms: {
+        ...LEGO_AORIST_ACTIVE_PARTICIPLE,
+        ...LEGO_AORIST_PASSIVE_PARTICIPLE
+      }
+    },
+    'ὁράω': {
+      extraForms: {
+        ...HORAO_AORIST_ACTIVE_PARTICIPLE,
+        ...HORAO_AORIST_PASSIVE_PARTICIPLE
+      }
+    },
+    'ἔρχομαι': {
+      extraForms: {
+        ...ERCHOMAI_AORIST_ACTIVE_PARTICIPLE
+      }
+    },
+    'ἔχω': {
+      extraForms: {
+        ...ECHO_AORIST_ACTIVE_PARTICIPLE,
+        ...ECHO_AORIST_PASSIVE_PARTICIPLE
+      }
+    },
+    'ἄγω': {
+      extraForms: {
+        ...AGO_AORIST_ACTIVE_PARTICIPLE,
+        ...AGO_AORIST_PASSIVE_PARTICIPLE
+      }
+    },
+    'γινώσκω': {
+      extraForms: {
+        ...GINOSKO_AORIST_ACTIVE_PARTICIPLE,
+        ...GINOSKO_AORIST_PASSIVE_PARTICIPLE
+      }
+    },
+    'κρίνω': {
+      extraForms: {
+        ...KRINO_AORIST_ACTIVE_PARTICIPLE,
+        ...KRINO_AORIST_PASSIVE_PARTICIPLE
+      }
     },
     'φιλέω': {
       extraForms: {
