@@ -500,6 +500,25 @@
     font-family: var(--font-body);
   }
 
+  /* Inset each collapsible section's contents from its edges so the nested
+     buttons / accordions don't run the full width of the level above them
+     (which read as a flat full-bleed stack). The section shell (details) is
+     the outer level; its grid pads its direct children in by 10px, the
+     chapter accordion's own body pads its sets in another 10px, and each
+     set's paradigm list pads its buttons in 10px more — so every step down
+     the collapsible tree is visibly narrower than its parent. */
+  #supplementalGrid, #irregularGrid, #advancedGrid, #bookVocabGrid {
+    display: grid;
+    gap: 8px;
+    padding: 0 10px 12px;
+  }
+  /* These bodies sit directly inside the now-padded grids, so drop their own
+     side padding — items should inset once (10px), not twice. The
+     .supplemental-week-body INSIDE a chapter accordion is one level deeper
+     and keeps its padding so it still steps in. */
+  .irregular-practice-body { padding-left: 0; padding-right: 0; }
+  .advanced-week-body { padding-left: 0; padding-right: 0; }
+
   /* ── Advanced vocabulary ── */
   .advanced-section-shell {
     border: 1px solid var(--border);
