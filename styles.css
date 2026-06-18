@@ -859,18 +859,20 @@
     letter-spacing: 0.5px;
     white-space: nowrap;
   }
-  /* Small "(aor)" / "(fut)" form-type tag before a generated (derived) card's
-     headword, marking it as a non-standard principal part. */
+  /* "(aorist)" / "(future)" form-type caption under a generated (derived)
+     card's headword, marking it as a non-standard principal part. Sits as its
+     own centered line just below the word rather than inline before it. */
   .card-form-tag {
-    font-size: 0.42em;
+    font-size: calc((12px) * var(--text-scale));
     font-style: italic;
     color: var(--gold-dim);
     letter-spacing: 0.5px;
-    vertical-align: 0.5em;
-    white-space: nowrap;
+    text-align: center;
     text-transform: lowercase;
+    margin-top: -6px;
+    margin-bottom: 10px;
   }
-  .card-greek-small .card-form-tag { vertical-align: 0.35em; }
+  .card-greek-small + .card-form-tag { margin-top: 2px; }
 
   .flip-hint {
     position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);

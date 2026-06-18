@@ -356,6 +356,18 @@
       { g: 'κρίνομεν',   e: 'we judge (Present indicative active, 1st person pl.)',          required: true },
       { g: 'κρίνετε',    e: 'you all judge (Present indicative active, 2nd person pl.)',   required: true },
       { g: 'κρίνουσι(ν)', e: 'they judge (Present indicative active, 3rd person pl.)',       required: true },
+      // Present active across the non-indicative moods in scope by ch 11
+      // (Duff wk 2: active imperative, infinitive, masc. participle). All in
+      // Duff, so required — mirrors λύω's week-2 imperative/infinitive/
+      // participle sets. κρίνετε is spelt the same as the present indicative
+      // 2pl above; parsing's 2nd-plural mood-ambiguity handler accepts either
+      // reading. (3rd-person imperative and the subjunctive are ch 17, so they
+      // sit outside this liquid-future set.)
+      { g: 'κρῖνε',     e: 'judge! / keep judging! (Present imperative active, 2nd person sg.)', required: true },
+      { g: 'κρίνετε',   e: 'judge! / keep judging! (Present imperative active, 2nd person pl.)', required: true },
+      { g: 'κρίνειν',   e: 'to judge / to be judging (Present infinitive active)',               required: true },
+      { g: 'κρίνων',    e: 'judging (Present participle active, masc. Nom. sg.)',                 required: true },
+      { g: 'κρίνοντες', e: 'judging (Present participle active, masc. Nom. pl.)',                 required: true },
       { g: 'κρινῶ',      e: 'I will judge (Future indicative active, 1st person sg.)',           required: true },
       { g: 'κρινεῖς',    e: 'you will judge (Future indicative active, 2nd person sg.)',         required: true },
       { g: 'κρινεῖ',     e: 'he/she/it will judge (Future indicative active, 3rd person sg.)',  required: true },
