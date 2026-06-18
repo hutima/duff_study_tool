@@ -19,11 +19,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Greek Cards">
-<link rel="manifest" href="manifest.json?v=267">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=267">
-<link rel="icon" type="image/svg+xml" href="favicon.svg?v=267">
+<link rel="manifest" href="manifest.json?v=268">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=268">
+<link rel="icon" type="image/svg+xml" href="favicon.svg?v=268">
 <title>Elementary NT Greek — Flashcards</title>
-<link rel="stylesheet" href="styles.css?v=267">
+<link rel="stylesheet" href="styles.css?v=268">
 <script>
 (function(){
   try {
@@ -607,18 +607,6 @@
             <div id="analyticsTotalGrammarProgressBody"></div>
           </div>
         </details>
-        <details class="analytics-collapse analytics-sub-collapse" data-collapse-key="paradigmStepStats">
-          <summary class="analytics-collapse-summary">
-            <span class="analytics-collapse-caret" aria-hidden="true">▾</span>
-            <div class="analytics-collapse-title-wrap">
-              <h4>Paradigm parsing (step-by-step)</h4>
-              <p class="analytics-collapse-summary-status" id="analyticsParadigmStepStatsStatus">Off-the-record drill stats. Tap a row for the per-mood / per-tense breakdown.</p>
-            </div>
-          </summary>
-          <div class="analytics-collapse-body">
-            <div id="analyticsParadigmStepStatsBody"></div>
-          </div>
-        </details>
       </div>
     </details>
 
@@ -652,6 +640,19 @@
             <div id="analyticsSelectedGrammarProgressBody"></div>
           </div>
         </details>
+      </div>
+    </details>
+
+    <details class="analytics-collapse" data-collapse-key="paradigmStepStats">
+      <summary class="analytics-collapse-summary">
+        <span class="analytics-collapse-caret" aria-hidden="true">▾</span>
+        <div class="analytics-collapse-title-wrap">
+          <h3>Parsing</h3>
+          <p class="analytics-collapse-summary-status" id="analyticsParadigmStepStatsStatus">Step-by-step parsing accuracy. Tap a row for the per-mood / per-tense breakdown.</p>
+        </div>
+      </summary>
+      <div class="analytics-collapse-body">
+        <div id="analyticsParadigmStepStatsBody"></div>
       </div>
     </details>
 
@@ -769,7 +770,9 @@
         <details class="user-guide-changelog-version" open>
           <summary>Version 1.8 &middot; 2026-06-18</summary>
           <ul class="user-guide-list">
-            <li><strong>Parsing accuracy over recent guesses.</strong> The <em>Paradigm parsing (step-by-step)</em> section of Progress &amp; analytics now opens with a trend chart: your recent parses are pooled across paradigms and split into buckets of 20 (oldest&nbsp;&rarr;&nbsp;most recent), each bar showing the share you got fully correct. A caption calls out the latest run and whether it&rsquo;s up or down from the previous 20. Like the per-paradigm rows, it counts only the parse steps you currently have enabled.</li>
+            <li><strong>Parsing is now its own analytics section.</strong> Step-by-step parsing stats have moved out from under <em>Grammar</em> into a top-level <em>Parsing</em> section in Progress &amp; analytics, matching its place as its own study mode.</li>
+            <li><strong>Parsing accuracy over recent guesses.</strong> The <em>Parsing</em> analytics section now opens with a trend chart: your recent parses are pooled across paradigms and split into buckets of 20 (oldest&nbsp;&rarr;&nbsp;most recent), each bar showing the share you got fully correct. A caption calls out the latest run and whether it&rsquo;s up or down from the previous 20. Like the per-paradigm rows, it counts only the parse steps you currently have enabled.</li>
+            <li><strong>Fixed a tap glitch in parsing stats.</strong> Tapping a paradigm row (in the analytics section or the bottom review panel) no longer flashes open and instantly snaps shut on iOS.</li>
           </ul>
         </details>
         <details class="user-guide-changelog-version">
@@ -1077,62 +1080,62 @@
   </div>
 </div>
 
-<script defer src="js/data/words.js?v=267"></script>
-<script defer src="js/data/morphology.js?v=267"></script>
-<script defer src="js/data/lemma_inventory.js?v=267"></script>
-<script defer src="js/data/supplemental.js?v=267"></script>
-<script defer src="js/data/grammar.js?v=267"></script>
-<script defer src="js/data/supplementals/week_1_supplemental.js?v=267"></script>
-<script defer src="js/data/supplementals/week_1_paradigms.js?v=267"></script>
-<script defer src="js/data/supplementals/week_2_paradigms.js?v=267"></script>
-<script defer src="js/data/supplementals/week_3_paradigms.js?v=267"></script>
-<script defer src="js/data/supplementals/week_4_paradigms.js?v=267"></script>
-<script defer src="js/data/supplementals/second_aorist_flip.js?v=267"></script>
-<script defer src="js/data/supplementals/liquid_future_flip.js?v=267"></script>
-<script defer src="js/data/supplementals/week_5_paradigms.js?v=267"></script>
-<script defer src="js/data/supplementals/w6_aorist_passive_flip.js?v=267"></script>
-<script defer src="js/data/supplementals/w6_perfect_active_flip.js?v=267"></script>
-<script defer src="js/data/supplementals/w8_mi_verb_principal_parts_flip.js?v=267"></script>
-<script defer src="js/data/supplementals/week_6_paradigms.js?v=267"></script>
-<script defer src="js/data/supplementals/week_7_paradigms.js?v=267"></script>
-<script defer src="js/data/supplementals/week_8_paradigms.js?v=267"></script>
-<script defer src="js/data/supplementals/adj_paradigms.js?v=267"></script>
-<script defer src="js/data/supplementals/w3o_supplemental.js?v=267"></script>
-<script defer src="js/data/supplementals/w6o_supplemental.js?v=267"></script>
-<script defer src="js/data/supplementals/w7o_supplemental.js?v=267"></script>
-<script defer src="js/data/supplementals/w8o_supplemental.js?v=267"></script>
-<script defer src="js/data/supplementals/paradigm_morphology.js?v=267"></script>
-<script defer src="js/data/supplementals/stem_change_drills.js?v=267"></script>
-<script defer src="js/data/advanced/advanced_01.js?v=267"></script>
-<script defer src="js/data/advanced/advanced_02.js?v=267"></script>
-<script defer src="js/data/advanced/advanced_03.js?v=267"></script>
-<script defer src="js/data/advanced/advanced_04.js?v=267"></script>
-<script defer src="js/data/advanced/advanced_05.js?v=267"></script>
-<script defer src="js/data/advanced/advanced_06.js?v=267"></script>
-<script defer src="js/data/advanced/advanced_07.js?v=267"></script>
-<script defer src="js/data/advanced/advanced_08.js?v=267"></script>
-<script defer src="js/data/advanced/advanced_09.js?v=267"></script>
-<script defer src="js/data/advanced/advanced_10.js?v=267"></script>
-<script defer src="js/data/advanced/advanced_11.js?v=267"></script>
-<script defer src="js/data/advanced/advanced_12.js?v=267"></script>
-<script defer src="js/data/advanced/advanced_13.js?v=267"></script>
-<script defer src="js/data/advanced/advanced_14.js?v=267"></script>
-<script defer src="js/data/advanced/advanced_15.js?v=267"></script>
-<script defer src="js/data/advanced/advanced_16.js?v=267"></script>
-<script defer src="js/data/advanced/advanced_17.js?v=267"></script>
-<script defer src="js/data/advanced/advanced_18.js?v=267"></script>
-<script defer src="js/data/advanced/advanced_19.js?v=267"></script>
-<script defer src="js/data/advanced/advanced_20.js?v=267"></script>
-<script defer src="js/data/advanced/advanced_21.js?v=267"></script>
-<script defer src="js/data/advanced/advanced_22.js?v=267"></script>
-<script defer src="js/data/advanced/advanced_23.js?v=267"></script>
-<script defer src="js/data/advanced/advanced_24.js?v=267"></script>
-<script defer src="js/data/advanced/advanced_25.js?v=267"></script>
-<script defer src="js/data/nt_book_vocab.js?v=267"></script>
-<script defer src="js/data/reader.js?v=267"></script>
-<script defer src="js/data/reader_verse_literals.js?v=267"></script>
-<script defer src="js/data/reader_translations.js?v=267"></script>
-<script defer src="js/logic/pos_logic.js?v=267"></script>
-<script type="module" src="js/app/main.js?v=267"></script>
+<script defer src="js/data/words.js?v=268"></script>
+<script defer src="js/data/morphology.js?v=268"></script>
+<script defer src="js/data/lemma_inventory.js?v=268"></script>
+<script defer src="js/data/supplemental.js?v=268"></script>
+<script defer src="js/data/grammar.js?v=268"></script>
+<script defer src="js/data/supplementals/week_1_supplemental.js?v=268"></script>
+<script defer src="js/data/supplementals/week_1_paradigms.js?v=268"></script>
+<script defer src="js/data/supplementals/week_2_paradigms.js?v=268"></script>
+<script defer src="js/data/supplementals/week_3_paradigms.js?v=268"></script>
+<script defer src="js/data/supplementals/week_4_paradigms.js?v=268"></script>
+<script defer src="js/data/supplementals/second_aorist_flip.js?v=268"></script>
+<script defer src="js/data/supplementals/liquid_future_flip.js?v=268"></script>
+<script defer src="js/data/supplementals/week_5_paradigms.js?v=268"></script>
+<script defer src="js/data/supplementals/w6_aorist_passive_flip.js?v=268"></script>
+<script defer src="js/data/supplementals/w6_perfect_active_flip.js?v=268"></script>
+<script defer src="js/data/supplementals/w8_mi_verb_principal_parts_flip.js?v=268"></script>
+<script defer src="js/data/supplementals/week_6_paradigms.js?v=268"></script>
+<script defer src="js/data/supplementals/week_7_paradigms.js?v=268"></script>
+<script defer src="js/data/supplementals/week_8_paradigms.js?v=268"></script>
+<script defer src="js/data/supplementals/adj_paradigms.js?v=268"></script>
+<script defer src="js/data/supplementals/w3o_supplemental.js?v=268"></script>
+<script defer src="js/data/supplementals/w6o_supplemental.js?v=268"></script>
+<script defer src="js/data/supplementals/w7o_supplemental.js?v=268"></script>
+<script defer src="js/data/supplementals/w8o_supplemental.js?v=268"></script>
+<script defer src="js/data/supplementals/paradigm_morphology.js?v=268"></script>
+<script defer src="js/data/supplementals/stem_change_drills.js?v=268"></script>
+<script defer src="js/data/advanced/advanced_01.js?v=268"></script>
+<script defer src="js/data/advanced/advanced_02.js?v=268"></script>
+<script defer src="js/data/advanced/advanced_03.js?v=268"></script>
+<script defer src="js/data/advanced/advanced_04.js?v=268"></script>
+<script defer src="js/data/advanced/advanced_05.js?v=268"></script>
+<script defer src="js/data/advanced/advanced_06.js?v=268"></script>
+<script defer src="js/data/advanced/advanced_07.js?v=268"></script>
+<script defer src="js/data/advanced/advanced_08.js?v=268"></script>
+<script defer src="js/data/advanced/advanced_09.js?v=268"></script>
+<script defer src="js/data/advanced/advanced_10.js?v=268"></script>
+<script defer src="js/data/advanced/advanced_11.js?v=268"></script>
+<script defer src="js/data/advanced/advanced_12.js?v=268"></script>
+<script defer src="js/data/advanced/advanced_13.js?v=268"></script>
+<script defer src="js/data/advanced/advanced_14.js?v=268"></script>
+<script defer src="js/data/advanced/advanced_15.js?v=268"></script>
+<script defer src="js/data/advanced/advanced_16.js?v=268"></script>
+<script defer src="js/data/advanced/advanced_17.js?v=268"></script>
+<script defer src="js/data/advanced/advanced_18.js?v=268"></script>
+<script defer src="js/data/advanced/advanced_19.js?v=268"></script>
+<script defer src="js/data/advanced/advanced_20.js?v=268"></script>
+<script defer src="js/data/advanced/advanced_21.js?v=268"></script>
+<script defer src="js/data/advanced/advanced_22.js?v=268"></script>
+<script defer src="js/data/advanced/advanced_23.js?v=268"></script>
+<script defer src="js/data/advanced/advanced_24.js?v=268"></script>
+<script defer src="js/data/advanced/advanced_25.js?v=268"></script>
+<script defer src="js/data/nt_book_vocab.js?v=268"></script>
+<script defer src="js/data/reader.js?v=268"></script>
+<script defer src="js/data/reader_verse_literals.js?v=268"></script>
+<script defer src="js/data/reader_translations.js?v=268"></script>
+<script defer src="js/logic/pos_logic.js?v=268"></script>
+<script type="module" src="js/app/main.js?v=268"></script>
 </body>
 </html>
