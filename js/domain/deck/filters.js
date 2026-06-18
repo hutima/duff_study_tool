@@ -9,15 +9,57 @@ import { getConfidencePct } from '../srs/confidence.js';
 export const HARD_VOCAB_MIN_FAILS = 10;
 export const HARD_VOCAB_MAX_CONFIDENCE = 40;
 
-// Derived second-aorist cards (the "Second aorists as cards" toggle) carry a
-// `::2aor` deck-id suffix so deck mechanics — archive marks, cycle state,
-// saved deck order — track them separately, but their *stats* live on the
-// base card: every progress read/write strips the suffix, so reviewing
-// εἶπον records onto λέγω's entry and analytics/confidence see one word.
+// Irregular "split cards" toggles. Each derives standalone cards for a verb's
+// non-present principal part from the matching present-tense verb already in
+// the deck — the generalization of the original "Second aorists as cards"
+// behaviour to every stem-flip set. A config maps a flip set to a deck-id
+// `tag`, a render label, and the Duff chapter where the concept is taught
+// (used for the "default on when that chapter is selected" rule). `multi`
+// flags sets that contribute several principal parts per present lemma
+// (the μι-verbs), which need an index in the id so they don't collide.
+export const IRREGULAR_CARD_CONFIGS = [
+  { tag: '2aor',    flipKey: 'W4_SECOND_AORIST_FLIP',           label: '2 aor. of',     chapter: 11 },
+  { tag: 'lfut',    flipKey: 'W4_LIQUID_FUTURE_FLIP',           label: 'fut. of',       chapter: 11 },
+  { tag: 'aorpass', flipKey: 'W6_AORIST_PASSIVE_FLIP',          label: 'aor. pass. of', chapter: 15 },
+  { tag: 'perfact', flipKey: 'W6_PERFECT_ACTIVE_FLIP',          label: 'pf. of',        chapter: 16 },
+  { tag: 'mi',      flipKey: 'W8_MI_VERB_PRINCIPAL_PARTS_FLIP', label: 'of',            chapter: 19, multi: true }
+];
+
+const IRREGULAR_TAGS = IRREGULAR_CARD_CONFIGS.map(c => c.tag);
+
+// Matches a derived-card id suffix: `::<tag>` optionally followed by `::<n>`
+// (the index disambiguates μι-verbs). Derived cards carry it so deck
+// mechanics — archive marks, cycle state, saved deck order — track them
+// separately, but their *stats* live on the base card: progressCardId strips
+// the suffix, so reviewing εἶπον records onto λέγω's entry and
+// analytics/confidence see one word.
+const DERIVED_ID_SUFFIX_RE = new RegExp(`::(?:${IRREGULAR_TAGS.join('|')})(?:::\\d+)?$`);
+
+// Back-compat alias for the original single-suffix constant.
 export const SECOND_AORIST_ID_SUFFIX = '::2aor';
+
 export function progressCardId(cardId) {
   const id = String(cardId == null ? '' : cardId);
-  return id.endsWith(SECOND_AORIST_ID_SUFFIX) ? id.slice(0, -SECOND_AORIST_ID_SUFFIX.length) : id;
+  return id.replace(DERIVED_ID_SUFFIX_RE, '');
+}
+
+// Whether an irregular split-cards toggle is effectively ON. An explicit
+// override (the user clicked the toggle) wins; otherwise it defaults ON when
+// the concept's Duff chapter is among the currently selected chapters.
+export function isIrregularCardEnabled(tag, selectedKeys, overrides) {
+  const v = overrides && typeof overrides === 'object' ? overrides[tag] : undefined;
+  if (v === true) return true;
+  if (v === false) return false;
+  const config = IRREGULAR_CARD_CONFIGS.find(c => c.tag === tag);
+  if (!config) return false;
+  const chapters = new Set((selectedKeys || []).filter(isChapterKey).map(Number));
+  return chapters.has(config.chapter);
+}
+
+export function irregularEnabledTags(selectedKeys, overrides) {
+  return IRREGULAR_CARD_CONFIGS
+    .filter(c => isIrregularCardEnabled(c.tag, selectedKeys, overrides))
+    .map(c => c.tag);
 }
 
 export function isHardVocabCard(card, progressStore) {
@@ -186,32 +228,52 @@ export function getSelectedVocabCards(keys, requiredFlag = false) {
   return cards;
 }
 
-// Second-aorist expansion (the "Second aorists as cards" advanced toggle):
-// for every standard chapter-vocab verb with a recorded second aorist in the
-// W4 flip set, add a standalone card for the aorist form (e.g. εἶπον "I said"
-// for λέγω). The derived card keeps the parent's set metadata and required
-// flag so required-only and hard-review scoping treat the pair alike, and
-// gets a stable `::2aor` id suffix for deck mechanics — while its stats land
-// on the parent's progress entry via progressCardId above. Supplemental,
-// advanced, and flip cards are left alone — same rule as the render-side
-// stem annotations.
+// present-lemma → [derived entries] for one flip set.
+function buildIrregularLookup(config) {
+  const set = window.SUPPLEMENTAL_VOCAB_SETS && window.SUPPLEMENTAL_VOCAB_SETS[config.flipKey];
+  const flipCards = set && Array.isArray(set.cards) ? set.cards : [];
+  const map = {};
+  flipCards.forEach(c => {
+    if (!c || !c.stemFlip || !c.g || !c.aorist) return;
+    (map[c.g] = map[c.g] || []).push({
+      form: c.aorist,
+      gloss: c.aoristGloss,
+      stem: c.stem || '',
+      // μι-verbs name each principal part on the card itself; reuse it so the
+      // derived label reads e.g. "aorist active (1st sg.) of [δίδωμι]".
+      label: config.multi && c.stemFlipAorist ? c.stemFlipAorist : config.label
+    });
+  });
+  return map;
+}
+
+// Irregular-card expansion (the "… as cards" toggles): for every standard
+// chapter-vocab verb with a recorded non-present principal part in an enabled
+// flip set, add a standalone card for that form (e.g. εἶπον "I said" for λέγω,
+// λέλυκα "I have untied" for λύω). Derived cards keep the parent's set
+// metadata and required flag so required-only / hard-review scoping treat the
+// pair alike, and get a stable `::<tag>` id suffix for deck mechanics — while
+// their stats land on the parent's progress entry via progressCardId above.
+// Supplemental, advanced, and flip cards are left alone — same rule as the
+// render-side stem annotations.
 //
-// Placement: each aorist is woven into its own chapter's run of cards about
-// half the run away from its present-stem parent (circularly), not appended
-// right after it — back-to-back the present gives the aorist away in an
-// unshuffled deck. The offset is deterministic, so the unshuffled order is
+// Placement: each derived card is woven into its own chapter's run of cards
+// about half the run away from its present-stem parent (circularly), not
+// appended right after it — back-to-back the present gives the answer away in
+// an unshuffled deck. The offset is deterministic, so the unshuffled order is
 // stable across rebuilds; shuffled decks randomize it anyway.
-export function expandSecondAoristCards(cards) {
+export function expandIrregularCards(cards, enabledTags) {
   if (!Array.isArray(cards) || !cards.length) return cards || [];
-  const flip = window.SUPPLEMENTAL_VOCAB_SETS && window.SUPPLEMENTAL_VOCAB_SETS.W4_SECOND_AORIST_FLIP;
-  const flipCards = flip && Array.isArray(flip.cards) ? flip.cards : [];
-  if (!flipCards.length) return cards;
-  const byLemma = {};
-  for (const c of flipCards) {
-    if (c && c.stemFlip && c.g && c.aorist) byLemma[c.g] = c;
-  }
+  const tags = (enabledTags || []).filter(t => IRREGULAR_TAGS.includes(t));
+  if (!tags.length) return cards;
+  const lookups = IRREGULAR_CARD_CONFIGS
+    .filter(c => tags.includes(c.tag))
+    .map(c => ({ config: c, byLemma: buildIrregularLookup(c) }))
+    .filter(l => Object.keys(l.byLemma).length);
+  if (!lookups.length) return cards;
+
   const out = [];
-  // Current contiguous same-sourceKey run, plus the aorists derived from it
+  // Current contiguous same-sourceKey run, plus the derived cards from it
   // (with each parent's index within the run) awaiting placement.
   let run = [];
   let runKey;
@@ -231,38 +293,53 @@ export function expandSecondAoristCards(cards) {
     runKey = key;
     const parentIdx = run.length;
     run.push(card);
-    if (!card || card.advanced || card.supplemental || card.stemFlip || card.secondAoristOf) return;
-    const entry = byLemma[card.g];
-    if (!entry) return;
-    pending.push({
-      parentIdx,
-      card: {
-        ...card,
-        g: entry.aorist,
-        e: entry.aoristGloss || card.e,
-        secondAoristOf: card.g,
-        secondAoristStem: entry.stem || '',
-        id: `${card.id}${SECOND_AORIST_ID_SUFFIX}`
-      }
+    if (!card || card.advanced || card.supplemental || card.stemFlip || card.derivedFrom) return;
+    lookups.forEach(({ config, byLemma }) => {
+      const entries = byLemma[card.g];
+      if (!entries) return;
+      entries.forEach((entry, i) => {
+        const suffix = config.multi ? `::${config.tag}::${i}` : `::${config.tag}`;
+        pending.push({
+          parentIdx,
+          card: {
+            ...card,
+            g: entry.form,
+            e: entry.gloss || card.e,
+            derivedFrom: card.g,
+            derivedLabel: entry.label,
+            derivedStem: entry.stem,
+            derivedTag: config.tag,
+            // Legacy aliases so the render path that special-cased the
+            // second aorist keeps working unchanged.
+            secondAoristOf: config.tag === '2aor' ? card.g : undefined,
+            secondAoristStem: config.tag === '2aor' ? entry.stem : undefined,
+            id: `${card.id}${suffix}`
+          }
+        });
+      });
     });
   });
   flushRun();
   return out;
 }
 
-// Which face of a shared base/second-aorist progress entry a card is:
-// 'aorist' for the derived `::2aor` card, 'present' for a base chapter-vocab
-// verb that has one (same eligibility rule as the expansion above), null for
+// Which face of a shared base/derived progress entry a card is: the derived
+// suffix (e.g. '2aor', 'mi::0') for a derived card, 'base' for a present-tense
+// chapter-vocab verb that has at least one derived face anywhere, null for
 // every other card — those have no sibling face and no shared-entry concern.
-// The spaced scheduler uses this to grade the shared entry by its weaker
-// face (see resolveSharedFaceOutcome in js/app/main.js).
-export function secondAoristFaceKey(card) {
+// The spaced scheduler grades the shared entry by its weakest active face
+// (see resolveSharedFaceOutcome in js/app/main.js).
+export function derivedCardFaceKey(card) {
   if (!card) return null;
-  if (card.secondAoristOf || String(card.id || '').endsWith(SECOND_AORIST_ID_SUFFIX)) return 'aorist';
+  const m = String(card.id || '').match(DERIVED_ID_SUFFIX_RE);
+  if (m) return m[0].slice(2); // drop the leading "::" → '2aor' | 'mi::0' …
   if (card.advanced || card.supplemental || card.stemFlip) return null;
-  const flip = window.SUPPLEMENTAL_VOCAB_SETS && window.SUPPLEMENTAL_VOCAB_SETS.W4_SECOND_AORIST_FLIP;
-  const flipCards = flip && Array.isArray(flip.cards) ? flip.cards : [];
-  return flipCards.some(c => c && c.stemFlip && c.aorist && c.g === card.g) ? 'present' : null;
+  for (const config of IRREGULAR_CARD_CONFIGS) {
+    const set = window.SUPPLEMENTAL_VOCAB_SETS && window.SUPPLEMENTAL_VOCAB_SETS[config.flipKey];
+    const flipCards = set && Array.isArray(set.cards) ? set.cards : [];
+    if (flipCards.some(c => c && c.stemFlip && c.aorist && c.g === card.g)) return 'base';
+  }
+  return null;
 }
 
 export function getSelectedGrammarCards(keys) {

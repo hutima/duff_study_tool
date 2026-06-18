@@ -447,11 +447,11 @@ export function renderCard() {
   // Verbs with irregular principal parts get them in one small bracketed line
   // under the Greek headword (2 aor. / fut. / aor. pass. / pf.).
   const verbStemAltHTML = notesOn ? verbStemAltHtml(card, maxCh) : '';
-  // On a standalone second-aorist card ("Second aorists as cards" toggle)
-  // that line reads "2 aor. of [parent]" — and the parent's present stem IS
-  // the answer being drilled, so it must not appear until the flip. Question
-  // face gets nothing; the back keeps the full line as the reveal payoff.
-  const verbStemAltQuestionHTML = card.secondAoristOf ? '' : verbStemAltHTML;
+  // On a standalone derived card (the irregular "… as cards" toggles) that
+  // line reads "<label> of [parent]" — and the parent IS the answer being
+  // drilled, so it must not appear until the flip. Question face gets nothing;
+  // the back keeps the full line as the reveal payoff.
+  const verbStemAltQuestionHTML = card.derivedFrom ? '' : verbStemAltHTML;
   // Third-declension nouns carry a "declines like σάρξ" pointer in the hint
   // line of the Greek-bearing face, anchoring each noun to its model paradigm.
   const declModelTag = notesOn ? nounDeclensionModelSuffix(card, maxCh) : '';
@@ -738,10 +738,10 @@ function getPerfectActiveByLemma() {
 // and for lemmas with no recorded parts.
 function verbStemAltHtml(card, maxChapter) {
   if (!card || card.advanced || card.supplemental || card.stemFlip) return '';
-  // A standalone second-aorist card (the "Second aorists as cards" toggle)
-  // points back at its present-stem parent instead of listing parts.
-  if (card.secondAoristOf) {
-    return `<div class="card-stem-alts"><span class="card-stem-alts-label">2 aor. of</span> [${escapeHtml(card.secondAoristOf)}]</div>`;
+  // A standalone derived card (the irregular "… as cards" toggles) points
+  // back at its present-stem parent instead of listing parts.
+  if (card.derivedFrom) {
+    return `<div class="card-stem-alts"><span class="card-stem-alts-label">${escapeHtml(card.derivedLabel || 'of')}</span> [${escapeHtml(card.derivedFrom)}]</div>`;
   }
   const unlocked = (ch) => maxChapter == null || maxChapter >= ch;
   const parts = [];
@@ -765,9 +765,9 @@ function verbStemAltHtml(card, maxChapter) {
 // supplemental/advanced/flip cards and lemmas without a recorded stem.
 function verbStemInlineHtml(card) {
   if (!card || card.advanced || card.supplemental || card.stemFlip) return '';
-  // Standalone second-aorist cards carry their stem directly (the lookup is
-  // keyed by present-stem lemma, which their headword isn't).
-  const stem = card.secondAoristOf ? card.secondAoristStem : getVerbStemByLemma()[card.g];
+  // Standalone derived cards carry their stem directly (the lookup is keyed
+  // by present-stem lemma, which their headword isn't).
+  const stem = card.derivedFrom ? (card.derivedStem || '') : getVerbStemByLemma()[card.g];
   return stem ? `<span class="card-stem-inline">, ${escapeHtml(stem)}</span>` : '';
 }
 

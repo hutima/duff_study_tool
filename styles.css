@@ -1185,6 +1185,10 @@
   .toggle-label:focus-visible { outline: 2px solid var(--gold-dim); outline-offset: 3px; border-radius: 4px; }
   .toggle-label:hover .toggle-text,
   .toggle-label:focus-visible .toggle-text { color: var(--gold); }
+  /* Only the switch flips the toggle (a text guard in main.js stops text
+     clicks), so the switch reads as the actionable part and the text doesn't. */
+  .toggle-label > .toggle-text { cursor: default; }
+  .toggle-switch { cursor: pointer; }
   .toggle-switch {
     display: inline-block;
     width: 34px; height: 18px; flex-shrink: 0;
@@ -1209,8 +1213,9 @@
   }
   /* (i) info button injected into each master toggle (opens a describe-modal). */
   .toggle-info {
+    position: relative;
     flex-shrink: 0;
-    width: 15px; height: 15px;
+    width: 16px; height: 16px;
     display: inline-flex; align-items: center; justify-content: center;
     border: 1px solid var(--gold-dim); border-radius: 50%;
     color: var(--gold-dim);
@@ -1219,6 +1224,18 @@
     letter-spacing: 0; text-transform: none;
     cursor: pointer;
     transition: color 0.1s, border-color 0.1s, background 0.1s;
+  }
+  /* Invisible, layout-free hit area so the small (i) is easy to tap without
+     catching the surrounding toggle. Sits above the toggle's own click target
+     (the info handler stops propagation), so taps near the circle open the
+     info modal instead of flipping the switch. */
+  .toggle-info::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 40px; height: 40px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
   }
   .toggle-info:hover, .toggle-info:focus-visible {
     color: var(--gold); border-color: var(--gold);

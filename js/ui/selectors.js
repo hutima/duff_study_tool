@@ -134,9 +134,7 @@ export function buildChapterSelector() {
     const btn = document.createElement('button');
     btn.className = 'chapter-btn';
     btn.dataset.key = key;
-    const countLabel = host.canAccessGrammarUi()
-      ? `${vocabCount} vocab${studyCount ? ` · ${studyCount} grammar` : ''}`
-      : `${vocabCount} vocab`;
+    const countLabel = `${vocabCount} vocab`;
     const subject = CHAPTER_TITLES[Number(key)] || '';
     const subtitleHtml = subject ? `<span class="chapter-subtitle">${subject}</span>` : '';
     btn.innerHTML = `${set.label}${subtitleHtml}<span class="chapter-count">${countLabel}</span>`;
@@ -268,13 +266,25 @@ export function deselectAllIrregular() {
   loadDeckFromKeys(runtime.selectedKeys, null, { clearUnspacedMarks: true });
 }
 
+// The count shown on a paradigm-practice entry: the number of paradigm
+// tables in the set. Sets with no tables (vocab-only supplements, the
+// stem-flip irregular sets) fall back to their vocab count so the number
+// isn't a meaningless "0 paradigms".
+function paradigmCount(key) {
+  return host.canAccessGrammarUi() ? getSupplementalParadigmsForKey(key).length : 0;
+}
+function entryCountLabel(key, vocabCount) {
+  const n = paradigmCount(key);
+  return n > 0 ? `${n} paradigm${n === 1 ? '' : 's'}` : `${vocabCount} vocab`;
+}
+
 // Renders one selectable supplemental set into `container` — a flat button
 // when the set has 0–1 parsing paradigms, or an expandable <details> listing
 // each paradigm when it has more than one. Shared by the chapter groups.
-function renderSupplementalEntry(container, key, set, vocabCount, studyCount) {
-  const countLabel = host.canAccessGrammarUi()
-    ? `${vocabCount} vocab${studyCount ? ` · ${studyCount} grammar` : ''}`
-    : `${vocabCount} vocab`;
+// `labelOverride` lets a flattened single-set chapter prefix the chapter name.
+function renderSupplementalEntry(container, key, set, vocabCount, studyCount, labelOverride) {
+  const label = labelOverride || set.label;
+  const countLabel = entryCountLabel(key, vocabCount);
   const paradigmList = host.canAccessGrammarUi() ? getSupplementalParadigmsForKey(key) : [];
 
   if (paradigmList.length <= 1) {
@@ -282,7 +292,7 @@ function renderSupplementalEntry(container, key, set, vocabCount, studyCount) {
     btn.type = 'button';
     btn.className = 'chapter-btn supplemental-set-flat';
     btn.dataset.key = key;
-    btn.innerHTML = `<span>${set.label}</span><span class="chapter-count">${countLabel}</span>`;
+    btn.innerHTML = `<span>${label}</span><span class="chapter-count">${countLabel}</span>`;
     btn.onclick = () => toggleSet(key);
     container.appendChild(btn);
     return;
@@ -294,7 +304,7 @@ function renderSupplementalEntry(container, key, set, vocabCount, studyCount) {
 
   const summary = document.createElement('summary');
   summary.className = 'supplemental-summary';
-  summary.innerHTML = `<span>${set.label}</span><span class="chapter-count">${countLabel}</span>`;
+  summary.innerHTML = `<span>${label}</span><span class="chapter-count">${countLabel}</span>`;
   details.appendChild(summary);
 
   const controls = document.createElement('div');
@@ -303,7 +313,7 @@ function renderSupplementalEntry(container, key, set, vocabCount, studyCount) {
   const allBtn = document.createElement('button');
   allBtn.className = 'chapter-btn supplemental-all-btn';
   allBtn.dataset.key = key;
-  allBtn.innerHTML = `All ${set.label}<span class="chapter-count">${countLabel}</span>`;
+  allBtn.innerHTML = `All ${label}<span class="chapter-count">${countLabel}</span>`;
   allBtn.onclick = () => toggleSet(key);
   controls.appendChild(allBtn);
 
@@ -383,6 +393,20 @@ export function buildSupplementalSelector() {
   orderedChapters.forEach(chapter => {
     const entries = chapterGroups.get(chapter);
     if (!entries || !entries.length) return;
+    const chapterLabel = chapter == null ? 'Other paradigms' : `Chapter ${chapter}`;
+
+    // Single-set chapters skip the extra grouping level — the lone entry is
+    // bumped up directly under the section (e.g. Chapter 20's supplemental,
+    // whose own label already names the chapter). Non-chapter-named sets get
+    // a "Chapter N · " prefix so the context isn't lost.
+    if (entries.length === 1) {
+      const { key, set, vocabCount, studyCount } = entries[0];
+      const needsPrefix = chapter != null && !/^chapter\b/i.test(String(set.label || ''));
+      const labelOverride = needsPrefix ? `${chapterLabel} · ${set.label}` : null;
+      renderSupplementalEntry(list, key, set, vocabCount, studyCount, labelOverride);
+      return;
+    }
+
     const chapterDetails = document.createElement('details');
     chapterDetails.className = 'supplemental-week';
     chapterDetails.open = entries.some(({ key }) =>
@@ -392,15 +416,15 @@ export function buildSupplementalSelector() {
     const chapterSummary = document.createElement('summary');
     chapterSummary.className = 'supplemental-week-summary';
     const totalVocab = entries.reduce((s, e) => s + e.vocabCount, 0);
-    const totalStudy = entries.reduce((s, e) => s + e.studyCount, 0);
+    const totalParadigms = entries.reduce((s, e) => s + paradigmCount(e.key), 0);
     const subject = chapter != null ? (CHAPTER_TITLES[chapter] || '') : '';
-    const chapterLabel = chapter == null ? 'Other paradigms' : `Chapter ${chapter}`;
     const titleHtml = subject
       ? `<span class="supplemental-week-title"><span>${chapterLabel}</span><span class="supplemental-week-subtitle">${subject}</span></span>`
       : `<span>${chapterLabel}</span>`;
-    const chapterCount = host.canAccessGrammarUi()
-      ? `${entries.length} set${entries.length === 1 ? '' : 's'} · ${totalVocab} vocab${totalStudy ? ` · ${totalStudy} grammar` : ''}`
-      : `${entries.length} set${entries.length === 1 ? '' : 's'} · ${totalVocab} vocab`;
+    const setsLabel = `${entries.length} set${entries.length === 1 ? '' : 's'}`;
+    const chapterCount = totalParadigms > 0
+      ? `${setsLabel} · ${totalParadigms} paradigm${totalParadigms === 1 ? '' : 's'}`
+      : `${setsLabel} · ${totalVocab} vocab`;
     chapterSummary.innerHTML = `${titleHtml}<span class="chapter-count">${chapterCount}</span>`;
     chapterDetails.appendChild(chapterSummary);
 

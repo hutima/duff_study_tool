@@ -54,7 +54,7 @@
 
   window.registerSupplementalGrammarSet(KEY, {
     label: 'πολύς / μέγας-paradigm',
-    notes: 'Week 1 paradigm: irregular adjectives πολύς and μέγας.',
+    notes: 'Paradigm: irregular adjectives πολύς and μέγας.',
     items: [
       {
         family: 'Irregular adjective recognition',

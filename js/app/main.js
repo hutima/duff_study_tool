@@ -161,7 +161,7 @@ import {
 // Domain — Deck
 import { isChapterKey, isAdvancedKey, sortSetKeys, sourceHint, expandSessionSets } from '../domain/deck/ordering.js';
 import { getSelectedVocabCards, getSelectedGrammarCards, getAllVocabKeys, getAllChapterKeys,
-         getAllVocabCards, getAllGrammarCards, getChapterVocabCards, expandSecondAoristCards, progressCardId, secondAoristFaceKey,
+         getAllVocabCards, getAllGrammarCards, getChapterVocabCards, expandIrregularCards, irregularEnabledTags, isIrregularCardEnabled, IRREGULAR_CARD_CONFIGS, progressCardId, derivedCardFaceKey,
          getCardReviewLeft, getCardReviewRight, getCardMetaLine, getCardAuxLine } from '../domain/deck/filters.js';
 
 // Domain — Grammar
@@ -253,7 +253,7 @@ import {
   toggleRequiredOnly,
   toggleHardVocabReview,
   toggleStemNotes,
-  toggleSecondAoristCards,
+  toggleIrregularCards,
   toggleDirection,
   toggleSpacedRepetition,
   toggleSpacingCadence,
@@ -1384,6 +1384,24 @@ function installToggleInfoButtons() {
     if (textEl) textEl.insertAdjacentElement('afterend', info);
     else label.appendChild(info);
   });
+
+  // Only the switch should flip a toggle — a tap on the label *text* must not,
+  // so the small (i) sitting in that text run is easy to hit without catching
+  // the toggle. A capture-phase guard swallows clicks that land on a
+  // `.toggle-text` before the toggle's own inline onclick runs. The (i) keeps
+  // its own handler (we bail for it), and keyboard activation (Enter/Space,
+  // whose target is the button itself, not the text) still toggles.
+  if (!bar.dataset.textGuard) {
+    bar.dataset.textGuard = '1';
+    bar.addEventListener('click', (e) => {
+      if (e.target.closest('.toggle-info')) return;
+      const text = e.target.closest('.toggle-text');
+      if (text && bar.contains(text)) {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+      }
+    }, true);
+  }
 }
 
 function showToggleInfo(label) {
@@ -1492,10 +1510,13 @@ function syncToggleButtons() {
   if (stemNotesSwitch) stemNotesSwitch.classList.toggle('on', runtime.stemNotes !== false);
   const stemNotesToggleEl = document.getElementById('stemNotesToggle');
   if (stemNotesToggleEl) stemNotesToggleEl.setAttribute('aria-checked', runtime.stemNotes !== false ? 'true' : 'false');
-  const secondAoristCardsSwitch = document.getElementById('secondAoristCardsBtn');
-  if (secondAoristCardsSwitch) secondAoristCardsSwitch.classList.toggle('on', !!runtime.secondAoristCards);
-  const secondAoristCardsToggleEl = document.getElementById('secondAoristCardsToggle');
-  if (secondAoristCardsToggleEl) secondAoristCardsToggleEl.setAttribute('aria-checked', runtime.secondAoristCards ? 'true' : 'false');
+  IRREGULAR_CARD_CONFIGS.forEach(c => {
+    const on = isIrregularCardEnabled(c.tag, runtime.selectedKeys, runtime.irregularCards);
+    const sw = document.getElementById(`irregularCards_${c.tag}_Btn`);
+    if (sw) sw.classList.toggle('on', on);
+    const toggleEl = document.getElementById(`irregularCards_${c.tag}_Toggle`);
+    if (toggleEl) toggleEl.setAttribute('aria-checked', on ? 'true' : 'false');
+  });
   // Spacing cadence: ON = relaxed (8-month course), OFF = intensive (2-month, default).
   const cadenceRelaxed = runtime.spacingCadence === 'relaxed';
   const cadenceSwitch = document.getElementById('cadenceBtn');
@@ -1646,6 +1667,10 @@ function syncLayoutVisibility() {
   const reviewDeckMode = isReviewDeckMode();
 
   if (controlsBar) controlsBar.style.display = 'flex';
+  // Reader mode keeps no deck and saves no progress, so the Reshuffle / Reset
+  // actions have nothing to act on — hide the whole grid there.
+  const resetActionsGrid = document.querySelector('.reset-actions-grid');
+  if (resetActionsGrid) resetActionsGrid.style.display = isReaderMode() ? 'none' : '';
   if (cardArea) cardArea.style.display = cardMode ? '' : 'none';
   if (reviewShell) reviewShell.style.display = reviewDeckMode ? '' : 'none';
   if (navRow) navRow.style.display = reviewDeckMode && runtime.selectedKeys.length ? 'flex' : 'none';
@@ -1661,9 +1686,11 @@ function syncLayoutVisibility() {
   // Stem & declension notes annotate standard vocab cards only.
   const stemNotesToggleVis = document.getElementById('stemNotesToggle');
   if (stemNotesToggleVis) stemNotesToggleVis.style.display = runtime.studyMode === 'vocab' ? 'flex' : 'none';
-  // Second-aorists-as-cards expands the vocab deck only.
-  const secondAoristCardsToggleVis = document.getElementById('secondAoristCardsToggle');
-  if (secondAoristCardsToggleVis) secondAoristCardsToggleVis.style.display = runtime.studyMode === 'vocab' ? 'flex' : 'none';
+  // Irregular "… as cards" toggles expand the vocab deck only.
+  IRREGULAR_CARD_CONFIGS.forEach(c => {
+    const el = document.getElementById(`irregularCards_${c.tag}_Toggle`);
+    if (el) el.style.display = runtime.studyMode === 'vocab' ? 'flex' : 'none';
+  });
   // Split vocab/grammar selection only makes sense between vocab and morph;
   // parsing mode owns its chapter via the dedicated dropdown, and reader mode
   // doesn't use the deck selection at all, so hide the toggle in both.
@@ -2001,11 +2028,14 @@ function getSelectedCards(keys) {
     return buildFilteredFocusedParadigmCards();
   }
   const vocabCards = getSelectedVocabCards(keys, false);
-  // "Second aorists as cards" (advanced settings, vocab-only, default off):
-  // each second-aorist verb's aorist form joins the deck as its own card.
-  return (runtime.secondAoristCards && runtime.studyMode === 'vocab')
-    ? expandSecondAoristCards(vocabCards)
-    : vocabCards;
+  // Irregular "… as cards" toggles (advanced settings, vocab-only): each
+  // enabled concept's non-present principal part joins the deck as its own
+  // card. A toggle defaults on when its concept's chapter is selected, unless
+  // the user has overridden it manually.
+  const tags = runtime.studyMode === 'vocab'
+    ? irregularEnabledTags(runtime.selectedKeys, runtime.irregularCards)
+    : [];
+  return tags.length ? expandIrregularCards(vocabCards, tags) : vocabCards;
 }
 
 // When the "Exclude known morphs" toggle is on, drop any card that already
@@ -2701,8 +2731,16 @@ function getDeckAggregateStats(cards = runtime.originalDeck) {
 // active while the toggle is on — with it off the aorist face can't be
 // re-reviewed, so a stale Hard from it must not pin the base card down.
 const SPACED_OUTCOME_RANK = { again: 0, pass: 1, easy: 2 };
+// A derived face counts toward the shared schedule only while its own toggle
+// is active; the base present face always counts. With a toggle off, a stale
+// rating from that face must not keep pinning the base card down.
+function isSharedFaceActive(face) {
+  if (face === 'base') return true;
+  const tag = String(face).split('::')[0];
+  return isIrregularCardEnabled(tag, runtime.selectedKeys, runtime.irregularCards);
+}
 function resolveSharedFaceOutcome(card, ratedOutcome) {
-  const face = secondAoristFaceKey(card);
+  const face = derivedCardFaceKey(card);
   if (!face) return ratedOutcome;
   const progress = getWordProgress(card.id, { persist: true });
   const faces = (progress.faceOutcomes && typeof progress.faceOutcomes === 'object')
@@ -2710,11 +2748,16 @@ function resolveSharedFaceOutcome(card, ratedOutcome) {
     : {};
   faces[face] = ratedOutcome;
   progress.faceOutcomes = faces;
-  if (!(runtime.secondAoristCards && runtime.studyMode === 'vocab')) return ratedOutcome;
-  const sibling = faces[face === 'aorist' ? 'present' : 'aorist'];
-  const siblingRank = SPACED_OUTCOME_RANK[sibling];
-  if (!Number.isFinite(siblingRank) || siblingRank >= SPACED_OUTCOME_RANK[ratedOutcome]) return ratedOutcome;
-  return sibling;
+  if (runtime.studyMode !== 'vocab') return ratedOutcome;
+  // Grade the shared entry by its weakest active face so an Easy present
+  // doesn't bury a still-Hard derived form (or vice-versa).
+  let worst = ratedOutcome;
+  for (const [f, out] of Object.entries(faces)) {
+    if (!isSharedFaceActive(f)) continue;
+    const rank = SPACED_OUTCOME_RANK[out];
+    if (Number.isFinite(rank) && rank < SPACED_OUTCOME_RANK[worst]) worst = out;
+  }
+  return worst;
 }
 
 function applySpacedReview(card, outcome) {
@@ -3182,7 +3225,7 @@ const GLOBAL_CLICK_HANDLERS = {
   restoreSpacedUndo, setAppProfile, setStudyMode, setThemeMode, setFontFamily, setTextSize,
   showDisclaimerModal, startStudying, toggleDirection, toggleMorphSelfCheck,
   toggleMorphStepByStep, setMorphFocusedParadigm, setParsingChapter, goToStemDrillFromParsing,
-  toggleRequiredOnly, toggleHardVocabReview, toggleStemNotes, toggleSecondAoristCards, toggleShuffle, toggleSpacedRepetition, toggleSpacingCadence, toggleSplitSelection, toggleAspectStep, toggleDimStep, toggleOptionalForms, toggleOptionalFormFilter, toggleDimValueFilter, toggleExcludeKnownMorphs, toggleParsingShuffleAll, toggleParsingCustomReview, toggleParsingCustomParadigm, setAllParsingCustomParadigms, toggleParsingReverse, toggleAccentLookalikes, resetKnownMorphs, closeResetKnownModal, confirmResetKnownFocused, confirmResetKnownAll, clearParsingStats, toggleUnspacedDailyReset, triggerImportProgress,
+  toggleRequiredOnly, toggleHardVocabReview, toggleStemNotes, toggleIrregularCards, toggleShuffle, toggleSpacedRepetition, toggleSpacingCadence, toggleSplitSelection, toggleAspectStep, toggleDimStep, toggleOptionalForms, toggleOptionalFormFilter, toggleDimValueFilter, toggleExcludeKnownMorphs, toggleParsingShuffleAll, toggleParsingCustomReview, toggleParsingCustomParadigm, setAllParsingCustomParadigms, toggleParsingReverse, toggleAccentLookalikes, resetKnownMorphs, closeResetKnownModal, confirmResetKnownFocused, confirmResetKnownAll, clearParsingStats, toggleUnspacedDailyReset, triggerImportProgress,
   openReaderTab, selectReaderDrillChoice, advanceReaderDrill,
   closeWhatsNewV1_5Modal, closeAspectDefaultOffModal, closeToggleInfoModal, onDueHistogramToggle
 };
