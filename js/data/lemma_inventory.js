@@ -1593,6 +1593,34 @@
   // through to the data gap rather than be silently mislabeled.
   delete GINOMAI_PERFECT_ACTIVE_PARTICIPLE['γεγονυίας_pl'];
 
+  // βάλλω present active participle βάλλων — present stem (doubled λλ),
+  // recessive ντ-stem accent (like λύων), distinct from the ending-accented
+  // 2nd-aorist βαλών below. Lookup-only: parsing the aorist βαλών as a
+  // present participle now reconstructs βάλλων / βαλλόντων (the λλ/λ
+  // contrast) instead of dashing. The dat-pl βάλλουσι(ν) is syncretic with
+  // the present indicative 3pl, so this is spread BEFORE the indicative in
+  // the entry's extraForms to keep that key's indicative reading.
+  const BALLO_PRESENT_ACTIVE_PARTICIPLE = {
+    'βάλλων':      'present active participle nominative singular masculine',
+    'βάλλοντος':   'present active participle genitive singular masculine/neuter',
+    'βάλλοντι':    'present active participle dative singular masculine/neuter',
+    'βάλλοντα':    'present active participle accusative singular masculine',
+    'βάλλοντες':   'present active participle nominative plural masculine',
+    'βαλλόντων':   'present active participle genitive plural masculine/feminine/neuter',
+    'βάλλουσι':    'present active participle dative plural masculine/neuter',
+    'βάλλουσιν':   'present active participle dative plural masculine/neuter',
+    'βάλλοντας':   'present active participle accusative plural masculine',
+    'βάλλουσα':    'present active participle nominative singular feminine',
+    'βαλλούσης':   'present active participle genitive singular feminine',
+    'βαλλούσῃ':    'present active participle dative singular feminine',
+    'βάλλουσαν':   'present active participle accusative singular feminine',
+    'βάλλουσαι':   'present active participle nominative plural feminine',
+    'βαλλουσῶν':   'present active participle genitive plural feminine',
+    'βαλλούσαις':  'present active participle dative plural feminine',
+    'βαλλούσας':   'present active participle accusative plural feminine',
+    'βάλλον':      'present active participle nominative/accusative singular neuter'
+  };
+
   // βάλλω aorist active participle βαλών — 2nd aorist active, ντ-stem
   // masc/neut + 1st-decl -οῦσα fem. Only the nominative is drilled
   // (W4_BALLO_SECOND_AORIST); the full declension is real and common.
@@ -2220,6 +2248,7 @@
     },
     'βάλλω': {
       extraForms: {
+        ...BALLO_PRESENT_ACTIVE_PARTICIPLE,
         ...BALLO_EXTRA_FORMS,
         ...BALLO_AORIST_ACTIVE_PARTICIPLE,
         ...BALLO_AORIST_PASSIVE_PARTICIPLE
