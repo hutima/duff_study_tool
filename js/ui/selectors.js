@@ -275,7 +275,9 @@ function paradigmCount(key) {
 }
 function entryCountLabel(key, vocabCount) {
   const n = paradigmCount(key);
-  return n > 0 ? `${n} paradigm${n === 1 ? '' : 's'}` : `${vocabCount} vocab`;
+  // "set" instead of "paradigm" here: the per-entry count sits in a narrow
+  // right-hand column where "paradigm(s)" wraps mid-word ("paradig / m").
+  return n > 0 ? `${n} set${n === 1 ? '' : 's'}` : `${vocabCount} vocab`;
 }
 
 // Renders one selectable supplemental set into `container` — a flat button
@@ -422,8 +424,11 @@ export function buildSupplementalSelector() {
       ? `<span class="supplemental-week-title"><span>${chapterLabel}</span><span class="supplemental-week-subtitle">${subject}</span></span>`
       : `<span>${chapterLabel}</span>`;
     const setsLabel = `${entries.length} set${entries.length === 1 ? '' : 's'}`;
+    // The per-paradigm-table count was dropped here (now folded into the
+    // per-entry "N set(s)" labels); the header just names how many sets the
+    // chapter holds, falling back to a vocab total for table-less chapters.
     const chapterCount = totalParadigms > 0
-      ? `${setsLabel} · ${totalParadigms} paradigm${totalParadigms === 1 ? '' : 's'}`
+      ? setsLabel
       : `${setsLabel} · ${totalVocab} vocab`;
     chapterSummary.innerHTML = `${titleHtml}<span class="chapter-count">${chapterCount}</span>`;
     chapterDetails.appendChild(chapterSummary);

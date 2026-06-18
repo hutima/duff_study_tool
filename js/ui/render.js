@@ -457,7 +457,12 @@ export function renderCard() {
   // "(future)" caption UNDER the headword so a non-standard principal part
   // reads as such at a glance. The abbreviation that drives the tag is spelt
   // out in full here. It names the tense/voice, not the meaning, so it's safe
-  // on the question face.
+  // on the question face — which is the ONLY face that gets it: the answer
+  // face already carries the full "<label> of [parent]" parse line
+  // (verbStemAltHTML), so repeating "(perfect)" above "perfect active
+  // (1st sg.) of [δείκνυμι]" is redundant. formTagLine is only ever set for
+  // derived cards (derivedShort ⟹ derivedFrom), so the parse line always
+  // accompanies it on the answer side.
   const formTagFull = card.derivedShort
     ? (FORM_TAG_FULL_LABELS[card.derivedShort] || card.derivedShort)
     : '';
@@ -551,7 +556,6 @@ export function renderCard() {
           <span class="card-label">English</span>
           <div class="card-english">${englishDisplay}</div>
           <div class="card-greek-small">${host.formatGreekHeadword(card.g)}</div>
-          ${formTagLine}
           ${verbStemAltHTML}
           <div class="card-hint">${host.transliterateGreek(host.formatGreekHeadword(card.g))}${advancedCountSuffix}</div>
           <div class="card-pos">${host.detectPartOfSpeech(card)}</div>
@@ -570,7 +574,6 @@ export function renderCard() {
           ${requiredLabelHTML}
           <span class="card-label">Greek</span>
           <div class="card-greek">${greekDisplay}</div>
-          ${formTagLine}
           ${verbStemAltHTML}
           <div class="card-hint">${host.transliterateGreek(host.formatGreekHeadword(card.g))}${advancedCountSuffix}${declModelTag}</div>
           <div class="card-pos">${host.detectPartOfSpeech(card)}</div>
