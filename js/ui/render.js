@@ -9,7 +9,7 @@ import { runtime } from '../state/runtime.js';
 import { buildGrammarSupportHtml } from '../domain/grammar/explanations.js';
 import { renderProgress, renderReview } from './progress.js';
 import { buildMorphSteps, summarizeLemmaStats, getParadigmStepAttemptWindow, computeAccessibleDimensionPools, parseAnswerDimensions, aspectMistakeNote, isSecondPluralPresentMoodAmbiguity, computeParadigmPresentValues, accentLookalikesFor, confusableFormHints } from '../domain/grammar/morph_steps.js';
-import { getAccessibleMorphCards, deriveSelectionLevels, buildMultiGenderLemmas, MIXED_FORM_NOUN_LEMMAS, THIRD_DECLENSION_NOUN_LEMMAS, paradigmCategoryNote } from '../domain/grammar/paradigm_focus.js';
+import { getAccessibleMorphCards, deriveSelectionLevels, buildMultiGenderLemmas, MIXED_FORM_NOUN_LEMMAS, THIRD_DECLENSION_NOUN_LEMMAS } from '../domain/grammar/paradigm_focus.js';
 
 // Spell out the derived-card form abbreviation (card.derivedShort) for the
 // "(aorist)" / "(future)" caption under a generated card's headword.
@@ -355,13 +355,11 @@ export function renderCard() {
         : `<div class="morph-result pending">${pendingLabel}</div>`;
     }
 
-    const morphSourceLabelBase = card.supplemental
-      ? cardFaceLabelFromSourceLabel(card.sourceLabel)
+    // Identify by the dictionary lemma, not the paradigm set's principal-parts
+    // label, and without a paradigm-category note (see renderMorphStepCard).
+    const morphSourceLabel = card.supplemental
+      ? (card.lemma || cardFaceLabelFromSourceLabel(card.sourceLabel))
       : card.sourceLabel;
-    const morphCategoryNote = paradigmCategoryNote(card.lemma);
-    const morphSourceLabel = morphCategoryNote
-      ? `${morphSourceLabelBase} · ${morphCategoryNote}`
-      : morphSourceLabelBase;
     // Grammar.js families are keyed to a single family-level lemma/gloss
     // even when a few questions in the family use related-but-different
     // vocabulary (e.g. the πιστός questions sitting under an ἀγαθός family).
@@ -1623,13 +1621,11 @@ function renderParsingReverseCard(area, card) {
   const answered = runtime.morphAnswerState.answered;
   const selectedIdx = runtime.morphAnswerState.selectedIndex;
 
-  const stepSourceLabel = card.supplemental
-    ? cardFaceLabelFromSourceLabel(card.sourceLabel || '')
+  // Identify by the dictionary lemma, not the paradigm set's principal-parts
+  // label, and without a paradigm-category note (see renderMorphStepCard).
+  const reverseSourceLine = card.supplemental
+    ? (card.lemma || cardFaceLabelFromSourceLabel(card.sourceLabel || ''))
     : (card.sourceLabel || '');
-  const reverseCategoryNote = paradigmCategoryNote(card.lemma);
-  const reverseSourceLine = reverseCategoryNote
-    ? `${stepSourceLabel} · ${reverseCategoryNote}`
-    : stepSourceLabel;
 
   const choiceButtons = options.map((form, idx) => {
     const classes = ['choice-btn', 'choice-btn-greek'];
@@ -1696,18 +1692,15 @@ function renderMorphStepCard(area, card) {
     ? renderMorphStepSummary(card, state)
     : renderMorphStepCurrent(state);
 
-  const stepSourceLabel = card.supplemental
-    ? cardFaceLabelFromSourceLabel(card.sourceLabel || '')
+  // Identify the word by its dictionary lemma (λύω), not the paradigm set's
+  // display label. For the participle sets that label is the principal-parts
+  // line ("λύσας, λύσασα, λῦσαν"), which hands the student the tense/mood they
+  // are being asked to parse; the lemma alone never leaks the parse. No
+  // paradigm-category note here either — for second-aorist / liquid-future
+  // verbs the category names the very tense the walk is testing.
+  const stepSourceLine = card.supplemental
+    ? (card.lemma || cardFaceLabelFromSourceLabel(card.sourceLabel || ''))
     : (card.sourceLabel || '');
-  // Name the paradigm category being tested ("liquid future", "second aorist",
-  // "3rd declension", …) after the lemma, so the card says *what* it drills,
-  // not just which word. Category is a fixed property of the lemma, not the
-  // specific form, so it doesn't leak the parse. Empty for un-catalogued
-  // lemmas (grammar.js one-offs), which then show the bare source label.
-  const stepCategoryNote = paradigmCategoryNote(card.lemma);
-  const stepSourceLine = stepCategoryNote
-    ? `${stepSourceLabel} · ${stepCategoryNote}`
-    : stepSourceLabel;
   // The aspect aside is coaching for the explicit Aspect step. With aspect off
   // (the default) the walk never asks for "continuous/undefined", so hide it.
   const aspectHint = runtime.aspectStep
