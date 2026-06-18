@@ -9,7 +9,17 @@ import { runtime } from '../state/runtime.js';
 import { buildGrammarSupportHtml } from '../domain/grammar/explanations.js';
 import { renderProgress, renderReview } from './progress.js';
 import { buildMorphSteps, summarizeLemmaStats, getParadigmStepAttemptWindow, computeAccessibleDimensionPools, parseAnswerDimensions, aspectMistakeNote, isSecondPluralPresentMoodAmbiguity, computeParadigmPresentValues, accentLookalikesFor, confusableFormHints } from '../domain/grammar/morph_steps.js';
-import { getAccessibleMorphCards, deriveSelectionLevels, buildMultiGenderLemmas, MIXED_FORM_NOUN_LEMMAS, THIRD_DECLENSION_NOUN_LEMMAS } from '../domain/grammar/paradigm_focus.js';
+import { getAccessibleMorphCards, deriveSelectionLevels, buildMultiGenderLemmas, MIXED_FORM_NOUN_LEMMAS, THIRD_DECLENSION_NOUN_LEMMAS, paradigmCategoryNote } from '../domain/grammar/paradigm_focus.js';
+
+// Spell out the derived-card form abbreviation (card.derivedShort) for the
+// "(aorist)" / "(future)" caption under a generated card's headword.
+const FORM_TAG_FULL_LABELS = {
+  'aor': 'aorist',
+  'fut': 'future',
+  'pf': 'perfect',
+  'aor pass': 'aorist passive',
+  'pres': 'present'
+};
 
 let host = {
   saveState: () => {},
@@ -345,9 +355,13 @@ export function renderCard() {
         : `<div class="morph-result pending">${pendingLabel}</div>`;
     }
 
-    const morphSourceLabel = card.supplemental
+    const morphSourceLabelBase = card.supplemental
       ? cardFaceLabelFromSourceLabel(card.sourceLabel)
       : card.sourceLabel;
+    const morphCategoryNote = paradigmCategoryNote(card.lemma);
+    const morphSourceLabel = morphCategoryNote
+      ? `${morphSourceLabelBase} · ${morphCategoryNote}`
+      : morphSourceLabelBase;
     // Grammar.js families are keyed to a single family-level lemma/gloss
     // even when a few questions in the family use related-but-different
     // vocabulary (e.g. the πιστός questions sitting under an ἀγαθός family).
@@ -441,14 +455,18 @@ export function renderCard() {
   // A card carries at most one inline stem: the verbal stem for second-aorist /
   // liquid-future verbs, or the third-declension noun stem (never both).
   const stemInline = notesOn ? (verbStemInlineHtml(card) || nounStemInlineHtml(card, maxCh)) : '';
-  // Generated (derived) cards flag the form type with a small "(aor)" / "(fut)"
-  // tag before the headword so a non-standard principal part reads as such at a
-  // glance. It names the tense/voice, not the meaning, so it's safe on the
-  // question face.
-  const formTag = card.derivedShort
-    ? `<span class="card-form-tag">(${escapeHtml(card.derivedShort)})</span> `
+  // Generated (derived) cards name the form type in a small "(aorist)" /
+  // "(future)" caption UNDER the headword so a non-standard principal part
+  // reads as such at a glance. The abbreviation that drives the tag is spelt
+  // out in full here. It names the tense/voice, not the meaning, so it's safe
+  // on the question face.
+  const formTagFull = card.derivedShort
+    ? (FORM_TAG_FULL_LABELS[card.derivedShort] || card.derivedShort)
     : '';
-  const greekDisplay = `${prepStar}${formTag}${host.formatGreekHeadword(card.g)}${stemInline}`;
+  const formTagLine = formTagFull
+    ? `<div class="card-form-tag">(${escapeHtml(formTagFull)})</div>`
+    : '';
+  const greekDisplay = `${prepStar}${host.formatGreekHeadword(card.g)}${stemInline}`;
   const englishDisplay = `${prepStar}${card.e || '—'}`;
   const requiredLabelHTML = `<span class="card-required-label card-required-label-${card.required ? 'req' : 'opt'}">(${card.required ? 'req.' : 'opt.'})</span>`;
   // Verbs with irregular principal parts get them in one small bracketed line
@@ -524,6 +542,7 @@ export function renderCard() {
           ${requiredLabelHTML}
           <span class="card-label">Greek</span>
           <div class="card-greek">${greekDisplay}</div>
+          ${formTagLine}
           ${verbStemAltQuestionHTML}
           <div class="card-hint">${sourceLabelDisplay}${declModelTag}</div>
           <div class="flip-hint">click to reveal →</div>
@@ -533,7 +552,8 @@ export function renderCard() {
           ${requiredLabelHTML}
           <span class="card-label">English</span>
           <div class="card-english">${englishDisplay}</div>
-          <div class="card-greek-small">${formTag}${host.formatGreekHeadword(card.g)}</div>
+          <div class="card-greek-small">${host.formatGreekHeadword(card.g)}</div>
+          ${formTagLine}
           ${verbStemAltHTML}
           <div class="card-hint">${host.transliterateGreek(host.formatGreekHeadword(card.g))}${advancedCountSuffix}</div>
           <div class="card-pos">${host.detectPartOfSpeech(card)}</div>
@@ -552,6 +572,7 @@ export function renderCard() {
           ${requiredLabelHTML}
           <span class="card-label">Greek</span>
           <div class="card-greek">${greekDisplay}</div>
+          ${formTagLine}
           ${verbStemAltHTML}
           <div class="card-hint">${host.transliterateGreek(host.formatGreekHeadword(card.g))}${advancedCountSuffix}${declModelTag}</div>
           <div class="card-pos">${host.detectPartOfSpeech(card)}</div>
@@ -1605,6 +1626,10 @@ function renderParsingReverseCard(area, card) {
   const stepSourceLabel = card.supplemental
     ? cardFaceLabelFromSourceLabel(card.sourceLabel || '')
     : (card.sourceLabel || '');
+  const reverseCategoryNote = paradigmCategoryNote(card.lemma);
+  const reverseSourceLine = reverseCategoryNote
+    ? `${stepSourceLabel} · ${reverseCategoryNote}`
+    : stepSourceLabel;
 
   const choiceButtons = options.map((form, idx) => {
     const classes = ['choice-btn', 'choice-btn-greek'];
@@ -1648,7 +1673,7 @@ function renderParsingReverseCard(area, card) {
       <div class="morph-prompt">Pick the form that matches this parse.</div>
       <div class="morph-form">${escapeHtml(card.lemma || card.form)}</div>
       <div class="morph-step-label">${escapeHtml(parseLine)}</div>
-      <div class="morph-source">${escapeHtml(stepSourceLabel)}</div>
+      <div class="morph-source">${escapeHtml(reverseSourceLine)}</div>
       <div class="morph-choices">${choiceButtons}</div>
       ${dontKnowHtml}
       ${resultHtml}
@@ -1674,6 +1699,20 @@ function renderMorphStepCard(area, card) {
   const stepSourceLabel = card.supplemental
     ? cardFaceLabelFromSourceLabel(card.sourceLabel || '')
     : (card.sourceLabel || '');
+  // Name the paradigm category being tested ("liquid future", "second aorist",
+  // "3rd declension", …) after the lemma, so the card says *what* it drills,
+  // not just which word. Category is a fixed property of the lemma, not the
+  // specific form, so it doesn't leak the parse. Empty for un-catalogued
+  // lemmas (grammar.js one-offs), which then show the bare source label.
+  const stepCategoryNote = paradigmCategoryNote(card.lemma);
+  const stepSourceLine = stepCategoryNote
+    ? `${stepSourceLabel} · ${stepCategoryNote}`
+    : stepSourceLabel;
+  // The aspect aside is coaching for the explicit Aspect step. With aspect off
+  // (the default) the walk never asks for "continuous/undefined", so hide it.
+  const aspectHint = runtime.aspectStep
+    ? ' · Use “continuous/undefined” when the form licenses either reading'
+    : '';
   // The italic line under the form is a reading aid — a transliteration of
   // the form the student is parsing, so they can sound it out. Printing the
   // lemma here (the old behavior) doubled up with the source-label prefix
@@ -1693,7 +1732,7 @@ function renderMorphStepCard(area, card) {
       ${lemmaGloss}
       <div class="morph-form">${escapeHtml(card.form)}</div>
       ${hintHtml}
-      <div class="morph-source">${escapeHtml(stepSourceLabel)} · Use “continuous/undefined” when the form licenses either reading</div>
+      <div class="morph-source">${escapeHtml(stepSourceLine)}${aspectHint}</div>
       ${renderMorphStepBreadcrumb(state)}
       ${body}
     </div>`;
