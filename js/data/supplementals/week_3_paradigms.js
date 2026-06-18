@@ -2,6 +2,7 @@
   window.registerSupplementalVocabSet('W3_RHUOMAI_INDICATIVE', {
     label: 'ῥύομαι — middle/deponent indicative (4 tenses)',
     week: 3,
+    chapter: 8,
     cards: [
       { g: 'ῥύομαι', e: 'Present: I rescue (1st person sg.)', required: true },
       { g: 'ῥύῃ', e: 'Present: you rescue (2nd person sg.)', required: true },
@@ -33,6 +34,7 @@
   window.registerSupplementalVocabSet('W3_RHUOMAI_OTHER_MOODS', {
     label: 'ῥύομαι — imperative, infinitive, participle (present & aorist)',
     week: 3,
+    chapter: 8,
     cards: [
       { g: 'ῥύου', e: 'rescue! (Present imperative, 2nd person sg.)', required: true },
       { g: 'ῥύεσθε', e: 'rescue! (Present imperative, 2nd person pl.)', required: true },
@@ -50,6 +52,7 @@
   window.registerSupplementalVocabSet('W3_EIMI_COMPLETE', {
     label: 'εἰμί — present, future, imperfect',
     week: 3,
+    chapter: 8,
     cards: [
       { g: 'εἰμί', e: 'Present: I am (1st person sg.)', required: true },
       { g: 'εἶ', e: 'Present: you are (2nd person sg.)', required: true },
@@ -75,6 +78,7 @@
   window.registerSupplementalVocabSet('W3_EIMI_INFINITIVE_PARTICIPLE', {
     label: 'εἰμί — infinitive and participle',
     week: 3,
+    chapter: 8,
     cards: [
       { g: 'εἶναι', e: 'to be (Present infinitive)', required: true },
       { g: 'ὤν', e: 'being (Present participle, masc. Nom. sg.)', required: true },
@@ -85,6 +89,7 @@
   window.registerSupplementalVocabSet('W3_EKEINOS', {
     label: 'ἐκεῖνος, ἐκείνη, ἐκεῖνο — far demonstrative',
     week: 3,
+    chapter: 9,
     cards: [
       { g: 'ἐκεῖνος', e: 'that (masc. Nom. sg.)', required: true },
       { g: 'ἐκεῖνον', e: 'that (masc. Acc. sg.)', required: true },
@@ -109,6 +114,7 @@
   window.registerSupplementalVocabSet('W3_HOUTOS', {
     label: 'οὗτος, αὕτη, τοῦτο — near demonstrative',
     week: 3,
+    chapter: 9,
     cards: [
       { g: 'οὗτος', e: 'this (masc. Nom. sg.)', required: true },
       { g: 'τοῦτον', e: 'this (masc. Acc. sg.)', required: true },
@@ -133,6 +139,7 @@
   window.registerSupplementalVocabSet('W3_PERSONAL_PRONOUNS', {
     label: 'First and second personal pronouns',
     week: 3,
+    chapter: 9,
     cards: [
       { g: 'ἐγώ', e: 'I (1st person Nom. sg.)', required: true },
       { g: 'ἐμέ / με', e: 'me (1st person Acc. sg.)', required: true },

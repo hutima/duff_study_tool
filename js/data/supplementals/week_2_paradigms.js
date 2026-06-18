@@ -2,6 +2,7 @@
   window.registerSupplementalVocabSet('W2_LUO_INDICATIVE', {
     label: 'λύω — active indicative (4 tenses)',
     week: 2,
+    chapter: 6,
     cards: [
       { g: 'λύω', e: 'Present: I untie (1st person sg.)', required: true },
       { g: 'λύεις', e: 'Present: you untie (2nd person sg.)', required: true },
@@ -33,6 +34,7 @@
   window.registerSupplementalVocabSet('W2_PHILEO_INDICATIVE', {
     label: 'φιλέω — active indicative (4 tenses)',
     week: 2,
+    chapter: 6,
     cards: [
       { g: 'φιλῶ', e: 'Present: I love (1st person sg.)', required: true },
       { g: 'φιλεῖς', e: 'Present: you love (2nd person sg.)', required: true },
@@ -64,6 +66,7 @@
   window.registerSupplementalVocabSet('W2_LUO_ACTIVE_IMPERATIVE', {
     label: 'λύω — active imperative (present & aorist)',
     week: 2,
+    chapter: 7,
     cards: [
       { g: 'λῦε', e: 'untie! / keep untying! (Present imperative, 2nd sg.)', required: true },
       { g: 'λύετε', e: 'untie! / keep untying! (Present imperative, 2nd pl.)', required: true },
@@ -75,6 +78,7 @@
   window.registerSupplementalVocabSet('W2_LUO_ACTIVE_INFINITIVE', {
     label: 'λύω — active infinitive (present & aorist)',
     week: 2,
+    chapter: 7,
     cards: [
       { g: 'λύειν', e: 'to untie / to be untying (Present infinitive)', required: true },
       { g: 'λῦσαι', e: 'to untie (Aorist infinitive)', required: true }
@@ -84,6 +88,7 @@
   window.registerSupplementalVocabSet('W2_LUO_ACTIVE_PARTICIPLE', {
     label: 'λύω — active masculine participles',
     week: 2,
+    chapter: 7,
     cards: [
       { g: 'λύων', e: 'untying (Present active participle, masc. Nom. sg.)', required: true },
       { g: 'λύοντες', e: 'untying (Present active participle, masc. Nom. pl.)', required: true },
@@ -95,6 +100,7 @@
   window.registerSupplementalVocabSet('W2_PHILEO_ACTIVE_PARTICIPLE', {
     label: 'φιλέω — active masculine participles',
     week: 2,
+    chapter: 7,
     cards: [
       { g: 'φιλῶν', e: 'loving (Present active participle, masc. Nom. sg.)', required: true },
       { g: 'φιλοῦντες', e: 'loving (Present active participle, masc. Nom. pl.)', required: true },

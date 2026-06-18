@@ -35,6 +35,7 @@
   window.registerSupplementalVocabSet('W4_LIQUID_FUTURE_FLIP', {
     label: 'Liquid-future verbs — present ↔ future flashcards',
     week: 4,
+    chapter: 11,
     cards: [
       entry('μένω', 'I remain',          'μενῶ', 'I will remain',       'μεν-',      'liquid stem (-ν): no σ; ending contracts to a circumflex (μενῶ, μενεῖς…)', true),
       entry('κρίνω', 'I judge',          'κρινῶ', 'I will judge',       'κριν-',     'liquid stem (-ν): no σ; circumflex ending', true),

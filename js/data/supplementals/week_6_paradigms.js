@@ -2,6 +2,7 @@
   window.registerSupplementalVocabSet('W6_LUO_PASSIVE_INDICATIVE', {
     label: 'λύω — passive indicative (4 tenses)',
     week: 6,
+    chapter: 15,
     cards: [
       { g: 'λύομαι', e: 'Present: I am (being) untied (1st person sg.)', required: true },
       { g: 'λύῃ', e: 'Present: you are (being) untied (2nd person sg.)', required: true },
@@ -33,6 +34,7 @@
   window.registerSupplementalVocabSet('W6_LUO_PASSIVE_OTHER_MOODS', {
     label: 'λύω — passive imperative, infinitive, participle (present & aorist)',
     week: 6,
+    chapter: 15,
     cards: [
       { g: 'λύου', e: 'be (being) untied! (Present passive imperative, 2nd person sg.)', required: true },
       { g: 'λύεσθε', e: 'be (being) untied! (Present passive imperative, 2nd person pl.)', required: true },

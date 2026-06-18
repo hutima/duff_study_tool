@@ -2,6 +2,7 @@
   window.registerSupplementalVocabSet('W4_RELATIVE_PRONOUN', {
     label: 'ὅς, ἥ, ὅ — relative pronoun',
     week: 4,
+    chapter: 10,
     cards: [
       { g: 'ὅς', e: 'who / which / that (masc. Nom. sg.)', required: true },
       { g: 'ὅν', e: 'whom / which / that (masc. Acc. sg.)', required: true },
@@ -26,6 +27,7 @@
   window.registerSupplementalVocabSet('W4_SECOND_AORIST_STEMS', {
     label: 'Second-aorist stems (present → aorist)',
     week: 4,
+    chapter: 11,
     cards: [
       { g: 'ἁμαρτάνω → ἥμαρτον', e: 'I sin → I sinned (shortened 2nd-aorist stem)', required: true },
       { g: 'ἀποθνῄσκω → ἀπέθανον', e: 'I die → I died (shortened 2nd-aorist stem)', required: true },
@@ -54,6 +56,7 @@
   window.registerSupplementalVocabSet('W4_BALLO_SECOND_AORIST', {
     label: 'βάλλω — second-aorist active forms',
     week: 4,
+    chapter: 11,
     cards: [
       { g: 'ἔβαλον', e: 'I threw (Aorist indicative, 1st person sg.)', required: true },
       { g: 'ἔβαλες', e: 'you threw (Aorist indicative, 2nd person sg.)', required: true },
@@ -79,6 +82,7 @@
   window.registerSupplementalVocabSet('W4_LAMBANO_SECOND_AORIST', {
     label: 'λαμβάνω — second-aorist active forms',
     week: 4,
+    chapter: 11,
     cards: [
       { g: 'ἔλαβον', e: 'I took (Aorist indicative, 1st person sg.)', required: true },
       { g: 'ἔλαβες', e: 'you took (Aorist indicative, 2nd person sg.)', required: true },
@@ -102,6 +106,7 @@
   window.registerSupplementalVocabSet('W4_LEIPO_SECOND_AORIST', {
     label: 'λείπω — second-aorist active forms',
     week: 4,
+    chapter: 11,
     cards: [
       { g: 'ἔλιπον', e: 'I left (Aorist indicative, 1st person sg.)', required: true },
       { g: 'ἔλιπες', e: 'you left (Aorist indicative, 2nd person sg.)', required: true },
@@ -127,6 +132,7 @@
   window.registerSupplementalVocabSet('W4_GINOMAI_SECOND_AORIST', {
     label: 'γίνομαι — second-aorist middle forms',
     week: 4,
+    chapter: 11,
     cards: [
       { g: 'ἐγενόμην', e: 'I became (Aorist middle indicative, 1st person sg.)', required: true },
       { g: 'ἐγένου', e: 'you became (Aorist middle indicative, 2nd person sg.)', required: true },
@@ -145,6 +151,7 @@
   window.registerSupplementalVocabSet('W4_FUTURE_LIQUID_STEMS', {
     label: 'Future-liquid stems (present → future → aorist)',
     week: 4,
+    chapter: 11,
     cards: [
       { g: 'σπείρω → σπερῶ → ἔσπειρα', e: 'I sow → I will sow → I sowed (liquid future)', required: true },
       { g: 'ἐγείρω → ἐγερῶ → ἤγειρα', e: 'I raise → I will raise → I raised (liquid future)', required: true },
@@ -175,6 +182,7 @@
   window.registerSupplementalVocabSet('W4_MENO_LIQUID_FUTURE', {
     label: 'μένω — present & liquid-future active indicative',
     week: 4,
+    chapter: 11,
     cards: [
       { g: 'μένω',      e: 'I remain (Present indicative active, 1st person sg.)',           required: true },
       { g: 'μένεις',    e: 'you remain (Present indicative active, 2nd person sg.)',         required: true },
@@ -210,6 +218,7 @@
   window.registerSupplementalVocabSet('W4_AGO_SECOND_AORIST', {
     label: 'ἄγω — second-aorist active forms',
     week: 4,
+    chapter: 11,
     cards: [
       { g: 'ἤγαγον',   e: 'I led (Aorist indicative, 1st person sg.)',          required: true },
       { g: 'ἤγαγες',   e: 'you led (Aorist indicative, 2nd person sg.)',        required: true },
@@ -228,6 +237,7 @@
   window.registerSupplementalVocabSet('W4_ECHO_SECOND_AORIST', {
     label: 'ἔχω — second-aorist active forms',
     week: 4,
+    chapter: 11,
     cards: [
       { g: 'ἔσχον',   e: 'I had (Aorist indicative, 1st person sg.)',          required: true },
       { g: 'ἔσχες',   e: 'you had (Aorist indicative, 2nd person sg.)',        required: true },
@@ -249,6 +259,7 @@
   window.registerSupplementalVocabSet('W4_GINOSKO_SECOND_AORIST', {
     label: 'γινώσκω — second-aorist active forms',
     week: 4,
+    chapter: 11,
     cards: [
       { g: 'ἔγνων',   e: 'I knew (Aorist indicative, 1st person sg.)',          required: true },
       { g: 'ἔγνως',   e: 'you knew (Aorist indicative, 2nd person sg.)',        required: true },
@@ -269,6 +280,7 @@
   window.registerSupplementalVocabSet('W4_ERCHOMAI_SECOND_AORIST', {
     label: 'ἔρχομαι — second-aorist active forms',
     week: 4,
+    chapter: 11,
     cards: [
       { g: 'ἦλθον',   e: 'I came (Aorist indicative, 1st person sg.)',          required: true },
       { g: 'ἦλθες',   e: 'you came (Aorist indicative, 2nd person sg.)',        required: true },
@@ -290,6 +302,7 @@
   window.registerSupplementalVocabSet('W4_LEGO_SECOND_AORIST', {
     label: 'λέγω — second-aorist active forms',
     week: 4,
+    chapter: 11,
     cards: [
       { g: 'εἶπον',   e: 'I said (Aorist indicative, 1st person sg.)',          required: true },
       { g: 'εἶπες',   e: 'you said (Aorist indicative, 2nd person sg.)',        required: true },
@@ -309,6 +322,7 @@
   window.registerSupplementalVocabSet('W4_HORAO_SECOND_AORIST', {
     label: 'ὁράω — second-aorist active forms',
     week: 4,
+    chapter: 11,
     cards: [
       { g: 'εἶδον',   e: 'I saw (Aorist indicative, 1st person sg.)',          required: true },
       { g: 'εἶδες',   e: 'you saw (Aorist indicative, 2nd person sg.)',        required: true },
@@ -334,6 +348,7 @@
   window.registerSupplementalVocabSet('W4_KRINO_LIQUID_FUTURE', {
     label: 'κρίνω — present, future, and aorist active',
     week: 4,
+    chapter: 11,
     cards: [
       { g: 'κρίνω',      e: 'I judge (Present indicative active, 1st person sg.)',           required: true },
       { g: 'κρίνεις',    e: 'you judge (Present indicative active, 2nd person sg.)',         required: true },

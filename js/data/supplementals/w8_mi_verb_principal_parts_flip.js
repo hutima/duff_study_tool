@@ -24,6 +24,7 @@
   window.registerSupplementalVocabSet('W8_MI_VERB_PRINCIPAL_PARTS_FLIP', {
     label: 'μι-verb principal parts — present ↔ aorist / perfect flashcards',
     week: 8,
+    chapter: 19,
     cards: [
       // δίδωμι
       entry('δίδωμι', 'I give',                          'ἔδωκα', 'I gave',                       'aorist active (1st sg.)',   'reduplication lost; k-aorist (-κα)'),
