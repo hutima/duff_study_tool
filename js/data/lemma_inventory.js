@@ -2205,6 +2205,98 @@
   const GINOSKO_AORIST_PASSIVE_PARTICIPLE = aoristPassiveParticipleParadigm('γνωσ');
   const KRINO_AORIST_PASSIVE_PARTICIPLE   = aoristPassiveParticipleParadigm('κρι');
 
+  // ─── Present active participles for the 2nd-aorist / suppletive verbs ──
+  //
+  // The aorist participles above resolve a "having Xed" mis-parse; their
+  // PRESENT participles were still missing, so parsing an aorist participle
+  // as a *present* one dashed (the βάλλω → βάλλων case, now generalised).
+  // Lookup-only (extraForms), like the rest.
+  //
+  // Present active participles take the recessive ντ-stem accent (λύων
+  // type), unlike the ending-accented 2nd-aorist βαλών. The helper takes an
+  // accented stem (accent stays on the stem) and a bare stem (used where a
+  // long ending ‑όντων/‑ούσης/‑ουσῶν pulls the accent off the stem); the
+  // neuter nom/acc sg is passed explicitly since its accent depends on the
+  // stem-vowel length (acute βάλλον vs circumflex λεῖπον).
+  function presentActiveNtParticiple(accStem, bareStem, neuter) {
+    const a = accStem, b = bareStem;
+    return {
+      [`${a}ων`]:     'present active participle nominative singular masculine',
+      [`${a}οντος`]:  'present active participle genitive singular masculine/neuter',
+      [`${a}οντι`]:   'present active participle dative singular masculine/neuter',
+      [`${a}οντα`]:   'present active participle accusative singular masculine',
+      [`${a}οντες`]:  'present active participle nominative plural masculine',
+      [`${b}όντων`]:  'present active participle genitive plural masculine/feminine/neuter',
+      [`${a}ουσι`]:   'present active participle dative plural masculine/neuter',
+      [`${a}ουσιν`]:  'present active participle dative plural masculine/neuter',
+      [`${a}οντας`]:  'present active participle accusative plural masculine',
+      [`${a}ουσα`]:   'present active participle nominative singular feminine',
+      [`${b}ούσης`]:  'present active participle genitive singular feminine',
+      [`${b}ούσῃ`]:   'present active participle dative singular feminine',
+      [`${a}ουσαν`]:  'present active participle accusative singular feminine',
+      [`${a}ουσαι`]:  'present active participle nominative plural feminine',
+      [`${b}ουσῶν`]:  'present active participle genitive plural feminine',
+      [`${b}ούσαις`]: 'present active participle dative plural feminine',
+      [`${b}ούσας`]:  'present active participle accusative plural feminine',
+      [neuter]:       'present active participle nominative/accusative singular neuter'
+    };
+  }
+
+  const LEIPO_PRESENT_ACTIVE_PARTICIPLE   = presentActiveNtParticiple('λείπ', 'λειπ', 'λεῖπον');
+  const LAMBANO_PRESENT_ACTIVE_PARTICIPLE = presentActiveNtParticiple('λαμβάν', 'λαμβαν', 'λαμβάνον');
+  const LEGO_PRESENT_ACTIVE_PARTICIPLE    = presentActiveNtParticiple('λέγ', 'λεγ', 'λέγον');
+  const ECHO_PRESENT_ACTIVE_PARTICIPLE    = presentActiveNtParticiple('ἔχ', 'ἐχ', 'ἔχον');
+  const AGO_PRESENT_ACTIVE_PARTICIPLE     = presentActiveNtParticiple('ἄγ', 'ἀγ', 'ἄγον');
+  const GINOSKO_PRESENT_ACTIVE_PARTICIPLE = presentActiveNtParticiple('γινώσκ', 'γινωσκ', 'γινῶσκον');
+  const KRINO_PRESENT_ACTIVE_PARTICIPLE   = presentActiveNtParticiple('κρίν', 'κριν', 'κρῖνον');
+
+  // ὁράω — present active participle ὁρῶν, an ‑άω contract (all-circumflex
+  // masc/neut ‑ῶν/‑ῶντος; fem ‑ῶσα/‑ώσης), so it can't use the ντ-stem
+  // helper. masc nom sg and neut nom/acc sg are both ὁρῶν; the key carries
+  // the masc reading.
+  const ORAO_PRESENT_ACTIVE_PARTICIPLE = {
+    'ὁρῶν':     'present active participle nominative singular masculine',
+    'ὁρῶντος':  'present active participle genitive singular masculine/neuter',
+    'ὁρῶντι':   'present active participle dative singular masculine/neuter',
+    'ὁρῶντα':   'present active participle accusative singular masculine',
+    'ὁρῶντες':  'present active participle nominative plural masculine',
+    'ὁρώντων':  'present active participle genitive plural masculine/feminine/neuter',
+    'ὁρῶσι':    'present active participle dative plural masculine/neuter',
+    'ὁρῶσιν':   'present active participle dative plural masculine/neuter',
+    'ὁρῶντας':  'present active participle accusative plural masculine',
+    'ὁρῶσα':    'present active participle nominative singular feminine',
+    'ὁρώσης':   'present active participle genitive singular feminine',
+    'ὁρώσῃ':    'present active participle dative singular feminine',
+    'ὁρῶσαν':   'present active participle accusative singular feminine',
+    'ὁρῶσαι':   'present active participle nominative plural feminine',
+    'ὁρωσῶν':   'present active participle genitive plural feminine',
+    'ὁρώσαις':  'present active participle dative plural feminine',
+    'ὁρώσας':   'present active participle accusative plural feminine'
+  };
+
+  // ἔρχομαι — deponent, so its present participle is MIDDLE: ἐρχόμενος,
+  // declining like λυόμενος / γενόμενος (regular ‑ος/‑η/‑ον). No present
+  // active form exists.
+  const ERCHOMAI_PRESENT_MIDDLE_PARTICIPLE = {
+    'ἐρχόμενος':  'present middle participle nominative singular masculine',
+    'ἐρχομένου':  'present middle participle genitive singular masculine/neuter',
+    'ἐρχομένῳ':   'present middle participle dative singular masculine/neuter',
+    'ἐρχόμενον':  'present middle participle accusative singular masculine/neuter',
+    'ἐρχόμενε':   'present middle participle vocative singular masculine',
+    'ἐρχόμενοι':  'present middle participle nominative plural masculine',
+    'ἐρχομένους': 'present middle participle accusative plural masculine',
+    'ἐρχομένων':  'present middle participle genitive plural masculine/feminine/neuter',
+    'ἐρχομένοις': 'present middle participle dative plural masculine/neuter',
+    'ἐρχομένη':   'present middle participle nominative singular feminine',
+    'ἐρχομένης':  'present middle participle genitive singular feminine',
+    'ἐρχομένῃ':   'present middle participle dative singular feminine',
+    'ἐρχομένην':  'present middle participle accusative singular feminine',
+    'ἐρχόμεναι':  'present middle participle nominative plural feminine',
+    'ἐρχομέναις': 'present middle participle dative plural feminine',
+    'ἐρχομένας':  'present middle participle accusative plural feminine',
+    'ἐρχόμενα':   'present middle participle nominative/accusative plural neuter'
+  };
+
   const LEMMA_INVENTORY = {
     'εἰμί': {
       // εἰμί is suppletive: it has no aorist or perfect family — Greek
@@ -2276,6 +2368,7 @@
     },
     'λαμβάνω': {
       extraForms: {
+        ...LAMBANO_PRESENT_ACTIVE_PARTICIPLE,
         ...LAMBANO_EXTRA_FORMS,
         ...LAMBANO_AORIST_ACTIVE_PARTICIPLE,
         ...LAMBANO_AORIST_PASSIVE_PARTICIPLE
@@ -2289,6 +2382,7 @@
     },
     'λείπω': {
       extraForms: {
+        ...LEIPO_PRESENT_ACTIVE_PARTICIPLE,
         ...LEIPO_EXTRA_FORMS,
         ...LEIPO_AORIST_ACTIVE_PARTICIPLE,
         ...LEIPO_AORIST_PASSIVE_PARTICIPLE
@@ -2305,41 +2399,48 @@
     // (and their lookup-only passives) without adding drill cards.
     'λέγω': {
       extraForms: {
+        ...LEGO_PRESENT_ACTIVE_PARTICIPLE,
         ...LEGO_AORIST_ACTIVE_PARTICIPLE,
         ...LEGO_AORIST_PASSIVE_PARTICIPLE
       }
     },
     'ὁράω': {
       extraForms: {
+        ...ORAO_PRESENT_ACTIVE_PARTICIPLE,
         ...HORAO_AORIST_ACTIVE_PARTICIPLE,
         ...HORAO_AORIST_PASSIVE_PARTICIPLE
       }
     },
     'ἔρχομαι': {
       extraForms: {
+        ...ERCHOMAI_PRESENT_MIDDLE_PARTICIPLE,
         ...ERCHOMAI_AORIST_ACTIVE_PARTICIPLE
       }
     },
     'ἔχω': {
       extraForms: {
+        ...ECHO_PRESENT_ACTIVE_PARTICIPLE,
         ...ECHO_AORIST_ACTIVE_PARTICIPLE,
         ...ECHO_AORIST_PASSIVE_PARTICIPLE
       }
     },
     'ἄγω': {
       extraForms: {
+        ...AGO_PRESENT_ACTIVE_PARTICIPLE,
         ...AGO_AORIST_ACTIVE_PARTICIPLE,
         ...AGO_AORIST_PASSIVE_PARTICIPLE
       }
     },
     'γινώσκω': {
       extraForms: {
+        ...GINOSKO_PRESENT_ACTIVE_PARTICIPLE,
         ...GINOSKO_AORIST_ACTIVE_PARTICIPLE,
         ...GINOSKO_AORIST_PASSIVE_PARTICIPLE
       }
     },
     'κρίνω': {
       extraForms: {
+        ...KRINO_PRESENT_ACTIVE_PARTICIPLE,
         ...KRINO_AORIST_ACTIVE_PARTICIPLE,
         ...KRINO_AORIST_PASSIVE_PARTICIPLE
       }
