@@ -1365,7 +1365,14 @@ function renderMorphStepSummary(card, state) {
     const deponentNoteHtml = softDeponentMiddle
       ? `<span class="morph-step-deponent-note">active (deponent) — middle in form, active in meaning</span>`
       : '';
-    const acceptable = Array.isArray(step.acceptable) ? step.acceptable : [step.correct];
+    let acceptable = Array.isArray(step.acceptable) ? step.acceptable : [step.correct];
+    // When the combined 'middle/passive' is accepted, don't also spell out its
+    // bare 'middle' / 'passive' components in the correction — the slash form
+    // already covers both, so "→ middle/passive" reads cleaner than
+    // "→ middle/passive / middle / passive".
+    if (step.key === 'voice' && acceptable.includes('middle/passive')) {
+      acceptable = acceptable.filter((a) => a !== 'middle' && a !== 'passive');
+    }
     const correctionInner = acceptable.map((a) => escapeHtml(applyDisplaySuffixIfPerson(step.key, a))).join(' / ');
     // For aspect mistakes, the picked value can visually overlap with the
     // correct value (picking "continuous" when the right answer is the

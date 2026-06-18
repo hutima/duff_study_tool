@@ -751,6 +751,15 @@ function isDeponentLemma(lemma) {
   return /μαι$/.test(l) || l === 'εἰμί';
 }
 
+// Tenses where the middle and passive share a single form. In the present,
+// imperfect, perfect, and pluperfect a form like λύομαι is equally middle
+// ("I loose for myself") and passive ("I am loosed") — there's no spelling
+// that picks one; only context does. The future and aorist DO spell them
+// apart (future middle λύσομαι vs passive λυθήσομαι; aorist middle ἐλυσάμην
+// vs passive ἐλύθην), so they're excluded. Used to widen the voice step's
+// accepted answers for these tenses (see buildMorphSteps).
+const MIDDLE_PASSIVE_SYNCRETIC_TENSES = new Set(['present', 'imperfect', 'perfect', 'pluperfect']);
+
 // Returns ordered dimension steps for this card. Each step:
 //   { key, label, correct, choices, displayChoices, displayCorrect }
 // `accessiblePools` is the optional chapter-gated distractor pool produced by
@@ -881,8 +890,22 @@ export function buildMorphSteps(card, accessiblePools = null, options = {}) {
       continue;
     }
     const pool = accessiblePools ? accessiblePools[dimKey] : null;
-    const choices = buildChoices(dimKey, correct, pool, dimValueFilters);
-    const displayCorrect = applyDisplaySuffix(dimKey, correct);
+    // Syncretic middle/passive collapse. A non-deponent verb's present /
+    // imperfect / perfect / pluperfect middle and passive are the same form
+    // (λύομαι), so a card the source set labelled one-sidedly ("λύω — passive
+    // indicative") should parse as the combined 'middle/passive' and accept
+    // either reading. The future/aorist (where the two voices diverge) and
+    // deponents (handled by their own active-accepting rule below) are left
+    // untouched. Collapsing before buildChoices makes 'middle/passive' a real
+    // option and the headline correct value, so the correction never points
+    // at a voice the student couldn't have picked.
+    const syncreticMiddlePassive = dimKey === 'voice'
+      && MIDDLE_PASSIVE_SYNCRETIC_TENSES.has(dims.tense)
+      && (correct === 'middle' || correct === 'passive' || correct === 'middle/passive')
+      && !isDeponentLemma(card.lemma);
+    const stepCorrect = syncreticMiddlePassive ? 'middle/passive' : correct;
+    const choices = buildChoices(dimKey, stepCorrect, pool, dimValueFilters);
+    const displayCorrect = applyDisplaySuffix(dimKey, stepCorrect);
     const displayChoices = choices.map((c) => applyDisplaySuffix(dimKey, c));
     // Each dimension has exactly one correct value per card. For aspect on
     // present/future verbs the correct value is the composite
@@ -894,14 +917,19 @@ export function buildMorphSteps(card, accessiblePools = null, options = {}) {
     const step = {
       key: dimKey,
       label: DIM_LABEL[dimKey] || dimKey,
-      correct,
-      acceptable: [correct],
+      correct: stepCorrect,
+      acceptable: [stepCorrect],
       choices,
       displayCorrect,
       displayChoices
     };
     if (dimKey === 'aspect' && dims.tense) {
       step.context = { tense: dims.tense };
+    }
+    // For the syncretic m/p tenses, accept the bare 'middle' and 'passive'
+    // picks too (not just the combined option) — either reading is right.
+    if (syncreticMiddlePassive) {
+      step.acceptable = ['middle/passive', 'middle', 'passive'];
     }
     // Deponent voice handling. Duff treats deponent verbs (dictionary form in
     // -μαι, plus εἰμί's future ἔσομαι) as functionally active even though the
