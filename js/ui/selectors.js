@@ -19,6 +19,7 @@ import {
   sortSetKeys,
   expandSessionSets
 } from '../domain/deck/ordering.js';
+import { CHAPTER_TITLES, WEEK_FIRST_CHAPTER } from '../data/setMeta.js';
 import { filterHardVocabCards } from '../domain/deck/filters.js';
 import { renderCard, renderChooseSessionEmptyState } from './render.js';
 import { renderProgress, renderReview } from './progress.js';
@@ -136,7 +137,9 @@ export function buildChapterSelector() {
     const countLabel = host.canAccessGrammarUi()
       ? `${vocabCount} vocab${studyCount ? ` · ${studyCount} grammar` : ''}`
       : `${vocabCount} vocab`;
-    btn.innerHTML = `${set.label}<span class="chapter-count">${countLabel}</span>`;
+    const subject = CHAPTER_TITLES[Number(key)] || '';
+    const subtitleHtml = subject ? `<span class="chapter-subtitle">${subject}</span>` : '';
+    btn.innerHTML = `${set.label}${subtitleHtml}<span class="chapter-count">${countLabel}</span>`;
     btn.onclick = () => toggleSet(key);
     grid.appendChild(btn);
   });
@@ -203,10 +206,56 @@ function toggleAllWeekSupplementals(weekKeys) {
   loadDeckFromKeys(nextKeys, null, { clearUnspacedMarks: true });
 }
 
+// Sets registered as stem-flip flashcards (present ↔ aorist/future/perfect)
+// are pulled out of chapter-grouped "Paradigm practice" and shown in their own
+// "Irregular practice" section. Detect by the stemFlip card flag so new flip
+// sets are picked up automatically.
+function isFlipSet(set) {
+  return !!(set && Array.isArray(set.cards) && set.cards.some(c => c && c.stemFlip));
+}
+
+// Sets kept registered (so their data still feeds a stem-change drill) but
+// hidden from the selector and removed from study decks. W4_SECOND_AORIST_STEMS
+// duplicated the highlighted W4_SECOND_AORIST_FLIP flashcards; its "present →
+// aorist" pairs still generate the second-aorist stem-change recall drill.
+const HIDDEN_SUPPLEMENTAL_KEYS = new Set(['W4_SECOND_AORIST_STEMS']);
+
+// The chapter a supplemental set belongs to: its explicit `chapter` tag, or
+// the first chapter of its course `week` as a fallback.
+function chapterForSet(set) {
+  if (set && Number.isInteger(set.chapter)) return set.chapter;
+  const wk = Number(set && set.week);
+  if (Number.isFinite(wk) && WEEK_FIRST_CHAPTER[wk] != null) return WEEK_FIRST_CHAPTER[wk];
+  return null;
+}
+
+// True for keys that belong to chapter-grouped "Paradigm practice" — i.e.
+// supplemental sets that aren't chapters, advanced buckets, book vocab, flip
+// (irregular practice) sets, or hidden drill-only sets.
+function isParadigmPracticeKey(key) {
+  const base = getParadigmBaseKey(key) || String(key);
+  if (isChapterKey(base) || isAdvancedKey(base) || isBookKey(base)) return false;
+  if (HIDDEN_SUPPLEMENTAL_KEYS.has(base)) return false;
+  return !isFlipSet((window.SETS || {})[base]);
+}
+
 export function deselectAllSupplementals() {
+  const remaining = runtime.selectedKeys.filter(k => !isParadigmPracticeKey(k));
+  if (remaining.length === runtime.selectedKeys.length) return;
+  host.saveCurrentDeckStateToBank();
+  runtime.currentSession = null;
+  runtime.selectedKeys = remaining;
+  if (!runtime.selectedKeys.length) {
+    clearAndRenderEmpty();
+    return;
+  }
+  loadDeckFromKeys(runtime.selectedKeys, null, { clearUnspacedMarks: true });
+}
+
+export function deselectAllIrregular() {
   const remaining = runtime.selectedKeys.filter(k => {
     const base = getParadigmBaseKey(k) || k;
-    return isChapterKey(base) || isAdvancedKey(base);
+    return !isFlipSet((window.SETS || {})[base]);
   });
   if (remaining.length === runtime.selectedKeys.length) return;
   host.saveCurrentDeckStateToBank();
@@ -219,6 +268,75 @@ export function deselectAllSupplementals() {
   loadDeckFromKeys(runtime.selectedKeys, null, { clearUnspacedMarks: true });
 }
 
+// Renders one selectable supplemental set into `container` — a flat button
+// when the set has 0–1 parsing paradigms, or an expandable <details> listing
+// each paradigm when it has more than one. Shared by the chapter groups.
+function renderSupplementalEntry(container, key, set, vocabCount, studyCount) {
+  const countLabel = host.canAccessGrammarUi()
+    ? `${vocabCount} vocab${studyCount ? ` · ${studyCount} grammar` : ''}`
+    : `${vocabCount} vocab`;
+  const paradigmList = host.canAccessGrammarUi() ? getSupplementalParadigmsForKey(key) : [];
+
+  if (paradigmList.length <= 1) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'chapter-btn supplemental-set-flat';
+    btn.dataset.key = key;
+    btn.innerHTML = `<span>${set.label}</span><span class="chapter-count">${countLabel}</span>`;
+    btn.onclick = () => toggleSet(key);
+    container.appendChild(btn);
+    return;
+  }
+
+  const details = document.createElement('details');
+  details.className = 'supplemental-set';
+  details.open = runtime.selectedKeys.includes(String(key)) || paradigmList.some(paradigm => runtime.selectedKeys.includes(paradigm.key));
+
+  const summary = document.createElement('summary');
+  summary.className = 'supplemental-summary';
+  summary.innerHTML = `<span>${set.label}</span><span class="chapter-count">${countLabel}</span>`;
+  details.appendChild(summary);
+
+  const controls = document.createElement('div');
+  controls.className = 'supplemental-paradigm-list';
+
+  const allBtn = document.createElement('button');
+  allBtn.className = 'chapter-btn supplemental-all-btn';
+  allBtn.dataset.key = key;
+  allBtn.innerHTML = `All ${set.label}<span class="chapter-count">${countLabel}</span>`;
+  allBtn.onclick = () => toggleSet(key);
+  controls.appendChild(allBtn);
+
+  paradigmList.forEach(paradigm => {
+    const btn = document.createElement('button');
+    btn.className = 'chapter-btn supplemental-paradigm-btn';
+    btn.dataset.key = paradigm.key;
+    btn.innerHTML = `${paradigm.label}<span class="chapter-count">${paradigm.type} · ${paradigm.count} card${paradigm.count === 1 ? '' : 's'}</span>`;
+    btn.onclick = () => toggleSet(paradigm.key);
+    controls.appendChild(btn);
+  });
+
+  details.appendChild(controls);
+  container.appendChild(details);
+}
+
+// Shared visibility test for a supplemental set in the current mode/split.
+function supplementalEntryVisible(key, set) {
+  const vocabCount = Array.isArray(set.cards) ? set.cards.length : 0;
+  const morphCount = window.getMorphologyCountForKey ? window.getMorphologyCountForKey(key) : 0;
+  const grammarCount = window.getGrammarCountForKey ? window.getGrammarCountForKey(key) : 0;
+  const studyCount = morphCount + grammarCount;
+  if (!vocabCount && !studyCount) return null;
+  if (!host.canAccessGrammarUi() && !vocabCount) return null;
+  const splitVocabOnly = runtime.splitSelection && runtime.studyMode === 'vocab';
+  const splitGrammarOnly = runtime.splitSelection && runtime.studyMode === 'morph';
+  if (splitVocabOnly && !vocabCount) return null;
+  if (splitGrammarOnly && !studyCount) return null;
+  return { vocabCount, studyCount };
+}
+
+// "Paradigm practice" — supplemental paradigm/vocab sets grouped by the Duff
+// chapter where their material is taught (was: grouped by course week).
 export function buildSupplementalSelector() {
   const list = document.getElementById('supplementalGrid');
   if (!list) return;
@@ -230,144 +348,136 @@ export function buildSupplementalSelector() {
   const deselectBtn = document.createElement('button');
   deselectBtn.type = 'button';
   deselectBtn.className = 'chapter-btn supplemental-deselect-all';
-  deselectBtn.textContent = 'Deselect all supplementals';
+  deselectBtn.textContent = 'Deselect all paradigm practice';
   deselectBtn.onclick = () => deselectAllSupplementals();
   list.appendChild(deselectBtn);
 
-  // In split mode the selector is scoped to the active half: vocab mode hides
-  // grammar-only supplementals, morph mode hides vocab-only ones. Outside
-  // split (or in any other mode) both halves stay visible.
-  const splitVocabOnly = runtime.splitSelection && runtime.studyMode === 'vocab';
-  const splitGrammarOnly = runtime.splitSelection && runtime.studyMode === 'morph';
-
-  const weekGroups = new Map();
+  const chapterGroups = new Map();
   supplementalKeys.forEach(key => {
     const set = sets[key];
     if (!set) return;
-    const vocabCount = Array.isArray(set.cards) ? set.cards.length : 0;
-    const morphCount = window.getMorphologyCountForKey ? window.getMorphologyCountForKey(key) : 0;
-    const grammarCount = window.getGrammarCountForKey ? window.getGrammarCountForKey(key) : 0;
-    const studyCount = morphCount + grammarCount;
-    if (!vocabCount && !studyCount) return;
-    if (!host.canAccessGrammarUi() && !vocabCount) return;
-    if (splitVocabOnly && !vocabCount) return;
-    if (splitGrammarOnly && !studyCount) return;
-
-    const weekNum = Number.isFinite(Number(set.week)) ? Number(set.week) : null;
-    if (!weekGroups.has(weekNum)) weekGroups.set(weekNum, []);
-    weekGroups.get(weekNum).push({ key, set, vocabCount, studyCount });
+    if (HIDDEN_SUPPLEMENTAL_KEYS.has(key)) return; // drill-only, hidden
+    if (isFlipSet(set)) return;                    // shown under Irregular practice
+    const vis = supplementalEntryVisible(key, set);
+    if (!vis) return;
+    const chapter = chapterForSet(set);
+    if (!chapterGroups.has(chapter)) chapterGroups.set(chapter, []);
+    chapterGroups.get(chapter).push({ key, set, vocabCount: vis.vocabCount, studyCount: vis.studyCount });
   });
 
-  const orderedWeeks = [...weekGroups.keys()].sort((a, b) => {
-    if (a === null && b === null) return 0;
-    if (a === null) return 1;
-    if (b === null) return -1;
+  const orderedChapters = [...chapterGroups.keys()].sort((a, b) => {
+    if (a == null && b == null) return 0;
+    if (a == null) return 1;
+    if (b == null) return -1;
     return a - b;
   });
 
   const meta = document.getElementById('supplementalSectionMeta');
   if (meta) {
-    const totalSets = orderedWeeks.reduce((n, w) => n + (weekGroups.get(w)?.length || 0), 0);
+    const totalSets = orderedChapters.reduce((n, c) => n + (chapterGroups.get(c)?.length || 0), 0);
     meta.textContent = totalSets
-      ? `${orderedWeeks.length} week${orderedWeeks.length === 1 ? '' : 's'} · ${totalSets} set${totalSets === 1 ? '' : 's'}`
+      ? `${orderedChapters.length} chapter${orderedChapters.length === 1 ? '' : 's'} · ${totalSets} set${totalSets === 1 ? '' : 's'}`
       : '';
   }
 
-  orderedWeeks.forEach(weekNum => {
-    const entries = weekGroups.get(weekNum);
+  orderedChapters.forEach(chapter => {
+    const entries = chapterGroups.get(chapter);
     if (!entries || !entries.length) return;
-    const weekDetails = document.createElement('details');
-    weekDetails.className = 'supplemental-week';
-    weekDetails.open = entries.some(({ key }) =>
+    const chapterDetails = document.createElement('details');
+    chapterDetails.className = 'supplemental-week';
+    chapterDetails.open = entries.some(({ key }) =>
       runtime.selectedKeys.includes(String(key)) ||
       getSupplementalParadigmsForKey(key).some(p => runtime.selectedKeys.includes(p.key))
     );
-    const weekSummary = document.createElement('summary');
-    weekSummary.className = 'supplemental-week-summary';
+    const chapterSummary = document.createElement('summary');
+    chapterSummary.className = 'supplemental-week-summary';
     const totalVocab = entries.reduce((s, e) => s + e.vocabCount, 0);
     const totalStudy = entries.reduce((s, e) => s + e.studyCount, 0);
-    const weekLabel = weekNum == null ? 'Other supplements' : `Week ${weekNum}`;
-    const weekCount = host.canAccessGrammarUi()
-      ? `${entries.length} paradigm${entries.length === 1 ? '' : 's'} · ${totalVocab} vocab${totalStudy ? ` · ${totalStudy} grammar` : ''}`
-      : `${entries.length} paradigm${entries.length === 1 ? '' : 's'} · ${totalVocab} vocab`;
-    weekSummary.innerHTML = `<span>${weekLabel}</span><span class="chapter-count">${weekCount}</span>`;
-    weekDetails.appendChild(weekSummary);
+    const subject = chapter != null ? (CHAPTER_TITLES[chapter] || '') : '';
+    const chapterLabel = chapter == null ? 'Other paradigms' : `Chapter ${chapter}`;
+    const titleHtml = subject
+      ? `<span class="supplemental-week-title"><span>${chapterLabel}</span><span class="supplemental-week-subtitle">${subject}</span></span>`
+      : `<span>${chapterLabel}</span>`;
+    const chapterCount = host.canAccessGrammarUi()
+      ? `${entries.length} set${entries.length === 1 ? '' : 's'} · ${totalVocab} vocab${totalStudy ? ` · ${totalStudy} grammar` : ''}`
+      : `${entries.length} set${entries.length === 1 ? '' : 's'} · ${totalVocab} vocab`;
+    chapterSummary.innerHTML = `${titleHtml}<span class="chapter-count">${chapterCount}</span>`;
+    chapterDetails.appendChild(chapterSummary);
 
-    const weekBody = document.createElement('div');
-    weekBody.className = 'supplemental-week-body';
+    const chapterBody = document.createElement('div');
+    chapterBody.className = 'supplemental-week-body';
 
-    const weekEntryKeys = entries.map(e => String(e.key));
-    const allWeekSelected = weekEntryKeys.length > 0
-      && weekEntryKeys.every(k => runtime.selectedKeys.includes(k));
+    const chapterEntryKeys = entries.map(e => String(e.key));
+    const allSelected = chapterEntryKeys.length > 0
+      && chapterEntryKeys.every(k => runtime.selectedKeys.includes(k));
     const selectAllBtn = document.createElement('button');
     selectAllBtn.type = 'button';
     selectAllBtn.className = 'chapter-btn supplemental-select-all-week';
-    if (allWeekSelected) selectAllBtn.classList.add('active');
-    selectAllBtn.setAttribute('aria-pressed', allWeekSelected ? 'true' : 'false');
-    if (allWeekSelected) {
-      selectAllBtn.textContent = weekNum == null
-        ? 'Deselect all other supplementals'
-        : `Deselect all Week ${weekNum} supplementals`;
-    } else {
-      selectAllBtn.textContent = weekNum == null
-        ? 'Select all other supplementals'
-        : `Select all Week ${weekNum} supplementals`;
-    }
-    selectAllBtn.onclick = () => toggleAllWeekSupplementals(weekEntryKeys);
-    weekBody.appendChild(selectAllBtn);
+    if (allSelected) selectAllBtn.classList.add('active');
+    selectAllBtn.setAttribute('aria-pressed', allSelected ? 'true' : 'false');
+    const groupName = chapter == null ? 'other paradigms' : `Chapter ${chapter}`;
+    selectAllBtn.textContent = allSelected ? `Deselect all ${groupName}` : `Select all ${groupName}`;
+    selectAllBtn.onclick = () => toggleAllWeekSupplementals(chapterEntryKeys);
+    chapterBody.appendChild(selectAllBtn);
 
     entries.forEach(({ key, set, vocabCount, studyCount }) => {
-      const countLabel = host.canAccessGrammarUi()
-        ? `${vocabCount} vocab${studyCount ? ` · ${studyCount} grammar` : ''}`
-        : `${vocabCount} vocab`;
-      const paradigmList = host.canAccessGrammarUi() ? getSupplementalParadigmsForKey(key) : [];
-
-      if (paradigmList.length <= 1) {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'chapter-btn supplemental-set-flat';
-        btn.dataset.key = key;
-        btn.innerHTML = `<span>${set.label}</span><span class="chapter-count">${countLabel}</span>`;
-        btn.onclick = () => toggleSet(key);
-        weekBody.appendChild(btn);
-        return;
-      }
-
-      const details = document.createElement('details');
-      details.className = 'supplemental-set';
-      details.open = runtime.selectedKeys.includes(String(key)) || paradigmList.some(paradigm => runtime.selectedKeys.includes(paradigm.key));
-
-      const summary = document.createElement('summary');
-      summary.className = 'supplemental-summary';
-      summary.innerHTML = `<span>${set.label}</span><span class="chapter-count">${countLabel}</span>`;
-      details.appendChild(summary);
-
-      const controls = document.createElement('div');
-      controls.className = 'supplemental-paradigm-list';
-
-      const allBtn = document.createElement('button');
-      allBtn.className = 'chapter-btn supplemental-all-btn';
-      allBtn.dataset.key = key;
-      allBtn.innerHTML = `All ${set.label}<span class="chapter-count">${countLabel}</span>`;
-      allBtn.onclick = () => toggleSet(key);
-      controls.appendChild(allBtn);
-
-      paradigmList.forEach(paradigm => {
-        const btn = document.createElement('button');
-        btn.className = 'chapter-btn supplemental-paradigm-btn';
-        btn.dataset.key = paradigm.key;
-        btn.innerHTML = `${paradigm.label}<span class="chapter-count">${paradigm.type} · ${paradigm.count} card${paradigm.count === 1 ? '' : 's'}</span>`;
-        btn.onclick = () => toggleSet(paradigm.key);
-        controls.appendChild(btn);
-      });
-
-      details.appendChild(controls);
-      weekBody.appendChild(details);
+      renderSupplementalEntry(chapterBody, key, set, vocabCount, studyCount);
     });
 
-    weekDetails.appendChild(weekBody);
-    list.appendChild(weekDetails);
+    chapterDetails.appendChild(chapterBody);
+    list.appendChild(chapterDetails);
   });
+
+  // The Irregular-practice section is rebuilt alongside paradigm practice so
+  // every refresh path (mode switch, data load, restore) keeps both in sync.
+  buildIrregularPracticeSelector();
+
+  setActiveSetButtons();
+}
+
+// "Irregular practice" — the stem-flip flashcard sets (present ↔ aorist /
+// future / perfect), shown together in their own section above paradigm
+// practice. Ordered by chapter.
+export function buildIrregularPracticeSelector() {
+  const list = document.getElementById('irregularGrid');
+  if (!list) return;
+  list.innerHTML = '';
+
+  const sets = window.SETS && typeof window.SETS === 'object' ? window.SETS : {};
+  const flipKeys = sortSetKeys(Object.keys(sets).filter(k => isFlipSet(sets[k]) && !HIDDEN_SUPPLEMENTAL_KEYS.has(k)));
+
+  const entries = [];
+  flipKeys.forEach(key => {
+    const set = sets[key];
+    if (!set) return;
+    const vis = supplementalEntryVisible(key, set);
+    if (!vis) return;
+    entries.push({ key, set, chapter: chapterForSet(set), vocabCount: vis.vocabCount, studyCount: vis.studyCount });
+  });
+  entries.sort((a, b) => (a.chapter ?? 99) - (b.chapter ?? 99) || a.key.localeCompare(b.key));
+
+  const meta = document.getElementById('irregularSectionMeta');
+  if (meta) {
+    meta.textContent = entries.length
+      ? `${entries.length} set${entries.length === 1 ? '' : 's'}`
+      : '';
+  }
+
+  if (!entries.length) return;
+
+  const deselectBtn = document.createElement('button');
+  deselectBtn.type = 'button';
+  deselectBtn.className = 'chapter-btn supplemental-deselect-all';
+  deselectBtn.textContent = 'Deselect all irregular practice';
+  deselectBtn.onclick = () => deselectAllIrregular();
+  list.appendChild(deselectBtn);
+
+  const body = document.createElement('div');
+  body.className = 'supplemental-week-body irregular-practice-body';
+  entries.forEach(({ key, set, vocabCount, studyCount }) => {
+    renderSupplementalEntry(body, key, set, vocabCount, studyCount);
+  });
+  list.appendChild(body);
 
   setActiveSetButtons();
 }

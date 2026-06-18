@@ -2,6 +2,7 @@
   window.registerSupplementalVocabSet('W5_SARX', {
     label: 'σάρξ — 3rd-decl. κ-stem',
     week: 5,
+    chapter: 12,
     cards: [
       { g: 'σάρξ', e: 'flesh (fem. Nom. sg.)', required: true },
       { g: 'σάρκα', e: 'flesh (fem. Acc. sg.)', required: true },
@@ -17,6 +18,7 @@
   window.registerSupplementalVocabSet('W5_ONOMA', {
     label: 'ὄνομα — 3rd-decl. ματ-stem',
     week: 5,
+    chapter: 13,
     cards: [
       { g: 'ὄνομα', e: 'name (neut. Nom./Acc. sg.)', required: true },
       { g: 'ὀνόματος', e: 'of name (neut. Gen. sg.)', required: true },
@@ -30,6 +32,7 @@
   window.registerSupplementalVocabSet('W5_TIS', {
     label: 'τίς, τί — interrogative/indefinite pronoun',
     week: 5,
+    chapter: 13,
     cards: [
       // τίς is 3rd-decl. with masc. and fem. sharing forms; the neuter
       // (τί / τίνα) is distinct in nom./acc. but syncretic with masc./fem.
@@ -51,6 +54,7 @@
   window.registerSupplementalVocabSet('W5_PLEION', {
     label: 'πλείων — comparative',
     week: 5,
+    chapter: 13,
     cards: [
       { g: 'πλείων', e: 'more (masc./fem. Nom. sg.)', required: true },
       { g: 'πλείονα', e: 'more (masc./fem. Acc. sg.; neut. Nom./Acc. pl.)', required: true },
@@ -67,6 +71,7 @@
   window.registerSupplementalVocabSet('W5_ASTER', {
     label: 'ἀστήρ — 3rd-decl. ρ-stem',
     week: 5,
+    chapter: 13,
     cards: [
       { g: 'ἀστήρ', e: 'star (masc. Nom. sg.)', required: true },
       { g: 'ἀστέρα', e: 'star (masc. Acc. sg.)', required: true },
@@ -82,6 +87,7 @@
   window.registerSupplementalVocabSet('W5_POLIS', {
     label: 'πόλις — 3rd-decl. ι-stem',
     week: 5,
+    chapter: 13,
     cards: [
       { g: 'πόλις', e: 'city (fem. Nom. sg.)', required: true },
       { g: 'πόλιν', e: 'city (fem. Acc. sg.)', required: true },
@@ -96,6 +102,7 @@
   window.registerSupplementalVocabSet('W5_BASILEUS', {
     label: 'βασιλεύς — 3rd-decl. ευ-stem',
     week: 5,
+    chapter: 13,
     cards: [
       { g: 'βασιλεύς', e: 'king (masc. Nom. sg.)', required: true },
       { g: 'βασιλέα', e: 'king (masc. Acc. sg.)', required: true },
@@ -110,6 +117,7 @@
   window.registerSupplementalVocabSet('W5_PAS', {
     label: 'πᾶς, πᾶσα, πᾶν',
     week: 5,
+    chapter: 13,
     cards: [
       { g: 'πᾶς', e: 'all / every / whole (masc. Nom. sg.)', required: true },
       { g: 'πάντα', e: 'all / every / whole (masc. Acc. sg.; neut. Nom./Acc. pl.)', required: true },

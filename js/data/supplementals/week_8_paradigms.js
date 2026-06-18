@@ -2,6 +2,7 @@
   window.registerSupplementalVocabSet('W8_TITHEMI_PRESENT_INDICATIVE', {
     label: 'τίθημι — present active indicative',
     week: 8,
+    chapter: 19,
     cards: [
       { g: 'τίθημι', e: 'I put / place (1st person sg.)', required: true },
       { g: 'τίθης', e: 'you put / place (2nd person sg.)', required: true },
@@ -15,6 +16,7 @@
   window.registerSupplementalVocabSet('W8_HISTEMI_PRESENT_INDICATIVE', {
     label: 'ἵστημι — present active indicative',
     week: 8,
+    chapter: 19,
     cards: [
       { g: 'ἵστημι', e: 'I make stand / I stand (1st person sg.)', required: true },
       { g: 'ἵστης', e: 'you make stand / you stand (2nd person sg.)', required: true },
@@ -28,6 +30,7 @@
   window.registerSupplementalVocabSet('W8_DIDOMI_PRESENT_INDICATIVE', {
     label: 'δίδωμι — present active indicative',
     week: 8,
+    chapter: 19,
     cards: [
       { g: 'δίδωμι', e: 'I give (1st person sg.)', required: true },
       { g: 'δίδως', e: 'you give (2nd person sg.)', required: true },
@@ -41,6 +44,7 @@
   window.registerSupplementalVocabSet('W8_TITHEMI_PRESENT_SUBJUNCTIVE', {
     label: 'τίθημι — present active subjunctive',
     week: 8,
+    chapter: 19,
     cards: [
       { g: 'τιθῶ', e: '(that) I may put / place (Present active subjunctive, 1st person sg.)', required: true },
       { g: 'τιθῇς', e: '(that) you may put / place (Present active subjunctive, 2nd person sg.)', required: true },
@@ -54,6 +58,7 @@
   window.registerSupplementalVocabSet('W8_HISTEMI_PRESENT_SUBJUNCTIVE', {
     label: 'ἵστημι — present active subjunctive',
     week: 8,
+    chapter: 19,
     cards: [
       { g: 'ἱστῶ', e: '(that) I may stand (Present active subjunctive, 1st person sg.)', required: true },
       { g: 'ἱστῇς', e: '(that) you may stand (Present active subjunctive, 2nd person sg.)', required: true },
@@ -67,6 +72,7 @@
   window.registerSupplementalVocabSet('W8_DIDOMI_PRESENT_SUBJUNCTIVE', {
     label: 'δίδωμι — present active subjunctive',
     week: 8,
+    chapter: 19,
     cards: [
       { g: 'διδῶ', e: '(that) I may give (Present active subjunctive, 1st person sg.)', required: true },
       { g: 'διδῷς', e: '(that) you may give (Present active subjunctive, 2nd person sg.)', required: true },
@@ -80,6 +86,7 @@
   window.registerSupplementalVocabSet('W8_MI_OTHER_ACTIVE_FORMS', {
     label: '-μι verbs — imperative, infinitive, participle (τίθημι/ἵστημι/δίδωμι)',
     week: 8,
+    chapter: 19,
     cards: [
       { g: 'τίθει', e: 'put! / place! (Present active imperative, 2nd person sg.)', required: true },
       { g: 'ἵστη', e: 'stand! (Present active imperative, 2nd person sg.)', required: true },
@@ -105,6 +112,7 @@
   window.registerSupplementalVocabSet('W8_DIDOMI_TENSES', {
     label: 'δίδωμι — active indicative (5 tenses)',
     week: 8,
+    chapter: 19,
     cards: [
       { g: 'δίδωμι', e: 'Present: I give (1st person sg.)', required: true },
       { g: 'δίδως', e: 'Present: you give (2nd person sg.)', required: true },
@@ -142,6 +150,7 @@
   window.registerSupplementalVocabSet('W8_DIDOMAI_PRESENT', {
     label: 'δίδομαι — present middle/passive indicative',
     week: 8,
+    chapter: 19,
     cards: [
       { g: 'δίδομαι', e: 'I am (being) given (Present middle/passive, 1st person sg.)', required: true },
       { g: 'δίδοσαι', e: 'you are (being) given (Present middle/passive, 2nd person sg.)', required: true },

@@ -2,6 +2,7 @@
   window.registerSupplementalVocabSet('W1_LUO_PRESENT_ACTIVE', {
     label: 'λύω — present active indicative',
     week: 1,
+    chapter: 2,
     cards: [
       { g: 'λύω', e: 'I untie / I am untying (1st person sg.)', required: true },
       { g: 'λύεις', e: 'you untie / you are untying (2nd person sg.)', required: true },
@@ -15,6 +16,7 @@
   window.registerSupplementalVocabSet('W1_PHILEO_PRESENT_ACTIVE', {
     label: 'φιλέω — present active indicative',
     week: 1,
+    chapter: 2,
     cards: [
       { g: 'φιλῶ', e: 'I love / I am loving (1st person sg.)', required: true },
       { g: 'φιλεῖς', e: 'you love / you are loving (2nd person sg.)', required: true },
@@ -28,6 +30,7 @@
   window.registerSupplementalVocabSet('W1_LOGOS_DECLENSION', {
     label: 'λόγος — 2nd-decl. masc. with article',
     week: 1,
+    chapter: 3,
     cards: [
       { g: 'ὁ λόγος', e: 'the word (masc. Nom. sg.)', required: true },
       { g: 'τὸν λόγον', e: 'the word (masc. Acc. sg.)', required: true },
@@ -43,6 +46,7 @@
   window.registerSupplementalVocabSet('W1_ARCHE_DECLENSION', {
     label: 'ἀρχή — 1st-decl. fem. (η-pattern) with article',
     week: 1,
+    chapter: 3,
     cards: [
       { g: 'ἡ ἀρχή', e: 'the beginning (fem. Nom. sg.)', required: true },
       { g: 'τὴν ἀρχήν', e: 'the beginning (fem. Acc. sg.)', required: true },
@@ -58,6 +62,7 @@
   window.registerSupplementalVocabSet('W1_ERGON_DECLENSION', {
     label: 'ἔργον — 2nd-decl. neut. with article',
     week: 1,
+    chapter: 3,
     cards: [
       { g: 'τὸ ἔργον', e: 'the work (neut. Nom./Acc. sg.)', required: true },
       { g: 'τοῦ ἔργου', e: 'of the work (neut. Gen. sg.)', required: true },
@@ -71,6 +76,7 @@
   window.registerSupplementalVocabSet('W1_HEMERA_DECLENSION', {
     label: 'ἡμέρα — 1st-decl. fem. (α-pattern)',
     week: 1,
+    chapter: 3,
     cards: [
       { g: 'ἡμέρα', e: 'day (fem. Nom. sg.)', required: true },
       { g: 'ἡμέραν', e: 'day (fem. Acc. sg.)', required: true },
@@ -86,6 +92,7 @@
   window.registerSupplementalVocabSet('W1_DOXA_DECLENSION', {
     label: 'δόξα — 1st-decl. fem. (α-impure pattern)',
     week: 1,
+    chapter: 3,
     cards: [
       { g: 'δόξα', e: 'glory (fem. Nom. sg.)', required: true },
       { g: 'δόξαν', e: 'glory (fem. Acc. sg.)', required: true },
@@ -101,6 +108,7 @@
   window.registerSupplementalVocabSet('W1_PROPHETES_DECLENSION', {
     label: 'προφήτης — 1st-decl. masc. (-ης pattern)',
     week: 1,
+    chapter: 3,
     cards: [
       { g: 'ὁ προφήτης', e: 'the prophet (masc. Nom. sg.)', required: true },
       { g: 'τὸν προφήτην', e: 'the prophet (masc. Acc. sg.)', required: true },
@@ -117,6 +125,7 @@
   window.registerSupplementalVocabSet('W1_MATHETES_DECLENSION', {
     label: 'μαθητής — 1st-decl. masc. (-ης pattern)',
     week: 1,
+    chapter: 3,
     cards: [
       { g: 'ὁ μαθητής', e: 'the disciple (masc. Nom. sg.)', required: true },
       { g: 'τὸν μαθητήν', e: 'the disciple (masc. Acc. sg.)', required: true },
@@ -132,6 +141,7 @@
   window.registerSupplementalVocabSet('W1_AUTOS_PARADIGM', {
     label: 'αὐτός, αὐτή, αὐτό',
     week: 1,
+    chapter: 5,
     cards: [
       { g: 'αὐτός', e: 'he (masc. Nom. sg.)', required: true },
       { g: 'αὐτόν', e: 'him (masc. Acc. sg.)', required: true },
@@ -156,6 +166,7 @@
   window.registerSupplementalVocabSet('W1_EIMI_PRESENT', {
     label: 'εἰμί — present indicative',
     week: 1,
+    chapter: 2,
     cards: [
       { g: 'εἰμί', e: 'I am (1st person sg.)', required: true },
       { g: 'εἶ', e: 'you are (2nd person sg.)', required: true },

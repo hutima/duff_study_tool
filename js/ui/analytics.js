@@ -863,7 +863,7 @@ function renderParadigmStepStatsSection() {
   const enabledDims = host.getEnabledParsingDims();
   const drilled = getAllLemmaStats(stats, enabledDims);
   if (!drilled.length) {
-    body.innerHTML = `<p class="analytics-empty">Turn on “Parse step-by-step” in Grammar mode and complete a parse to start seeing per-paradigm accuracy here.</p>`;
+    body.innerHTML = `<p class="analytics-empty">Switch to Parsing mode and complete a parse to start seeing per-paradigm accuracy here.</p>`;
     if (status) status.textContent = 'No drill attempts yet. Tap a row to break a paradigm down by mood, tense, and voice.';
     return;
   }
@@ -934,11 +934,25 @@ function renderParadigmStepStatsSection() {
   if (status) status.textContent = `${paradigmCount} paradigm${paradigmCount === 1 ? '' : 's'} drilled · tap a row for the mood / tense breakdown.`;
 }
 
+// Same-row tap dedupe (see toggle below). Module-level so it survives the
+// section re-render, which can rebind the handler.
+let lastParadigmToggleKey = '';
+let lastParadigmToggleAt = 0;
+
 function setupParadigmStepStatsInteractivity(rootEl) {
   if (!rootEl || rootEl.dataset.paradigmStatsBound === '1') return;
   rootEl.dataset.paradigmStatsBound = '1';
   const toggle = (key) => {
     if (!key) return;
+    // Swallow the iOS Safari "ghost click": replacing the tapped row's subtree
+    // synchronously inside the click handler makes Safari re-dispatch a click
+    // to whatever now sits under the finger — the just-expanded row — instantly
+    // toggling it shut (the row flashes open then closed in one frame). Ignore
+    // a repeat tap of the same row within a short window so it stays put.
+    const now = Date.now();
+    if (key === lastParadigmToggleKey && now - lastParadigmToggleAt < 400) return;
+    lastParadigmToggleKey = key;
+    lastParadigmToggleAt = now;
     runtime.analyticsParadigmExpanded = runtime.analyticsParadigmExpanded === key ? null : key;
     renderParadigmStepStatsSection();
   };

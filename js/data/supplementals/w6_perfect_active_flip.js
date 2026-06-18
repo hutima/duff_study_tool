@@ -26,6 +26,7 @@
   window.registerSupplementalVocabSet('W6_PERFECT_ACTIVE_FLIP', {
     label: 'Perfect active stems — present ↔ perfect active flashcards',
     week: 6,
+    chapter: 16,
     cards: [
       entry('λύω', 'I untie',                  'λέλυκα', 'I have untied',              'regular reduplication λ → λε-'),
       entry('πιστεύω', 'I believe',            'πεπίστευκα', 'I have believed',        'regular reduplication π → πε-'),

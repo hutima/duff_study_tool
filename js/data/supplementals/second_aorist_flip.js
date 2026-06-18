@@ -33,6 +33,7 @@
   window.registerSupplementalVocabSet('W4_SECOND_AORIST_FLIP', {
     label: 'Second-aorist verbs — present ↔ aorist flashcards',
     week: 4,
+    chapter: 11,
     cards: [
       entry('ἁμαρτάνω', 'I sin',    'ἥμαρτον', 'I sinned',    'ἁμαρτ-',   'shortened 2nd-aorist stem; α → η augment'),
       entry('ἀποθνῄσκω', 'I die',   'ἀπέθανον', 'I died',     'ἀποθαν-',  'shortened stem; ε-augment inside the compound'),

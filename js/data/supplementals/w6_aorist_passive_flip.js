@@ -28,6 +28,7 @@
   window.registerSupplementalVocabSet('W6_AORIST_PASSIVE_FLIP', {
     label: 'Aorist passive stems — present ↔ aorist passive flashcards',
     week: 6,
+    chapter: 15,
     cards: [
       entry('λύω', 'I untie',                  'ἐλύθην', 'I was untied',                'regular θη-stem; ε-augment + -θην'),
       entry('ἀκούω', 'I hear',                 'ἠκούσθην', 'I was heard',               'regular pattern; α → η augment, ς inserted'),

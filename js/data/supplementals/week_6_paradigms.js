@@ -2,6 +2,7 @@
   window.registerSupplementalVocabSet('W6_LUO_PASSIVE_INDICATIVE', {
     label: 'λύω — passive indicative (4 tenses)',
     week: 6,
+    chapter: 15,
     cards: [
       { g: 'λύομαι', e: 'Present: I am (being) untied (1st person sg.)', required: true },
       { g: 'λύῃ', e: 'Present: you are (being) untied (2nd person sg.)', required: true },
@@ -33,6 +34,7 @@
   window.registerSupplementalVocabSet('W6_LUO_PASSIVE_OTHER_MOODS', {
     label: 'λύω — passive imperative, infinitive, participle (present & aorist)',
     week: 6,
+    chapter: 15,
     cards: [
       { g: 'λύου', e: 'be (being) untied! (Present passive imperative, 2nd person sg.)', required: true },
       { g: 'λύεσθε', e: 'be (being) untied! (Present passive imperative, 2nd person pl.)', required: true },
@@ -71,6 +73,33 @@
       { g: 'λυθεισῶν', e: 'of (those) having been untied (fem. Gen. pl.)', required: true },
       { g: 'λυθείσαις', e: 'to/for (those) having been untied (fem. Dat. pl.)', required: true },
       { g: 'λυθέν', e: 'having been untied (neut. Nom./Acc. sg.)', required: true }
+    ]
+  });
+
+  window.registerSupplementalVocabSet('W6_LUO_MIDDLE_INDICATIVE', {
+    label: 'λύω — middle indicative (future & aorist)',
+    week: 6,
+    // The middle voice arrives with the passive in Ch 15. λύω's present and
+    // imperfect middle are identical in form to the passive (λύομαι, ἐλυόμην
+    // — already drilled by W6_LUO_PASSIVE_INDICATIVE), so the only forms where
+    // the middle is its own paradigm are the FUTURE (λύσομαι, vs future
+    // passive λυθήσομαι) and the AORIST (ἐλυσάμην, vs aorist passive ἐλύθην).
+    // Those two tenses are what this set adds. Surfaces under λύω via the
+    // "λύω —" label prefix (see extractLemma in paradigm_morphology.js).
+    chapter: 15,
+    cards: [
+      { g: 'λύσομαι', e: 'Future: I will loose for myself (1st person sg.)', required: true },
+      { g: 'λύσῃ', e: 'Future: you will loose for yourself (2nd person sg.)', required: true },
+      { g: 'λύσεται', e: 'Future: he/she/it will loose for him/herself (3rd person sg.)', required: true },
+      { g: 'λυσόμεθα', e: 'Future: we will loose for ourselves (1st person pl.)', required: true },
+      { g: 'λύσεσθε', e: 'Future: you will loose for yourselves (2nd person pl.)', required: true },
+      { g: 'λύσονται', e: 'Future: they will loose for themselves (3rd person pl.)', required: true },
+      { g: 'ἐλυσάμην', e: 'Aorist: I loosed for myself (1st person sg.)', required: true },
+      { g: 'ἐλύσω', e: 'Aorist: you loosed for yourself (2nd person sg.)', required: true },
+      { g: 'ἐλύσατο', e: 'Aorist: he/she/it loosed for him/herself (3rd person sg.)', required: true },
+      { g: 'ἐλυσάμεθα', e: 'Aorist: we loosed for ourselves (1st person pl.)', required: true },
+      { g: 'ἐλύσασθε', e: 'Aorist: you loosed for yourselves (2nd person pl.)', required: true },
+      { g: 'ἐλύσαντο', e: 'Aorist: they loosed for themselves (3rd person pl.)', required: true }
     ]
   });
 

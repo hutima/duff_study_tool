@@ -472,12 +472,26 @@ function renderParsingReviewPanel() {
   bindParsingReviewInteractivity();
 }
 
+// Same-row tap dedupe (see toggle below). Module-level so it survives the
+// panel re-render, which recreates the list element and rebinds the handler.
+let lastParsingReviewToggleKey = '';
+let lastParsingReviewToggleAt = 0;
+
 function bindParsingReviewInteractivity() {
   const list = document.querySelector('#reviewList .parsing-review-list');
   if (!list || list.dataset.parsingRowsBound === '1') return;
   list.dataset.parsingRowsBound = '1';
   const toggle = (key) => {
     if (!key) return;
+    // Swallow the iOS Safari "ghost click": replacing the tapped row's subtree
+    // synchronously inside the click handler makes Safari re-dispatch a click
+    // to the element now under the finger — the just-expanded row — instantly
+    // toggling it shut (the row flashes open then closed in one frame). Ignore
+    // a repeat tap of the same row within a short window so it stays put.
+    const now = Date.now();
+    if (key === lastParsingReviewToggleKey && now - lastParsingReviewToggleAt < 400) return;
+    lastParsingReviewToggleKey = key;
+    lastParsingReviewToggleAt = now;
     runtime.parsingReviewExpanded = runtime.parsingReviewExpanded === key ? null : key;
     renderParsingReviewPanel();
   };

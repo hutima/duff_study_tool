@@ -2,6 +2,7 @@
   window.registerSupplementalVocabSet('W7_RHUOMAI_PRESENT_MIDDLE_SUBJUNCTIVE', {
     label: 'ῥύομαι — present middle subjunctive',
     week: 7,
+    chapter: 17,
     cards: [
       { g: 'ῥύωμαι', e: '(that) I may rescue (Present middle subjunctive, 1st person sg.)', required: true },
       { g: 'ῥύῃ', e: '(that) you may rescue (Present middle subjunctive, 2nd person sg.)', required: true },
@@ -15,6 +16,7 @@
   window.registerSupplementalVocabSet('W7_LUO_PRESENT_PASSIVE_SUBJUNCTIVE', {
     label: 'λύω — present passive subjunctive',
     week: 7,
+    chapter: 17,
     cards: [
       { g: 'λύωμαι', e: '(that) I may be untied (Present passive subjunctive, 1st person sg.)', required: true },
       { g: 'λύῃ', e: '(that) you may be untied (Present passive subjunctive, 2nd person sg.)', required: true },
@@ -28,6 +30,7 @@
   window.registerSupplementalVocabSet('W7_RHUOMAI_AORIST_MIDDLE_SUBJUNCTIVE', {
     label: 'ῥύομαι — 1st aorist middle subjunctive',
     week: 7,
+    chapter: 17,
     cards: [
       { g: 'ῥύσωμαι', e: '(that) I may rescue (1st aorist middle subjunctive, 1st person sg.)', required: true },
       { g: 'ῥύσῃ', e: '(that) you may rescue (1st aorist middle subjunctive, 2nd person sg.)', required: true },
@@ -41,6 +44,7 @@
   window.registerSupplementalVocabSet('W7_GINOMAI_AORIST_MIDDLE_SUBJUNCTIVE', {
     label: 'γίνομαι — 2nd aorist middle subjunctive',
     week: 7,
+    chapter: 17,
     cards: [
       { g: 'γένωμαι', e: '(that) I may become (2nd aorist middle subjunctive, 1st person sg.)', required: true },
       { g: 'γένῃ', e: '(that) you may become (2nd aorist middle subjunctive, 2nd person sg.)', required: true },
@@ -54,6 +58,7 @@
   window.registerSupplementalVocabSet('W7_INDEFINITE_CONSTRUCTIONS', {
     label: 'Indefinite constructions (ἄν + subjunctive)',
     week: 7,
+    chapter: 17,
     cards: [
       { g: 'ὅς', e: 'who (relative pronoun, masc. Nom. sg.)', required: true },
       { g: 'ὅς ἄν + subjunctive', e: 'whoever (indefinite construction)', required: true },
@@ -67,6 +72,7 @@
   window.registerSupplementalVocabSet('W7_THIRD_PERSON_IMPERATIVE', {
     label: 'Third-person imperative (5 voice/tense combos)',
     week: 7,
+    chapter: 18,
     cards: [
       { g: 'λυέτω', e: 'let him/her/it untie (Present active imperative, 3rd person sg.)', required: true },
       { g: 'λυέτωσαν', e: 'let them untie (Present active imperative, 3rd person pl.)', required: true },

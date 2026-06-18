@@ -4,6 +4,7 @@
   window.registerSupplementalVocabSet(KEY, {
     label: 'πολύς / μέγας-paradigm',
     week: 1,
+    chapter: 5,
     cards: [
       // πολύς — irregular adj. Distinct masc.-only forms first, then the
       // 2nd-decl. forms shared between masc. and neut. (gen./dat. sg. and
