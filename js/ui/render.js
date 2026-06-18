@@ -21,6 +21,12 @@ const FORM_TAG_FULL_LABELS = {
   'pres': 'present'
 };
 
+// Small superscript star printed before a headword as a terse "watch this form"
+// marker: on multi-case prepositions (meaning shifts with the object's case)
+// and on derived irregular cards when their tense caption is switched off. The
+// trailing space keeps it off the first letter of the word.
+const HEADWORD_STAR = '<sup class="card-headword-star" aria-hidden="true">★</sup> ';
+
 let host = {
   saveState: () => {},
   syncLayoutVisibility: () => {},
@@ -434,9 +440,11 @@ export function renderCard() {
     : card.sourceLabel;
   const sourceLabelDisplay = `${onCardSourceLabel}${advancedCountSuffix}`;
 
-  // Prepositions that govern more than one case get a star on both faces as a
-  // reminder that the meaning depends on the case of the object.
-  const prepStar = host.isMultiCasePreposition(card) ? '★ ' : '';
+  // Prepositions that govern more than one case get a small superscript star
+  // on both faces as a reminder that the meaning depends on the case of the
+  // object. (Same marker the irregular cards borrow when their tense caption
+  // is hidden — see formTagLine below.)
+  const prepStar = host.isMultiCasePreposition(card) ? HEADWORD_STAR : '';
   // Vocab mode has no explicit chapter dropdown, so the selection itself is
   // the gate: its max effective chapter (same deriveSelectionLevels scale
   // parsing uses) caps the later stem annotations below. The second-aorist /
@@ -466,10 +474,17 @@ export function renderCard() {
   const formTagFull = card.derivedShort
     ? (FORM_TAG_FULL_LABELS[card.derivedShort] || card.derivedShort)
     : '';
-  const formTagLine = formTagFull
+  // The "Show tense on irregular cards" toggle (advanced settings, default on)
+  // governs whether that caption is named. When off, the named tense is
+  // replaced by a small superscript star before the headword — the same marker
+  // multi-case prepositions wear — flagging the form as a non-standard
+  // principal part without giving its tense away.
+  const irregularTenseOn = runtime.irregularTense !== false;
+  const formTagLine = (formTagFull && irregularTenseOn)
     ? `<div class="card-form-tag">(${escapeHtml(formTagFull)})</div>`
     : '';
-  const greekDisplay = `${prepStar}${host.formatGreekHeadword(card.g)}${stemInline}`;
+  const irregularStar = (formTagFull && !irregularTenseOn) ? HEADWORD_STAR : '';
+  const greekDisplay = `${prepStar}${irregularStar}${host.formatGreekHeadword(card.g)}${stemInline}`;
   const englishDisplay = `${prepStar}${card.e || '—'}`;
   const requiredLabelHTML = `<span class="card-required-label card-required-label-${card.required ? 'req' : 'opt'}">(${card.required ? 'req.' : 'opt.'})</span>`;
   // Verbs with irregular principal parts get them in one small bracketed line

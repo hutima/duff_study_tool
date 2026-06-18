@@ -725,6 +725,17 @@ export function toggleStemNotes() {
   renderCard();
 }
 
+// The "(aorist)" / "(future)" tense caption on derived irregular cards is a
+// render-only annotation (like stem notes) — flipping it just re-renders the
+// current card; the deck is untouched. When off, render.js shows a small
+// superscript star before the headword in its place.
+export function toggleIrregularTense() {
+  runtime.irregularTense = runtime.irregularTense === false;
+  host.syncToggleButtons();
+  host.saveState();
+  renderCard();
+}
+
 // Irregular forms as their own cards (e.g. εἶπον alongside λέγω, λέλυκα
 // alongside λύω). Unlike stem notes this changes the deck's contents, so it
 // rebuilds the deck the same way toggleRequiredOnly does. Clicking records an

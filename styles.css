@@ -874,6 +874,16 @@
   }
   .card-greek-small + .card-form-tag { margin-top: 2px; }
 
+  /* Small superscript star before a headword (multi-case prepositions, and
+     derived irregular cards when their tense caption is hidden). Sits raised
+     and shrunk so it reads as a marker rather than part of the word. */
+  .card-headword-star {
+    font-size: 0.5em;
+    vertical-align: super;
+    line-height: 0;
+    color: var(--gold-dim);
+  }
+
   .flip-hint {
     position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
     font-family: var(--font-display); font-size: calc((11px) * var(--text-scale)); letter-spacing: 1.5px;
