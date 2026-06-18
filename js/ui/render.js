@@ -441,7 +441,14 @@ export function renderCard() {
   // A card carries at most one inline stem: the verbal stem for second-aorist /
   // liquid-future verbs, or the third-declension noun stem (never both).
   const stemInline = notesOn ? (verbStemInlineHtml(card) || nounStemInlineHtml(card, maxCh)) : '';
-  const greekDisplay = `${prepStar}${host.formatGreekHeadword(card.g)}${stemInline}`;
+  // Generated (derived) cards flag the form type with a small "(aor)" / "(fut)"
+  // tag before the headword so a non-standard principal part reads as such at a
+  // glance. It names the tense/voice, not the meaning, so it's safe on the
+  // question face.
+  const formTag = card.derivedShort
+    ? `<span class="card-form-tag">(${escapeHtml(card.derivedShort)})</span> `
+    : '';
+  const greekDisplay = `${prepStar}${formTag}${host.formatGreekHeadword(card.g)}${stemInline}`;
   const englishDisplay = `${prepStar}${card.e || '—'}`;
   const requiredLabelHTML = `<span class="card-required-label card-required-label-${card.required ? 'req' : 'opt'}">(${card.required ? 'req.' : 'opt.'})</span>`;
   // Verbs with irregular principal parts get them in one small bracketed line
@@ -526,7 +533,7 @@ export function renderCard() {
           ${requiredLabelHTML}
           <span class="card-label">English</span>
           <div class="card-english">${englishDisplay}</div>
-          <div class="card-greek-small">${host.formatGreekHeadword(card.g)}</div>
+          <div class="card-greek-small">${formTag}${host.formatGreekHeadword(card.g)}</div>
           ${verbStemAltHTML}
           <div class="card-hint">${host.transliterateGreek(host.formatGreekHeadword(card.g))}${advancedCountSuffix}</div>
           <div class="card-pos">${host.detectPartOfSpeech(card)}</div>
@@ -1381,7 +1388,19 @@ function renderMorphStepSummary(card, state) {
     const ans = state.answers[idx];
     return ans && ans.selectedIdx >= 0 ? step.choices[ans.selectedIdx] : '';
   });
-  const correctValues = state.steps.map((step) => step.correct);
+  const correctValues = state.steps.map((step) => {
+    // A deponent's voice is middle (or middle/passive) in form but parses as
+    // active in meaning — the headline answer the soft-accept convention
+    // expects (morph_steps.js seeds step.acceptable = [middle, 'active']). Show
+    // 'active' here so the Correct-parse line matches the graded Voice step
+    // instead of contradicting it with the formal 'middle'.
+    if (step.key === 'voice'
+        && Array.isArray(step.acceptable) && step.acceptable.includes('active')
+        && (step.correct === 'middle' || step.correct === 'middle/passive')) {
+      return 'active';
+    }
+    return step.correct;
+  });
   // A structural impossibility (e.g. future imperative) or a paradigm value
   // gap (e.g. third person for ἐγώ/σύ) trumps any lemma lookup — show the
   // specific reason instead of the generic "[no morph exists]" we'd fall back

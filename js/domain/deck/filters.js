@@ -18,10 +18,10 @@ export const HARD_VOCAB_MAX_CONFIDENCE = 40;
 // flags sets that contribute several principal parts per present lemma
 // (the μι-verbs), which need an index in the id so they don't collide.
 export const IRREGULAR_CARD_CONFIGS = [
-  { tag: '2aor',    flipKey: 'W4_SECOND_AORIST_FLIP',           label: '2 aor. of',     chapter: 11 },
-  { tag: 'lfut',    flipKey: 'W4_LIQUID_FUTURE_FLIP',           label: 'fut. of',       chapter: 11 },
-  { tag: 'aorpass', flipKey: 'W6_AORIST_PASSIVE_FLIP',          label: 'aor. pass. of', chapter: 15 },
-  { tag: 'perfact', flipKey: 'W6_PERFECT_ACTIVE_FLIP',          label: 'pf. of',        chapter: 16 },
+  { tag: '2aor',    flipKey: 'W4_SECOND_AORIST_FLIP',           label: '2 aor. of',     short: 'aor',      chapter: 11 },
+  { tag: 'lfut',    flipKey: 'W4_LIQUID_FUTURE_FLIP',           label: 'fut. of',       short: 'fut',      chapter: 11 },
+  { tag: 'aorpass', flipKey: 'W6_AORIST_PASSIVE_FLIP',          label: 'aor. pass. of', short: 'aor pass', chapter: 15 },
+  { tag: 'perfact', flipKey: 'W6_PERFECT_ACTIVE_FLIP',          label: 'pf. of',        short: 'pf',       chapter: 16 },
   { tag: 'mi',      flipKey: 'W8_MI_VERB_PRINCIPAL_PARTS_FLIP', label: 'of',            chapter: 19, multi: true }
 ];
 
@@ -228,6 +228,19 @@ export function getSelectedVocabCards(keys, requiredFlag = false) {
   return cards;
 }
 
+// Short form-type abbreviation shown as a "(aor)" / "(fut)" tag before the
+// derived headword. Fixed per config for the binary sets; for the μι-verbs
+// (several principal parts per lemma) it's read off each part's own label.
+function shortFormFor(label) {
+  const s = String(label || '').toLowerCase();
+  if (s.includes('aorist passive')) return 'aor pass';
+  if (s.includes('future')) return 'fut';
+  if (s.includes('perfect')) return 'pf';
+  if (s.includes('aorist')) return 'aor';
+  if (s.includes('present')) return 'pres';
+  return '';
+}
+
 // present-lemma → [derived entries] for one flip set.
 function buildIrregularLookup(config) {
   const set = window.SUPPLEMENTAL_VOCAB_SETS && window.SUPPLEMENTAL_VOCAB_SETS[config.flipKey];
@@ -241,7 +254,8 @@ function buildIrregularLookup(config) {
       stem: c.stem || '',
       // μι-verbs name each principal part on the card itself; reuse it so the
       // derived label reads e.g. "aorist active (1st sg.) of [δίδωμι]".
-      label: config.multi && c.stemFlipAorist ? c.stemFlipAorist : config.label
+      label: config.multi && c.stemFlipAorist ? c.stemFlipAorist : config.label,
+      short: config.short || shortFormFor(c.stemFlipAorist)
     });
   });
   return map;
@@ -307,6 +321,7 @@ export function expandIrregularCards(cards, enabledTags) {
             e: entry.gloss || card.e,
             derivedFrom: card.g,
             derivedLabel: entry.label,
+            derivedShort: entry.short,
             derivedStem: entry.stem,
             derivedTag: config.tag,
             // Legacy aliases so the render path that special-cased the

@@ -859,6 +859,18 @@
     letter-spacing: 0.5px;
     white-space: nowrap;
   }
+  /* Small "(aor)" / "(fut)" form-type tag before a generated (derived) card's
+     headword, marking it as a non-standard principal part. */
+  .card-form-tag {
+    font-size: 0.42em;
+    font-style: italic;
+    color: var(--gold-dim);
+    letter-spacing: 0.5px;
+    vertical-align: 0.5em;
+    white-space: nowrap;
+    text-transform: lowercase;
+  }
+  .card-greek-small .card-form-tag { vertical-align: 0.35em; }
 
   .flip-hint {
     position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
@@ -2584,6 +2596,27 @@
     width: 100%;
     margin-top: 8px;
     margin-bottom: 12px;
+  }
+  /* Variant-forms sub-collapsible: the irregular "… as cards" toggles, grouped
+     to save vertical space. Full-width like the parsing-options section, but
+     keeps the switch-on-the-left layout of the main controls bar. */
+  .variant-forms-section {
+    flex: 1 1 100%;
+    align-self: stretch;
+    width: 100%;
+  }
+  .variant-forms-section[open] { display: block; }
+  .variant-forms-section[open] > .toggle-label {
+    display: flex;
+    justify-content: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .variant-forms-section[open] > .toggle-label > .toggle-switch { order: -1; }
+  .variant-forms-count {
+    color: var(--muted);
+    text-transform: none;
+    letter-spacing: 0;
   }
   /* Tight spacing between a parsing-step toggle and its child
      filter, then wider spacing between each (toggle + filter) group.
