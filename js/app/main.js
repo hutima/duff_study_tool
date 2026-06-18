@@ -1510,13 +1510,19 @@ function syncToggleButtons() {
   if (stemNotesSwitch) stemNotesSwitch.classList.toggle('on', runtime.stemNotes !== false);
   const stemNotesToggleEl = document.getElementById('stemNotesToggle');
   if (stemNotesToggleEl) stemNotesToggleEl.setAttribute('aria-checked', runtime.stemNotes !== false ? 'true' : 'false');
+  let irregularOnCount = 0;
   IRREGULAR_CARD_CONFIGS.forEach(c => {
     const on = isIrregularCardEnabled(c.tag, runtime.selectedKeys, runtime.irregularCards);
+    if (on) irregularOnCount += 1;
     const sw = document.getElementById(`irregularCards_${c.tag}_Btn`);
     if (sw) sw.classList.toggle('on', on);
     const toggleEl = document.getElementById(`irregularCards_${c.tag}_Toggle`);
     if (toggleEl) toggleEl.setAttribute('aria-checked', on ? 'true' : 'false');
   });
+  // Surface how many variant-form toggles are active while the section is
+  // collapsed, so the default-on-by-chapter state isn't hidden.
+  const variantFormsCount = document.getElementById('variantFormsCount');
+  if (variantFormsCount) variantFormsCount.textContent = irregularOnCount ? ` · ${irregularOnCount} on` : '';
   // Spacing cadence: ON = relaxed (8-month course), OFF = intensive (2-month, default).
   const cadenceRelaxed = runtime.spacingCadence === 'relaxed';
   const cadenceSwitch = document.getElementById('cadenceBtn');
@@ -1686,11 +1692,10 @@ function syncLayoutVisibility() {
   // Stem & declension notes annotate standard vocab cards only.
   const stemNotesToggleVis = document.getElementById('stemNotesToggle');
   if (stemNotesToggleVis) stemNotesToggleVis.style.display = runtime.studyMode === 'vocab' ? 'flex' : 'none';
-  // Irregular "… as cards" toggles expand the vocab deck only.
-  IRREGULAR_CARD_CONFIGS.forEach(c => {
-    const el = document.getElementById(`irregularCards_${c.tag}_Toggle`);
-    if (el) el.style.display = runtime.studyMode === 'vocab' ? 'flex' : 'none';
-  });
+  // Irregular "… as cards" toggles expand the vocab deck only; they live in a
+  // collapsible "Variant forms" section, so show/hide that whole container.
+  const variantFormsDetails = document.getElementById('variantFormsDetails');
+  if (variantFormsDetails) variantFormsDetails.style.display = runtime.studyMode === 'vocab' ? '' : 'none';
   // Split vocab/grammar selection only makes sense between vocab and morph;
   // parsing mode owns its chapter via the dedicated dropdown, and reader mode
   // doesn't use the deck selection at all, so hide the toggle in both.
