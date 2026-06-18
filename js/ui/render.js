@@ -1217,6 +1217,22 @@ function resolveFormForPickedDims(card, steps, pickedValues, autoFilledDims) {
       pickedDims[k] = autoFilledDims[k];
     });
   }
+  // Deponent / middle leniency, mirrored from grading. The voice step
+  // accepts 'active' for a form whose voice is middle or middle/passive
+  // (deponents are middle in form but active in meaning — see
+  // morph_steps.js step.acceptable). There is no active-voice form to
+  // find for such a lemma, so a student who picks 'active' must resolve
+  // against the form's actual middle voice — otherwise the lookup rejects
+  // the (only) middle form on the voice key and the parse dashes to "—"
+  // even when 'active' was graded correct and the sole error was elsewhere
+  // (e.g. ῥυόμεναι parsed as masculine instead of feminine should still
+  // reconstruct the masculine ῥυόμενοι, not blank out).
+  if (pickedDims.voice === 'active') {
+    const cardVoice = parseAnswerDimensions(card.parsedAnswer || card.answer || '').voice;
+    if (cardVoice === 'middle' || cardVoice === 'middle/passive') {
+      pickedDims.voice = cardVoice;
+    }
+  }
   const keys = Object.keys(pickedDims);
   if (keys.length === 0) return { kind: 'none' };
 
@@ -1304,8 +1320,25 @@ function renderMorphStepSummary(card, state) {
         </div>`;
     }
     const correct = answer && answer.isCorrect;
-    const markClass = correct ? 'morph-step-correct' : 'morph-step-incorrect';
+    // Deponent voice soft-accept. For a deponent the form is middle (or
+    // middle/passive) but Duff parses it as active — so both grade correct
+    // (morph_steps.js seeds step.acceptable = [middle, 'active']). 'active'
+    // is the headline answer; when the student instead names the formal
+    // 'middle' voice it still counts, but render it amber with an "active
+    // (deponent)" note rather than a plain green ✓, so the convention is
+    // reinforced instead of reading as fully, unremarkably right.
+    const pickedRaw = answer && answer.selectedIdx >= 0 ? step.choices[answer.selectedIdx] : null;
+    const deponentVoiceStep = step.key === 'voice'
+      && Array.isArray(step.acceptable) && step.acceptable.includes('active')
+      && (step.correct === 'middle' || step.correct === 'middle/passive');
+    const softDeponentMiddle = !!correct && deponentVoiceStep && !!pickedRaw && pickedRaw !== 'active';
+    const markClass = softDeponentMiddle
+      ? 'morph-step-soft'
+      : (correct ? 'morph-step-correct' : 'morph-step-incorrect');
     const mark = correct ? '✓' : '✗';
+    const deponentNoteHtml = softDeponentMiddle
+      ? `<span class="morph-step-deponent-note">active (deponent) — middle in form, active in meaning</span>`
+      : '';
     const acceptable = Array.isArray(step.acceptable) ? step.acceptable : [step.correct];
     const correctionInner = acceptable.map((a) => escapeHtml(applyDisplaySuffixIfPerson(step.key, a))).join(' / ');
     // For aspect mistakes, the picked value can visually overlap with the
@@ -1325,7 +1358,7 @@ function renderMorphStepSummary(card, state) {
       <div class="morph-step-summary-row ${markClass}">
         <span class="morph-step-summary-dim">${escapeHtml(step.label)}</span>
         <span class="morph-step-summary-pick">${escapeHtml(pickedLabel)} ${mark}</span>
-        ${showCorrection}
+        ${showCorrection}${deponentNoteHtml}
       </div>`;
   }).join('');
 
