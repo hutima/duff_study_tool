@@ -32,6 +32,10 @@
         type: 'supplemental',
         supplemental: true,
         week: set.week ?? null,
+        // `chapter` drives the chapter-grouped Paradigm-practice selector
+        // (selectors.js chapterForSet). Must be carried through here or every
+        // set falls back to its week's first chapter.
+        chapter: Number.isInteger(set.chapter) ? set.chapter : null,
         cards: []
       };
     } else {
@@ -39,6 +43,7 @@
       window.SETS[key].type = window.SETS[key].type || 'supplemental';
       window.SETS[key].supplemental = true;
       if (set.week != null) window.SETS[key].week = set.week;
+      if (Number.isInteger(set.chapter)) window.SETS[key].chapter = set.chapter;
       if (!Array.isArray(window.SETS[key].cards)) window.SETS[key].cards = [];
     }
   }
