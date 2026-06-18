@@ -5518,7 +5518,7 @@
   const WEEK_GRAMMAR = {
 
     "W2O": {
-      label: "Week 2 — Course Supplement Grammar",
+      label: "Course supplement grammar",
       notes: "Master indicative paradigm · moods · imperative · active masc. participles",
       items: [
         {
@@ -5630,7 +5630,7 @@
     },
 
     "W3O": {
-      label: "Week 3 — Course Supplement Grammar",
+      label: "Course supplement grammar",
       notes: "Complete εἰμί · demonstrative paradigms · personal pronouns",
       items: [
         {
@@ -5849,7 +5849,7 @@
     },
 
     "W4O": {
-      label: "Week 4 — Course Supplement Grammar",
+      label: "Course supplement grammar",
       notes: "Relative pronouns · second aorist · liquid futures",
       items: [
         {
@@ -6002,7 +6002,7 @@
     },
 
     "W5O": {
-      label: "Week 5 — Course Supplement Grammar",
+      label: "Course supplement grammar",
       notes: "Third declension · participial paradigms · second / third declension review",
       items: [
         {
@@ -6067,7 +6067,7 @@
     },
 
     "W6O": {
-      label: "Week 6 — Course Supplement Grammar",
+      label: "Course supplement grammar",
       notes: "Passive endings · passive participles · perfect · pluperfect · square of stops",
       items: [
         {
@@ -6181,7 +6181,7 @@
     },
 
     "W7O": {
-      label: "Week 7 — Course Supplement Grammar",
+      label: "Course supplement grammar",
       notes: "Subjunctive · indefinite constructions · 3rd-person imperative · aspect",
       items: [
         {
@@ -6321,7 +6321,7 @@
     },
 
     "W8O": {
-      label: "Week 8 — Course Supplement Grammar",
+      label: "Course supplement grammar",
       notes: "-μι present active · -μι other active tenses · -μι middle/passive",
       items: [
         {

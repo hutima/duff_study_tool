@@ -12,6 +12,7 @@ import { shuffleArray } from '../utils/helpers.js';
 import { SRS_CYCLE_ADVANCE_MS } from '../domain/srs/constants.js';
 import { msFromDays, daysFromMs } from '../domain/srs/scheduler.js';
 import { expandSessionSets, sortSetKeys } from '../domain/deck/ordering.js';
+import { isIrregularCardEnabled } from '../domain/deck/filters.js';
 import {
   sanitizeGamificationState,
   STORAGE_KEY,
@@ -724,11 +725,15 @@ export function toggleStemNotes() {
   renderCard();
 }
 
-// Second aorists as their own cards (e.g. εἶπον alongside λέγω). Unlike
-// stem notes this changes the deck's contents, so it rebuilds the deck the
-// same way toggleRequiredOnly does.
-export function toggleSecondAoristCards() {
-  runtime.secondAoristCards = !runtime.secondAoristCards;
+// Irregular forms as their own cards (e.g. εἶπον alongside λέγω, λέλυκα
+// alongside λύω). Unlike stem notes this changes the deck's contents, so it
+// rebuilds the deck the same way toggleRequiredOnly does. Clicking records an
+// explicit override (true/false) so the auto "on when the chapter is selected"
+// default no longer applies to that concept.
+export function toggleIrregularCards(tag) {
+  if (!runtime.irregularCards || typeof runtime.irregularCards !== 'object') runtime.irregularCards = {};
+  const current = isIrregularCardEnabled(tag, runtime.selectedKeys, runtime.irregularCards);
+  runtime.irregularCards[tag] = !current;
   host.syncToggleButtons();
   if (!runtime.selectedKeys.length) {
     host.saveState();

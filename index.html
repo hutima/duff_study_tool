@@ -19,11 +19,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Greek Cards">
-<link rel="manifest" href="manifest.json?v=273">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=273">
-<link rel="icon" type="image/svg+xml" href="favicon.svg?v=273">
+<link rel="manifest" href="manifest.json?v=274">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=274">
+<link rel="icon" type="image/svg+xml" href="favicon.svg?v=274">
 <title>Elementary NT Greek — Flashcards</title>
-<link rel="stylesheet" href="styles.css?v=273">
+<link rel="stylesheet" href="styles.css?v=274">
 <script>
 (function(){
   try {
@@ -145,14 +145,6 @@
       <span class="toggle-text">Hard review</span>
       <span class="toggle-switch" id="hardReviewBtn" aria-hidden="true"></span>
     </button>
-    <button class="toggle-label" id="stemNotesToggle" type="button" role="switch" aria-checked="true" onclick="toggleStemNotes()" title="Show stem and declension notes on vocab cards: the bare stem printed after second-aorist / liquid-future verbs and third-declension nouns, the bracketed principal parts under a verb, and the 'declines like' pointer on third-declension nouns.">
-      <span class="toggle-text">Stem &amp; declension notes</span>
-      <span class="toggle-switch on" id="stemNotesBtn" aria-hidden="true"></span>
-    </button>
-    <button class="toggle-label" id="secondAoristCardsToggle" type="button" role="switch" aria-checked="false" onclick="toggleSecondAoristCards()" title="Give each second-aorist form its own flashcard — e.g. εἶπον 'I said' joins the deck as a separate card — whenever its present-stem verb (λέγω) is in the deck. The aorist is woven into the chapter's cards away from the present form, and reviews of it count toward the base verb's stats.">
-      <span class="toggle-text">Second aorists as cards</span>
-      <span class="toggle-switch" id="secondAoristCardsBtn" aria-hidden="true"></span>
-    </button>
     <button class="toggle-label" id="directionToggle" type="button" role="switch" aria-checked="false" onclick="toggleDirection()" title="Card direction. Off shows the Greek first (you recall the English meaning); on shows the English first (you recall the Greek form).">
       <span class="toggle-text">Eng → Gk</span>
       <span class="toggle-switch" id="directionBtn" aria-hidden="true"></span>
@@ -168,6 +160,30 @@
     <button class="toggle-label" id="unspacedDailyResetToggle" type="button" role="switch" aria-checked="false" onclick="toggleUnspacedDailyReset()" title="Auto-clear archived (Easy) cards once a day around 5 AM local time so you wake up to a fresh deck.">
       <span class="toggle-text">Daily archive reset</span>
       <span class="toggle-switch" id="unspacedDailyResetBtn" aria-hidden="true"></span>
+    </button>
+    <button class="toggle-label" id="stemNotesToggle" type="button" role="switch" aria-checked="true" onclick="toggleStemNotes()" title="Show stem and declension notes on vocab cards: the bare stem printed after second-aorist / liquid-future verbs and third-declension nouns, the bracketed principal parts under a verb, and the 'declines like' pointer on third-declension nouns.">
+      <span class="toggle-text">Stem &amp; declension notes</span>
+      <span class="toggle-switch on" id="stemNotesBtn" aria-hidden="true"></span>
+    </button>
+    <button class="toggle-label" id="irregularCards_2aor_Toggle" type="button" role="switch" aria-checked="false" onclick="toggleIrregularCards('2aor')" title="Give each second-aorist form its own flashcard — e.g. εἶπον 'I said' joins the deck as a separate card — whenever its present-stem verb (λέγω) is in the deck. The aorist is woven into the chapter's cards away from the present form, and reviews of it count toward the base verb's stats. On by default once Chapter 11 is selected, unless you switch it off yourself.">
+      <span class="toggle-text">Second aorists as cards</span>
+      <span class="toggle-switch" id="irregularCards_2aor_Btn" aria-hidden="true"></span>
+    </button>
+    <button class="toggle-label" id="irregularCards_lfut_Toggle" type="button" role="switch" aria-checked="false" onclick="toggleIrregularCards('lfut')" title="Give each liquid-future form its own flashcard — e.g. μενῶ 'I will remain' alongside μένω — whenever its present-stem verb is in the deck. Reviews of it count toward the base verb's stats. On by default once Chapter 11 is selected, unless you switch it off yourself.">
+      <span class="toggle-text">Liquid futures as cards</span>
+      <span class="toggle-switch" id="irregularCards_lfut_Btn" aria-hidden="true"></span>
+    </button>
+    <button class="toggle-label" id="irregularCards_aorpass_Toggle" type="button" role="switch" aria-checked="false" onclick="toggleIrregularCards('aorpass')" title="Give each aorist-passive form its own flashcard — e.g. ἐλύθην 'I was untied' alongside λύω — whenever its present-stem verb is in the deck. Reviews of it count toward the base verb's stats. On by default once Chapter 15 is selected, unless you switch it off yourself.">
+      <span class="toggle-text">Aorist passives as cards</span>
+      <span class="toggle-switch" id="irregularCards_aorpass_Btn" aria-hidden="true"></span>
+    </button>
+    <button class="toggle-label" id="irregularCards_perfact_Toggle" type="button" role="switch" aria-checked="false" onclick="toggleIrregularCards('perfact')" title="Give each perfect-active form its own flashcard — e.g. λέλυκα 'I have untied' alongside λύω — whenever its present-stem verb is in the deck. Reviews of it count toward the base verb's stats. On by default once Chapter 16 is selected, unless you switch it off yourself.">
+      <span class="toggle-text">Perfect actives as cards</span>
+      <span class="toggle-switch" id="irregularCards_perfact_Btn" aria-hidden="true"></span>
+    </button>
+    <button class="toggle-label" id="irregularCards_mi_Toggle" type="button" role="switch" aria-checked="false" onclick="toggleIrregularCards('mi')" title="Give each μι-verb principal part its own flashcard — e.g. ἔδωκα, δώσω, δέδωκα alongside δίδωμι — whenever the present-stem μι-verb is in the deck. Reviews of them count toward the base verb's stats. On by default once Chapter 19 is selected, unless you switch it off yourself.">
+      <span class="toggle-text">μι-verb forms as cards</span>
+      <span class="toggle-switch" id="irregularCards_mi_Btn" aria-hidden="true"></span>
     </button>
     <button class="toggle-label" id="splitSelectionToggle" type="button" role="switch" aria-checked="false" onclick="toggleSplitSelection()" title="Keep separate chapter selections for vocab and grammar modes">
       <span class="toggle-text">Split vocab/grammar selection</span>
@@ -1086,62 +1102,62 @@
   </div>
 </div>
 
-<script defer src="js/data/words.js?v=273"></script>
-<script defer src="js/data/morphology.js?v=273"></script>
-<script defer src="js/data/lemma_inventory.js?v=273"></script>
-<script defer src="js/data/supplemental.js?v=273"></script>
-<script defer src="js/data/grammar.js?v=273"></script>
-<script defer src="js/data/supplementals/week_1_supplemental.js?v=273"></script>
-<script defer src="js/data/supplementals/week_1_paradigms.js?v=273"></script>
-<script defer src="js/data/supplementals/week_2_paradigms.js?v=273"></script>
-<script defer src="js/data/supplementals/week_3_paradigms.js?v=273"></script>
-<script defer src="js/data/supplementals/week_4_paradigms.js?v=273"></script>
-<script defer src="js/data/supplementals/second_aorist_flip.js?v=273"></script>
-<script defer src="js/data/supplementals/liquid_future_flip.js?v=273"></script>
-<script defer src="js/data/supplementals/week_5_paradigms.js?v=273"></script>
-<script defer src="js/data/supplementals/w6_aorist_passive_flip.js?v=273"></script>
-<script defer src="js/data/supplementals/w6_perfect_active_flip.js?v=273"></script>
-<script defer src="js/data/supplementals/w8_mi_verb_principal_parts_flip.js?v=273"></script>
-<script defer src="js/data/supplementals/week_6_paradigms.js?v=273"></script>
-<script defer src="js/data/supplementals/week_7_paradigms.js?v=273"></script>
-<script defer src="js/data/supplementals/week_8_paradigms.js?v=273"></script>
-<script defer src="js/data/supplementals/adj_paradigms.js?v=273"></script>
-<script defer src="js/data/supplementals/w3o_supplemental.js?v=273"></script>
-<script defer src="js/data/supplementals/w6o_supplemental.js?v=273"></script>
-<script defer src="js/data/supplementals/w7o_supplemental.js?v=273"></script>
-<script defer src="js/data/supplementals/w8o_supplemental.js?v=273"></script>
-<script defer src="js/data/supplementals/paradigm_morphology.js?v=273"></script>
-<script defer src="js/data/supplementals/stem_change_drills.js?v=273"></script>
-<script defer src="js/data/advanced/advanced_01.js?v=273"></script>
-<script defer src="js/data/advanced/advanced_02.js?v=273"></script>
-<script defer src="js/data/advanced/advanced_03.js?v=273"></script>
-<script defer src="js/data/advanced/advanced_04.js?v=273"></script>
-<script defer src="js/data/advanced/advanced_05.js?v=273"></script>
-<script defer src="js/data/advanced/advanced_06.js?v=273"></script>
-<script defer src="js/data/advanced/advanced_07.js?v=273"></script>
-<script defer src="js/data/advanced/advanced_08.js?v=273"></script>
-<script defer src="js/data/advanced/advanced_09.js?v=273"></script>
-<script defer src="js/data/advanced/advanced_10.js?v=273"></script>
-<script defer src="js/data/advanced/advanced_11.js?v=273"></script>
-<script defer src="js/data/advanced/advanced_12.js?v=273"></script>
-<script defer src="js/data/advanced/advanced_13.js?v=273"></script>
-<script defer src="js/data/advanced/advanced_14.js?v=273"></script>
-<script defer src="js/data/advanced/advanced_15.js?v=273"></script>
-<script defer src="js/data/advanced/advanced_16.js?v=273"></script>
-<script defer src="js/data/advanced/advanced_17.js?v=273"></script>
-<script defer src="js/data/advanced/advanced_18.js?v=273"></script>
-<script defer src="js/data/advanced/advanced_19.js?v=273"></script>
-<script defer src="js/data/advanced/advanced_20.js?v=273"></script>
-<script defer src="js/data/advanced/advanced_21.js?v=273"></script>
-<script defer src="js/data/advanced/advanced_22.js?v=273"></script>
-<script defer src="js/data/advanced/advanced_23.js?v=273"></script>
-<script defer src="js/data/advanced/advanced_24.js?v=273"></script>
-<script defer src="js/data/advanced/advanced_25.js?v=273"></script>
-<script defer src="js/data/nt_book_vocab.js?v=273"></script>
-<script defer src="js/data/reader.js?v=273"></script>
-<script defer src="js/data/reader_verse_literals.js?v=273"></script>
-<script defer src="js/data/reader_translations.js?v=273"></script>
-<script defer src="js/logic/pos_logic.js?v=273"></script>
-<script type="module" src="js/app/main.js?v=273"></script>
+<script defer src="js/data/words.js?v=274"></script>
+<script defer src="js/data/morphology.js?v=274"></script>
+<script defer src="js/data/lemma_inventory.js?v=274"></script>
+<script defer src="js/data/supplemental.js?v=274"></script>
+<script defer src="js/data/grammar.js?v=274"></script>
+<script defer src="js/data/supplementals/week_1_supplemental.js?v=274"></script>
+<script defer src="js/data/supplementals/week_1_paradigms.js?v=274"></script>
+<script defer src="js/data/supplementals/week_2_paradigms.js?v=274"></script>
+<script defer src="js/data/supplementals/week_3_paradigms.js?v=274"></script>
+<script defer src="js/data/supplementals/week_4_paradigms.js?v=274"></script>
+<script defer src="js/data/supplementals/second_aorist_flip.js?v=274"></script>
+<script defer src="js/data/supplementals/liquid_future_flip.js?v=274"></script>
+<script defer src="js/data/supplementals/week_5_paradigms.js?v=274"></script>
+<script defer src="js/data/supplementals/w6_aorist_passive_flip.js?v=274"></script>
+<script defer src="js/data/supplementals/w6_perfect_active_flip.js?v=274"></script>
+<script defer src="js/data/supplementals/w8_mi_verb_principal_parts_flip.js?v=274"></script>
+<script defer src="js/data/supplementals/week_6_paradigms.js?v=274"></script>
+<script defer src="js/data/supplementals/week_7_paradigms.js?v=274"></script>
+<script defer src="js/data/supplementals/week_8_paradigms.js?v=274"></script>
+<script defer src="js/data/supplementals/adj_paradigms.js?v=274"></script>
+<script defer src="js/data/supplementals/w3o_supplemental.js?v=274"></script>
+<script defer src="js/data/supplementals/w6o_supplemental.js?v=274"></script>
+<script defer src="js/data/supplementals/w7o_supplemental.js?v=274"></script>
+<script defer src="js/data/supplementals/w8o_supplemental.js?v=274"></script>
+<script defer src="js/data/supplementals/paradigm_morphology.js?v=274"></script>
+<script defer src="js/data/supplementals/stem_change_drills.js?v=274"></script>
+<script defer src="js/data/advanced/advanced_01.js?v=274"></script>
+<script defer src="js/data/advanced/advanced_02.js?v=274"></script>
+<script defer src="js/data/advanced/advanced_03.js?v=274"></script>
+<script defer src="js/data/advanced/advanced_04.js?v=274"></script>
+<script defer src="js/data/advanced/advanced_05.js?v=274"></script>
+<script defer src="js/data/advanced/advanced_06.js?v=274"></script>
+<script defer src="js/data/advanced/advanced_07.js?v=274"></script>
+<script defer src="js/data/advanced/advanced_08.js?v=274"></script>
+<script defer src="js/data/advanced/advanced_09.js?v=274"></script>
+<script defer src="js/data/advanced/advanced_10.js?v=274"></script>
+<script defer src="js/data/advanced/advanced_11.js?v=274"></script>
+<script defer src="js/data/advanced/advanced_12.js?v=274"></script>
+<script defer src="js/data/advanced/advanced_13.js?v=274"></script>
+<script defer src="js/data/advanced/advanced_14.js?v=274"></script>
+<script defer src="js/data/advanced/advanced_15.js?v=274"></script>
+<script defer src="js/data/advanced/advanced_16.js?v=274"></script>
+<script defer src="js/data/advanced/advanced_17.js?v=274"></script>
+<script defer src="js/data/advanced/advanced_18.js?v=274"></script>
+<script defer src="js/data/advanced/advanced_19.js?v=274"></script>
+<script defer src="js/data/advanced/advanced_20.js?v=274"></script>
+<script defer src="js/data/advanced/advanced_21.js?v=274"></script>
+<script defer src="js/data/advanced/advanced_22.js?v=274"></script>
+<script defer src="js/data/advanced/advanced_23.js?v=274"></script>
+<script defer src="js/data/advanced/advanced_24.js?v=274"></script>
+<script defer src="js/data/advanced/advanced_25.js?v=274"></script>
+<script defer src="js/data/nt_book_vocab.js?v=274"></script>
+<script defer src="js/data/reader.js?v=274"></script>
+<script defer src="js/data/reader_verse_literals.js?v=274"></script>
+<script defer src="js/data/reader_translations.js?v=274"></script>
+<script defer src="js/logic/pos_logic.js?v=274"></script>
+<script type="module" src="js/app/main.js?v=274"></script>
 </body>
 </html>

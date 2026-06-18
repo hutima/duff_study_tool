@@ -1,6 +1,6 @@
 (function () {
   window.registerSupplementalVocabSet('W1O', {
-    label: 'Week 1 Supplemental',
+    label: 'Chapter 5 supplemental',
     week: 1,
     chapter: 5,
     cards: [
