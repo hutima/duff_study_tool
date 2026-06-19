@@ -9,7 +9,7 @@ import { runtime } from '../state/runtime.js';
 import { buildGrammarSupportHtml } from '../domain/grammar/explanations.js';
 import { renderProgress, renderReview } from './progress.js';
 import { buildMorphSteps, summarizeLemmaStats, getParadigmStepAttemptWindow, computeAccessibleDimensionPools, parseAnswerDimensions, aspectMistakeNote, isSecondPluralPresentMoodAmbiguity, computeParadigmPresentValues, accentLookalikesFor, confusableFormHints, THIRD_PERSON_IMPERATIVE_CHAPTER } from '../domain/grammar/morph_steps.js';
-import { getAccessibleMorphCards, deriveSelectionLevels, buildMultiGenderLemmas, MIXED_FORM_NOUN_LEMMAS, THIRD_DECLENSION_NOUN_LEMMAS } from '../domain/grammar/paradigm_focus.js';
+import { getAccessibleMorphCards, deriveSelectionLevels, buildMultiGenderLemmas, MIXED_FORM_NOUN_LEMMAS, THIRD_DECLENSION_NOUN_LEMMAS, paradigmCategoryForLemma } from '../domain/grammar/paradigm_focus.js';
 
 // Spell out the derived-card form abbreviation (card.derivedShort) for the
 // "(aorist)" / "(future)" caption under a generated card's headword.
@@ -1614,6 +1614,17 @@ function renderMorphStepSummary(card, state) {
     ? `<div class="morph-step-gap-note"><span class="morph-step-gap-label">No such form</span> ${escapeHtml(state.paradigmGap.note)}</div>`
     : '';
 
+  // Name the paradigm being assessed on the summary (post-parse, so it can't
+  // give the answer away the way a front-of-card source label could). The
+  // lemma plus its paradigm category — e.g. "βασιλεύς — Nouns · 3rd declension"
+  // — tells the student why this form is being drilled. Falls back to the
+  // card's family label for uncategorised ("Other constructions") paradigms.
+  const paradigmCategory = card.lemma ? paradigmCategoryForLemma(card.lemma) : null;
+  const paradigmDescriptor = paradigmCategory || card.family || '';
+  const paradigmMetaLine = card.lemma
+    ? `<div class="morph-step-summary-meta">Paradigm: ${escapeHtml(card.lemma)}${paradigmDescriptor ? ' — ' + escapeHtml(paradigmDescriptor) : ''}</div>`
+    : '';
+
   return `
     <div class="morph-step-summary">
       <div class="morph-step-summary-title">Parse complete — ${escapeHtml(totalStr)}</div>
@@ -1626,7 +1637,7 @@ function renderMorphStepSummary(card, state) {
       ${personInferredNote}
       ${stemChangeNote}
       ${recentLine}
-      <div class="morph-step-summary-meta">${escapeHtml(card.lemma)}${card.family ? ' · ' + escapeHtml(card.family) : ''}</div>
+      ${paradigmMetaLine}
     </div>`;
 }
 
