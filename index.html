@@ -19,11 +19,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Greek Cards">
-<link rel="manifest" href="manifest.json?v=286">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=286">
-<link rel="icon" type="image/svg+xml" href="favicon.svg?v=286">
+<link rel="manifest" href="manifest.json?v=287">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=287">
+<link rel="icon" type="image/svg+xml" href="favicon.svg?v=287">
 <title>Elementary NT Greek — Flashcards</title>
-<link rel="stylesheet" href="styles.css?v=286">
+<link rel="stylesheet" href="styles.css?v=287">
 <script>
 (function(){
   try {
@@ -794,39 +794,25 @@
       <details class="user-guide-changelog">
         <summary>Changelog</summary>
         <details class="user-guide-changelog-version" open>
-          <summary>Version 1.10 &middot; 2026-06-19</summary>
+          <summary>Version 1.9 &middot; 2026-06-19</summary>
           <ul class="user-guide-list">
-            <li><strong>Undo a parse guess.</strong> The step-by-step parsing walk now has an <em>&#8624; Undo guess</em> button that steps you back to your previous dimension so you can re-pick and keep practising the rest of the form along the right path (handy after a wrong mood pick sends you down the participle branch). Undo is a study aid, not a free retry: a reattempted dimension is marked amber with an asterisk (not a red &#10007;) and scores <em>half credit</em> rather than full &mdash; and the parse no longer counts as &ldquo;known&rdquo;, so the form keeps coming back under <em>Exclude known morphs</em>.</li>
-            <li><strong>Third-person imperatives (Ch. 18).</strong> Parsing now treats an imperative&rsquo;s person as a real choice once you reach chapter 18 (&ldquo;Using Verbs&rdquo;, which adds forms like &lambda;&upsilon;&#941;&tau;&omega; &ldquo;let him loose&rdquo;): the Person step is asked and offers 2nd or 3rd (never 1st, which Koine has no imperative for). These forms now fold into their parent paradigms (&lambda;&#973;&omega;, &#7165;&#973;&omicron;&mu;&alpha;&iota;) instead of a separate combined set, so they show up when you drill &lambda;&#973;&omega;. Below chapter 18 imperatives stay 2nd person as before.</li>
-            <li><strong>&pi;&omicron;&lambda;&#973;&sigmaf; and &mu;&#941;&gamma;&alpha;&sigmaf; are now separate paradigms.</strong> They share a declension shape but are different words, and bundling them let a &mu;&#941;&gamma;&alpha;&sigmaf; parse resolve to &pi;&omicron;&lambda;&#973;&sigmaf;&rsquo;s &pi;&omicron;&lambda;&lambda;&#942; (the feminine showing as &ldquo;&pi;&omicron;&lambda;&lambda;&#942;&rdquo; instead of &ldquo;&mu;&epsilon;&gamma;&#940;&lambda;&eta;&rdquo;). Each is its own focusable paradigm now, so the resolved form always matches the word you&rsquo;re parsing.</li>
-            <li><strong>Parse summary names the paradigm.</strong> After you finish a parse, the summary now shows the lemma and its paradigm class (e.g. &ldquo;Paradigm: &beta;&alpha;&sigma;&iota;&lambda;&epsilon;&#973;&sigmaf; &mdash; Nouns &middot; 3rd declension&rdquo;), so you can see what&rsquo;s being drilled. It&rsquo;s shown only on the answer side, never on the question, where it could hint at the parse.</li>
-          </ul>
-        </details>
-        <details class="user-guide-changelog-version">
-          <summary>Version 1.9 &middot; 2026-06-18</summary>
-          <ul class="user-guide-list">
-            <li><strong>Variant forms as cards.</strong> Five toggles (second aorist, liquid future, aorist passive, perfect active, &mu;&iota;-verb forms), collapsed under <em>Variant forms</em> in Advanced settings. Each adds a verb&rsquo;s non-present principal part as its own card from the matching verb already in your deck, with reviews counting toward that verb. On by default once the form&rsquo;s chapter is selected, unless you set it yourself; generated cards carry a small <em>(aor)</em> / <em>(fut)</em> tag.</li>
-            <li><strong>Simpler study-selector counts.</strong> <em>Paradigm practice</em> now counts in &ldquo;sets&rdquo; (the longer word &ldquo;paradigm&rdquo; was wrapping mid-word in the narrow count column), and the grammar count is gone (chapters show just vocab). A one-set chapter (e.g. Chapter&nbsp;20) no longer nests an extra level, and former &ldquo;Week N&rdquo; labels now read by chapter.</li>
-            <li><strong>Reader is leaner.</strong> Reader mode drops the Shuffle / Reset controls &mdash; it keeps no deck and saves no progress.</li>
-            <li><strong>Toggle tap fixes.</strong> Only the switch flips a toggle (the label text no longer does), and the (i) info button has a bigger tap target.</li>
-            <li><strong>Deponent voice, fixed.</strong> Only true deponents (dictionary form in -&mu;&alpha;&iota; &mdash; &gamma;&#943;&nu;&omicron;&mu;&alpha;&iota;, &#7956;&rho;&chi;&omicron;&mu;&alpha;&iota;&hellip;) accept <em>active</em> and read <em>active</em> in the <em>Correct parse</em> line. A regular verb&rsquo;s genuine middle &mdash; &lambda;&#973;&omega;&rsquo;s &#7952;&lambda;&#973;&sigma;&omega; (&ldquo;you loosed for yourself&rdquo;) &mdash; is now graded strictly as <em>middle</em>, so <em>active</em> is marked wrong there.</li>
-            <li><strong>κρίνω present moods filled out.</strong> The κρίνω paradigm now carries the present active imperative (κρῖνε / κρίνετε), infinitive (κρίνειν), and masculine participle (κρίνων / κρίνοντες) alongside the indicative &mdash; matching λύω, so the present active infinitive is now drillable in parsing.</li>
-            <li><strong>Parsing source line says the lemma.</strong> A parsing card now names the word by its dictionary form (e.g. &lambda;&#973;&omega;) rather than a participle set&rsquo;s principal-parts label (&ldquo;&lambda;&#973;&sigma;&alpha;&sigmaf;, &lambda;&#973;&sigma;&alpha;&sigma;&alpha;, &lambda;&#8166;&sigma;&alpha;&nu;&rdquo;), which gave away the tense and mood you&rsquo;re being asked to parse. The paradigm-category note is gone for the same reason.</li>
-            <li><strong>Middle and passive both count where they&rsquo;re identical.</strong> In the present, imperfect, perfect, and pluperfect a form like &lambda;&#973;&omicron;&mu;&alpha;&iota; is both middle and passive &mdash; no spelling tells them apart. Parsing now reads the voice of these forms as <em>middle/passive</em> and accepts either reading, instead of marking <em>middle</em> wrong on a card the paradigm happened to label <em>passive</em>. The future and aorist (where the two voices have distinct forms) stay strict.</li>
-            <li><strong>Aspect hint follows its step.</strong> The &ldquo;use continuous/undefined&rdquo; coaching line only shows when the optional <em>Aspect</em> step is on; with aspect off (the default) it&rsquo;s hidden.</li>
-            <li><strong>Clearer variant-form tag.</strong> The &ldquo;variant forms as cards&rdquo; marker is now spelled out in full (<em>(aorist)</em>, <em>(future)</em>&hellip;) and sits on its own line under the word rather than crammed in front of it. It shows only on the question side &mdash; the answer side already spells out the full parse (e.g. &ldquo;perfect active (1st sg.) of [&delta;&epsilon;&#943;&kappa;&nu;&upsilon;&mu;&iota;]&rdquo;), so the tag would just repeat it there.</li>
-            <li><strong>Hide the tense on irregular cards.</strong> A new <em>Show tense on irregular cards</em> toggle (top of <em>Variant forms</em> in Advanced settings, on by default) lets you drop the <em>(aorist)</em> / <em>(future)</em> caption and quiz yourself on the tense. With it off, a small superscript star marks the form instead &mdash; the same star multi-case prepositions now wear.</li>
-            <li><strong>μι-verb principal parts, expanded.</strong> The μι-verb flip set now prints the verbal stem after each form (e.g. ἔδωκα, δω-) like the second-aorist cards, and adds principal parts for the common compounds &mdash; ἀποδίδωμι / παραδίδωμι, ἐπιτίθημι, ἀνίστημι / παρίστημι, and συνίημι.</li>
+            <li><strong>Undo a parse guess.</strong> A new <em>&#8624; Undo guess</em> button steps the parsing walk back so you can re-pick and keep practising along the right path. It&rsquo;s a study aid, not a free retry: a reattempted dimension scores <em>half credit</em> (amber, not a red &#10007;) and never counts as &ldquo;known&rdquo;, so the form keeps coming back under <em>Exclude known morphs</em> until you get it clean twice in a row.</li>
+            <li><strong>Half credit shows in your stats.</strong> Per-paradigm accuracy and the mood / tense / voice bars now count a reattempt as half (not zero), and a new <em>clean / reattempted / missed</em> outcome chart in the Parsing analytics section shows how much of your drilling was right first try versus needed a nudge.</li>
+            <li><strong>Third-person imperatives (Ch. 18).</strong> The Person step is asked from chapter 18 (2nd or 3rd), and these forms fold into their parent paradigms (&lambda;&#973;&omega;, &#7165;&#973;&omicron;&mu;&alpha;&iota;) instead of a separate set.</li>
+            <li><strong>&pi;&omicron;&lambda;&#973;&sigmaf; and &mu;&#941;&gamma;&alpha;&sigmaf; are separate paradigms now,</strong> so a &mu;&#941;&gamma;&alpha;&sigmaf; parse no longer resolves to &pi;&omicron;&lambda;&#973;&sigmaf;&rsquo;s &pi;&omicron;&lambda;&lambda;&#942;. The parse summary also names the paradigm (lemma + class), on the answer side only.</li>
+            <li><strong>Gentler on transient mistakes.</strong> An <em>Uncertain</em> card returns to normal spacing after one clean review (was three); a <em>Hard</em> miss still takes three.</li>
           </ul>
         </details>
         <details class="user-guide-changelog-version">
           <summary>Version 1.8 &middot; 2026-06-18</summary>
           <ul class="user-guide-list">
-            <li><strong>Study selector grouped by chapter.</strong> &ldquo;Supplemental&rdquo; is now <em>Paradigm practice</em>, grouped by the Duff chapter that teaches each set and showing its subject; the stem-flip flashcards moved to their own <em>Irregular practice</em> section; the deselect buttons collapsed into one.</li>
-            <li><strong>Trimmed a duplicate second-aorist set</strong> in favor of the highlighted present&nbsp;&harr;&nbsp;aorist flip set; the stem-change drill is unchanged.</li>
-            <li><strong>&lambda;&upsilon;&omega; middle voice (Ch&nbsp;15).</strong> Added the distinct future- and aorist-middle forms to the parsing paradigm.</li>
-            <li><strong>Parsing is its own analytics section,</strong> out from under <em>Grammar</em>, opening with an accuracy-over-recent-guesses trend chart (buckets of 20, enabled steps only).</li>
-            <li><strong>Fixed a parsing-stats tap glitch</strong> on iOS.</li>
+            <li><strong>Parsing is its own analytics section,</strong> out from under <em>Grammar</em>, opening with an accuracy-over-recent-guesses trend (buckets of 20, enabled steps only).</li>
+            <li><strong>Variant forms as cards.</strong> Five toggles (second aorist, liquid future, aorist passive, perfect active, &mu;&iota;-verb forms) under <em>Variant forms</em> in Advanced settings &mdash; each adds a verb&rsquo;s non-present principal part as its own card, on by default once its chapter is selected, with a small <em>(aor)</em> / <em>(fut)</em> tag you can hide via <em>Show tense on irregular cards</em>.</li>
+            <li><strong>More paradigm forms.</strong> &mu;&iota;-verbs print their verbal stem and gain common compounds (&#7936;&pi;&omicron;&delta;&#943;&delta;&omega;&mu;&iota;, &#7952;&pi;&iota;&tau;&#943;&theta;&eta;&mu;&iota;, &#7936;&nu;&#943;&sigma;&tau;&eta;&mu;&iota;, &sigma;&upsilon;&nu;&#943;&eta;&mu;&iota;&hellip;); &kappa;&rho;&#943;&nu;&omega; gains the present imperative, infinitive, and participle; &lambda;&#973;&omega; gains its middle voice (Ch.&nbsp;15).</li>
+            <li><strong>Voice grading sharpened.</strong> Only true deponents (-&mu;&alpha;&iota; lemmas) accept <em>active</em>; a regular verb&rsquo;s genuine middle is graded as <em>middle</em>; and where present/imperfect/perfect/pluperfect forms are spelled alike, parsing reads the voice as <em>middle/passive</em> and accepts either.</li>
+            <li><strong>Fewer giveaways.</strong> A parsing card names the word by its dictionary form (not a principal-parts label that revealed the tense/mood), and the aspect coaching line only shows when the <em>Aspect</em> step is on.</li>
+            <li><strong>Study selector grouped by chapter.</strong> &ldquo;Supplemental&rdquo; is now <em>Paradigm practice</em> (counted in &ldquo;sets&rdquo;), the stem-flips moved to <em>Irregular practice</em>, and the deselect buttons collapsed into one; one-set chapters no longer nest.</li>
+            <li><strong>Leaner Reader and tap fixes.</strong> Reader drops Shuffle / Reset (no deck, no progress); only a toggle&rsquo;s switch flips it (with a bigger (i) target); and a parsing-stats tap glitch on iOS is fixed.</li>
           </ul>
         </details>
         <details class="user-guide-changelog-version">
@@ -1123,62 +1109,62 @@
   </div>
 </div>
 
-<script defer src="js/data/words.js?v=286"></script>
-<script defer src="js/data/morphology.js?v=286"></script>
-<script defer src="js/data/lemma_inventory.js?v=286"></script>
-<script defer src="js/data/supplemental.js?v=286"></script>
-<script defer src="js/data/grammar.js?v=286"></script>
-<script defer src="js/data/supplementals/week_1_supplemental.js?v=286"></script>
-<script defer src="js/data/supplementals/week_1_paradigms.js?v=286"></script>
-<script defer src="js/data/supplementals/week_2_paradigms.js?v=286"></script>
-<script defer src="js/data/supplementals/week_3_paradigms.js?v=286"></script>
-<script defer src="js/data/supplementals/week_4_paradigms.js?v=286"></script>
-<script defer src="js/data/supplementals/second_aorist_flip.js?v=286"></script>
-<script defer src="js/data/supplementals/liquid_future_flip.js?v=286"></script>
-<script defer src="js/data/supplementals/week_5_paradigms.js?v=286"></script>
-<script defer src="js/data/supplementals/w6_aorist_passive_flip.js?v=286"></script>
-<script defer src="js/data/supplementals/w6_perfect_active_flip.js?v=286"></script>
-<script defer src="js/data/supplementals/w8_mi_verb_principal_parts_flip.js?v=286"></script>
-<script defer src="js/data/supplementals/week_6_paradigms.js?v=286"></script>
-<script defer src="js/data/supplementals/week_7_paradigms.js?v=286"></script>
-<script defer src="js/data/supplementals/week_8_paradigms.js?v=286"></script>
-<script defer src="js/data/supplementals/adj_paradigms.js?v=286"></script>
-<script defer src="js/data/supplementals/w3o_supplemental.js?v=286"></script>
-<script defer src="js/data/supplementals/w6o_supplemental.js?v=286"></script>
-<script defer src="js/data/supplementals/w7o_supplemental.js?v=286"></script>
-<script defer src="js/data/supplementals/w8o_supplemental.js?v=286"></script>
-<script defer src="js/data/supplementals/paradigm_morphology.js?v=286"></script>
-<script defer src="js/data/supplementals/stem_change_drills.js?v=286"></script>
-<script defer src="js/data/advanced/advanced_01.js?v=286"></script>
-<script defer src="js/data/advanced/advanced_02.js?v=286"></script>
-<script defer src="js/data/advanced/advanced_03.js?v=286"></script>
-<script defer src="js/data/advanced/advanced_04.js?v=286"></script>
-<script defer src="js/data/advanced/advanced_05.js?v=286"></script>
-<script defer src="js/data/advanced/advanced_06.js?v=286"></script>
-<script defer src="js/data/advanced/advanced_07.js?v=286"></script>
-<script defer src="js/data/advanced/advanced_08.js?v=286"></script>
-<script defer src="js/data/advanced/advanced_09.js?v=286"></script>
-<script defer src="js/data/advanced/advanced_10.js?v=286"></script>
-<script defer src="js/data/advanced/advanced_11.js?v=286"></script>
-<script defer src="js/data/advanced/advanced_12.js?v=286"></script>
-<script defer src="js/data/advanced/advanced_13.js?v=286"></script>
-<script defer src="js/data/advanced/advanced_14.js?v=286"></script>
-<script defer src="js/data/advanced/advanced_15.js?v=286"></script>
-<script defer src="js/data/advanced/advanced_16.js?v=286"></script>
-<script defer src="js/data/advanced/advanced_17.js?v=286"></script>
-<script defer src="js/data/advanced/advanced_18.js?v=286"></script>
-<script defer src="js/data/advanced/advanced_19.js?v=286"></script>
-<script defer src="js/data/advanced/advanced_20.js?v=286"></script>
-<script defer src="js/data/advanced/advanced_21.js?v=286"></script>
-<script defer src="js/data/advanced/advanced_22.js?v=286"></script>
-<script defer src="js/data/advanced/advanced_23.js?v=286"></script>
-<script defer src="js/data/advanced/advanced_24.js?v=286"></script>
-<script defer src="js/data/advanced/advanced_25.js?v=286"></script>
-<script defer src="js/data/nt_book_vocab.js?v=286"></script>
-<script defer src="js/data/reader.js?v=286"></script>
-<script defer src="js/data/reader_verse_literals.js?v=286"></script>
-<script defer src="js/data/reader_translations.js?v=286"></script>
-<script defer src="js/logic/pos_logic.js?v=286"></script>
-<script type="module" src="js/app/main.js?v=286"></script>
+<script defer src="js/data/words.js?v=287"></script>
+<script defer src="js/data/morphology.js?v=287"></script>
+<script defer src="js/data/lemma_inventory.js?v=287"></script>
+<script defer src="js/data/supplemental.js?v=287"></script>
+<script defer src="js/data/grammar.js?v=287"></script>
+<script defer src="js/data/supplementals/week_1_supplemental.js?v=287"></script>
+<script defer src="js/data/supplementals/week_1_paradigms.js?v=287"></script>
+<script defer src="js/data/supplementals/week_2_paradigms.js?v=287"></script>
+<script defer src="js/data/supplementals/week_3_paradigms.js?v=287"></script>
+<script defer src="js/data/supplementals/week_4_paradigms.js?v=287"></script>
+<script defer src="js/data/supplementals/second_aorist_flip.js?v=287"></script>
+<script defer src="js/data/supplementals/liquid_future_flip.js?v=287"></script>
+<script defer src="js/data/supplementals/week_5_paradigms.js?v=287"></script>
+<script defer src="js/data/supplementals/w6_aorist_passive_flip.js?v=287"></script>
+<script defer src="js/data/supplementals/w6_perfect_active_flip.js?v=287"></script>
+<script defer src="js/data/supplementals/w8_mi_verb_principal_parts_flip.js?v=287"></script>
+<script defer src="js/data/supplementals/week_6_paradigms.js?v=287"></script>
+<script defer src="js/data/supplementals/week_7_paradigms.js?v=287"></script>
+<script defer src="js/data/supplementals/week_8_paradigms.js?v=287"></script>
+<script defer src="js/data/supplementals/adj_paradigms.js?v=287"></script>
+<script defer src="js/data/supplementals/w3o_supplemental.js?v=287"></script>
+<script defer src="js/data/supplementals/w6o_supplemental.js?v=287"></script>
+<script defer src="js/data/supplementals/w7o_supplemental.js?v=287"></script>
+<script defer src="js/data/supplementals/w8o_supplemental.js?v=287"></script>
+<script defer src="js/data/supplementals/paradigm_morphology.js?v=287"></script>
+<script defer src="js/data/supplementals/stem_change_drills.js?v=287"></script>
+<script defer src="js/data/advanced/advanced_01.js?v=287"></script>
+<script defer src="js/data/advanced/advanced_02.js?v=287"></script>
+<script defer src="js/data/advanced/advanced_03.js?v=287"></script>
+<script defer src="js/data/advanced/advanced_04.js?v=287"></script>
+<script defer src="js/data/advanced/advanced_05.js?v=287"></script>
+<script defer src="js/data/advanced/advanced_06.js?v=287"></script>
+<script defer src="js/data/advanced/advanced_07.js?v=287"></script>
+<script defer src="js/data/advanced/advanced_08.js?v=287"></script>
+<script defer src="js/data/advanced/advanced_09.js?v=287"></script>
+<script defer src="js/data/advanced/advanced_10.js?v=287"></script>
+<script defer src="js/data/advanced/advanced_11.js?v=287"></script>
+<script defer src="js/data/advanced/advanced_12.js?v=287"></script>
+<script defer src="js/data/advanced/advanced_13.js?v=287"></script>
+<script defer src="js/data/advanced/advanced_14.js?v=287"></script>
+<script defer src="js/data/advanced/advanced_15.js?v=287"></script>
+<script defer src="js/data/advanced/advanced_16.js?v=287"></script>
+<script defer src="js/data/advanced/advanced_17.js?v=287"></script>
+<script defer src="js/data/advanced/advanced_18.js?v=287"></script>
+<script defer src="js/data/advanced/advanced_19.js?v=287"></script>
+<script defer src="js/data/advanced/advanced_20.js?v=287"></script>
+<script defer src="js/data/advanced/advanced_21.js?v=287"></script>
+<script defer src="js/data/advanced/advanced_22.js?v=287"></script>
+<script defer src="js/data/advanced/advanced_23.js?v=287"></script>
+<script defer src="js/data/advanced/advanced_24.js?v=287"></script>
+<script defer src="js/data/advanced/advanced_25.js?v=287"></script>
+<script defer src="js/data/nt_book_vocab.js?v=287"></script>
+<script defer src="js/data/reader.js?v=287"></script>
+<script defer src="js/data/reader_verse_literals.js?v=287"></script>
+<script defer src="js/data/reader_translations.js?v=287"></script>
+<script defer src="js/logic/pos_logic.js?v=287"></script>
+<script type="module" src="js/app/main.js?v=287"></script>
 </body>
 </html>
