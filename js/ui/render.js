@@ -1364,6 +1364,163 @@ function resolveFormForPickedDims(card, steps, pickedValues, autoFilledDims) {
   return { kind: 'form', form: candidates[0].form };
 }
 
+// ── Per-form English glosses ────────────────────────────────────────────────
+// Shown after the answer as reinforcement (never mid-walk — see the gloss
+// hiding in renderMorphStepCard). A curated per-form gloss in the data always
+// wins; otherwise we build one from the parse. Nominal forms read as the word's
+// dictionary meaning (English doesn't inflect for case); verb / participle /
+// infinitive forms are conjugated from the table below. These are study
+// reinforcement, so the English is deliberately regular and a touch mechanical.
+const VERB_GLOSS = {
+  'εἰμί':    { pres: 'be',     pres3: 'is',      past: 'was',      pastPart: 'been',     presPart: 'being' },
+  'λύω':     { pres: 'loose',  pres3: 'looses',  past: 'loosed',   pastPart: 'loosed',   presPart: 'loosing' },
+  'φιλέω':   { pres: 'love',   pres3: 'loves',   past: 'loved',    pastPart: 'loved',    presPart: 'loving' },
+  'βάλλω':   { pres: 'throw',  pres3: 'throws',  past: 'threw',    pastPart: 'thrown',   presPart: 'throwing' },
+  'λαμβάνω': { pres: 'take',   pres3: 'takes',   past: 'took',     pastPart: 'taken',    presPart: 'taking' },
+  'λείπω':   { pres: 'leave',  pres3: 'leaves',  past: 'left',     pastPart: 'left',     presPart: 'leaving' },
+  'ἄγω':     { pres: 'lead',   pres3: 'leads',   past: 'led',      pastPart: 'led',      presPart: 'leading' },
+  'ἔχω':     { pres: 'have',   pres3: 'has',     past: 'had',      pastPart: 'had',      presPart: 'having' },
+  'γινώσκω': { pres: 'know',   pres3: 'knows',   past: 'knew',     pastPart: 'known',    presPart: 'knowing' },
+  'λέγω':    { pres: 'say',    pres3: 'says',    past: 'said',     pastPart: 'said',     presPart: 'saying' },
+  'ὁράω':    { pres: 'see',    pres3: 'sees',    past: 'saw',      pastPart: 'seen',     presPart: 'seeing' },
+  'μένω':    { pres: 'remain', pres3: 'remains', past: 'remained', pastPart: 'remained', presPart: 'remaining' },
+  'κρίνω':   { pres: 'judge',  pres3: 'judges',  past: 'judged',   pastPart: 'judged',   presPart: 'judging' },
+  'δίδωμι':  { pres: 'give',   pres3: 'gives',   past: 'gave',     pastPart: 'given',    presPart: 'giving' },
+  'δίδομαι': { pres: 'give',   pres3: 'gives',   past: 'gave',     pastPart: 'given',    presPart: 'giving' },
+  'τίθημι':  { pres: 'put',    pres3: 'puts',    past: 'put',      pastPart: 'put',      presPart: 'putting' },
+  'ἵστημι':  { pres: 'stand',  pres3: 'stands',  past: 'stood',    pastPart: 'stood',    presPart: 'standing' },
+  'ῥύομαι':  { pres: 'rescue', pres3: 'rescues', past: 'rescued',  pastPart: 'rescued',  presPart: 'rescuing', deponent: true },
+  'γίνομαι': { pres: 'become', pres3: 'becomes', past: 'became',   pastPart: 'become',   presPart: 'becoming', deponent: true },
+  'ἔρχομαι': { pres: 'come',   pres3: 'comes',   past: 'came',     pastPart: 'come',     presPart: 'coming',   deponent: true }
+};
+
+// Dictionary meanings, used as the gloss for every nominal form and as a
+// fallback when a generated paradigm card carries no lemmaGloss of its own.
+const LEMMA_GLOSS = {
+  'ὁ, ἡ, τό': 'the', 'λόγος': 'word, message', 'ἔργον': 'work, deed',
+  'ἀρχή': 'beginning, ruler', 'φωνή': 'voice, sound', 'ἡμέρα': 'day',
+  'ἁμαρτία': 'sin', 'δόξα': 'glory', 'προφήτης': 'prophet', 'μαθητής': 'disciple',
+  'σάρξ': 'flesh', 'ὄνομα': 'name', 'πόλις': 'city', 'βασιλεύς': 'king', 'ἀστήρ': 'star',
+  'πᾶς, πᾶσα, πᾶν': 'all, every', 'πολύς': 'much, many', 'μέγας': 'great, large',
+  'πλείων': 'more, greater', 'αὐτός, αὐτή, αὐτό': 'he / she / it; same; -self',
+  'First and second personal pronouns': 'I / you', 'οὗτος, αὕτη, τοῦτο': 'this',
+  'ἐκεῖνος, ἐκείνη, ἐκεῖνο': 'that', 'ὅς, ἥ, ὅ': 'who, which', 'τίς, τί': 'who? / what?',
+  'λύω': 'loose, destroy', 'φιλέω': 'love', 'εἰμί': 'be', 'βάλλω': 'throw, cast',
+  'λαμβάνω': 'take, receive', 'λείπω': 'leave', 'ἄγω': 'lead, bring', 'ἔχω': 'have, hold',
+  'γινώσκω': 'know', 'λέγω': 'say, speak', 'ὁράω': 'see', 'μένω': 'remain, stay',
+  'κρίνω': 'judge', 'δίδωμι': 'give', 'τίθημι': 'put, place', 'ἵστημι': 'stand, set',
+  'ῥύομαι': 'rescue, deliver', 'γίνομαι': 'become, happen', 'ἔρχομαι': 'come, go'
+};
+
+function glossSubject(person, number) {
+  if (!person || !number) return '';
+  const sg = number === 'singular';
+  if (person === 'first') return sg ? 'I' : 'we';
+  if (person === 'second') return sg ? 'you' : 'you (pl.)';
+  if (person === 'third') return sg ? 'he/she/it' : 'they';
+  return '';
+}
+function glossBePresent(person, number) {
+  if (number === 'plural') return 'are';
+  if (person === 'first') return 'am';
+  if (person === 'second') return 'are';
+  return 'is';
+}
+function glossBePast(person, number) {
+  return (number === 'singular' && (person === 'first' || person === 'third')) ? 'was' : 'were';
+}
+
+// εἰμί is suppletive in English ("be" → am/is/are/was/were/been), so it gets its
+// own realiser rather than going through the regular table.
+function glossEimi(dims) {
+  const { tense, mood, person, number } = dims;
+  if (mood === 'infinitive') return 'to be';
+  if (mood === 'participle') return 'being';
+  const subj = glossSubject(person, number);
+  if (!subj) return '';
+  if (mood === 'subjunctive') return `${subj} may be`;
+  if (mood === 'imperative') {
+    return person === 'third' ? `let ${number === 'plural' ? 'them' : 'him/her/it'} be` : 'be!';
+  }
+  const is3sg = person === 'third' && number === 'singular';
+  switch (tense) {
+    case 'imperfect': return `${subj} ${glossBePast(person, number)}`;
+    case 'future': return `${subj} will be`;
+    case 'perfect': return `${subj} ${is3sg ? 'has' : 'have'} been`;
+    case 'pluperfect': return `${subj} had been`;
+    default: return `${subj} ${glossBePresent(person, number)}`;
+  }
+}
+
+// Realise an English gloss for a verb form from its parsed dimensions. Voice is
+// collapsed for glossing: deponents and bare middles read active, middle/passive
+// and passive read passive. The aspect distinction English can't carry (aorist
+// vs. present infinitive, say) is dropped rather than faked.
+function conjugateVerbGloss(v, dims, lemma) {
+  if (lemma === 'εἰμί') return glossEimi(dims);
+  const { tense, voice, mood, person, number } = dims;
+  const vv = v.deponent ? 'active' : (voice || 'active');
+  const passive = vv === 'passive' || vv === 'middle/passive';
+  const aorist = tense === 'aorist' || tense === 'first aorist' || tense === 'second aorist';
+
+  if (mood === 'participle') {
+    if (passive) return tense === 'present' ? `being ${v.pastPart}` : `having been ${v.pastPart}`;
+    if (tense === 'present') return v.presPart;
+    if (tense === 'future') return `about to ${v.pres}`;
+    return `having ${v.pastPart}`; // aorist / perfect active
+  }
+  if (mood === 'infinitive') {
+    if (passive) return tense === 'perfect' ? `to have been ${v.pastPart}` : `to be ${v.pastPart}`;
+    return tense === 'perfect' ? `to have ${v.pastPart}` : `to ${v.pres}`;
+  }
+  const subj = glossSubject(person, number);
+  const is3sg = person === 'third' && number === 'singular';
+  if (mood === 'subjunctive') {
+    if (!subj) return '';
+    return passive ? `${subj} may be ${v.pastPart}` : `${subj} may ${v.pres}`;
+  }
+  if (mood === 'imperative') {
+    if (person === 'third') {
+      const who = number === 'plural' ? 'them' : 'him/her/it';
+      return passive ? `let ${who} be ${v.pastPart}` : `let ${who} ${v.pres}`;
+    }
+    return passive ? `be ${v.pastPart}!` : `${v.pres}!`;
+  }
+  // indicative (and the default when mood is unspecified)
+  if (!subj) return '';
+  if (passive) {
+    if (tense === 'present') return `${subj} ${glossBePresent(person, number)} ${v.pastPart}`;
+    if (tense === 'imperfect') return `${subj} ${glossBePast(person, number)} being ${v.pastPart}`;
+    if (tense === 'future') return `${subj} will be ${v.pastPart}`;
+    if (aorist) return `${subj} ${glossBePast(person, number)} ${v.pastPart}`;
+    if (tense === 'perfect') return `${subj} ${is3sg ? 'has' : 'have'} been ${v.pastPart}`;
+    if (tense === 'pluperfect') return `${subj} had been ${v.pastPart}`;
+    return '';
+  }
+  if (tense === 'present') return `${subj} ${is3sg ? v.pres3 : v.pres}`;
+  if (tense === 'imperfect') return `${subj} ${glossBePast(person, number)} ${v.presPart}`;
+  if (tense === 'future') return `${subj} will ${v.pres}`;
+  if (aorist) return `${subj} ${v.past}`;
+  if (tense === 'perfect') return `${subj} ${is3sg ? 'has' : 'have'} ${v.pastPart}`;
+  if (tense === 'pluperfect') return `${subj} had ${v.pastPart}`;
+  return '';
+}
+
+// The gloss shown for a parsing card. A curated per-form gloss in the data
+// always wins — the card builder sets card.gloss = q.gloss || item.gloss, so a
+// hand-authored per-form gloss is exactly the case where it differs from the
+// lemma gloss; we keep that untouched rather than regenerate over it. Otherwise
+// verbs are conjugated and everything else reads as its dictionary meaning.
+function formGloss(card) {
+  if (card.gloss && card.gloss !== card.lemmaGloss) return card.gloss;
+  const dims = parseAnswerDimensions(card.parsedAnswer || card.answer || '');
+  if (VERB_GLOSS[card.lemma]) {
+    const generated = conjugateVerbGloss(VERB_GLOSS[card.lemma], dims, card.lemma);
+    if (generated) return generated;
+  }
+  return card.lemmaGloss || LEMMA_GLOSS[card.lemma] || card.gloss || '';
+}
+
 // A short, affirmative "why this form" morphology tell for the summary — the
 // headline that names how the form announces its parse ("augment + σα = first
 // aorist active indicative"; "the article agrees in case, number, and gender").
@@ -1900,8 +2057,9 @@ function renderParsingReverseCard(area, card) {
   let resultHtml = '';
   if (answered) {
     const isCorrect = runtime.morphAnswerState.isCorrect;
-    const glossLine = (card.gloss || card.lemmaGloss)
-      ? `<div class="morph-gloss">Gloss: “${escapeHtml(card.gloss || card.lemmaGloss)}”</div>`
+    const reverseGloss = formGloss(card);
+    const glossLine = reverseGloss
+      ? `<div class="morph-gloss">Gloss: “${escapeHtml(reverseGloss)}”</div>`
       : '';
     // When an accent/breathing look-alike was offered, name the distinction
     // after the answer (whether they hit or missed) so the spelling contrast
@@ -1939,8 +2097,9 @@ function renderMorphStepCard(area, card) {
   // "you will be" on ἔσεσθε would otherwise hand the student tense/person/
   // number on a plate. Revealed in the summary, where it's reinforcement
   // rather than a giveaway.
-  const lemmaGloss = state.completed && (card.gloss || card.lemmaGloss)
-    ? `<div class="morph-gloss">Gloss: “${escapeHtml(card.gloss || card.lemmaGloss)}”</div>`
+  const glossText = formGloss(card);
+  const lemmaGloss = state.completed && glossText
+    ? `<div class="morph-gloss">Gloss: “${escapeHtml(glossText)}”</div>`
     : '';
 
   const body = state.completed
