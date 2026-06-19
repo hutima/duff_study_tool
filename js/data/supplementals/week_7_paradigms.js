@@ -73,17 +73,22 @@
     label: 'Third-person imperative (5 voice/tense combos)',
     week: 7,
     chapter: 18,
+    // Each form carries its own `lemma` so parsing folds the 3rd-person
+    // imperatives into the λύω and ῥύομαι paradigms (rather than a standalone
+    // combined "Third-person imperative" paradigm, which would both hide them
+    // from a focused λύω walk and let the form lookup cross between λύω and
+    // ῥύομαι). λυθήτω is λύω's aorist passive imperative.
     cards: [
-      { g: 'λυέτω', e: 'let him/her/it untie (Present active imperative, 3rd person sg.)', required: true },
-      { g: 'λυέτωσαν', e: 'let them untie (Present active imperative, 3rd person pl.)', required: true },
-      { g: 'λυσάτω', e: 'let him/her/it untie (1st aorist active imperative, 3rd person sg.)', required: true },
-      { g: 'λυσάτωσαν', e: 'let them untie (1st aorist active imperative, 3rd person pl.)', required: true },
-      { g: 'ῥυέσθω', e: 'let him/her/it rescue / be rescued (Present middle/passive imperative, 3rd person sg.)', required: true },
-      { g: 'ῥυέσθωσαν', e: 'let them rescue / be rescued (Present middle/passive imperative, 3rd person pl.)', required: true },
-      { g: 'ῥυσάσθω', e: 'let him/her/it rescue (1st aorist middle imperative, 3rd person sg.)', required: true },
-      { g: 'ῥυσάσθωσαν', e: 'let them rescue (1st aorist middle imperative, 3rd person pl.)', required: true },
-      { g: 'λυθήτω', e: 'let him/her/it be untied (Aorist passive imperative, 3rd person sg.)', required: true },
-      { g: 'λυθήτωσαν', e: 'let them be untied (Aorist passive imperative, 3rd person pl.)', required: true }
+      { g: 'λυέτω', e: 'let him/her/it untie (Present active imperative, 3rd person sg.)', lemma: 'λύω', required: true },
+      { g: 'λυέτωσαν', e: 'let them untie (Present active imperative, 3rd person pl.)', lemma: 'λύω', required: true },
+      { g: 'λυσάτω', e: 'let him/her/it untie (1st aorist active imperative, 3rd person sg.)', lemma: 'λύω', required: true },
+      { g: 'λυσάτωσαν', e: 'let them untie (1st aorist active imperative, 3rd person pl.)', lemma: 'λύω', required: true },
+      { g: 'ῥυέσθω', e: 'let him/her/it rescue / be rescued (Present middle/passive imperative, 3rd person sg.)', lemma: 'ῥύομαι', required: true },
+      { g: 'ῥυέσθωσαν', e: 'let them rescue / be rescued (Present middle/passive imperative, 3rd person pl.)', lemma: 'ῥύομαι', required: true },
+      { g: 'ῥυσάσθω', e: 'let him/her/it rescue (1st aorist middle imperative, 3rd person sg.)', lemma: 'ῥύομαι', required: true },
+      { g: 'ῥυσάσθωσαν', e: 'let them rescue (1st aorist middle imperative, 3rd person pl.)', lemma: 'ῥύομαι', required: true },
+      { g: 'λυθήτω', e: 'let him/her/it be untied (Aorist passive imperative, 3rd person sg.)', lemma: 'λύω', required: true },
+      { g: 'λυθήτωσαν', e: 'let them be untied (Aorist passive imperative, 3rd person pl.)', lemma: 'λύω', required: true }
     ]
   });
 

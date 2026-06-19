@@ -750,13 +750,15 @@ export function buildInferredStep(dimKey, accessiblePools, options = {}) {
 const VOICE_INTRODUCED_AT_CHAPTER = 15;
 const VOICE_INTRODUCED_AT_CHAPTER_PARTICIPLE = 14;
 
-// Duff introduces the 3rd-person imperative (λυέτω "let him loose", λυέτωσαν
-// "let them loose") at ch 17. Before then every imperative in scope is 2nd
-// person, so the parsing walk treats an imperative's person as structurally
-// fixed (step skipped, 2nd person implied). From ch 17 the 2nd/3rd contrast is
-// real, so the person step is asked. There is no 1st-person imperative in
-// Koine, so the step (when shown) only ever offers 2nd / 3rd.
-export const THIRD_PERSON_IMPERATIVE_CHAPTER = 17;
+// Duff introduces the 3rd-person imperative (λυέτω "let him/her/it loose",
+// λυέτωσαN "let them loose") in ch 18 ("Using Verbs") — ch 17 is the
+// subjunctive. The matching paradigm set (W7_THIRD_PERSON_IMPERATIVE) is gated
+// to ch 18, so this constant must agree: before ch 18 every imperative in
+// scope is 2nd person and the parsing walk treats an imperative's person as
+// structurally fixed (step skipped, 2nd person implied); from ch 18 the 2nd/3rd
+// contrast is real, so the person step is asked. There is no 1st-person
+// imperative in Koine, so the step (when shown) only ever offers 2nd / 3rd.
+export const THIRD_PERSON_IMPERATIVE_CHAPTER = 18;
 
 // A deponent verb's dictionary form is itself middle/passive (ends in -μαι):
 // γίνομαι, ἔρχομαι, δέχομαι, δύναμαι… These are middle/passive in form but
