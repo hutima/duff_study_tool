@@ -2464,6 +2464,28 @@
     text-transform: uppercase;
     color: var(--gold-dim);
   }
+  /* "Why this form" — the short morphology tell that sits where the stem-change
+     note used to. Gold accent (matching the old stem note) but a normal text
+     font, since the body is English prose with the odd Greek ending. */
+  .morph-step-why-note {
+    margin-top: 8px;
+    padding: 8px 10px;
+    border-left: 2px solid rgba(201,168,76,0.45);
+    background: rgba(201,168,76,0.05);
+    font-size: calc((13px) * var(--text-scale));
+    line-height: 1.45;
+    color: var(--cream);
+    border-radius: 0 6px 6px 0;
+  }
+  .morph-step-why-label {
+    display: inline-block;
+    margin-right: 8px;
+    font-family: var(--font-display);
+    font-size: calc((10px) * var(--text-scale));
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+  }
   .morph-step-ambig-note {
     margin-top: 8px;
     padding: 8px 10px;

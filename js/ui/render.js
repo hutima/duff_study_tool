@@ -8,7 +8,7 @@
 import { runtime } from '../state/runtime.js';
 import { buildGrammarSupportHtml } from '../domain/grammar/explanations.js';
 import { renderProgress, renderReview } from './progress.js';
-import { buildMorphSteps, summarizeLemmaStats, getParadigmStepAttemptWindow, computeAccessibleDimensionPools, parseAnswerDimensions, aspectMistakeNote, isSecondPluralPresentMoodAmbiguity, computeParadigmPresentValues, accentLookalikesFor, confusableFormHints, THIRD_PERSON_IMPERATIVE_CHAPTER } from '../domain/grammar/morph_steps.js';
+import { buildMorphSteps, computeAccessibleDimensionPools, parseAnswerDimensions, aspectMistakeNote, isSecondPluralPresentMoodAmbiguity, computeParadigmPresentValues, accentLookalikesFor, confusableFormHints, THIRD_PERSON_IMPERATIVE_CHAPTER } from '../domain/grammar/morph_steps.js';
 import { getAccessibleMorphCards, deriveSelectionLevels, buildMultiGenderLemmas, MIXED_FORM_NOUN_LEMMAS, THIRD_DECLENSION_NOUN_LEMMAS, paradigmCategoryForLemma } from '../domain/grammar/paradigm_focus.js';
 
 // Spell out the derived-card form abbreviation (card.derivedShort) for the
@@ -1364,6 +1364,155 @@ function resolveFormForPickedDims(card, steps, pickedValues, autoFilledDims) {
   return { kind: 'form', form: candidates[0].form };
 }
 
+// A short, affirmative "why this form" morphology tell for the summary — the
+// headline that names how the form announces its parse ("augment + σα = first
+// aorist active indicative"; "the article agrees in case, number, and gender").
+// Built conservatively from the parsed dimensions plus the paradigm category:
+// where a simple rule would mislead (εἰμί, μι-verb aorists, …) it returns ''
+// so the caller can fall back to the stem-change pair rather than print
+// something inaccurate. The Greek endings are illustrative, not exhaustive.
+function buildWhyThisFormNote(card, dims, category) {
+  const cat = String(category || '');
+  const tense = dims.tense || '';
+  const voice = dims.voice || '';
+  const mood = dims.mood || '';
+  const isActive = voice === 'active' || voice === '';
+  const midPass = voice === 'middle' || voice === 'passive' || voice === 'middle/passive';
+
+  // ── Nominals: the tell is agreement / the ending, never tense ──
+  if (cat === 'Article') {
+    return 'The article agrees with its noun in case, number, and gender.';
+  }
+  if (cat === 'Adjectives') {
+    return 'An adjective agrees with the noun it modifies in case, number, and gender.';
+  }
+  if (cat.startsWith('Pronouns')) {
+    if (cat.includes('relative')) {
+      return 'A relative pronoun takes gender and number from its antecedent, and its case from its job in the relative clause.';
+    }
+    if (cat.includes('demonstrative')) {
+      return 'A demonstrative agrees with its noun in case, number, and gender.';
+    }
+    if (cat.includes('interrogative')) {
+      return 'τίς / τί shows case and number; the masculine and feminine share one set of endings, the neuter another.';
+    }
+    return 'A personal / intensive pronoun shows case and number; αὐτός also marks gender to agree with its noun.';
+  }
+  if (cat.startsWith('Nouns') && mood !== 'participle') {
+    const decl = cat.includes('1st') ? '1st-declension '
+      : cat.includes('2nd') ? '2nd-declension '
+      : cat.includes('3rd') ? '3rd-declension '
+      : '';
+    return `A ${decl}noun: the ending carries case and number, while its gender is fixed by the word, not the ending.`;
+  }
+
+  // ── Participles: a verbal adjective — the suffix names tense/voice, and it
+  //    still agrees in case, number, and gender like any adjective ──
+  if (mood === 'participle') {
+    const agree = 'declines like an adjective, agreeing in case, number, and gender';
+    if (voice === 'passive' && (tense === 'aorist' || tense === 'first aorist')) {
+      return `Aorist passive participle (‑θείς / ‑θεῖσα / ‑θέν); ${agree}.`;
+    }
+    if (voice === 'passive' && tense === 'second aorist') {
+      return `Second-aorist passive participle (‑είς / ‑εῖσα / ‑έν); ${agree}.`;
+    }
+    if (midPass) {
+      return `The ‑μενος / ‑μένη / ‑μενον suffix marks a middle/passive participle; it ${agree}.`;
+    }
+    if (tense === 'present') return `Present active participle (‑ων / ‑ουσα / ‑ον); ${agree}.`;
+    if (tense === 'first aorist' || tense === 'aorist') return `First-aorist active participle (‑σας / ‑σασα / ‑σαν); ${agree}.`;
+    if (tense === 'second aorist') return `Second-aorist active participle (‑ών / ‑οῦσα / ‑όν on the aorist stem); ${agree}.`;
+    if (tense === 'perfect') return `Perfect active participle (‑ώς / ‑υῖα / ‑ός); ${agree}.`;
+    if (tense === 'future') return `Future active participle (‑σων / ‑σουσα / ‑σον); ${agree}.`;
+    return `Active participle; ${agree}.`;
+  }
+
+  // ── εἰμί is irregular: there is no stem rule to teach, so say so plainly ──
+  if (cat.includes('εἰμί')) {
+    return 'εἰμί is irregular — its forms are learned individually, not built from a stem rule.';
+  }
+
+  // ── Infinitives: the ending is the whole tell ──
+  if (mood === 'infinitive') {
+    if (tense === 'present') return isActive ? 'Present active infinitive — ends in ‑ειν.' : 'Present middle/passive infinitive — ends in ‑εσθαι.';
+    if (tense === 'future') return 'Future infinitive — ‑σειν (active) / ‑σεσθαι (middle).';
+    if (tense === 'first aorist' || tense === 'aorist') {
+      if (voice === 'passive') return 'Aorist passive infinitive — ends in ‑θῆναι.';
+      if (midPass) return 'First-aorist middle infinitive — ends in ‑σασθαι.';
+      return 'First-aorist active infinitive — ends in ‑σαι.';
+    }
+    if (tense === 'second aorist') {
+      if (voice === 'passive') return 'Second-aorist passive infinitive — ends in ‑ῆναι.';
+      if (midPass) return 'Second-aorist middle infinitive — ends in ‑έσθαι.';
+      return 'Second-aorist active infinitive — ends in ‑εῖν.';
+    }
+    if (tense === 'perfect') return isActive ? 'Perfect active infinitive — ends in ‑κέναι.' : 'Perfect middle/passive infinitive — ends in ‑σθαι.';
+    return '';
+  }
+
+  // ── Subjunctive / imperative: the mood is marked the same across tenses ──
+  if (mood === 'subjunctive') {
+    return 'The lengthened connecting vowel (η / ω) marks the subjunctive; the aorist subjunctive carries no augment.';
+  }
+  if (mood === 'imperative') {
+    return 'Imperative endings (‑ε, ‑έτω, ‑ετε, ‑έτωσαν …) give the command; the aorist imperative takes no augment.';
+  }
+
+  // ── Finite indicative: the augment and stem markers do the work ──
+  if (mood === 'indicative' || mood === '') {
+    // Liquid-stem futures/aorists drop the σ — the plain "σ = future" rule is
+    // actively wrong for them, so they get their own note.
+    if (cat.includes('liquid')) {
+      if (tense === 'future') return 'Liquid future — the σ drops and the stem contracts (μενῶ, κρινῶ); the circumflex is the tell.';
+      if (tense === 'aorist' || tense === 'first aorist') return 'Liquid aorist — no σ; the stem vowel lengthens instead (ἔμεινα, ἔκρινα).';
+    }
+    // Contract verbs: the stem vowel contracts with the ending in the present
+    // system; elsewhere it lengthens before σ (φιλήσω) and the notes below apply.
+    if (cat.includes('contract') && (tense === 'present' || tense === 'imperfect')) {
+      return tense === 'imperfect'
+        ? 'Contract verb — augment + the ε-stem contracting with the secondary endings (ἐφίλουν).'
+        : 'Contract verb — the ε-stem contracts with the ending (φιλέ‑ω → φιλῶ).';
+    }
+    // μι-verbs: athematic, reduplicated present; their aorists are irregular
+    // (κ-aorist / root aorist), so only the present gets a rule — the rest fall
+    // through to '' and the stem-change pair.
+    if (cat.includes('μι-verb')) {
+      if (tense === 'present' || tense === 'imperfect') {
+        return 'μι-verb — athematic endings on a reduplicated present stem (δί‑δω‑μι, τί‑θη‑μι).';
+      }
+      return '';
+    }
+    switch (tense) {
+      case 'present':
+        return midPass
+          ? 'Present stem + primary middle/passive endings (‑ομαι, ‑ῃ, ‑εται …), no augment.'
+          : 'Present stem + primary active endings, no augment.';
+      case 'imperfect':
+        return 'Augment + present stem + secondary endings = imperfect.';
+      case 'future':
+        return 'σ before the ending marks the future (λύ‑σ‑ω).';
+      case 'first aorist':
+      case 'aorist':
+        if (voice === 'passive') return 'Augment + ‑θη‑ marks the aorist passive (ἐ‑λύ‑θη‑ν).';
+        if (midPass) return 'Augment + ‑σα‑ + middle endings = first aorist middle (ἐ‑λυ‑σά‑μην).';
+        return 'Augment + ‑σα‑ = first aorist active indicative (ἔ‑λυ‑σα).';
+      case 'second aorist':
+        if (voice === 'passive') return 'Augment + a bare ‑η‑ stem marks the second aorist passive (ἐ‑γράφ‑η‑ν).';
+        return 'Augment + a changed (second-aorist) stem + secondary endings (ἔ‑βαλ‑ον).';
+      case 'perfect':
+        return isActive
+          ? 'Reduplication + ‑κ‑ marks the perfect active (λέ‑λυ‑κα).'
+          : 'Reduplication + primary middle/passive endings marks the perfect (λέ‑λυ‑μαι).';
+      case 'pluperfect':
+        return 'Augment + reduplication marks the pluperfect (ἐ‑λε‑λύ‑κειν).';
+      default:
+        return '';
+    }
+  }
+
+  return '';
+}
+
 function renderMorphStepSummary(card, state) {
   const rows = state.steps.map((step, idx) => {
     const answer = state.answers[idx];
@@ -1554,14 +1703,6 @@ function renderMorphStepSummary(card, state) {
        </div>
      </div>`;
 
-  const lemmaSummary = summarizeLemmaStats(runtime.paradigmStepStats || {}, card.lemma, host.getEnabledParsingDims());
-  // `correct` is fractional credit (a reattempted dim counts 0.5), so format it
-  // to drop a trailing ".0" while still showing a half.
-  const fmtCredit = (n) => (Number.isInteger(n) ? String(n) : n.toFixed(1));
-  const recentLine = lemmaSummary.attempts > 0
-    ? `<div class="morph-step-rollup-recent">Last ${lemmaSummary.attempts}/${getParadigmStepAttemptWindow()} attempts for ${escapeHtml(card.lemma)}: ${fmtCredit(lemmaSummary.correct)}/${lemmaSummary.total} dimensions correct (${Math.round(100 * lemmaSummary.correct / Math.max(1, lemmaSummary.total))}%)</div>`
-    : '';
-
   // Stem-change footer: if the parsed form is in a tense whose stem differs
   // from the present lemma (aorist family, perfect, pluperfect), surface the
   // present → form pair so the student sees the stem association alongside
@@ -1580,17 +1721,28 @@ function renderMorphStepSummary(card, state) {
     ? `<div class="morph-step-ambig-note"><span class="morph-step-ambig-label">Ambiguous form</span> 2nd-plural present is spelt the same in the indicative and the imperative — only context picks the mood. Either reading is accepted.</div>`
     : '';
 
-  // "How to tell it apart" hints for forms that are easy to confuse with a
-  // neighbouring parse (e.g. present vs future — the σ). Tucked behind a
-  // collapsed "Hint" disclosure so the summary stays short; the ambiguity note
-  // above is deliberately NOT collapsed (it explains why a mark was accepted).
+  // Differentiation note. A short, affirmative "why this form" morphology tell
+  // sits always-visible; the deeper "how to tell it apart" disambiguation hints
+  // (present vs future — the σ; etc.) tuck behind a collapsed (+) disclosure so
+  // the summary stays short. When neither is available we fall back to the
+  // stem-change pair (itself only present for a tense whose stem differs from
+  // the lemma) — and when even that is empty, nothing renders. The ambiguity /
+  // gap notes above stay open: they explain why a mark was accepted.
+  const category = card.lemma ? paradigmCategoryForLemma(card.lemma) : null;
+  const whyThisForm = buildWhyThisFormNote(card, parsedDims, category);
   const tellApartItems = confusableFormHints(card.parsedAnswer || card.answer, parseAnswerDimensions(card.parsedAnswer || card.answer), card.form);
+  const whyThisFormHtml = whyThisForm
+    ? `<div class="morph-step-why-note"><span class="morph-step-why-label">Why this form</span> ${escapeHtml(whyThisForm)}</div>`
+    : '';
   const tellApartHints = tellApartItems.length
     ? `<details class="morph-step-hint">
-         <summary class="morph-step-hint-summary">Hint</summary>
+         <summary class="morph-step-hint-summary">How to tell it apart</summary>
          <div class="morph-step-hint-body">${tellApartItems.map((hint) => `<div class="morph-step-hint-note">${escapeHtml(hint)}</div>`).join('')}</div>
        </details>`
     : '';
+  const differentiationHtml = (whyThisFormHtml || tellApartHints)
+    ? `${whyThisFormHtml}${tellApartHints}`
+    : stemChangeNote;
 
   // Inferred-person note: a 2nd-person imperative card carries no graded Person
   // step (below ch 17 the person is structurally 2nd; the card just doesn't
@@ -1614,17 +1766,6 @@ function renderMorphStepSummary(card, state) {
     ? `<div class="morph-step-gap-note"><span class="morph-step-gap-label">No such form</span> ${escapeHtml(state.paradigmGap.note)}</div>`
     : '';
 
-  // Name the paradigm being assessed on the summary (post-parse, so it can't
-  // give the answer away the way a front-of-card source label could). The
-  // lemma plus its paradigm category — e.g. "βασιλεύς — Nouns · 3rd declension"
-  // — tells the student why this form is being drilled. Falls back to the
-  // card's family label for uncategorised ("Other constructions") paradigms.
-  const paradigmCategory = card.lemma ? paradigmCategoryForLemma(card.lemma) : null;
-  const paradigmDescriptor = paradigmCategory || card.family || '';
-  const paradigmMetaLine = card.lemma
-    ? `<div class="morph-step-summary-meta">Paradigm: ${escapeHtml(card.lemma)}${paradigmDescriptor ? ' — ' + escapeHtml(paradigmDescriptor) : ''}</div>`
-    : '';
-
   return `
     <div class="morph-step-summary">
       <div class="morph-step-summary-title">Parse complete — ${escapeHtml(totalStr)}</div>
@@ -1633,11 +1774,8 @@ function renderMorphStepSummary(card, state) {
       ${youParseLine}
       ${paradigmGapNote}
       ${ambigNote}
-      ${tellApartHints}
       ${personInferredNote}
-      ${stemChangeNote}
-      ${recentLine}
-      ${paradigmMetaLine}
+      ${differentiationHtml}
     </div>`;
 }
 
@@ -1835,14 +1973,28 @@ function renderMorphStepCard(area, card) {
   const hintHtml = formTransliteration
     ? `<div class="morph-hint">${escapeHtml(formTransliteration)}</div>`
     : '';
+  // Source line: the lexical (dictionary) form. Once the parse is complete we
+  // append the paradigm category — "λείπω — Verbs · second aorist" — so the
+  // lemma and its paradigm sit together at the top, and the old footer
+  // "Paradigm:" line is dropped as redundant. The category stays OFF the
+  // in-progress header on purpose: it names the very tense the walk is testing
+  // (e.g. "second aorist"), so showing it mid-walk would hand over the answer.
+  const completedCategory = state.completed && card.lemma
+    ? (paradigmCategoryForLemma(card.lemma) || card.family || '')
+    : '';
+  const sourceLineHtml = state.completed && card.lemma
+    ? `<div class="morph-source">${escapeHtml(card.lemma)}${completedCategory ? ' — ' + escapeHtml(completedCategory) : ''}</div>`
+    : `<div class="morph-source">${escapeHtml(stepSourceLine)}${aspectHint}</div>`;
+  // The prompt line ("Parse this form one dimension at a time") is intentionally
+  // gone: the breadcrumb + per-step question already frame the task, and its
+  // slot is now taken by the completed-only gloss above the form.
   area.innerHTML = `
     <div class="morph-card morph-step-card">
       <div class="morph-label">Grammar · Step-by-step</div>
-      <div class="morph-prompt">Parse this form one dimension at a time.</div>
       ${lemmaGloss}
       <div class="morph-form">${escapeHtml(card.form)}</div>
       ${hintHtml}
-      <div class="morph-source">${escapeHtml(stepSourceLine)}${aspectHint}</div>
+      ${sourceLineHtml}
       ${renderMorphStepBreadcrumb(state)}
       ${body}
     </div>`;
