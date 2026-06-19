@@ -912,9 +912,11 @@ function undoMorphologyStep() {
   noteStudyInteraction();
   // Diff the graded answers before vs. after the restore so the dimensions the
   // undone action committed (one step for an answer/skip, every remaining step
-  // for a give-up) can be force-failed.
+  // for a give-up) can be force-failed. Undo is offered only while the walk is
+  // in progress (never on the summary), so no finalized attempt can exist to
+  // roll back — the forced-wrong dims are simply recorded when the walk later
+  // completes normally.
   const beforeKeys = gradedAnsweredStepKeys(state.steps, state.answers);
-  const wasCompleted = state.completed;
   const frame = state.history.pop();
   state.steps = frame.steps;
   state.answers = frame.answers;
@@ -925,14 +927,6 @@ function undoMorphologyStep() {
   if (!state.forcedWrong || typeof state.forcedWrong !== 'object') state.forcedWrong = {};
   const afterKeys = gradedAnsweredStepKeys(state.steps, state.answers);
   beforeKeys.forEach((k) => { if (!afterKeys.has(k)) state.forcedWrong[k] = true; });
-  // If the undone action had finalized the walk, roll the recorded stats back
-  // to their pre-finalize snapshot so the eventual re-completion records
-  // exactly one attempt (with the undone dims forced wrong) rather than
-  // double-counting the parse.
-  if (wasCompleted && state.statsBeforeFinalize) {
-    runtime.paradigmStepStats = state.statsBeforeFinalize;
-    state.statsBeforeFinalize = null;
-  }
   renderCard();
   renderProgress();
   saveState();
@@ -1162,10 +1156,6 @@ function giveUpMorphologyStep() {
 
 function finalizeMorphStepAttempt(card, state) {
   if (!card || !card.lemma) return;
-  // Snapshot the stats before this attempt is recorded so an undo from the
-  // summary can roll the attempt back cleanly (the rolling windows can't be
-  // un-pushed surgically once they overflow).
-  state.statsBeforeFinalize = cloneParsingData(runtime.paradigmStepStats || { byLemma: {} });
   const forced = (state && state.forcedWrong) || {};
   const dims = {};
   state.steps.forEach((step, idx) => {
