@@ -1053,10 +1053,12 @@ const FORM_RECENT_CAP = 2;
 const FORM_HISTORY_CAP = 10;
 
 // Record one attempt: a fully walked card with per-dimension credit. Each dim
-// value is tri-valued — 1 (clean correct), 0.5 (reattempted via undo, re-picked
-// correctly), or 0 (wrong). The accuracy aggregators sum the value (so a
-// reattempt counts half), while evaluateRecentAttempt's "known" test requires
-// an exact 1, so any reattempt keeps the form out of the 2/2 exclude-known set.
+// value is 1 (clean correct), a fraction (reattempted via undo, re-picked
+// correctly — 0.5 per single undo, halving again for each extra undo: 0.25,
+// 0.125, …), or 0 (wrong). The accuracy aggregators sum the value (so a
+// reattempt counts fractionally), while evaluateRecentAttempt's "known" test
+// requires an exact 1, so any reattempt keeps the form out of the 2/2
+// exclude-known set.
 // stats: { byLemma: { lemma: { attempts: [{at, dims}],
 //                              forms: { [cardId]: { seen, recent: [{dims}] } } } } }
 // `formMeta` is optional: { cardId } stores the most recent FORM_HISTORY_CAP
@@ -1121,8 +1123,9 @@ export function summarizeLemmaStats(stats, lemma, enabledDims) {
     let attemptTotal = 0, attemptCorrect = 0;
     for (const [dim, val] of Object.entries(a.dims)) {
       if (!isDimEnabled(enabledDims, dim)) continue;
-      // `val` is fractional credit: 1 = clean correct, 0.5 = reattempted via
-      // undo (re-picked right), 0 = wrong. Sum it so a reattempt counts half.
+      // `val` is fractional credit: 1 = clean correct, a fraction (0.5, 0.25,
+      // …, halving per undo) = reattempted via undo (re-picked right), 0 =
+      // wrong. Sum it so a reattempt counts fractionally.
       const credit = Number(val) || 0;
       if (!perDim[dim]) perDim[dim] = { seen: 0, correct: 0 };
       perDim[dim].seen += 1;

@@ -930,7 +930,12 @@ function undoMorphologyStep() {
   state.paradigmGap = frame.paradigmGap;
   if (!state.forcedWrong || typeof state.forcedWrong !== 'object') state.forcedWrong = {};
   const afterKeys = gradedAnsweredStepKeys(state.steps, state.answers);
-  beforeKeys.forEach((k) => { if (!afterKeys.has(k)) state.forcedWrong[k] = true; });
+  // Count undos per dimension rather than a flat flag: each time a graded
+  // step's committed answer is rolled back, bump its tally so the credit can
+  // halve once per undo (1 undo → 0.5, 2 → 0.25, …) when the walk completes.
+  beforeKeys.forEach((k) => {
+    if (!afterKeys.has(k)) state.forcedWrong[k] = (Number(state.forcedWrong[k]) || 0) + 1;
+  });
   renderCard();
   renderProgress();
   saveState();
@@ -1172,15 +1177,18 @@ function finalizeMorphStepAttempt(card, state) {
     const pickRight = !!ans.isCorrect;
     // Scoring per dimension:
     //   clean correct pick     → 1   (full credit)
-    //   reattempted via undo   → 0.5 if the final pick was right, else 0
+    //   reattempted via undo   → 0.5^(undos) if the final pick was right, else 0
+    //                            (1 undo → 0.5, 2 → 0.25, 3 → 0.125, …)
     //   wrong pick             → 0
-    // A reattempt never earns the full 1 a clean pick gets. The 0.5 also keeps
-    // the form out of "known": evaluateRecentAttempt counts a dimension correct
-    // only when it's exactly 1, so any reattempt fails the 2/2 exclude-known
-    // test (the whole parse reads as not-yet-known) while still scoring half in
-    // the accuracy stats.
+    // A reattempt never earns the full 1 a clean pick gets, and each undo before
+    // the eventual correct pick halves the credit again. Any value below 1 also
+    // keeps the form out of "known": evaluateRecentAttempt counts a dimension
+    // correct only when it's exactly 1, so any reattempt fails the 2/2
+    // exclude-known test (the whole parse reads as not-yet-known) while still
+    // scoring fractional credit in the accuracy stats.
+    const undos = Number(forced[step.key]) || 0;
     let credit;
-    if (forced[step.key]) credit = pickRight ? 0.5 : 0;
+    if (undos > 0) credit = pickRight ? Math.pow(0.5, undos) : 0;
     else credit = pickRight ? 1 : 0;
     dims[step.key] = credit;
   });
