@@ -318,6 +318,7 @@ export function buildPersistedStatePayload(options = {}) {
     aspectStep: runtime.aspectStep,
     stemNotes: runtime.stemNotes,
     irregularCards: runtime.irregularCards,
+    irregularTense: runtime.irregularTense,
     dimToggles: runtime.dimToggles,
     dimValueFilters: runtime.dimValueFilters,
     includeOptionalForms: runtime.includeOptionalForms,
@@ -399,6 +400,8 @@ function sanitizeImportedState(candidate) {
   state.aspectStep = candidate.aspectStep === true;
   // Same default-true contract for the vocab-card stem/declension notes.
   state.stemNotes = candidate.stemNotes !== false;
+  // …and for the irregular-card tense caption.
+  state.irregularTense = candidate.irregularTense !== false;
   // Irregular "… as cards" overrides: explicit true/false only; missing keys
   // stay auto. Migrates the legacy secondAoristCards boolean.
   state.irregularCards = sanitizeIrregularCards(candidate);
@@ -1157,6 +1160,7 @@ export function restoreState() {
     runtime.paradigmStepStats = sanitizeParadigmStepStats(saved.paradigmStepStats);
     runtime.aspectStep = saved.aspectStep === true;
     runtime.stemNotes = saved.stemNotes !== false;
+    runtime.irregularTense = saved.irregularTense !== false;
     runtime.irregularCards = sanitizeIrregularCards(saved);
     const DIM_TOGGLE_KEYS = ['tense', 'voice', 'mood', 'person', 'number', 'case', 'gender'];
     const savedDt = (saved.dimToggles && typeof saved.dimToggles === 'object') ? saved.dimToggles : {};

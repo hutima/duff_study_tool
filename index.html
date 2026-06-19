@@ -19,11 +19,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Greek Cards">
-<link rel="manifest" href="manifest.json?v=281">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=281">
-<link rel="icon" type="image/svg+xml" href="favicon.svg?v=281">
+<link rel="manifest" href="manifest.json?v=282">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=282">
+<link rel="icon" type="image/svg+xml" href="favicon.svg?v=282">
 <title>Elementary NT Greek — Flashcards</title>
-<link rel="stylesheet" href="styles.css?v=281">
+<link rel="stylesheet" href="styles.css?v=282">
 <script>
 (function(){
   try {
@@ -167,6 +167,10 @@
     </button>
     <details class="utility-section variant-forms-section" id="variantFormsDetails">
       <summary>Variant forms as cards<span class="variant-forms-count" id="variantFormsCount"></span></summary>
+    <button class="toggle-label" id="irregularTenseToggle" type="button" role="switch" aria-checked="true" onclick="toggleIrregularTense()" title="Name the tense on irregular cards — the '(aorist)' / '(future)' / '(perfect)' caption under a derived form's headword. Off replaces it with a small superscript star before the word, so the form is flagged as a non-standard principal part without giving its tense away.">
+      <span class="toggle-text">Show tense on irregular cards</span>
+      <span class="toggle-switch on" id="irregularTenseBtn" aria-hidden="true"></span>
+    </button>
     <button class="toggle-label" id="irregularCards_2aor_Toggle" type="button" role="switch" aria-checked="false" onclick="toggleIrregularCards('2aor')" title="Give each second-aorist form its own flashcard — e.g. εἶπον 'I said' joins the deck as a separate card — whenever its present-stem verb (λέγω) is in the deck. The aorist is woven into the chapter's cards away from the present form, and reviews of it count toward the base verb's stats. On by default once Chapter 11 is selected, unless you switch it off yourself.">
       <span class="toggle-text">Second aorists as cards</span>
       <span class="toggle-switch" id="irregularCards_2aor_Btn" aria-hidden="true"></span>
@@ -802,6 +806,7 @@
             <li><strong>Middle and passive both count where they&rsquo;re identical.</strong> In the present, imperfect, perfect, and pluperfect a form like &lambda;&#973;&omicron;&mu;&alpha;&iota; is both middle and passive &mdash; no spelling tells them apart. Parsing now reads the voice of these forms as <em>middle/passive</em> and accepts either reading, instead of marking <em>middle</em> wrong on a card the paradigm happened to label <em>passive</em>. The future and aorist (where the two voices have distinct forms) stay strict.</li>
             <li><strong>Aspect hint follows its step.</strong> The &ldquo;use continuous/undefined&rdquo; coaching line only shows when the optional <em>Aspect</em> step is on; with aspect off (the default) it&rsquo;s hidden.</li>
             <li><strong>Clearer variant-form tag.</strong> The &ldquo;variant forms as cards&rdquo; marker is now spelled out in full (<em>(aorist)</em>, <em>(future)</em>&hellip;) and sits on its own line under the word rather than crammed in front of it. It shows only on the question side &mdash; the answer side already spells out the full parse (e.g. &ldquo;perfect active (1st sg.) of [&delta;&epsilon;&#943;&kappa;&nu;&upsilon;&mu;&iota;]&rdquo;), so the tag would just repeat it there.</li>
+            <li><strong>Hide the tense on irregular cards.</strong> A new <em>Show tense on irregular cards</em> toggle (top of <em>Variant forms</em> in Advanced settings, on by default) lets you drop the <em>(aorist)</em> / <em>(future)</em> caption and quiz yourself on the tense. With it off, a small superscript star marks the form instead &mdash; the same star multi-case prepositions now wear.</li>
             <li><strong>μι-verb principal parts, expanded.</strong> The μι-verb flip set now prints the verbal stem after each form (e.g. ἔδωκα, δω-) like the second-aorist cards, and adds principal parts for the common compounds &mdash; ἀποδίδωμι / παραδίδωμι, ἐπιτίθημι, ἀνίστημι / παρίστημι, and συνίημι.</li>
           </ul>
         </details>
@@ -1109,62 +1114,62 @@
   </div>
 </div>
 
-<script defer src="js/data/words.js?v=281"></script>
-<script defer src="js/data/morphology.js?v=281"></script>
-<script defer src="js/data/lemma_inventory.js?v=281"></script>
-<script defer src="js/data/supplemental.js?v=281"></script>
-<script defer src="js/data/grammar.js?v=281"></script>
-<script defer src="js/data/supplementals/week_1_supplemental.js?v=281"></script>
-<script defer src="js/data/supplementals/week_1_paradigms.js?v=281"></script>
-<script defer src="js/data/supplementals/week_2_paradigms.js?v=281"></script>
-<script defer src="js/data/supplementals/week_3_paradigms.js?v=281"></script>
-<script defer src="js/data/supplementals/week_4_paradigms.js?v=281"></script>
-<script defer src="js/data/supplementals/second_aorist_flip.js?v=281"></script>
-<script defer src="js/data/supplementals/liquid_future_flip.js?v=281"></script>
-<script defer src="js/data/supplementals/week_5_paradigms.js?v=281"></script>
-<script defer src="js/data/supplementals/w6_aorist_passive_flip.js?v=281"></script>
-<script defer src="js/data/supplementals/w6_perfect_active_flip.js?v=281"></script>
-<script defer src="js/data/supplementals/w8_mi_verb_principal_parts_flip.js?v=281"></script>
-<script defer src="js/data/supplementals/week_6_paradigms.js?v=281"></script>
-<script defer src="js/data/supplementals/week_7_paradigms.js?v=281"></script>
-<script defer src="js/data/supplementals/week_8_paradigms.js?v=281"></script>
-<script defer src="js/data/supplementals/adj_paradigms.js?v=281"></script>
-<script defer src="js/data/supplementals/w3o_supplemental.js?v=281"></script>
-<script defer src="js/data/supplementals/w6o_supplemental.js?v=281"></script>
-<script defer src="js/data/supplementals/w7o_supplemental.js?v=281"></script>
-<script defer src="js/data/supplementals/w8o_supplemental.js?v=281"></script>
-<script defer src="js/data/supplementals/paradigm_morphology.js?v=281"></script>
-<script defer src="js/data/supplementals/stem_change_drills.js?v=281"></script>
-<script defer src="js/data/advanced/advanced_01.js?v=281"></script>
-<script defer src="js/data/advanced/advanced_02.js?v=281"></script>
-<script defer src="js/data/advanced/advanced_03.js?v=281"></script>
-<script defer src="js/data/advanced/advanced_04.js?v=281"></script>
-<script defer src="js/data/advanced/advanced_05.js?v=281"></script>
-<script defer src="js/data/advanced/advanced_06.js?v=281"></script>
-<script defer src="js/data/advanced/advanced_07.js?v=281"></script>
-<script defer src="js/data/advanced/advanced_08.js?v=281"></script>
-<script defer src="js/data/advanced/advanced_09.js?v=281"></script>
-<script defer src="js/data/advanced/advanced_10.js?v=281"></script>
-<script defer src="js/data/advanced/advanced_11.js?v=281"></script>
-<script defer src="js/data/advanced/advanced_12.js?v=281"></script>
-<script defer src="js/data/advanced/advanced_13.js?v=281"></script>
-<script defer src="js/data/advanced/advanced_14.js?v=281"></script>
-<script defer src="js/data/advanced/advanced_15.js?v=281"></script>
-<script defer src="js/data/advanced/advanced_16.js?v=281"></script>
-<script defer src="js/data/advanced/advanced_17.js?v=281"></script>
-<script defer src="js/data/advanced/advanced_18.js?v=281"></script>
-<script defer src="js/data/advanced/advanced_19.js?v=281"></script>
-<script defer src="js/data/advanced/advanced_20.js?v=281"></script>
-<script defer src="js/data/advanced/advanced_21.js?v=281"></script>
-<script defer src="js/data/advanced/advanced_22.js?v=281"></script>
-<script defer src="js/data/advanced/advanced_23.js?v=281"></script>
-<script defer src="js/data/advanced/advanced_24.js?v=281"></script>
-<script defer src="js/data/advanced/advanced_25.js?v=281"></script>
-<script defer src="js/data/nt_book_vocab.js?v=281"></script>
-<script defer src="js/data/reader.js?v=281"></script>
-<script defer src="js/data/reader_verse_literals.js?v=281"></script>
-<script defer src="js/data/reader_translations.js?v=281"></script>
-<script defer src="js/logic/pos_logic.js?v=281"></script>
-<script type="module" src="js/app/main.js?v=281"></script>
+<script defer src="js/data/words.js?v=282"></script>
+<script defer src="js/data/morphology.js?v=282"></script>
+<script defer src="js/data/lemma_inventory.js?v=282"></script>
+<script defer src="js/data/supplemental.js?v=282"></script>
+<script defer src="js/data/grammar.js?v=282"></script>
+<script defer src="js/data/supplementals/week_1_supplemental.js?v=282"></script>
+<script defer src="js/data/supplementals/week_1_paradigms.js?v=282"></script>
+<script defer src="js/data/supplementals/week_2_paradigms.js?v=282"></script>
+<script defer src="js/data/supplementals/week_3_paradigms.js?v=282"></script>
+<script defer src="js/data/supplementals/week_4_paradigms.js?v=282"></script>
+<script defer src="js/data/supplementals/second_aorist_flip.js?v=282"></script>
+<script defer src="js/data/supplementals/liquid_future_flip.js?v=282"></script>
+<script defer src="js/data/supplementals/week_5_paradigms.js?v=282"></script>
+<script defer src="js/data/supplementals/w6_aorist_passive_flip.js?v=282"></script>
+<script defer src="js/data/supplementals/w6_perfect_active_flip.js?v=282"></script>
+<script defer src="js/data/supplementals/w8_mi_verb_principal_parts_flip.js?v=282"></script>
+<script defer src="js/data/supplementals/week_6_paradigms.js?v=282"></script>
+<script defer src="js/data/supplementals/week_7_paradigms.js?v=282"></script>
+<script defer src="js/data/supplementals/week_8_paradigms.js?v=282"></script>
+<script defer src="js/data/supplementals/adj_paradigms.js?v=282"></script>
+<script defer src="js/data/supplementals/w3o_supplemental.js?v=282"></script>
+<script defer src="js/data/supplementals/w6o_supplemental.js?v=282"></script>
+<script defer src="js/data/supplementals/w7o_supplemental.js?v=282"></script>
+<script defer src="js/data/supplementals/w8o_supplemental.js?v=282"></script>
+<script defer src="js/data/supplementals/paradigm_morphology.js?v=282"></script>
+<script defer src="js/data/supplementals/stem_change_drills.js?v=282"></script>
+<script defer src="js/data/advanced/advanced_01.js?v=282"></script>
+<script defer src="js/data/advanced/advanced_02.js?v=282"></script>
+<script defer src="js/data/advanced/advanced_03.js?v=282"></script>
+<script defer src="js/data/advanced/advanced_04.js?v=282"></script>
+<script defer src="js/data/advanced/advanced_05.js?v=282"></script>
+<script defer src="js/data/advanced/advanced_06.js?v=282"></script>
+<script defer src="js/data/advanced/advanced_07.js?v=282"></script>
+<script defer src="js/data/advanced/advanced_08.js?v=282"></script>
+<script defer src="js/data/advanced/advanced_09.js?v=282"></script>
+<script defer src="js/data/advanced/advanced_10.js?v=282"></script>
+<script defer src="js/data/advanced/advanced_11.js?v=282"></script>
+<script defer src="js/data/advanced/advanced_12.js?v=282"></script>
+<script defer src="js/data/advanced/advanced_13.js?v=282"></script>
+<script defer src="js/data/advanced/advanced_14.js?v=282"></script>
+<script defer src="js/data/advanced/advanced_15.js?v=282"></script>
+<script defer src="js/data/advanced/advanced_16.js?v=282"></script>
+<script defer src="js/data/advanced/advanced_17.js?v=282"></script>
+<script defer src="js/data/advanced/advanced_18.js?v=282"></script>
+<script defer src="js/data/advanced/advanced_19.js?v=282"></script>
+<script defer src="js/data/advanced/advanced_20.js?v=282"></script>
+<script defer src="js/data/advanced/advanced_21.js?v=282"></script>
+<script defer src="js/data/advanced/advanced_22.js?v=282"></script>
+<script defer src="js/data/advanced/advanced_23.js?v=282"></script>
+<script defer src="js/data/advanced/advanced_24.js?v=282"></script>
+<script defer src="js/data/advanced/advanced_25.js?v=282"></script>
+<script defer src="js/data/nt_book_vocab.js?v=282"></script>
+<script defer src="js/data/reader.js?v=282"></script>
+<script defer src="js/data/reader_verse_literals.js?v=282"></script>
+<script defer src="js/data/reader_translations.js?v=282"></script>
+<script defer src="js/logic/pos_logic.js?v=282"></script>
+<script type="module" src="js/app/main.js?v=282"></script>
 </body>
 </html>

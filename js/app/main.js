@@ -254,6 +254,7 @@ import {
   toggleHardVocabReview,
   toggleStemNotes,
   toggleIrregularCards,
+  toggleIrregularTense,
   toggleDirection,
   toggleSpacedRepetition,
   toggleSpacingCadence,
@@ -1510,6 +1511,10 @@ function syncToggleButtons() {
   if (stemNotesSwitch) stemNotesSwitch.classList.toggle('on', runtime.stemNotes !== false);
   const stemNotesToggleEl = document.getElementById('stemNotesToggle');
   if (stemNotesToggleEl) stemNotesToggleEl.setAttribute('aria-checked', runtime.stemNotes !== false ? 'true' : 'false');
+  const irregularTenseSwitch = document.getElementById('irregularTenseBtn');
+  if (irregularTenseSwitch) irregularTenseSwitch.classList.toggle('on', runtime.irregularTense !== false);
+  const irregularTenseToggleEl = document.getElementById('irregularTenseToggle');
+  if (irregularTenseToggleEl) irregularTenseToggleEl.setAttribute('aria-checked', runtime.irregularTense !== false ? 'true' : 'false');
   let irregularOnCount = 0;
   IRREGULAR_CARD_CONFIGS.forEach(c => {
     const on = isIrregularCardEnabled(c.tag, runtime.selectedKeys, runtime.irregularCards);
@@ -3230,7 +3235,7 @@ const GLOBAL_CLICK_HANDLERS = {
   restoreSpacedUndo, setAppProfile, setStudyMode, setThemeMode, setFontFamily, setTextSize,
   showDisclaimerModal, startStudying, toggleDirection, toggleMorphSelfCheck,
   toggleMorphStepByStep, setMorphFocusedParadigm, setParsingChapter, goToStemDrillFromParsing,
-  toggleRequiredOnly, toggleHardVocabReview, toggleStemNotes, toggleIrregularCards, toggleShuffle, toggleSpacedRepetition, toggleSpacingCadence, toggleSplitSelection, toggleAspectStep, toggleDimStep, toggleOptionalForms, toggleOptionalFormFilter, toggleDimValueFilter, toggleExcludeKnownMorphs, toggleParsingShuffleAll, toggleParsingCustomReview, toggleParsingCustomParadigm, setAllParsingCustomParadigms, toggleParsingReverse, toggleAccentLookalikes, resetKnownMorphs, closeResetKnownModal, confirmResetKnownFocused, confirmResetKnownAll, clearParsingStats, toggleUnspacedDailyReset, triggerImportProgress,
+  toggleRequiredOnly, toggleHardVocabReview, toggleStemNotes, toggleIrregularCards, toggleIrregularTense, toggleShuffle, toggleSpacedRepetition, toggleSpacingCadence, toggleSplitSelection, toggleAspectStep, toggleDimStep, toggleOptionalForms, toggleOptionalFormFilter, toggleDimValueFilter, toggleExcludeKnownMorphs, toggleParsingShuffleAll, toggleParsingCustomReview, toggleParsingCustomParadigm, setAllParsingCustomParadigms, toggleParsingReverse, toggleAccentLookalikes, resetKnownMorphs, closeResetKnownModal, confirmResetKnownFocused, confirmResetKnownAll, clearParsingStats, toggleUnspacedDailyReset, triggerImportProgress,
   openReaderTab, selectReaderDrillChoice, advanceReaderDrill,
   closeWhatsNewV1_5Modal, closeAspectDefaultOffModal, closeToggleInfoModal, onDueHistogramToggle
 };

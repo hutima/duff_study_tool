@@ -140,6 +140,10 @@ export const runtime = {
   // among the selected chapters (see isIrregularCardEnabled). Changes deck
   // contents, so flipping a toggle rebuilds the deck.
   irregularCards: {},
+  // Show the "(aorist)" / "(future)" tense caption on derived irregular cards.
+  // Render-only; default on. When off, a small superscript star before the
+  // headword stands in for the named tense (see render.js).
+  irregularTense: true,
   // Per-dimension toggles for the parsing walk. Each key controls whether
   // that dim's step is asked. Default-on; off → step skipped, dim doesn't
   // contribute to stats, omitted from the final parse summary, and the
