@@ -1560,6 +1560,15 @@ function buildWhyThisFormNote(card, dims, category) {
       : cat.includes('2nd') ? '2nd-declension '
       : cat.includes('3rd') ? '3rd-declension '
       : '';
+    // Genitive plural: the ‑ων ending is shared by every noun, of every
+    // gender (λόγων masc., δώρων neut., πόλεων fem.), so it can never signal
+    // gender — a tempting "all genders" answer here is wrong. Call this out
+    // explicitly, since the gen. pl. is where students most expect the form
+    // itself to carry gender. (The 1st declension circumflexes it to ‑ῶν,
+    // but it's the same ending and still gender-blind.)
+    if (dims.case === 'genitive' && dims.number === 'plural') {
+      return `A ${decl}noun: the genitive plural ending ‑ων is shared by every noun of every gender (λόγων masc., δώρων neut., πόλεων fem.), so it shows case and number only — the gender is fixed by the word, not the ending.`;
+    }
     return `A ${decl}noun: the ending carries case and number, while its gender is fixed by the word, not the ending.`;
   }
 
