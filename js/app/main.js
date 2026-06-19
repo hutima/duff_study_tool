@@ -854,6 +854,90 @@ function noteInferredAnswerSatisfied(state, answeredIdx) {
   }
 }
 
+// ─── Parsing-walk undo ────────────────────────────────────────────────────
+// Undo is a pedagogical tool, not a free retry. It reverts the most recent
+// guess so the student can re-open that step and pick a different value to
+// keep walking the parse along a sensible path (e.g. correcting a wrong mood
+// pick that sent them down the participle branch). Any dimension that gets
+// undone is still recorded as a miss when the walk finally completes
+// (state.forcedWrong), so stats and the spaced / exclude-known machinery
+// treat the original guess as wrong regardless of what's re-picked.
+function cloneParsingData(value) {
+  if (value == null) return value;
+  if (typeof structuredClone === 'function') {
+    try { return structuredClone(value); } catch (e) { /* fall through to JSON */ }
+  }
+  return JSON.parse(JSON.stringify(value));
+}
+
+// Snapshot only the mutable parts of a forward-walk state before an action
+// changes them, so undo can restore them exactly. The static fields
+// (accessiblePools, paradigmPresentValues, autoFilledDims, impliedDims) don't
+// change during a walk, so they're kept by reference rather than cloned.
+function snapshotMorphStepState(state) {
+  return {
+    steps: cloneParsingData(state.steps),
+    answers: cloneParsingData(state.answers),
+    stepIdx: state.stepIdx,
+    completed: state.completed,
+    structuralImpossibility: cloneParsingData(state.structuralImpossibility || null),
+    paradigmGap: cloneParsingData(state.paradigmGap || null)
+  };
+}
+
+const MORPH_HISTORY_CAP = 64;
+function pushMorphHistory(state) {
+  if (!state) return;
+  if (!Array.isArray(state.history)) state.history = [];
+  state.history.push(snapshotMorphStepState(state));
+  while (state.history.length > MORPH_HISTORY_CAP) state.history.shift();
+}
+
+// Keys of the graded (non-inferred) steps that currently carry an answer.
+// Diffed across an undo to learn which dimensions the undone action committed.
+function gradedAnsweredStepKeys(steps, answers) {
+  const keys = new Set();
+  (steps || []).forEach((s, i) => {
+    if (!s || s.inferred) return;
+    if (answers && answers[i] != null) keys.add(s.key);
+  });
+  return keys;
+}
+
+function undoMorphologyStep() {
+  if (!isParsingMode()) return;
+  const card = runtime.deck[runtime.currentIdx];
+  const state = runtime.morphStepState;
+  if (!card || !state || !Array.isArray(state.history) || !state.history.length) return;
+  noteStudyInteraction();
+  // Diff the graded answers before vs. after the restore so the dimensions the
+  // undone action committed (one step for an answer/skip, every remaining step
+  // for a give-up) can be force-failed.
+  const beforeKeys = gradedAnsweredStepKeys(state.steps, state.answers);
+  const wasCompleted = state.completed;
+  const frame = state.history.pop();
+  state.steps = frame.steps;
+  state.answers = frame.answers;
+  state.stepIdx = frame.stepIdx;
+  state.completed = frame.completed;
+  state.structuralImpossibility = frame.structuralImpossibility;
+  state.paradigmGap = frame.paradigmGap;
+  if (!state.forcedWrong || typeof state.forcedWrong !== 'object') state.forcedWrong = {};
+  const afterKeys = gradedAnsweredStepKeys(state.steps, state.answers);
+  beforeKeys.forEach((k) => { if (!afterKeys.has(k)) state.forcedWrong[k] = true; });
+  // If the undone action had finalized the walk, roll the recorded stats back
+  // to their pre-finalize snapshot so the eventual re-completion records
+  // exactly one attempt (with the undone dims forced wrong) rather than
+  // double-counting the parse.
+  if (wasCompleted && state.statsBeforeFinalize) {
+    runtime.paradigmStepStats = state.statsBeforeFinalize;
+    state.statsBeforeFinalize = null;
+  }
+  renderCard();
+  renderProgress();
+  saveState();
+}
+
 function answerMorphologyStep(choiceIdx) {
   if (!isParsingMode()) return;
   noteStudyInteraction();
@@ -862,6 +946,7 @@ function answerMorphologyStep(choiceIdx) {
   const state = runtime.morphStepState;
   const step = state.steps[state.stepIdx];
   if (!step) return;
+  pushMorphHistory(state);
   const picked = step.choices[choiceIdx];
   // Inferred follow-up steps are ungraded — they exist to converge on a
   // single form for feedback, not to score the student. For graded steps
@@ -1035,6 +1120,7 @@ function skipMorphologyStep() {
   const state = runtime.morphStepState;
   const step = state.steps[state.stepIdx];
   if (!step) return;
+  pushMorphHistory(state);
   const isCorrect = step.inferred ? null : false;
   state.answers[state.stepIdx] = { selectedIdx: -1, isCorrect };
   const answeredIdx = state.stepIdx;
@@ -1060,6 +1146,7 @@ function giveUpMorphologyStep() {
   const card = runtime.deck[runtime.currentIdx];
   if (!card || !runtime.morphStepState || runtime.morphStepState.completed) return;
   const state = runtime.morphStepState;
+  pushMorphHistory(state);
   for (let i = state.stepIdx; i < state.steps.length; i += 1) {
     const step = state.steps[i];
     if (!step) continue;
@@ -1075,6 +1162,11 @@ function giveUpMorphologyStep() {
 
 function finalizeMorphStepAttempt(card, state) {
   if (!card || !card.lemma) return;
+  // Snapshot the stats before this attempt is recorded so an undo from the
+  // summary can roll the attempt back cleanly (the rolling windows can't be
+  // un-pushed surgically once they overflow).
+  state.statsBeforeFinalize = cloneParsingData(runtime.paradigmStepStats || { byLemma: {} });
+  const forced = (state && state.forcedWrong) || {};
   const dims = {};
   state.steps.forEach((step, idx) => {
     if (step.inferred) return; // ungraded — don't contribute to per-dim stats
@@ -1083,7 +1175,11 @@ function finalizeMorphStepAttempt(card, state) {
     // walk early aren't graded — the form doesn't exist, so person/number
     // couldn't have been asked.
     if (!ans) return;
-    dims[step.key] = ans && ans.isCorrect ? 1 : 0;
+    // A dimension the student undid is recorded as a miss no matter what they
+    // ultimately re-picked — undo is for re-practising the walk, not erasing
+    // a guess from the stats.
+    const correct = forced[step.key] ? false : !!ans.isCorrect;
+    dims[step.key] = correct ? 1 : 0;
   });
   if (!runtime.paradigmStepStats || typeof runtime.paradigmStepStats !== 'object') {
     runtime.paradigmStepStats = { byLemma: {} };
@@ -3216,7 +3312,7 @@ installKeyboardShortcuts({
 const GLOBAL_CLICK_HANDLERS = {
   flipCard, navigate, markCard, handleNavNext, answerMorphologyChoice,
   revealMorphologyAnswer, rateMorphologySelfCheck, markMorphologyDontKnow,
-  answerMorphologyStep, skipMorphologyStep, giveUpMorphologyStep, answerParsingReverseChoice,
+  answerMorphologyStep, skipMorphologyStep, giveUpMorphologyStep, undoMorphologyStep, answerParsingReverseChoice,
   returnSeenCardToDeck, clearParsingMorph,
   closeAnalyticsOverlay, closeTransferModal, exportProgressJson,
   closeShortcutsModal, closeStudySelector,
