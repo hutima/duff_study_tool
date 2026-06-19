@@ -659,13 +659,11 @@ function ensureStepStateForCard(card) {
     // parse summary (currently just single-gender gender) — the step
     // wasn't asked, but the dim belongs to the canonical label.
     impliedDims: steps.impliedDims || {},
-    // Undo support: a stack of pre-action snapshots (pushed by the answer/
-    // skip/give-up handlers), the set of step keys force-failed via undo, and
-    // a one-shot stats snapshot taken at finalize so an undo from the summary
-    // can roll the recorded attempt back. All reset per card.
+    // Undo support (walking view only): a stack of pre-action snapshots
+    // (pushed by the answer/skip/give-up handlers) and the set of step keys
+    // force-failed via undo. Both reset per card.
     history: [],
-    forcedWrong: {},
-    statsBeforeFinalize: null
+    forcedWrong: {}
   };
   return runtime.morphStepState;
 }
@@ -1583,7 +1581,6 @@ function renderMorphStepSummary(card, state) {
       ${personInferredNote}
       ${stemChangeNote}
       ${recentLine}
-      ${renderMorphUndoRow(state)}
       <div class="morph-step-summary-meta">${escapeHtml(card.lemma)}${card.family ? ' · ' + escapeHtml(card.family) : ''}</div>
     </div>`;
 }
