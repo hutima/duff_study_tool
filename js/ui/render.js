@@ -8,7 +8,7 @@
 import { runtime } from '../state/runtime.js';
 import { buildGrammarSupportHtml } from '../domain/grammar/explanations.js';
 import { renderProgress, renderReview } from './progress.js';
-import { buildMorphSteps, summarizeLemmaStats, getParadigmStepAttemptWindow, computeAccessibleDimensionPools, parseAnswerDimensions, aspectMistakeNote, isSecondPluralPresentMoodAmbiguity, computeParadigmPresentValues, accentLookalikesFor, confusableFormHints } from '../domain/grammar/morph_steps.js';
+import { buildMorphSteps, summarizeLemmaStats, getParadigmStepAttemptWindow, computeAccessibleDimensionPools, parseAnswerDimensions, aspectMistakeNote, isSecondPluralPresentMoodAmbiguity, computeParadigmPresentValues, accentLookalikesFor, confusableFormHints, THIRD_PERSON_IMPERATIVE_CHAPTER } from '../domain/grammar/morph_steps.js';
 import { getAccessibleMorphCards, deriveSelectionLevels, buildMultiGenderLemmas, MIXED_FORM_NOUN_LEMMAS, THIRD_DECLENSION_NOUN_LEMMAS } from '../domain/grammar/paradigm_focus.js';
 
 // Spell out the derived-card form abbreviation (card.derivedShort) for the
@@ -656,9 +656,13 @@ function ensureStepStateForCard(card) {
     // them in silently. Survives across renders via the cached state.
     autoFilledDims: steps.autoFilledDims || {},
     // Subset of autoFilledDims that should still appear in the rendered
-    // parse summary (currently just single-gender gender) — the step
-    // wasn't asked, but the dim belongs to the canonical label.
+    // parse summary (single-gender gender, and a pre-ch17 imperative's
+    // implied 2nd person) — the step wasn't asked, but the dim belongs to
+    // the canonical label.
     impliedDims: steps.impliedDims || {},
+    // Max effective chapter for this walk — gates the imperative→person
+    // injection (3rd-person imperatives enter at ch 17) and the summary note.
+    maxChapter: Number.isFinite(levels.maxEffectiveChapter) ? levels.maxEffectiveChapter : Infinity,
     // Undo support (walking view only): a stack of pre-action snapshots
     // (pushed by the answer/skip/give-up handlers) and the set of step keys
     // force-failed via undo. Both reset per card.
@@ -1033,10 +1037,10 @@ function applyDisplaySuffixIfPerson(dimKey, value) {
 // "continuous/undefined · present · indicative · second person · plural".
 // Skips empty values so a partial walk still reads cleanly.
 //
-// Imperative cards have no Person step (it's structurally 2nd person), but
-// the canonical parse still reads "...imperative · second person ·
-// singular" — slot the implied 2nd-person token in after mood when no
-// Person step is present.
+// Imperative cards below ch 17 have no Person step (structurally 2nd person),
+// but the canonical parse still reads "...imperative · second person ·
+// singular" — slot the implied person token (from impliedDims, defaulting to
+// 2nd) in after mood when no Person step is present.
 // `impliedDims` carries dimensions that weren't asked as a step but still
 // belong to the canonical parse — currently single-gender gender (λόγος
 // is always masculine, the step is skipped, but the label still reads
@@ -1058,7 +1062,8 @@ function assembleParseLine(steps, values, impliedDims) {
     if (step.key === 'number') postNumberPos = parts.length;
   });
   if (moodImperativePos >= 0 && !hasPersonStep) {
-    parts.splice(moodImperativePos, 0, 'second person');
+    const impliedPerson = (impliedDims && impliedDims.person) ? impliedDims.person : 'second';
+    parts.splice(moodImperativePos, 0, `${impliedPerson} person`);
     if (postNumberPos >= moodImperativePos) postNumberPos += 1;
   }
   if (impliedDims && impliedDims.gender) {
@@ -1550,8 +1555,11 @@ function renderMorphStepSummary(card, state) {
      </div>`;
 
   const lemmaSummary = summarizeLemmaStats(runtime.paradigmStepStats || {}, card.lemma, host.getEnabledParsingDims());
+  // `correct` is fractional credit (a reattempted dim counts 0.5), so format it
+  // to drop a trailing ".0" while still showing a half.
+  const fmtCredit = (n) => (Number.isInteger(n) ? String(n) : n.toFixed(1));
   const recentLine = lemmaSummary.attempts > 0
-    ? `<div class="morph-step-rollup-recent">Last ${lemmaSummary.attempts}/${getParadigmStepAttemptWindow()} attempts for ${escapeHtml(card.lemma)}: ${lemmaSummary.correct}/${lemmaSummary.total} dimensions correct (${Math.round(100 * lemmaSummary.correct / Math.max(1, lemmaSummary.total))}%)</div>`
+    ? `<div class="morph-step-rollup-recent">Last ${lemmaSummary.attempts}/${getParadigmStepAttemptWindow()} attempts for ${escapeHtml(card.lemma)}: ${fmtCredit(lemmaSummary.correct)}/${lemmaSummary.total} dimensions correct (${Math.round(100 * lemmaSummary.correct / Math.max(1, lemmaSummary.total))}%)</div>`
     : '';
 
   // Stem-change footer: if the parsed form is in a tense whose stem differs
@@ -1584,16 +1592,19 @@ function renderMorphStepSummary(card, state) {
        </details>`
     : '';
 
-  // Inferred-person note: an imperative form has no person contrast in Koine
-  // (it's 2nd person by default), so its walk omits the Person step entirely.
-  // When the student instead picks a finite mood (indicative/subjunctive), we
-  // inject an ungraded Person step so their picks still resolve to a single
-  // form — but the resulting row carries no ✓/✗, which reads like a bug
-  // without explanation. Name why the row is ungraded.
+  // Inferred-person note: a 2nd-person imperative card carries no graded Person
+  // step (below ch 17 the person is structurally 2nd; the card just doesn't
+  // specify one). When the student instead picks a finite mood, we inject an
+  // ungraded Person step so their picks still resolve to a single form — but
+  // the resulting row carries no ✓/✗, which reads like a bug without
+  // explanation. Name why the row is ungraded.
   const gradedMoodStep = state.steps.find((s) => s.key === 'mood' && !s.inferred);
   const hasInferredPerson = state.steps.some((s) => s.key === 'person' && s.inferred);
+  const impPersonReason = (state.maxChapter == null || state.maxChapter < THIRD_PERSON_IMPERATIVE_CHAPTER)
+    ? 'the imperative is 2nd person by default'
+    : 'this imperative form doesn’t specify a person';
   const personInferredNote = (hasInferredPerson && gradedMoodStep && gradedMoodStep.correct === 'imperative')
-    ? `<div class="morph-step-person-note"><span class="morph-step-person-label">Person not graded</span> the imperative is 2nd person by default, so ${escapeHtml(card.form || card.lemma)} is parsed without a person — picking a finite mood is what added the Person step, so it isn't scored.</div>`
+    ? `<div class="morph-step-person-note"><span class="morph-step-person-label">Person not graded</span> ${impPersonReason}, so ${escapeHtml(card.form || card.lemma)} is parsed without a person — picking a finite mood is what added the Person step, so it isn't scored.</div>`
     : '';
 
   // Paradigm-gap note: the student picked a value the focused paradigm has no

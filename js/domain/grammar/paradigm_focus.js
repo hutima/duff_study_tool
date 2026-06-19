@@ -102,6 +102,12 @@ const PARADIGM_CATEGORIES = {
 
   // ─── Adjectives ───
   'πᾶς, πᾶσα, πᾶν':                      'Adjectives',
+  // πολύς and μέγας are now separate paradigms (split in adj_paradigms.js so
+  // the form lookup never crosses between them); the old combined
+  // 'πολύς / μέγας-paradigm' lemma is kept for back-compat with saved focus
+  // selections / any legacy single-item generation.
+  'πολύς':                               'Adjectives',
+  'μέγας':                               'Adjectives',
   'πολύς / μέγας-paradigm':              'Adjectives',
   'πλείων':                              'Adjectives',
 

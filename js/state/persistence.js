@@ -82,6 +82,16 @@ const PARADIGM_STEP_ATTEMPT_CAP = 20;
 // recent entry carries either per-dim results (so disabled dims can be
 // filtered out at read time) or a legacy allDims fallback from pre-2-of-2 saves.
 const FORM_HISTORY_CAP = 10;
+// Per-dimension parsing credit is tri-valued: 1 (clean correct), 0.5
+// (reattempted via undo, re-picked correctly), 0 (wrong). Clamp any saved /
+// imported value into that set so a fractional reattempt score survives a
+// round-trip instead of being coerced back to a plain 0/1.
+function sanitizeDimCredit(v) {
+  const n = Number(v);
+  if (!Number.isFinite(n) || n <= 0) return 0;
+  if (n >= 1) return 1;
+  return 0.5;
+}
 function sanitizeFormRecentList(input, legacyLastCorrect) {
   if (Array.isArray(input)) {
     return input
@@ -91,7 +101,7 @@ function sanitizeFormRecentList(input, legacyLastCorrect) {
         if (typeof a.allDims === 'boolean') return { allDims: a.allDims };
         const dims = isPlainObject(a.dims)
           ? Object.fromEntries(
-              Object.entries(a.dims).map(([k, v]) => [String(k), v ? 1 : 0])
+              Object.entries(a.dims).map(([k, v]) => [String(k), sanitizeDimCredit(v)])
             )
           : {};
         return { dims };
@@ -150,7 +160,11 @@ function sanitizeSpacingCadence(value) {
 // to its successor so saved stats and the focused-paradigm pointer
 // land on a real lemma after the split.
 const LEGACY_PARADIGM_LEMMA_RENAMES = {
-  'πόλις & βασιλεύς': 'πόλις'
+  'πόλις & βασιλεύς': 'πόλις',
+  // πολύς and μέγας were one merged paradigm; now split into two (πολύς /
+  // μέγας). Migrate a saved focus pointer to πολύς; the combined stats are
+  // dropped rather than misattributed (see sanitizeParadigmStepStats).
+  'πολύς / μέγας-paradigm': 'πολύς'
 };
 
 export function migrateParadigmLemma(lemma) {
@@ -196,7 +210,7 @@ function sanitizeParadigmStepStats(input) {
       .map((a) => ({
         at: Number(a.at) || 0,
         dims: Object.fromEntries(
-          Object.entries(a.dims).map(([k, v]) => [String(k), v ? 1 : 0])
+          Object.entries(a.dims).map(([k, v]) => [String(k), sanitizeDimCredit(v)])
         )
       }));
     const forms = sanitizeLemmaForms(entry.forms);
