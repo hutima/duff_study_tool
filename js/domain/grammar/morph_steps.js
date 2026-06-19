@@ -1178,7 +1178,7 @@ export function getParsingAccuracyBuckets(stats, enabledDims, bucketSize = PARSI
     const attempts = (stats.byLemma[lemma] && stats.byLemma[lemma].attempts) || [];
     for (const a of attempts) {
       if (!a || !a.dims) continue;
-      let total = 0, correct = 0;
+      let total = 0, correct = 0, sawMiss = false, sawHalf = false;
       for (const [dim, val] of Object.entries(a.dims)) {
         if (!isDimEnabled(enabledDims, dim)) continue;
         total += 1;
@@ -1186,9 +1186,13 @@ export function getParsingAccuracyBuckets(stats, enabledDims, bucketSize = PARSI
         // correct one. A parse is `full` only when every dim is exactly 1, so
         // a reattempt (correct < total) is never counted as fully correct.
         correct += Number(val) || 0;
+        if (val === 0) sawMiss = true;
+        else if (val !== 1) sawHalf = true;
       }
       if (!total) continue;
-      all.push({ at: Number(a.at) || 0, total, correct, full: correct === total });
+      // 3-tier whole-parse outcome for the outcome-mix chart.
+      const outcome = sawMiss ? 'missed' : sawHalf ? 'reattempted' : 'clean';
+      all.push({ at: Number(a.at) || 0, total, correct, full: correct === total, outcome });
     }
   }
   all.sort((x, y) => x.at - y.at);
@@ -1204,14 +1208,22 @@ export function getParsingAccuracyBuckets(stats, enabledDims, bucketSize = PARSI
   if (rem > 0) { boundaries.push([0, rem]); idx = rem; }
   for (; idx < n; idx += size) boundaries.push([idx, idx + size]);
 
+  const overall = { clean: 0, reattempted: 0, missed: 0 };
   const buckets = boundaries.map(([start, end], i) => {
     const slice = all.slice(start, end);
     let dims = 0, dimsCorrect = 0, fulls = 0;
+    let clean = 0, reattempted = 0, missed = 0;
     for (const s of slice) {
       dims += s.total;
       dimsCorrect += s.correct;
       if (s.full) fulls += 1;
+      if (s.outcome === 'clean') clean += 1;
+      else if (s.outcome === 'reattempted') reattempted += 1;
+      else missed += 1;
     }
+    overall.clean += clean;
+    overall.reattempted += reattempted;
+    overall.missed += missed;
     const count = slice.length;
     return {
       index: i,
@@ -1220,15 +1232,24 @@ export function getParsingAccuracyBuckets(stats, enabledDims, bucketSize = PARSI
       last: Math.min(end, n),
       fulls,
       fullPct: count ? Math.round((fulls / count) * 100) : 0,
-      dimPct: dims ? Math.round((dimsCorrect / dims) * 100) : 0
+      dimPct: dims ? Math.round((dimsCorrect / dims) * 100) : 0,
+      // 3-tier outcome counts for the outcome-mix chart.
+      clean,
+      reattempted,
+      missed
     };
   });
-  return { buckets, totalParses: n };
+  return { buckets, totalParses: n, outcomes: overall };
 }
 
 // Re-evaluate a single recent attempt under the user's current dim toggles.
 // Legacy attempts (saved before per-dim recording, only `allDims: bool`) keep
 // their stored verdict since we no longer have the per-dim breakdown.
+//
+// Binary "clean parse" test: true only when every enabled dim is exactly 1.
+// This is the strict rule the exclude-known deck filter and the form dots use —
+// a reattempt (0.5) keeps a form out of "known" — so it stays whole-parse-binary
+// on purpose. The half-credit aware view lives in recentAttemptCredit below.
 function evaluateRecentAttempt(attempt, enabledDims) {
   if (!attempt) return false;
   if (typeof attempt.allDims === 'boolean') return attempt.allDims;
@@ -1238,6 +1259,36 @@ function evaluateRecentAttempt(attempt, enabledDims) {
     if (val !== 1) return false;
   }
   return true;
+}
+
+// Whole-parse outcome for one stored recent attempt under the current dims,
+// honouring the 3-tier scoring (1 / 0.5 / 0):
+//   'clean'       every enabled dim correct (=== 1)
+//   'missed'      at least one enabled dim wrong (=== 0)
+//   'reattempted' no outright miss but at least one dim reattempted (=== 0.5)
+// Legacy `allDims` attempts collapse to 'clean' / 'missed'. Used by the
+// half-credit accuracy views and the outcome-mix chart so a parse that was
+// eventually right (via undo) reads as half-credit, not a flat miss.
+function recentAttemptOutcome(attempt, enabledDims) {
+  if (!attempt) return 'missed';
+  if (typeof attempt.allDims === 'boolean') return attempt.allDims ? 'clean' : 'missed';
+  const dims = attempt.dims || {};
+  let sawHalf = false;
+  for (const [dim, val] of Object.entries(dims)) {
+    if (!isDimEnabled(enabledDims, dim)) continue;
+    if (val === 0) return 'missed';
+    if (val !== 1) sawHalf = true;
+  }
+  return sawHalf ? 'reattempted' : 'clean';
+}
+
+// Fractional whole-parse credit for one recent attempt: clean → 1,
+// reattempted → 0.5, missed → 0. The accuracy %/per-value bars sum this so a
+// reattempt counts half (matching how the dim accuracy stats score it) instead
+// of the binary all-or-nothing evaluateRecentAttempt verdict.
+function recentAttemptCredit(attempt, enabledDims) {
+  const outcome = recentAttemptOutcome(attempt, enabledDims);
+  return outcome === 'clean' ? 1 : outcome === 'reattempted' ? 0.5 : 0;
 }
 
 // Tally for one form, after filtering disabled dims. Returns
@@ -1261,6 +1312,27 @@ export function countLemmaFormRecent(stats, lemma, cardId, enabledDims, windowSi
   for (const a of list) {
     if (evaluateRecentAttempt(a, enabledDims)) correct += 1;
   }
+  return { correct, total: list.length };
+}
+
+// Half-credit aware variant of countLemmaFormRecent for the accuracy %/per-value
+// bars: `correct` sums each recent attempt's fractional credit (clean 1,
+// reattempted 0.5, missed 0) rather than counting only clean parses. `total`
+// is still the attempt count, so correct/total is a 0–1 proficiency that gives
+// a reattempt half weight. Does NOT feed the dots or the exclude-known filter —
+// those keep the strict binary countLemmaFormRecent (the 2/2 "known" rule).
+export function countLemmaFormCredit(stats, lemma, cardId, enabledDims, windowSize) {
+  if (!cardId) return { correct: 0, total: 0 };
+  const entry = stats?.byLemma?.[lemma];
+  const form = entry?.forms && entry.forms[cardId];
+  if (!form || !Array.isArray(form.recent) || !form.recent.length) {
+    return { correct: 0, total: 0 };
+  }
+  const list = (Number.isInteger(windowSize) && windowSize > 0)
+    ? form.recent.slice(-windowSize)
+    : form.recent;
+  let correct = 0;
+  for (const a of list) correct += recentAttemptCredit(a, enabledDims);
   return { correct, total: list.length };
 }
 
@@ -1386,7 +1458,10 @@ export function accumulateValueBreakdown(acc, stats, lemma, cards, enabledDims) 
     if (!card || !card.id) continue;
     const dims = parseAnswerDimensions(card.parsedAnswer || card.answer);
     const status = getLemmaFormStatus(stats, lemma, card.id, enabledDims);
-    const { correct, total } = countLemmaFormRecent(stats, lemma, card.id, enabledDims);
+    // Half-credit aware: a reattempted parse contributes 0.5 here (not 0), so
+    // the per-value bars and headline % move with the 3-tier scoring. The dots
+    // (status, above) stay strict-binary, as does the 2/2 known check.
+    const { correct, total } = countLemmaFormCredit(stats, lemma, card.id, enabledDims);
     // Once-per-form paradigm-wide tally (recent attempts + coverage).
     acc.totals.scope += 1;
     if (status !== 'unseen') acc.totals.seen += 1;
