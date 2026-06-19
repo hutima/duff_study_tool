@@ -822,10 +822,14 @@ function maybeInjectInferredSteps(state, stepKey, picked) {
   // and double-count it in the parse summary (e.g. a single-gender lemma's
   // gender showing twice when the student picks mood=participle).
   Object.keys(state.autoFilledDims || {}).forEach((k) => existing.add(k));
-  const needs = inferredFollowupDims(stepKey, picked, existing);
+  // maxChapter gates the imperative→person injection (3rd-person imperatives
+  // enter at ch 17); `picked` is the mood the student just chose, passed so an
+  // injected imperative person step offers only 2nd/3rd.
+  const maxChapter = Number.isFinite(state.maxChapter) ? state.maxChapter : Infinity;
+  const needs = inferredFollowupDims(stepKey, picked, existing, { maxChapter });
   if (!needs.length) return 0;
   const pools = state.accessiblePools || {};
-  const newSteps = needs.map((dk) => buildInferredStep(dk, pools)).filter(Boolean);
+  const newSteps = needs.map((dk) => buildInferredStep(dk, pools, { mood: picked })).filter(Boolean);
   if (!newSteps.length) return 0;
   // Insert right after the current step so the natural dimension order
   // (mood → person → number, etc.) is preserved.
@@ -1165,11 +1169,20 @@ function finalizeMorphStepAttempt(card, state) {
     // walk early aren't graded — the form doesn't exist, so person/number
     // couldn't have been asked.
     if (!ans) return;
-    // A dimension the student undid is recorded as a miss no matter what they
-    // ultimately re-picked — undo is for re-practising the walk, not erasing
-    // a guess from the stats.
-    const correct = forced[step.key] ? false : !!ans.isCorrect;
-    dims[step.key] = correct ? 1 : 0;
+    const pickRight = !!ans.isCorrect;
+    // Scoring per dimension:
+    //   clean correct pick     → 1   (full credit)
+    //   reattempted via undo   → 0.5 if the final pick was right, else 0
+    //   wrong pick             → 0
+    // A reattempt never earns the full 1 a clean pick gets. The 0.5 also keeps
+    // the form out of "known": evaluateRecentAttempt counts a dimension correct
+    // only when it's exactly 1, so any reattempt fails the 2/2 exclude-known
+    // test (the whole parse reads as not-yet-known) while still scoring half in
+    // the accuracy stats.
+    let credit;
+    if (forced[step.key]) credit = pickRight ? 0.5 : 0;
+    else credit = pickRight ? 1 : 0;
+    dims[step.key] = credit;
   });
   if (!runtime.paradigmStepStats || typeof runtime.paradigmStepStats !== 'object') {
     runtime.paradigmStepStats = { byLemma: {} };

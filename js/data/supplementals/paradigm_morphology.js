@@ -301,7 +301,10 @@
       if (!answer) return;
       const gloss = extractCardGloss(card);
       seenForms.add(form);
-      questions.push({ form, answer, gloss });
+      // Carry an optional per-card lemma so a set that bundles two distinct
+      // paradigms (πολύς + μέγας — same declension shape, different words)
+      // splits into one parsing paradigm per lemma below.
+      questions.push({ form, answer, gloss, lemma: card.lemma || null });
     });
 
     if (questions.length < 2) return null;
@@ -313,20 +316,33 @@
     // participle paradigm sets (λύων…, λυθείς…) use this so their forms
     // surface under λύω / ῥύομαι when that verb is the focused paradigm,
     // rather than as standalone "λύων, λύουσα, λῦον" dropdown entries.
-    const lemma = set.parsingLemma || extractLemma(set.label) || key;
+    const setLemma = set.parsingLemma || extractLemma(set.label) || key;
     const gloss = extractLemmaGloss(set);
+    // Split into one item per distinct per-card lemma when the set tags its
+    // cards (πολύς vs μέγας); otherwise a single item under the set lemma.
+    // Keeping each paradigm separate means the parsing form lookup only ever
+    // resolves a card's picks against its own lemma's forms.
+    const byLemma = new Map();
+    questions.forEach((q) => {
+      const lm = q.lemma || setLemma;
+      if (!byLemma.has(lm)) byLemma.set(lm, []);
+      byLemma.get(lm).push({ form: q.form, answer: q.answer, gloss: q.gloss });
+    });
+    const multiLemma = byLemma.size > 1;
+    const items = [...byLemma.entries()].map(([lm, qs]) => ({
+      // When the set bundles multiple paradigms, name each item by its own
+      // lemma so the card source line and dropdown read e.g. "πολύς" / "μέγας"
+      // rather than the combined set label.
+      family: multiLemma ? lm : (set.label || key),
+      lemma: lm,
+      gloss: multiLemma ? (qs[0] && qs[0].gloss) || gloss : gloss,
+      questions: qs
+    }));
     return {
       label: set.label || key,
       week: set.week ?? null,
       chapter: Number.isInteger(set.chapter) ? set.chapter : null,
-      items: [
-        {
-          family: set.label || key,
-          lemma,
-          gloss,
-          questions
-        }
-      ]
+      items
     };
   }
 
