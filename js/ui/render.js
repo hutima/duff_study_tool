@@ -658,7 +658,14 @@ function ensureStepStateForCard(card) {
     // Subset of autoFilledDims that should still appear in the rendered
     // parse summary (currently just single-gender gender) — the step
     // wasn't asked, but the dim belongs to the canonical label.
-    impliedDims: steps.impliedDims || {}
+    impliedDims: steps.impliedDims || {},
+    // Undo support: a stack of pre-action snapshots (pushed by the answer/
+    // skip/give-up handlers), the set of step keys force-failed via undo, and
+    // a one-shot stats snapshot taken at finalize so an undo from the summary
+    // can roll the recorded attempt back. All reset per card.
+    history: [],
+    forcedWrong: {},
+    statsBeforeFinalize: null
   };
   return runtime.morphStepState;
 }
@@ -976,11 +983,26 @@ function renderMorphStepBreadcrumb(state) {
     // student shouldn't see "wrong" on mood before they've committed
     // to the dynamic person that completes their parse.
     else if (answer && (step.inferred || answer.deferred)) cls += ' neutral';
+    // A dimension that was undone counts as a miss even if it's since been
+    // re-answered correctly — show it red so the breadcrumb matches the stats.
+    else if (answer && state.forcedWrong && state.forcedWrong[step.key]) cls += ' incorrect';
     else if (answer && answer.isCorrect === true) cls += ' correct';
     else if (answer && answer.isCorrect === false) cls += ' incorrect';
     return `<span class="${cls}" title="${escapeHtml(step.label)}">${escapeHtml(step.label[0])}</span>`;
   }).join('');
   return `<div class="morph-step-breadcrumb">${dots}</div>`;
+}
+
+// Undo row — only shown once there's at least one guess to step back through.
+// Undo re-opens the previous step so the student can pick a different value
+// and keep practising; the dimension undone still counts as a miss.
+function renderMorphUndoRow(state) {
+  if (!state || !Array.isArray(state.history) || !state.history.length) return '';
+  return `
+    <div class="morph-step-undo-row">
+      <button class="ctrl-btn morph-step-undo-btn" type="button" onclick="undoMorphologyStep()"
+        title="Step back to your previous guess and re-pick. The guess you undo still counts as a miss — undo is for practising the right path, not erasing a mistake.">↶ Undo guess</button>
+    </div>`;
 }
 
 function renderMorphStepCurrent(state) {
@@ -998,6 +1020,7 @@ function renderMorphStepCurrent(state) {
         <button class="ctrl-btn morph-dontknow-btn" type="button" onclick="skipMorphologyStep()">I don't know</button>
         <button class="ctrl-btn morph-giveup-btn" type="button" onclick="giveUpMorphologyStep()">I give up</button>
       </div>
+      ${renderMorphUndoRow(state)}
     </div>`;
 }
 
@@ -1363,7 +1386,11 @@ function renderMorphStepSummary(card, state) {
           <span class="morph-step-summary-pick">${escapeHtml(pickedLabel)}</span>
         </div>`;
     }
-    const correct = answer && answer.isCorrect;
+    // A dimension the student undid counts as a miss regardless of the value
+    // ultimately re-picked — show it ✗ with a correction so the summary
+    // matches what gets recorded.
+    const forcedWrong = !!(state.forcedWrong && state.forcedWrong[step.key]);
+    const correct = !forcedWrong && answer && answer.isCorrect;
     // Deponent voice soft-accept. For a deponent the form is middle (or
     // middle/passive) but Duff parses it as active — so both grade correct
     // (morph_steps.js seeds step.acceptable = [middle, 'active']). 'active'
@@ -1405,11 +1432,16 @@ function renderMorphStepSummary(card, state) {
     const showCorrection = !correct && answer
       ? `<span class="morph-step-correction">→ ${correctionInner}</span>${aspectNoteHtml}`
       : '';
+    // Explain why a re-picked dimension still reads as a miss, so an undone
+    // step that now shows the right value doesn't look like a scoring bug.
+    const undoneNoteHtml = forcedWrong
+      ? `<span class="morph-step-undone-note">counted as a miss — you undid this step</span>`
+      : '';
     return `
       <div class="morph-step-summary-row ${markClass}">
         <span class="morph-step-summary-dim">${escapeHtml(step.label)}</span>
         <span class="morph-step-summary-pick">${escapeHtml(pickedLabel)} ${mark}</span>
-        ${showCorrection}${deponentNoteHtml}
+        ${showCorrection}${deponentNoteHtml}${undoneNoteHtml}
       </div>`;
   }).join('');
 
@@ -1418,7 +1450,13 @@ function renderMorphStepSummary(card, state) {
   // X/N excludes inferred (ungraded) follow-up steps and steps that were
   // never asked because a structural impossibility ended the walk early.
   const gradedCount = state.steps.filter((s, i) => !s.inferred && state.answers[i]).length;
-  const totalCorrect = state.answers.filter((a, i) => a && a.isCorrect && !state.steps[i].inferred).length;
+  const totalCorrect = state.answers.filter((a, i) => {
+    const step = state.steps[i];
+    if (!a || !a.isCorrect || step.inferred) return false;
+    // An undone dimension counts as a miss even when re-answered correctly.
+    if (state.forcedWrong && state.forcedWrong[step.key]) return false;
+    return true;
+  }).length;
   const totalStr = `${totalCorrect}/${gradedCount} correct`;
 
   // Side-by-side "Your parse" vs "Correct parse" with the corresponding
@@ -1545,6 +1583,7 @@ function renderMorphStepSummary(card, state) {
       ${personInferredNote}
       ${stemChangeNote}
       ${recentLine}
+      ${renderMorphUndoRow(state)}
       <div class="morph-step-summary-meta">${escapeHtml(card.lemma)}${card.family ? ' · ' + escapeHtml(card.family) : ''}</div>
     </div>`;
 }

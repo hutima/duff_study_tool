@@ -1549,6 +1549,28 @@
     padding: 7px 10px;
   }
 
+  /* Undo guess — a low-key "step back" affordance for the forward parsing
+     walk and its summary. Quieter than "I don't know"/"I give up" since it's
+     a navigation aid, not a grading verdict (the undone dimension still
+     counts as a miss). */
+  .morph-step-undo-row {
+    display: flex;
+    justify-content: center;
+    margin: 4px 0 12px;
+  }
+  .morph-step-undo-btn {
+    min-width: 0;
+    padding: 5px 12px;
+    font-size: calc((13px) * var(--text-scale));
+    background: transparent;
+    border: 1px solid var(--gold-dim);
+    color: var(--muted);
+  }
+  .morph-step-undo-btn:hover {
+    border-color: var(--gold);
+    color: var(--cream);
+  }
+
   .nav-btn.nav-disabled,
   .nav-btn:disabled {
     opacity: 0.4;
@@ -2395,6 +2417,15 @@
     margin-top: 4px;
     color: #e7a1a1;
     font-size: calc((12px) * var(--text-scale));
+    line-height: 1.4;
+  }
+  /* Undone dimension: re-picked for practice but still scored as a miss. */
+  .morph-step-undone-note {
+    display: block;
+    margin-top: 4px;
+    color: #e7a1a1;
+    font-size: calc((11px) * var(--text-scale));
+    font-style: italic;
     line-height: 1.4;
   }
   .morph-step-rollup-recent {
