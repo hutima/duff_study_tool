@@ -11,7 +11,7 @@ const SETS = {
       {
         "g": "ἀμήν",
         "e": "amen, truly",
-        "required": false
+        "required": true
       },
       {
         "g": "Δαυίδ, ὁ",
@@ -21,7 +21,7 @@ const SETS = {
       {
         "g": "ῥαββί, ὁ",
         "e": "rabbi",
-        "required": false
+        "required": true
       },
       {
         "g": "Ἰακώβ, ὁ",

@@ -713,6 +713,25 @@
   }
   .reset-actions-grid .ctrl-btn { width: 100%; text-align: center; }
 
+  /* Progress tools: an always-open frame (not a collapsible) at the same level
+     as the display prefs, so export/import sit one frame up from the toggles. */
+  .progress-tools-label {
+    display: block;
+    font-family: var(--font-display);
+    color: var(--gold-dim);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: calc((11px) * var(--text-scale));
+    margin-bottom: 10px;
+  }
+  .progress-tools-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    width: 100%;
+  }
+  .progress-tools-actions .ctrl-btn { width: 100%; text-align: center; }
+
   /* ── Card Area ── */
   .card-area {
     perspective: 1200px;
