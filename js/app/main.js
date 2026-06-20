@@ -3491,7 +3491,6 @@ installKeyboardShortcuts({
   isWhatsNewV1_5ModalOpen, closeWhatsNewV1_5Modal,
   isAspectDefaultOffModalOpen, closeAspectDefaultOffModal,
   isToggleInfoModalOpen, closeToggleInfoModal,
-  isToggleInfoModalOpen, closeToggleInfoModal,
   isDisclaimerModalOpen, isTransferModalOpen, closeTransferModal,
   isReviewDeckMode,
   getSelectedKeys: () => runtime.selectedKeys,
