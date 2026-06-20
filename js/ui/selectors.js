@@ -127,14 +127,23 @@ export function buildChapterSelector() {
     const morphCount = window.getMorphologyCountForKey ? window.getMorphologyCountForKey(key) : 0;
     const grammarCount = window.getGrammarCountForKey ? window.getGrammarCountForKey(key) : 0;
     const studyCount = morphCount + grammarCount;
-    const vocabCount = Array.isArray(set.cards) ? set.cards.length : 0;
+    const allCards = Array.isArray(set.cards) ? set.cards : [];
+    const vocabCount = allCards.length;
     if (!vocabCount && !studyCount) return;
     if (!host.canAccessGrammarUi() && !vocabCount) return;
+
+    // Mirror the "Starred words only" toggle: when it's on, the deck only
+    // pulls starred (required) cards, so show that count instead of the full
+    // chapter total. buildChapterSelector() re-runs on toggle (see
+    // toggleRequiredOnly) so this stays in sync.
+    const shownVocabCount = runtime.requiredOnly
+      ? allCards.filter(card => card.required).length
+      : vocabCount;
 
     const btn = document.createElement('button');
     btn.className = 'chapter-btn';
     btn.dataset.key = key;
-    const countLabel = `${vocabCount} vocab`;
+    const countLabel = `${shownVocabCount} vocab`;
     const subject = CHAPTER_TITLES[Number(key)] || '';
     const subtitleHtml = subject ? `<span class="chapter-subtitle">${subject}</span>` : '';
     btn.innerHTML = `${set.label}${subtitleHtml}<span class="chapter-count">${countLabel}</span>`;

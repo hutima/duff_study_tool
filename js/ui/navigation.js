@@ -697,6 +697,9 @@ export function toggleShuffle() {
 export function toggleRequiredOnly() {
   runtime.requiredOnly = !runtime.requiredOnly;
   host.syncToggleButtons();
+  // The chapter buttons show a vocab count that mirrors this toggle (full vs
+  // starred-only), so refresh the selector whenever it flips.
+  buildChapterSelector();
   if (!runtime.selectedKeys.length) {
     host.saveState();
     return;
