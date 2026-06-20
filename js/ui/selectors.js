@@ -160,18 +160,11 @@ function getSupplementalParadigmsForKey(key) {
     });
   }
 
-  const grammarSet = window.GRAMMAR_SETS?.[raw];
-  if (grammarSet && Array.isArray(grammarSet.items)) {
-    grammarSet.items.forEach((item, idx) => {
-      paradigms.push({
-        key: `${raw}::grammar::${idx}`,
-        type: 'Grammar',
-        label: item.family || item.lemma || `Grammar ${idx + 1}`,
-        count: Array.isArray(item.questions) ? item.questions.length : 0
-      });
-    });
-  }
-
+  // Grammar tied to a paradigm-practice set (legacy lecture-week questions,
+  // re-homed in grammar.js) rides along when the set is selected — it is NOT
+  // surfaced as a separate selectable sub-paradigm, so a set that already has a
+  // morph paradigm stays a single button instead of becoming a collapsible.
+  // (Grammar-only supplemental sets no longer exist.)
   return paradigms.filter(paradigm => paradigm.count > 0);
 }
 
@@ -397,18 +390,9 @@ export function buildSupplementalSelector() {
     if (!entries || !entries.length) return;
     const chapterLabel = chapter == null ? 'Other paradigms' : `Chapter ${chapter}`;
 
-    // Single-set chapters skip the extra grouping level — the lone entry is
-    // bumped up directly under the section (e.g. Chapter 20's supplemental,
-    // whose own label already names the chapter). Non-chapter-named sets get
-    // a "Chapter N · " prefix so the context isn't lost.
-    if (entries.length === 1) {
-      const { key, set, vocabCount, studyCount } = entries[0];
-      const needsPrefix = chapter != null && !/^chapter\b/i.test(String(set.label || ''));
-      const labelOverride = needsPrefix ? `${chapterLabel} · ${set.label}` : null;
-      renderSupplementalEntry(list, key, set, vocabCount, studyCount, labelOverride);
-      return;
-    }
-
+    // Every chapter renders as a consistent group — even single-paradigm
+    // chapters (e.g. 10, 12) get the same "Chapter N" header + Select-all as
+    // the rest, rather than a bare inline button.
     const chapterDetails = document.createElement('details');
     chapterDetails.className = 'supplemental-week';
     chapterDetails.open = entries.some(({ key }) =>

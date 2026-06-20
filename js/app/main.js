@@ -1960,7 +1960,9 @@ function syncLayoutVisibility() {
   const cardMode = isCardStudyMode();
   const reviewDeckMode = isReviewDeckMode();
 
-  if (controlsBar) controlsBar.style.display = 'flex';
+  // In reader mode every toggle in the controls bar is hidden, leaving an
+  // empty bordered frame — hide the whole bar there so it doesn't show blank.
+  if (controlsBar) controlsBar.style.display = isReaderMode() ? 'none' : 'flex';
   // Reader mode keeps no deck and saves no progress, so the Reshuffle / Reset
   // actions have nothing to act on — hide the whole grid there.
   // Lookup mode is a reference, not a deck: the nav row (Prev/Next/Reset) and

@@ -623,9 +623,9 @@ const SETS = {
         "required": false
       },
       {
-        "g": "ἕτερος -α, -ον",
-        "e": "another, different / adj. masc.-fem.-neut. endings",
-        "required": false
+        "g": "ἕτερος, -α, -ον",
+        "e": "other, different (of two)",
+        "required": true
       },
       {
         "g": "ἴδιος -α, -ον",
@@ -3190,7 +3190,6 @@ const SESSIONS = [
       "1",
       "2",
       "3",
-      "W1O",
       "W1_LUO_PRESENT_ACTIVE",
       "W1_PHILEO_PRESENT_ACTIVE",
       "W1_LOGOS_DECLENSION",
@@ -3212,7 +3211,6 @@ const SESSIONS = [
     "sets": [
       "4",
       "5",
-      "W1O",
       "W1_LUO_PRESENT_ACTIVE",
       "W1_PHILEO_PRESENT_ACTIVE",
       "W1_LOGOS_DECLENSION",
@@ -3265,7 +3263,6 @@ const SESSIONS = [
     "label": "Chapter 8",
     "sets": [
       "8",
-      "W3O",
       "W3_RHUOMAI_INDICATIVE",
       "W3_RHUOMAI_OTHER_MOODS",
       "W3_EIMI_COMPLETE",
@@ -3283,7 +3280,6 @@ const SESSIONS = [
     "label": "Chapter 9",
     "sets": [
       "9",
-      "W3O",
       "W3_RHUOMAI_INDICATIVE",
       "W3_RHUOMAI_OTHER_MOODS",
       "W3_EIMI_COMPLETE",
@@ -3328,14 +3324,12 @@ const SESSIONS = [
       "9",
       "10",
       "11",
-      "W1O",
       "W2_LUO_INDICATIVE",
       "W2_PHILEO_INDICATIVE",
       "W2_LUO_ACTIVE_IMPERATIVE",
       "W2_LUO_ACTIVE_INFINITIVE",
       "W2_LUO_ACTIVE_PARTICIPLE",
       "W2_PHILEO_ACTIVE_PARTICIPLE",
-      "W3O",
       "W3_RHUOMAI_INDICATIVE",
       "W3_RHUOMAI_OTHER_MOODS",
       "W3_EIMI_COMPLETE",
@@ -3392,7 +3386,6 @@ const SESSIONS = [
     "label": "Chapter 15",
     "sets": [
       "15",
-      "W6O",
       "W6_LUO_PASSIVE_INDICATIVE",
       "W6_LUO_PASSIVE_OTHER_MOODS",
       "W6_LUTHEIS_PARTICIPLE"
@@ -3406,7 +3399,6 @@ const SESSIONS = [
     "label": "Chapter 16",
     "sets": [
       "16",
-      "W6O",
       "W6_LUO_PERFECT",
       "W6_LUO_PLUPERFECT"
     ],
@@ -3419,7 +3411,6 @@ const SESSIONS = [
     "label": "Chapter 17",
     "sets": [
       "17",
-      "W7O",
       "W7_SUBJUNCTIVE_MOOD"
     ],
     "special": false,
@@ -3431,7 +3422,6 @@ const SESSIONS = [
     "label": "Chapter 18",
     "sets": [
       "18",
-      "W7O",
       "W7_INDEFINITE_CONSTRUCTIONS",
       "W7_THIRD_PERSON_IMPERATIVE"
     ],
@@ -3444,7 +3434,6 @@ const SESSIONS = [
     "label": "Chapter 19",
     "sets": [
       "19",
-      "W8O",
       "W8_TITHEMI_PRESENT_INDICATIVE",
       "W8_HISTEMI_PRESENT_INDICATIVE",
       "W8_DIDOMI_PRESENT_INDICATIVE",
@@ -3462,7 +3451,6 @@ const SESSIONS = [
     "label": "Chapter 20",
     "sets": [
       "20",
-      "W8O",
       "W8_DIDOMI_TENSES",
       "W8_DIDOMAI_PRESENT"
     ],
@@ -3494,7 +3482,6 @@ const SESSIONS = [
       "18",
       "19",
       "20",
-      "W1O",
       "W1_LUO_PRESENT_ACTIVE",
       "W1_PHILEO_PRESENT_ACTIVE",
       "W1_LOGOS_DECLENSION",
@@ -3511,7 +3498,6 @@ const SESSIONS = [
       "W2_LUO_ACTIVE_INFINITIVE",
       "W2_LUO_ACTIVE_PARTICIPLE",
       "W2_PHILEO_ACTIVE_PARTICIPLE",
-      "W3O",
       "W3_RHUOMAI_INDICATIVE",
       "W3_RHUOMAI_OTHER_MOODS",
       "W3_EIMI_COMPLETE",
@@ -3537,17 +3523,14 @@ const SESSIONS = [
       "W5_LUO_AORIST_ACTIVE_PARTICIPLE",
       "W5_RHUOMAI_PRESENT_MIDDLE_PARTICIPLE",
       "W5_RHUOMAI_AORIST_MIDDLE_PARTICIPLE",
-      "W6O",
       "W6_LUO_PASSIVE_INDICATIVE",
       "W6_LUO_PASSIVE_OTHER_MOODS",
       "W6_LUTHEIS_PARTICIPLE",
       "W6_LUO_PERFECT",
       "W6_LUO_PLUPERFECT",
-      "W7O",
       "W7_SUBJUNCTIVE_MOOD",
       "W7_INDEFINITE_CONSTRUCTIONS",
       "W7_THIRD_PERSON_IMPERATIVE",
-      "W8O",
       "W8_TITHEMI_PRESENT_INDICATIVE",
       "W8_HISTEMI_PRESENT_INDICATIVE",
       "W8_DIDOMI_PRESENT_INDICATIVE",
