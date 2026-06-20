@@ -22,3 +22,15 @@
 
 Every asset URL in `index.html` ends in `?v=NNN`. The same number lives in
 `sw.js` (`CACHE_NAME` + precache list). Bump both together on release.
+
+## Changelog
+
+The user guide's inline changelog (`#shortcutsOverlay` in `index.html`) is a
+short, high-level summary for users — **not** a per-commit or per-day log:
+
+- Keep it to a handful (~1–5) of **major release notes**, grouped by theme/era,
+  newest first. Don't add a new entry per change or per day — fold edits into
+  the most relevant existing entry (and re-consolidate if it's growing too fine).
+- Bullets are **short and skimmable**: headline features only. Skip minor
+  changes, bug fixes, and internal refactors.
+- Only the newest entry carries the `open` attribute.

@@ -781,6 +781,22 @@ function isDeponentLemma(lemma) {
 // accepted answers for these tenses (see buildMorphSteps).
 const MIDDLE_PASSIVE_SYNCRETIC_TENSES = new Set(['present', 'imperfect', 'perfect', 'pluperfect']);
 
+// True when a card's voice is the syncretic middle/passive of a present /
+// imperfect / perfect / pluperfect non-deponent verb — the tenses where one
+// form (λύομαι) serves both voices, so a one-sidedly-labelled 'passive' (or
+// 'middle') card should be read as the combined 'middle/passive' and accept
+// either reading. The future/aorist (which spell the voices apart) and
+// deponents (covered by the active-accepting rule) are excluded. Shared by the
+// parsing drill (buildMorphSteps) and the Lookup-mode pool (buildLookupPool) so
+// the two surfaces expose exactly the same set of legitimate voices.
+export function isSyncreticMiddlePassiveVoice(dims, lemma) {
+  if (!dims) return false;
+  const voice = dims.voice;
+  return MIDDLE_PASSIVE_SYNCRETIC_TENSES.has(dims.tense)
+    && (voice === 'middle' || voice === 'passive' || voice === 'middle/passive')
+    && !isDeponentLemma(lemma);
+}
+
 // Returns ordered dimension steps for this card. Each step:
 //   { key, label, correct, choices, displayChoices, displayCorrect }
 // `accessiblePools` is the optional chapter-gated distractor pool produced by
@@ -935,9 +951,7 @@ export function buildMorphSteps(card, accessiblePools = null, options = {}) {
     // option and the headline correct value, so the correction never points
     // at a voice the student couldn't have picked.
     const syncreticMiddlePassive = dimKey === 'voice'
-      && MIDDLE_PASSIVE_SYNCRETIC_TENSES.has(dims.tense)
-      && (correct === 'middle' || correct === 'passive' || correct === 'middle/passive')
-      && !isDeponentLemma(card.lemma);
+      && isSyncreticMiddlePassiveVoice(dims, card.lemma);
     const stepCorrect = syncreticMiddlePassive ? 'middle/passive' : correct;
     const choices = buildChoices(dimKey, stepCorrect, pool, dimValueFilters);
     const displayCorrect = applyDisplaySuffix(dimKey, stepCorrect);

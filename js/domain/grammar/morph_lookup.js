@@ -17,7 +17,7 @@
 // shares is auto-locked (no choice to make) and shown in the breadcrumb; the
 // walk completes when no remaining dimension has two or more options.
 
-import { parseAnswerDimensions, getParadigmStepDimensionLabel } from './morph_steps.js';
+import { parseAnswerDimensions, getParadigmStepDimensionLabel, isSyncreticMiddlePassiveVoice } from './morph_steps.js';
 
 // Canonical master order. Verb-led paradigms walk the whole thing; nominal
 // paradigms only ever populate case/number/gender, which sit here in the same
@@ -83,6 +83,24 @@ function isLookupForm(form) {
   return pieces.every((pc) => !/\s/.test(pc));
 }
 
+// Present / imperfect / perfect / pluperfect collapse middle and passive into a
+// single form (λύομαι is both "I loose for myself" and "I am loosed"). A source
+// set that labelled such a form one-sidedly ("λύω — passive indicative") parses
+// it as voice 'passive', which would expose only a 'passive' branch in the
+// faceted walk. Widen it to the combined 'middle/passive' so distinctValues
+// splits out BOTH a 'middle' and a 'passive' option and the student can build
+// either reading — exactly the voices the parsing drill already accepts. The
+// walk drives off `dims`, so also rewrite the displayed parse string to match,
+// or a form reached via the 'middle' branch would still read "… passive …" on
+// resolution. Future/aorist (distinct voices) and deponents are left untouched
+// by the shared isSyncreticMiddlePassiveVoice predicate.
+function widenSyncreticVoice(dims, parse, lemma) {
+  if (!isSyncreticMiddlePassiveVoice(dims, lemma)) return parse;
+  const wasCombined = dims.voice === 'middle/passive';
+  dims.voice = 'middle/passive';
+  return wasCombined ? parse : parse.replace(/\b(?:middle|passive)\b/, 'middle/passive');
+}
+
 // Build the lookup form pool from a set of morph cards plus the lemma's
 // extraForms. Each entry: { form, dims, parse }. Deduped by form‖parse so a
 // syncretic form contributing multiple parses (ἔλυον = imperfect active 1sg
@@ -99,11 +117,12 @@ export function buildLookupPool(cards, lemma) {
     // verb is εἰμί?") collapse to none and would be un-walkable noise.
     if (!(dims.tense || dims.voice || dims.mood || dims.person
           || dims.case || dims.number || dims.gender)) return;
+    const displayParse = widenSyncreticVoice(dims, String(parse), lemma);
     const f = String(form).trim();
-    const key = `${f}‖${String(parse).toLowerCase().trim()}`;
+    const key = `${f}‖${displayParse.toLowerCase().trim()}`;
     if (seen.has(key)) return;
     seen.add(key);
-    pool.push({ form: f, dims, parse: String(parse) });
+    pool.push({ form: f, dims, parse: displayParse });
   };
   (cards || []).forEach((card) => {
     if (!card) return;
