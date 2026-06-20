@@ -596,6 +596,13 @@ export function getCardsForFocusedParadigm(selectedKeys, focusedLemma, options =
   const filtered = preGenderFiltered
     .filter((c) => cardPassesDimValueFilters(c, dimValueFilters, multiGenderLemmas));
 
+  // Lookup mode wants every distinct (form, parse) pair, not one card per
+  // form: a syncretic form like ἔλυον (imperfect active 1sg AND 3pl) carries
+  // two parses, and the lookup walk must be able to reach the same form by
+  // either path. So skip the per-form dedup below and hand back the filtered
+  // list whole; buildLookupPool dedups by form‖parse instead.
+  if (options.includeSyncretic) return filtered;
+
   // Per-form dedup. Multiple sources can carry the same form (e.g.
   // grammar.js ch 5's εἰμί 1-sg question + W3_EIMI_COMPLETE's εἰμί entry).
   // In parsing mode they all render the same step-by-step walk — keeping

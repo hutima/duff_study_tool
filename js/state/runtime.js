@@ -112,6 +112,22 @@ export const runtime = {
   // paradigm — the student picks the form that matches. Off by default;
   // the forward dimensional walk stays the parsing baseline.
   parsingReverse: false,
+  // Lookup mode. When on (parsing mode only), parsing stops quizzing and
+  // becomes an interactive paradigm reference: the student selects a focused
+  // paradigm, then proceeds through the dimension breadcrumbs (tense → voice →
+  // mood → person / case → number → gender) to conjugate or decline it, and
+  // the tool resolves the picks to the matching Greek form. Unlike the drill,
+  // it covers EVERY legitimate form of the paradigm (built at full chapter
+  // scope with optional + extra forms folded in), not just the required ones.
+  // Off by default; mutually exclusive with the reverse / shuffle-all / custom
+  // deck sources (turning lookup on turns those off). Only parsing reads it.
+  parsingLookup: false,
+  // Ephemeral lookup-walk state: the focused lemma being explored, the form
+  // pool computed for it (cached so re-renders don't rebuild), a poolKey
+  // (lemma + chapter scope) to know when to rebuild, and the per-dimension
+  // picks the student has made so far. Never persisted — a fresh session
+  // resamples the pool from the live paradigm data.
+  morphLookupState: { lemma: null, poolKey: '', pool: [], picks: {} },
   // Ephemeral per-card cache for the reverse drill so the MC options stay
   // stable across re-renders of the same card (answer feedback re-renders
   // the card). Rebuilt whenever the focused card changes. Not persisted.

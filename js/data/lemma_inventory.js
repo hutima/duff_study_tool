@@ -145,6 +145,27 @@
     'ἔστων':    'present active imperative third person plural'
   };
 
+  // εἰμί's present (active) subjunctive — the reference grammar's Subjunctive
+  // column (ὦ, ᾖς, ᾖ, ὦμεν, ἦτε, ὦσι(ν)). Duff introduces the subjunctive in
+  // Ch 17 but doesn't drill εἰμί's, so it's optional here.
+  const EIMI_PRESENT_ACTIVE_SUBJUNCTIVE = {
+    'ὦ':       'present active subjunctive first person singular',
+    'ᾖς':      'present active subjunctive second person singular',
+    'ᾖ':       'present active subjunctive third person singular',
+    'ὦμεν':    'present active subjunctive first person plural',
+    'ἦτε':     'present active subjunctive second person plural',
+    'ὦσι(ν)':  'present active subjunctive third person plural'
+  };
+
+  // εἰμί's present participle, feminine + neuter nominative singular. The
+  // masculine ὤν (and ὄντες) is drilled in W3; οὖσα / ὄν complete the
+  // reference grammar's ὤν / οὖσα / ὄν row. (Duff gives only the nominative
+  // singular + the ὀντ- stem note for εἰμί's participle.)
+  const EIMI_PRESENT_PARTICIPLE_NOM = {
+    'οὖσα': 'present active participle nominative singular feminine',
+    'ὄν':   'present active participle nominative/accusative singular neuter'
+  };
+
   // εἰμί's optional-drill groups. Chapter gates:
   // - Ch 7: present imperative (imperative mood is introduced in Ch 7).
   // - Ch 8: future middle infinitive + the future participle's nominative
@@ -158,6 +179,10 @@
       forms: EIMI_PRESENT_ACTIVE_IMPERATIVE },
     { chapter: 8, family: 'εἰμί — future middle infinitive (optional)',
       forms: EIMI_FUTURE_MIDDLE_INFINITIVE },
+    { chapter: 8, family: 'εἰμί — present participle (feminine/neuter nom. sg.) (optional)',
+      forms: EIMI_PRESENT_PARTICIPLE_NOM },
+    { chapter: 17, family: 'εἰμί — present subjunctive (optional)',
+      forms: EIMI_PRESENT_ACTIVE_SUBJUNCTIVE },
     ...participleOptionalGroups(8, 'εἰμί — future middle participle',
       EIMI_FUTURE_MIDDLE_PARTICIPLE, { core: false })
   ];
@@ -275,6 +300,21 @@
     'λυσάσθωσαν':  'aorist middle imperative third person plural'
   };
 
+  // Perfect middle/passive indicative (λέλυμαι series). Duff's W6 set drills
+  // only the perfect ACTIVE (λέλυκα); the middle/passive — the reference
+  // grammar's Passive "Perfect" column — is real Koine but undrilled, so it
+  // fills in here. Voice is the syncretic middle/passive composite (the
+  // perfect doesn't spell the two apart), matching how the present/imperfect
+  // passive cards read.
+  const LUO_PERFECT_MIDDLE_PASSIVE_INDICATIVE = {
+    'λέλυμαι':   'perfect middle/passive indicative first person singular',
+    'λέλυσαι':   'perfect middle/passive indicative second person singular',
+    'λέλυται':   'perfect middle/passive indicative third person singular',
+    'λελύμεθα':  'perfect middle/passive indicative first person plural',
+    'λέλυσθε':   'perfect middle/passive indicative second person plural',
+    'λέλυνται':  'perfect middle/passive indicative third person plural'
+  };
+
   // Aorist passive imperative — 2nd/3rd person all drilled (W6 + W7);
   // nothing to add here. Aorist active imperative similarly complete
   // (W2 + W7).
@@ -302,15 +342,21 @@
       forms: LUO_PRESENT_MP_IMPERATIVE_3P },
     { chapter: 15, family: 'λύω — aorist middle imperative (optional)',
       forms: LUO_AORIST_MIDDLE_IMPERATIVE },
-    { chapter: 17, family: 'λύω — present active subjunctive (optional)',
+    { chapter: 16, family: 'λύω — perfect middle/passive indicative (optional)',
+      forms: LUO_PERFECT_MIDDLE_PASSIVE_INDICATIVE },
+    // λύω's subjunctive (all voices) is REQUIRED curriculum from Ch 17 — Duff
+    // teaches the subjunctive there and it's a high-frequency NT parse — so
+    // these groups are `core: true`: they enter the parsing deck unconditionally
+    // (not gated behind the "Optional paradigm" toggle) once Ch 17 is in scope.
+    { chapter: 17, core: true, family: 'λύω — present active subjunctive (required)',
       forms: LUO_PRESENT_ACTIVE_SUBJUNCTIVE },
-    { chapter: 17, family: 'λύω — aorist active subjunctive (optional)',
+    { chapter: 17, core: true, family: 'λύω — aorist active subjunctive (required)',
       forms: LUO_AORIST_ACTIVE_SUBJUNCTIVE },
-    { chapter: 17, family: 'λύω — aorist middle subjunctive (optional)',
+    { chapter: 17, core: true, family: 'λύω — aorist middle subjunctive (required)',
       forms: LUO_AORIST_MIDDLE_SUBJUNCTIVE },
-    { chapter: 17, family: 'λύω — aorist passive subjunctive (optional)',
+    { chapter: 17, core: true, family: 'λύω — aorist passive subjunctive (required)',
       forms: LUO_AORIST_PASSIVE_SUBJUNCTIVE },
-    { chapter: 17, family: 'λύω — present middle/passive subjunctive (optional)',
+    { chapter: 17, core: true, family: 'λύω — present middle/passive subjunctive (required)',
       forms: LUO_PRESENT_MIDDLE_PASSIVE_SUBJUNCTIVE }
   ];
 
@@ -325,6 +371,7 @@
     ...LUO_NONPRESENT_INFINITIVES,
     ...LUO_PRESENT_MP_IMPERATIVE_3P,
     ...LUO_AORIST_MIDDLE_IMPERATIVE,
+    ...LUO_PERFECT_MIDDLE_PASSIVE_INDICATIVE,
     // Active subjunctive last so λύῃ resolves to "present active
     // subjunctive 3sg" (and λύσῃ to "aorist active subjunctive 3sg"),
     // the most common single-form readings for those Greek strings.
@@ -1038,6 +1085,13 @@
     'φιληθῆναι':  'aorist passive infinitive'
   };
 
+  // φιλέω's present middle/passive participle (the reference grammar's
+  // "Present Middle/Passive ... φιλούμενος"). Declines like ἀγαθός; Duff
+  // gives only the masculine nominative singular, so that's what's added.
+  const PHILEO_PRESENT_MP_PARTICIPLE = {
+    'φιλούμενος': 'present middle/passive participle nominative singular masculine'
+  };
+
   const PHILEO_OPTIONAL_GROUPS = [
     { chapter: 7,  family: 'φιλέω — present active imperative (optional)',
       forms: PHILEO_PRESENT_ACTIVE_IMPERATIVE },
@@ -1051,6 +1105,8 @@
       forms: PHILEO_IMPERFECT_PASSIVE_INDICATIVE },
     { chapter: 15, family: 'φιλέω — aorist passive indicative (optional)',
       forms: PHILEO_AORIST_PASSIVE_INDICATIVE },
+    { chapter: 15, family: 'φιλέω — present middle/passive participle (optional)',
+      forms: PHILEO_PRESENT_MP_PARTICIPLE },
     { chapter: 17, family: 'φιλέω — present active subjunctive (optional)',
       forms: PHILEO_PRESENT_ACTIVE_SUBJUNCTIVE },
     { chapter: 17, family: 'φιλέω — aorist active subjunctive (optional)',
@@ -1064,6 +1120,7 @@
     ...PHILEO_PRESENT_ACTIVE_IMPERATIVE,
     ...PHILEO_AORIST_ACTIVE_IMPERATIVE,
     ...PHILEO_INFINITIVES,
+    ...PHILEO_PRESENT_MP_PARTICIPLE,
     // Subjunctive last so φιλῇ resolves to "present active subjunctive
     // 3sg" (the most common single-form reading) rather than the m/p
     // 2sg from the present passive indicative spread above.
@@ -2297,7 +2354,24 @@
     'ἐρχόμενα':   'present middle participle nominative/accusative plural neuter'
   };
 
+  // First/second personal pronouns: the 1st-person singular oblique cases have
+  // an accented (ἐμέ, ἐμοῦ, ἐμοί) and an enclitic (με, μου, μοι) spelling. The
+  // paradigm vocab cards store both ("ἐμέ / με") but the parsing pipeline keeps
+  // only the first (accented) form, so the enclitics are surfaced here for the
+  // lookup/fallback. Same parse as their accented twins (no gender on personal
+  // pronouns).
+  const PERSONAL_PRONOUN_ENCLITICS = {
+    'με':  'first person accusative singular',
+    'μου': 'first person genitive singular',
+    'μοι': 'first person dative singular'
+  };
+
   const LEMMA_INVENTORY = {
+    'First and second personal pronouns': {
+      // Lookup/fallback only (not drill cards — the enclitics share the
+      // accented forms' parse, so a separate drill card would be redundant).
+      extraForms: { ...PERSONAL_PRONOUN_ENCLITICS }
+    },
     'εἰμί': {
       // εἰμί is suppletive: it has no aorist or perfect family — Greek
       // uses other roots (γέγονα, ἐγενόμην) for those senses. Tenses
@@ -2315,7 +2389,9 @@
       extraForms: {
         ...EIMI_FUTURE_MIDDLE_PARTICIPLE,
         ...EIMI_FUTURE_MIDDLE_INFINITIVE,
-        ...EIMI_PRESENT_ACTIVE_IMPERATIVE
+        ...EIMI_PRESENT_ACTIVE_IMPERATIVE,
+        ...EIMI_PRESENT_ACTIVE_SUBJUNCTIVE,
+        ...EIMI_PRESENT_PARTICIPLE_NOM
       },
       optionalFormGroups: EIMI_OPTIONAL_GROUPS
     },
