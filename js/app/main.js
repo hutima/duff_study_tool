@@ -754,6 +754,12 @@ function getParsingChapter() {
   return 20;
 }
 
+// Sentinel <option> value at the head of the parsing chapter dropdown. It's the
+// dropdown face of the Lookup-mode toggle: selecting it turns Lookup on, and
+// selecting any real chapter turns it back off (see setParsingChapter /
+// syncParsingChapterUi). Non-numeric so it never parses as a chapter.
+const PARSING_BUILD_MODE_VALUE = 'build';
+
 // Parsing mode narrows the deck to the focused paradigm's forms via the
 // selectors-host hook; switching the focused paradigm re-runs
 // loadDeckFromKeys so the deck rebuilds accordingly.
@@ -790,22 +796,41 @@ function goToStemDrillFromParsing(setKey) {
 
 function setParsingChapter(value) {
   if (!isParsingMode()) return;
+  // The dropdown's first entry is the "Build mode" sentinel — the other face of
+  // the Lookup-mode toggle. Picking it turns Lookup on; picking a real chapter
+  // turns it back off. Keeping both in sync here (and reflecting the flag back
+  // into the dropdown in syncParsingChapterUi) makes the toggle ⇄ dropdown
+  // relationship symmetrical.
+  if (value === PARSING_BUILD_MODE_VALUE) {
+    if (!runtime.parsingLookup) toggleParsingLookup();
+    return;
+  }
   const n = Number(value);
   if (!Number.isFinite(n) || !Number.isInteger(n) || n < 1 || n > 20) return;
-  if (n === runtime.parsingChapter) return;
-  runtime.parsingChapter = n;
-  runtime.selectedKeys = [String(n)];
-  runtime.currentSession = null;
-  // If the previously-focused paradigm isn't introduced until a later
-  // chapter, drop it so ensureMorphFocusedParadigm picks the first
-  // in-scope lemma on the next rebuild. Without this, loadDeckFromKeys
-  // builds an empty deck once before syncParadigmFocusUi corrects it.
-  if (runtime.morphFocusedParadigm) {
-    const available = listAvailableParadigms(getAggregateSelectionKeys());
-    if (!available.some((p) => p.lemma === runtime.morphFocusedParadigm)) {
-      runtime.morphFocusedParadigm = null;
+  const chapterChanged = n !== runtime.parsingChapter;
+  if (chapterChanged) {
+    runtime.parsingChapter = n;
+    runtime.selectedKeys = [String(n)];
+    runtime.currentSession = null;
+    // If the previously-focused paradigm isn't introduced until a later
+    // chapter, drop it so ensureMorphFocusedParadigm picks the first
+    // in-scope lemma on the next rebuild. Without this, loadDeckFromKeys
+    // builds an empty deck once before syncParadigmFocusUi corrects it.
+    if (runtime.morphFocusedParadigm) {
+      const available = listAvailableParadigms(getAggregateSelectionKeys());
+      if (!available.some((p) => p.lemma === runtime.morphFocusedParadigm)) {
+        runtime.morphFocusedParadigm = null;
+      }
     }
   }
+  // Choosing a real chapter while in Build mode drops back to the drill. The
+  // toggle reloads the deck (with the chapter set just above), so let it do the
+  // single reload rather than loading twice.
+  if (runtime.parsingLookup) {
+    toggleParsingLookup();
+    return;
+  }
+  if (!chapterChanged) return;
   loadDeckFromKeys(runtime.selectedKeys, null);
 }
 
@@ -1448,13 +1473,18 @@ function syncParsingChapterUi() {
   if (!isParsingMode()) return;
   const chapter = getParsingChapter();
   if (!select.options.length) {
-    const opts = [];
+    // "Build mode" heads the list (before Chapter 1) as the dropdown face of the
+    // Lookup-mode toggle — see setParsingChapter.
+    const opts = [`<option value="${PARSING_BUILD_MODE_VALUE}">Build mode</option>`];
     for (let ch = 1; ch <= 20; ch++) {
       opts.push(`<option value="${ch}">Chapter ${ch}</option>`);
     }
     select.innerHTML = opts.join('');
   }
-  select.value = String(chapter);
+  // In Lookup mode the dropdown shows "Build mode"; otherwise it tracks the
+  // current chapter. (Turning the toggle on/off flows through here via
+  // syncToggleButtons, so the dropdown follows the toggle and vice versa.)
+  select.value = runtime.parsingLookup ? PARSING_BUILD_MODE_VALUE : String(chapter);
 }
 
 // Populate the primary focused-paradigm dropdown from the current selection
@@ -1589,8 +1619,15 @@ function syncParsingCustomParadigmsUi() {
 // The per-value exclude sub-filters (dimValueFilter_* / optionalFilter_*) are
 // skipped: their labels already name the value (e.g. "Aorist (Ch. 6)").
 function installToggleInfoButtons() {
-  const bar = document.getElementById('controlsBar');
-  if (!bar) return;
+  // The Advanced-settings master toggles live in two containers: most in the
+  // controls bar, plus the promoted Lookup-mode toggle that now sits up under
+  // Text size. Both get the same (i) button + capture-phase text guard.
+  [document.getElementById('controlsBar'), document.getElementById('parsingLookupRow')]
+    .filter(Boolean)
+    .forEach(installToggleInfoForContainer);
+}
+
+function installToggleInfoForContainer(bar) {
   bar.querySelectorAll('.toggle-label').forEach(label => {
     if (/^(dimValueFilter_|optionalFilter_)/.test(label.id)) return;
     if (!label.getAttribute('title')) return;
@@ -1975,9 +2012,10 @@ function syncLayoutVisibility() {
   if (parsingCustomReviewToggle) parsingCustomReviewToggle.style.display = (isParsingMode() && !lookupActive) ? 'flex' : 'none';
   const parsingReverseToggle = document.getElementById('parsingReverseToggle');
   if (parsingReverseToggle) parsingReverseToggle.style.display = (isParsingMode() && !lookupActive) ? 'flex' : 'none';
-  // Lookup mode toggle: parsing-only, sits next to English → Greek.
-  const parsingLookupToggle = document.getElementById('parsingLookupToggle');
-  if (parsingLookupToggle) parsingLookupToggle.style.display = isParsingMode() ? 'flex' : 'none';
+  // Lookup mode toggle: parsing-only. Promoted up under Text size (its own
+  // #parsingLookupRow in the display-prefs block), so show/hide the row.
+  const parsingLookupRow = document.getElementById('parsingLookupRow');
+  if (parsingLookupRow) parsingLookupRow.style.display = isParsingMode() ? 'flex' : 'none';
   // Accent/breathing look-alike distractors only do anything in the reverse
   // drill, so the toggle only shows once English → Greek is on.
   const accentLookalikeToggle = document.getElementById('accentLookalikeToggle');
