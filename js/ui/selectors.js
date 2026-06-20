@@ -134,7 +134,13 @@ export function buildChapterSelector() {
     const btn = document.createElement('button');
     btn.className = 'chapter-btn';
     btn.dataset.key = key;
-    const countLabel = `${vocabCount} vocab`;
+    // The count tracks the "Starred words only" toggle: when it's on, only the
+    // starred (required) cards are actually loaded into the deck, so the chapter
+    // button should advertise that narrowed number rather than the full vocab.
+    const shownVocab = runtime.requiredOnly && Array.isArray(set.cards)
+      ? set.cards.filter(card => card.required).length
+      : vocabCount;
+    const countLabel = `${shownVocab} vocab`;
     const subject = CHAPTER_TITLES[Number(key)] || '';
     const subtitleHtml = subject ? `<span class="chapter-subtitle">${subject}</span>` : '';
     btn.innerHTML = `${set.label}${subtitleHtml}<span class="chapter-count">${countLabel}</span>`;
