@@ -673,6 +673,10 @@
   }
   .display-prefs .theme-switcher { flex: 0 0 auto; max-width: 100%; }
   .display-prefs .theme-btn.active { color: var(--gold-light); background: rgba(201,168,76,0.14); }
+  /* Lookup-mode toggle, promoted up under Text size (parsing only). Mirror the
+     controls-bar toggle layout so the switch reads first, then the label. */
+  .parsing-lookup-row > .toggle-label { justify-content: flex-start; gap: 10px; }
+  .parsing-lookup-row > .toggle-label > .toggle-switch { order: -1; }
 
   /* ── Controls Bar ── */
   .controls-bar {
