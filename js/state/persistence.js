@@ -341,6 +341,7 @@ export function buildPersistedStatePayload(options = {}) {
     parsingCustomReview: runtime.parsingCustomReview,
     parsingCustomParadigms: runtime.parsingCustomParadigms,
     parsingReverse: runtime.parsingReverse,
+    parsingLookup: runtime.parsingLookup,
     accentLookalikes: runtime.accentLookalikes,
     optionalFormFilters: runtime.optionalFormFilters,
     analyticsVocabDirection: runtime.analyticsVocabDirection,
@@ -448,6 +449,8 @@ function sanitizeImportedState(candidate) {
   state.parsingCustomReview = !!candidate.parsingCustomReview;
   state.parsingCustomParadigms = sanitizeParadigmKeyMap(candidate.parsingCustomParadigms);
   state.parsingReverse = !!candidate.parsingReverse;
+  // Lookup mode (interactive paradigm reference) defaults to false (off).
+  state.parsingLookup = !!candidate.parsingLookup;
   state.accentLookalikes = !!candidate.accentLookalikes;
   // Sub-filters default to true (every category included) so toggling
   // the parent on without touching filters reproduces the original
@@ -1193,6 +1196,10 @@ export function restoreState() {
     runtime.parsingCustomParadigms = sanitizeParadigmKeyMap(saved.parsingCustomParadigms);
     // English → Greek parsing direction (default false).
     runtime.parsingReverse = !!saved.parsingReverse;
+    // Lookup mode (interactive paradigm reference; default false). The walk
+    // state itself (morphLookupState) is ephemeral and intentionally not
+    // restored — it resamples from the live paradigm data on first render.
+    runtime.parsingLookup = !!saved.parsingLookup;
     // Accent/breathing look-alike distractors in the reverse drill (default false).
     runtime.accentLookalikes = !!saved.accentLookalikes;
     // Per-category sub-filters: default each to true if missing.

@@ -167,7 +167,8 @@ import { getSelectedVocabCards, getSelectedGrammarCards, getAllVocabKeys, getAll
 // Domain — Grammar
 import { buildGrammarSupportHtml } from '../domain/grammar/explanations.js';
 import { recordParadigmAttempt, inferredFollowupDims, buildInferredStep, structuralImpossibilityReason, paradigmGapReason, lemmaInventoryGapReason, isLemmaFormKnown, getLemmaFormStatus, parseAnswerDimensions } from '../domain/grammar/morph_steps.js';
-import { listAvailableParadigms, listAvailableParadigmsByCategory, getCardsForFocusedParadigm, getCardsForParadigmCategory, getCardsForParadigmLemmas, getAllParsingCards, parseCategoryShuffleValue, makeCategoryShuffleValue } from '../domain/grammar/paradigm_focus.js';
+import { listAvailableParadigms, listAvailableParadigmsByCategory, getCardsForFocusedParadigm, getCardsForParadigmCategory, getCardsForParadigmLemmas, getAllParsingCards, parseCategoryShuffleValue, makeCategoryShuffleValue, chooseDefaultFocusedParadigm } from '../domain/grammar/paradigm_focus.js';
+import { buildLookupPool, truncatePicksFrom } from '../domain/grammar/morph_lookup.js';
 
 // UI
 import {
@@ -270,6 +271,7 @@ import {
   toggleParsingCustomParadigm,
   setAllParsingCustomParadigms,
   toggleParsingReverse,
+  toggleParsingLookup,
   toggleAccentLookalikes,
   toggleUnspacedDailyReset,
   reshuffleEligible,
@@ -450,7 +452,9 @@ configureRender({
         optionalFilters: runtime.optionalFormFilters
       }
     );
-  }
+  },
+  getLookupFocusLemma: () => getLookupFocusLemma(),
+  getLookupFormsForLemma: (lemma) => getLookupFormsForLemma(lemma)
 });
 configureSelectors({
   getSessions: () => getSessions(),
@@ -518,6 +522,8 @@ configureNavigation({
   ensureMorphFocusedParadigm: () => ensureMorphFocusedParadigm(),
   rebuildMorphDeckForStepMode: () => rebuildMorphDeckForStepMode(),
   rebuildParsingCycle: (opts) => rebuildParsingCycle(opts),
+  // Pin the focused paradigm to a concrete lemma when lookup mode turns on.
+  prepareLookupFocus: () => prepareLookupFocus(),
   // In-scope paradigm lemmas at the current selection — used by the custom
   // paradigm set's "Select all" action.
   listAvailableParadigmLemmas: () => listAvailableParadigms(getAggregateSelectionKeys()).map((p) => p.lemma)
@@ -1200,6 +1206,116 @@ function finalizeMorphStepAttempt(card, state) {
   });
 }
 
+// ─── Lookup mode ────────────────────────────────────────────────────────
+//
+// The reverse of the parsing drill: the student selects a focused paradigm and
+// walks the dimension breadcrumbs to build (conjugate / decline) any form, and
+// the tool resolves the picks to the matching Greek. Deck-independent and
+// off-the-record (no stats). The pool covers EVERY legitimate form of the
+// paradigm — built at the widest chapter scope with optional + extra forms
+// folded in — so a form the student hasn't drilled is still lookable.
+
+// The concrete lemma the lookup walk explores: the focused paradigm, with a
+// category-shuffle sentinel (or an empty focus) resolved to a real lemma so
+// the walk always has exactly one paradigm to read. Stem-recall lemmas are
+// handled by renderCard's redirect ahead of the lookup branch.
+function getLookupFocusLemma() {
+  if (!isParsingMode()) return null;
+  let sel = runtime.morphFocusedParadigm;
+  const category = parseCategoryShuffleValue(sel);
+  if (category) {
+    const inCat = listAvailableParadigms(getAggregateSelectionKeys())
+      .filter((p) => p.category === category);
+    sel = inCat.length ? inCat[0].lemma : null;
+  }
+  if (!sel) sel = chooseDefaultFocusedParadigm(getAggregateSelectionKeys());
+  return sel || null;
+}
+
+// Build (and cache on morphLookupState) the lookup form pool for a lemma. Full
+// chapter scope (['20']) = all legitimate morphs regardless of the parsing
+// chapter gate; optional + syncretic + extra forms folded in. Cached by lemma
+// so breadcrumb picks don't rebuild it; picks survive while the lemma is
+// unchanged and reset when it switches.
+function getLookupFormsForLemma(lemma) {
+  if (!lemma) return [];
+  const poolKey = `lookup::${lemma}`;
+  const st = runtime.morphLookupState;
+  if (st && st.poolKey === poolKey && Array.isArray(st.pool)) return st.pool;
+  const cards = getCardsForFocusedParadigm(['20'], lemma, {
+    includeOptional: true,
+    includeSyncretic: true
+  });
+  const pool = buildLookupPool(cards, lemma);
+  runtime.morphLookupState = {
+    lemma,
+    poolKey,
+    pool,
+    picks: (st && st.lemma === lemma && st.picks && typeof st.picks === 'object') ? st.picks : {}
+  };
+  return pool;
+}
+
+// Seed morphLookupState for the currently focused lemma before a pick handler
+// mutates its picks (render seeds it too, but a handler can fire first).
+function ensureLookupState() {
+  const lemma = getLookupFocusLemma();
+  if (!lemma) return null;
+  if (!runtime.morphLookupState || runtime.morphLookupState.poolKey !== `lookup::${lemma}`) {
+    getLookupFormsForLemma(lemma);
+  }
+  return runtime.morphLookupState;
+}
+
+// Toggling lookup on: pin the focused paradigm to a concrete lemma (not a
+// category-shuffle sentinel or empty) so the dropdown and the walk agree, and
+// clear stale picks. Called from the navigation toggle.
+function prepareLookupFocus() {
+  const lemma = getLookupFocusLemma();
+  if (lemma) runtime.morphFocusedParadigm = lemma;
+  runtime.morphLookupState = { lemma: null, poolKey: '', pool: [], picks: {} };
+}
+
+// Pick a value for the current breadcrumb dimension. Drops the dim + any later
+// picks first (defensive) so the walk stays a clean prefix, then records it.
+function pickLookupDimension(dim, value) {
+  if (!isParsingMode() || !runtime.parsingLookup || !dim) return;
+  noteStudyInteraction();
+  const state = ensureLookupState();
+  if (!state) return;
+  const next = truncatePicksFrom(state.picks, dim);
+  next[dim] = value;
+  state.picks = next;
+  renderCard();
+  renderProgress();
+  saveState();
+}
+
+// Tap a decided breadcrumb chip: drop that dimension and everything after it
+// so the student re-picks from there.
+function editLookupDimension(dim) {
+  if (!isParsingMode() || !runtime.parsingLookup || !dim) return;
+  noteStudyInteraction();
+  const state = ensureLookupState();
+  if (!state) return;
+  state.picks = truncatePicksFrom(state.picks, dim);
+  renderCard();
+  renderProgress();
+  saveState();
+}
+
+// Clear every pick — back to the first breadcrumb.
+function resetLookup() {
+  if (!isParsingMode() || !runtime.parsingLookup) return;
+  noteStudyInteraction();
+  const state = ensureLookupState();
+  if (!state) return;
+  state.picks = {};
+  renderCard();
+  renderProgress();
+  saveState();
+}
+
 function getModeDescription() {
   if (isMorphologyMode()) return 'Grammar Quiz';
   if (isParsingMode()) return 'Step-by-step Parsing';
@@ -1671,6 +1787,10 @@ function syncToggleButtons() {
   if (parsingReverseSwitch) parsingReverseSwitch.classList.toggle('on', !!runtime.parsingReverse);
   const parsingReverseToggle = document.getElementById('parsingReverseToggle');
   if (parsingReverseToggle) parsingReverseToggle.setAttribute('aria-checked', runtime.parsingReverse ? 'true' : 'false');
+  const parsingLookupSwitch = document.getElementById('parsingLookupBtn');
+  if (parsingLookupSwitch) parsingLookupSwitch.classList.toggle('on', !!runtime.parsingLookup);
+  const parsingLookupToggle = document.getElementById('parsingLookupToggle');
+  if (parsingLookupToggle) parsingLookupToggle.setAttribute('aria-checked', runtime.parsingLookup ? 'true' : 'false');
   const accentLookalikeSwitch = document.getElementById('accentLookalikeBtn');
   if (accentLookalikeSwitch) accentLookalikeSwitch.classList.toggle('on', !!runtime.accentLookalikes);
   const accentLookalikeToggle = document.getElementById('accentLookalikeToggle');
@@ -1787,11 +1907,16 @@ function syncLayoutVisibility() {
   if (controlsBar) controlsBar.style.display = 'flex';
   // Reader mode keeps no deck and saves no progress, so the Reshuffle / Reset
   // actions have nothing to act on — hide the whole grid there.
+  // Lookup mode is a reference, not a deck: the nav row (Prev/Next/Reset) and
+  // the reset-actions grid act on cards/stats it doesn't use, so both are
+  // hidden. (Computed inline here — the shared `lookupActive` is declared
+  // further down with the parsing-toggle visibility.)
+  const lookupReference = isParsingMode() && runtime.parsingLookup;
   const resetActionsGrid = document.querySelector('.reset-actions-grid');
-  if (resetActionsGrid) resetActionsGrid.style.display = isReaderMode() ? 'none' : '';
+  if (resetActionsGrid) resetActionsGrid.style.display = (isReaderMode() || lookupReference) ? 'none' : '';
   if (cardArea) cardArea.style.display = cardMode ? '' : 'none';
-  if (reviewShell) reviewShell.style.display = reviewDeckMode ? '' : 'none';
-  if (navRow) navRow.style.display = reviewDeckMode && runtime.selectedKeys.length ? 'flex' : 'none';
+  if (reviewShell) reviewShell.style.display = (reviewDeckMode && !lookupReference) ? '' : 'none';
+  if (navRow) navRow.style.display = reviewDeckMode && runtime.selectedKeys.length && !lookupReference ? 'flex' : 'none';
   if (markRow) markRow.style.display = reviewDeckMode && runtime.selectedKeys.length && !isMorphologyMode() && !isParsingMode() ? 'flex' : 'none';
   if (ffRow) ffRow.style.display = reviewDeckMode && runtime.selectedKeys.length && runtime.spacedRepetition && !isParsingMode() ? 'flex' : 'none';
   if (directionToggle) directionToggle.style.display = (runtime.studyMode === 'vocab' || runtime.studyMode === 'morph') ? 'flex' : 'none';
@@ -1816,37 +1941,47 @@ function syncLayoutVisibility() {
   // Parsing options apply only to parsing mode — keep them out of the
   // vocab / grammar / reader Advanced-settings panels where they have no
   // effect and would just clutter the UI.
+  // Lookup mode takes over the whole parsing surface (it's a reference, not a
+  // deck), so the drill-only controls — every per-dim/step option, the deck-
+  // pool toggles (exclude-known / shuffle-all / custom set / reverse), and the
+  // plain Shuffle — are hidden while it's on. The focused-paradigm dropdown and
+  // the chapter dropdown stay, since lookup is driven by exactly those.
+  const lookupActive = isParsingMode() && runtime.parsingLookup;
   const parsingOptionsDetails = document.getElementById('parsingOptionsDetails');
-  if (parsingOptionsDetails) parsingOptionsDetails.style.display = isParsingMode() ? '' : 'none';
+  if (parsingOptionsDetails) parsingOptionsDetails.style.display = (isParsingMode() && !lookupActive) ? '' : 'none';
   const parsingChapterRow = document.getElementById('parsingChapterRow');
   if (parsingChapterRow) parsingChapterRow.style.display = isParsingMode() ? 'flex' : 'none';
   const paradigmFocusRowPrimary = document.getElementById('paradigmFocusRowPrimary');
   // Shuffle-all and the custom paradigm set both turn the single focused
   // paradigm off, so hide its dropdown whenever either is on (the deck is
-  // then a mix of multiple paradigms).
-  if (paradigmFocusRowPrimary) paradigmFocusRowPrimary.style.display = (isParsingMode() && !runtime.parsingShuffleAll && !runtime.parsingCustomReview) ? 'flex' : 'none';
+  // then a mix of multiple paradigms). Lookup always uses a single focused
+  // paradigm, so its dropdown stays.
+  if (paradigmFocusRowPrimary) paradigmFocusRowPrimary.style.display = (isParsingMode() && (lookupActive || (!runtime.parsingShuffleAll && !runtime.parsingCustomReview))) ? 'flex' : 'none';
   // Custom paradigm set: the checkbox selector takes the dropdown's place
   // while the toggle is on.
   const parsingCustomParadigmsRow = document.getElementById('parsingCustomParadigmsRow');
-  if (parsingCustomParadigmsRow) parsingCustomParadigmsRow.style.display = (isParsingMode() && runtime.parsingCustomReview) ? 'flex' : 'none';
-  if (shuffleToggle) shuffleToggle.style.display = reviewDeckMode ? 'flex' : 'none';
+  if (parsingCustomParadigmsRow) parsingCustomParadigmsRow.style.display = (isParsingMode() && runtime.parsingCustomReview && !lookupActive) ? 'flex' : 'none';
+  if (shuffleToggle) shuffleToggle.style.display = (reviewDeckMode && !lookupActive) ? 'flex' : 'none';
   // Exclude-known-morphs is a parsing-only filter on the deck pool —
   // promoted from inside Parsing options to a top-level toggle next to
   // Shuffle so it's reachable without expanding the per-dim section.
   const excludeKnownMorphsToggle = document.getElementById('excludeKnownMorphsToggle');
-  if (excludeKnownMorphsToggle) excludeKnownMorphsToggle.style.display = isParsingMode() ? 'flex' : 'none';
+  if (excludeKnownMorphsToggle) excludeKnownMorphsToggle.style.display = (isParsingMode() && !lookupActive) ? 'flex' : 'none';
   // Shuffle-all-paradigms: parsing-only, sits next to Exclude known morphs.
   const parsingShuffleAllToggle = document.getElementById('parsingShuffleAllToggle');
-  if (parsingShuffleAllToggle) parsingShuffleAllToggle.style.display = isParsingMode() ? 'flex' : 'none';
+  if (parsingShuffleAllToggle) parsingShuffleAllToggle.style.display = (isParsingMode() && !lookupActive) ? 'flex' : 'none';
   // Custom paradigm set: parsing-only, sits next to Shuffle all paradigms.
   const parsingCustomReviewToggle = document.getElementById('parsingCustomReviewToggle');
-  if (parsingCustomReviewToggle) parsingCustomReviewToggle.style.display = isParsingMode() ? 'flex' : 'none';
+  if (parsingCustomReviewToggle) parsingCustomReviewToggle.style.display = (isParsingMode() && !lookupActive) ? 'flex' : 'none';
   const parsingReverseToggle = document.getElementById('parsingReverseToggle');
-  if (parsingReverseToggle) parsingReverseToggle.style.display = isParsingMode() ? 'flex' : 'none';
+  if (parsingReverseToggle) parsingReverseToggle.style.display = (isParsingMode() && !lookupActive) ? 'flex' : 'none';
+  // Lookup mode toggle: parsing-only, sits next to English → Greek.
+  const parsingLookupToggle = document.getElementById('parsingLookupToggle');
+  if (parsingLookupToggle) parsingLookupToggle.style.display = isParsingMode() ? 'flex' : 'none';
   // Accent/breathing look-alike distractors only do anything in the reverse
   // drill, so the toggle only shows once English → Greek is on.
   const accentLookalikeToggle = document.getElementById('accentLookalikeToggle');
-  if (accentLookalikeToggle) accentLookalikeToggle.style.display = (isParsingMode() && runtime.parsingReverse) ? 'flex' : 'none';
+  if (accentLookalikeToggle) accentLookalikeToggle.style.display = (isParsingMode() && runtime.parsingReverse && !lookupActive) ? 'flex' : 'none';
   // Spaced repetition writes confidence stats — parsing mode is explicitly
   // off-the-record, so the toggle is irrelevant there and gets hidden.
   if (spacedToggle) spacedToggle.style.display = (reviewDeckMode && !isParsingMode()) ? 'flex' : 'none';
@@ -3342,7 +3477,7 @@ const GLOBAL_CLICK_HANDLERS = {
   restoreSpacedUndo, setAppProfile, setStudyMode, setThemeMode, setFontFamily, setTextSize,
   showDisclaimerModal, startStudying, toggleDirection, toggleMorphSelfCheck,
   toggleMorphStepByStep, setMorphFocusedParadigm, setParsingChapter, goToStemDrillFromParsing,
-  toggleRequiredOnly, toggleHardVocabReview, toggleStemNotes, toggleIrregularCards, toggleIrregularTense, toggleShuffle, toggleSpacedRepetition, toggleSpacingCadence, toggleSplitSelection, toggleAspectStep, toggleDimStep, toggleOptionalForms, toggleOptionalFormFilter, toggleDimValueFilter, toggleExcludeKnownMorphs, toggleParsingShuffleAll, toggleParsingCustomReview, toggleParsingCustomParadigm, setAllParsingCustomParadigms, toggleParsingReverse, toggleAccentLookalikes, resetKnownMorphs, closeResetKnownModal, confirmResetKnownFocused, confirmResetKnownAll, clearParsingStats, toggleUnspacedDailyReset, triggerImportProgress,
+  toggleRequiredOnly, toggleHardVocabReview, toggleStemNotes, toggleIrregularCards, toggleIrregularTense, toggleShuffle, toggleSpacedRepetition, toggleSpacingCadence, toggleSplitSelection, toggleAspectStep, toggleDimStep, toggleOptionalForms, toggleOptionalFormFilter, toggleDimValueFilter, toggleExcludeKnownMorphs, toggleParsingShuffleAll, toggleParsingCustomReview, toggleParsingCustomParadigm, setAllParsingCustomParadigms, toggleParsingReverse, toggleParsingLookup, pickLookupDimension, editLookupDimension, resetLookup, toggleAccentLookalikes, resetKnownMorphs, closeResetKnownModal, confirmResetKnownFocused, confirmResetKnownAll, clearParsingStats, toggleUnspacedDailyReset, triggerImportProgress,
   openReaderTab, selectReaderDrillChoice, advanceReaderDrill,
   closeWhatsNewV1_5Modal, closeAspectDefaultOffModal, closeToggleInfoModal, onDueHistogramToggle
 };

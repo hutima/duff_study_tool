@@ -10,6 +10,7 @@ import { buildGrammarSupportHtml } from '../domain/grammar/explanations.js';
 import { renderProgress, renderReview } from './progress.js';
 import { buildMorphSteps, computeAccessibleDimensionPools, parseAnswerDimensions, aspectMistakeNote, isSecondPluralPresentMoodAmbiguity, computeParadigmPresentValues, accentLookalikesFor, confusableFormHints, THIRD_PERSON_IMPERATIVE_CHAPTER } from '../domain/grammar/morph_steps.js';
 import { getAccessibleMorphCards, deriveSelectionLevels, buildMultiGenderLemmas, MIXED_FORM_NOUN_LEMMAS, THIRD_DECLENSION_NOUN_LEMMAS, paradigmCategoryForLemma } from '../domain/grammar/paradigm_focus.js';
+import { resolveLookupWalk } from '../domain/grammar/morph_lookup.js';
 
 // Spell out the derived-card form abbreviation (card.derivedShort) for the
 // "(aorist)" / "(future)" caption under a generated card's headword.
@@ -52,7 +53,14 @@ let host = {
   // exclude-known filter or per-value dim filters) — the structural truth of
   // what forms the paradigm owns. Used to detect value gaps like ἐγώ/σύ
   // having no third-person forms. Returns [] outside parsing mode.
-  getFocusedParadigmAllCards: () => []
+  getFocusedParadigmAllCards: () => [],
+  // The lemma the lookup walk should explore — the focused paradigm, with any
+  // category-shuffle sentinel resolved to a concrete lemma. Null when nothing
+  // usable is focused.
+  getLookupFocusLemma: () => null,
+  // Every legitimate form of `lemma` as a lookup pool ([{ form, dims, parse }]),
+  // built at full chapter scope with optional + extra forms folded in.
+  getLookupFormsForLemma: () => []
 };
 
 export function configureRender(deps) {
@@ -145,6 +153,15 @@ export function renderCard() {
     // until the user taps through (or switches paradigms).
     const navRow = document.getElementById('navRow');
     if (navRow) navRow.style.display = 'none';
+    return;
+  }
+
+  // Lookup mode is deck-independent — it explores the focused paradigm's full
+  // form pool directly, so it renders ahead of every deck-state branch (an
+  // empty or stale deck must not pre-empt it). Sits after the stem-recall
+  // redirect (those lemmas have no parse to walk, in lookup or drill).
+  if (host.isParsingMode() && runtime.parsingLookup) {
+    renderMorphLookupCard(area);
     return;
   }
 
@@ -2095,6 +2112,117 @@ function renderParsingReverseCard(area, card) {
       <div class="morph-choices">${choiceButtons}</div>
       ${dontKnowHtml}
       ${resultHtml}
+    </div>`;
+  runtime.isFlipped = false;
+  renderProgress();
+}
+
+// Escapes a value for a single-quoted inline-handler attribute. Lookup dim
+// values are plain ASCII tokens, but escape defensively all the same.
+function escapeAttr(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;')
+    .replace(/'/g, '&#39;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+// Lookup mode: the reverse of the parsing drill. Instead of decomposing one
+// Greek form's parse, the student builds a parse from the breadcrumbs and the
+// tool resolves it to the matching form across the focused paradigm's full
+// (all-chapters + optional + extra) form pool. Deck-independent — it reads the
+// pool live, not runtime.deck.
+function renderMorphLookupCard(area) {
+  if (!area) return;
+  const lemma = host.getLookupFocusLemma();
+  if (!lemma) {
+    area.innerHTML = `
+      <div class="morph-card morph-step-card morph-lookup-card">
+        <div class="morph-label">Grammar · Lookup</div>
+        <div class="empty-state morph-lookup-empty"><div class="big">αβγ</div>Pick a focused paradigm from the dropdown above, then build any of its forms one part at a time.</div>
+      </div>`;
+    runtime.isFlipped = false;
+    renderProgress();
+    return;
+  }
+
+  // Seed/refresh the cached pool + picks for this lemma, then read the picks
+  // back (getLookupFormsForLemma resets picks when the lemma changes).
+  const pool = host.getLookupFormsForLemma(lemma) || [];
+  const st = runtime.morphLookupState || {};
+  const picks = (st.lemma === lemma && st.picks && typeof st.picks === 'object') ? st.picks : {};
+  const walk = resolveLookupWalk(pool, picks);
+
+  const gloss = LEMMA_GLOSS[lemma] || '';
+  const category = paradigmCategoryForLemma(lemma) || '';
+  const headerMeta = [gloss, category].filter(Boolean).map(escapeHtml).join(' · ');
+
+  if (walk.empty) {
+    area.innerHTML = `
+      <div class="morph-card morph-step-card morph-lookup-card">
+        <div class="morph-label">Grammar · Lookup</div>
+        <div class="morph-form morph-lookup-lemma">${escapeHtml(lemma)}</div>
+        ${headerMeta ? `<div class="morph-source">${headerMeta}</div>` : ''}
+        <div class="empty-state morph-lookup-empty">This paradigm has no parseable forms to look up.</div>
+      </div>`;
+    runtime.isFlipped = false;
+    renderProgress();
+    return;
+  }
+
+  // Breadcrumb of decided dimensions. Explicit picks are editable buttons
+  // (tap to re-pick from there); auto-locked dims (only one value possible)
+  // are static chips.
+  const trailHtml = walk.trail.map((t) => {
+    const inner = `<span class="morph-lookup-chip-dim">${escapeHtml(t.label)}</span><span class="morph-lookup-chip-val">${escapeHtml(t.valueLabel)}</span>`;
+    if (t.locked) {
+      return `<span class="morph-lookup-chip locked" title="Only one ${escapeHtml(String(t.label).toLowerCase())} is possible here">${inner}</span>`;
+    }
+    return `<button type="button" class="morph-lookup-chip" onclick="editLookupDimension('${escapeAttr(t.dim)}')" title="Change ${escapeHtml(String(t.label).toLowerCase())}">${inner}<span class="morph-lookup-chip-edit" aria-hidden="true">✎</span></button>`;
+  }).join('');
+  const trailBlock = trailHtml ? `<div class="morph-lookup-trail">${trailHtml}</div>` : '';
+
+  let bodyHtml;
+  if (walk.next) {
+    const buttons = walk.next.options.map((o) =>
+      `<button type="button" class="choice-btn morph-lookup-option" onclick="pickLookupDimension('${escapeAttr(walk.next.dim)}','${escapeAttr(o.value)}')">${escapeHtml(o.label)}</button>`
+    ).join('');
+    const resetRow = walk.trail.length
+      ? `<div class="morph-lookup-reset-row"><button type="button" class="ctrl-btn morph-lookup-reset" onclick="resetLookup()">↺ Start over</button></div>`
+      : '';
+    bodyHtml = `
+      <div class="morph-step-current morph-lookup-current">
+        <div class="morph-step-label">${escapeHtml(walk.next.label)}?</div>
+        <div class="morph-choices morph-lookup-choices">${buttons}</div>
+        ${resetRow}
+      </div>`;
+  } else {
+    const forms = walk.matches || [];
+    const formHtml = forms.length ? forms.map((m) => escapeHtml(m.form)).join('  ·  ') : '—';
+    const parse = forms.length ? forms[0].parse : '';
+    const glossText = forms.length
+      ? formGloss({ lemma, form: forms[0].form, parsedAnswer: parse, answer: parse })
+      : '';
+    const glossLine = glossText ? `<div class="morph-gloss">Gloss: “${escapeHtml(glossText)}”</div>` : '';
+    bodyHtml = `
+      <div class="morph-lookup-result">
+        <div class="morph-lookup-result-label">Form</div>
+        <div class="morph-lookup-form">${formHtml}</div>
+        <div class="morph-lookup-parse">${escapeHtml(parse)}</div>
+        ${glossLine}
+        <button type="button" class="ctrl-btn morph-lookup-reset" onclick="resetLookup()">↺ Look up another form</button>
+      </div>`;
+  }
+
+  area.innerHTML = `
+    <div class="morph-card morph-step-card morph-lookup-card">
+      <div class="morph-label">Grammar · Lookup</div>
+      <div class="morph-form morph-lookup-lemma">${escapeHtml(lemma)}</div>
+      ${headerMeta ? `<div class="morph-source">${headerMeta}</div>` : ''}
+      <div class="morph-lookup-hint">Build a form: choose each part to conjugate or decline this paradigm.</div>
+      ${trailBlock}
+      ${bodyHtml}
     </div>`;
   runtime.isFlipped = false;
   renderProgress();

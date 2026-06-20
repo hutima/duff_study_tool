@@ -77,6 +77,7 @@ let host = {
   ensureMorphFocusedParadigm: () => {},
   rebuildMorphDeckForStepMode: () => {},
   rebuildParsingCycle: () => {},
+  prepareLookupFocus: () => {},
   listAvailableParadigmLemmas: () => []
 };
 
@@ -1025,6 +1026,38 @@ export function toggleParsingReverse() {
   host.resetMorphAnswerState();
   host.syncToggleButtons();
   if (!runtime.selectedKeys.length) {
+    host.saveState();
+    return;
+  }
+  const keysToLoad = runtime.currentSession ? expandSessionSets(runtime.currentSession) : runtime.selectedKeys;
+  loadDeckFromKeys(keysToLoad, runtime.currentSession ? runtime.currentSession.id : null);
+}
+
+// Lookup mode: turn the parsing surface into an interactive paradigm
+// reference. Instead of quizzing forms, the student picks a focused paradigm
+// and walks the dimension breadcrumbs to conjugate / decline any of its forms.
+// Off by default and parsing-only. Mutually exclusive with the reverse drill
+// and the multi-paradigm deck sources (shuffle-all / custom set) — turning
+// lookup on switches those off so the single focused-paradigm dropdown is
+// available. Rebuilds the deck so the render path swaps (renderCard routes to
+// the lookup card whenever the flag is on); on→off, the drill deck comes back.
+export function toggleParsingLookup() {
+  if (!host.isParsingMode()) return;
+  runtime.parsingLookup = !runtime.parsingLookup;
+  if (runtime.parsingLookup) {
+    runtime.parsingReverse = false;
+    runtime.parsingShuffleAll = false;
+    runtime.parsingCustomReview = false;
+    runtime.parsingReverseState = { cardId: null, options: [], correctForm: '' };
+    runtime.morphLookupState = { lemma: null, poolKey: '', pool: [], picks: {} };
+    host.prepareLookupFocus();
+  }
+  host.resetMorphStepState();
+  host.resetMorphAnswerState();
+  host.syncToggleButtons();
+  host.syncLayoutVisibility();
+  if (!runtime.selectedKeys.length) {
+    renderCard();
     host.saveState();
     return;
   }
