@@ -6444,6 +6444,87 @@
   Object.entries(CHAPTER_GRAMMAR).forEach(([key, set]) => { GRAMMAR_SETS[key] = set; });
   Object.entries(WEEK_GRAMMAR).forEach(([key, set]) => { GRAMMAR_SETS[key] = set; });
 
+  // The legacy lecture-week supplements (W3O/W6O/W7O/W8O) are being merged away.
+  // Their starred vocab was folded into the regular chapters; their non-parsing
+  // grammar questions are re-homed here: each "family" item that describes a
+  // specific paradigm rides along with that paradigm-practice set (so doing the
+  // paradigm in Grammar mode includes the questions); anything that doesn't map
+  // to a paradigm (e.g. aspect concepts) folds into the chapter's grammar.
+  // Questions that duplicate ones already in the grammar pool are dropped.
+  // (Grammar tied to a paradigm set rides along silently — see
+  // getSupplementalParadigmsForKey in selectors.js, which lists morph paradigms
+  // only — so paradigm buttons stay single, not collapsibles.)
+  const LEGACY_GRAMMAR_TIE = {
+    W3O: {
+      'Complete εἰμί paradigm': 'W3_EIMI_COMPLETE',
+      'εἰμί non-indicative': 'W3_EIMI_INFINITIVE_PARTICIPLE',
+      'Near demonstrative paradigm — οὗτος': 'W3_HOUTOS',
+      'Far demonstrative paradigm — ἐκεῖνος': 'W3_EKEINOS',
+      'First and second personal pronouns': 'W3_PERSONAL_PRONOUNS'
+    },
+    W6O: {
+      'Passive form parsing': 'W6_LUO_PASSIVE_INDICATIVE',
+      'Aorist passive participle': 'W6_LUTHEIS_PARTICIPLE',
+      'Perfect and pluperfect identification': 'W6_LUO_PERFECT'
+    },
+    W7O: {
+      'Indefinite constructions': 'W7_INDEFINITE_CONSTRUCTIONS',
+      '3rd-person imperative': 'W7_THIRD_PERSON_IMPERATIVE'
+      // 'Long-vowel verb forms' (λύω active subjunctive) + 'Aspect of imperatives'
+      // have no dedicated paradigm set → fall through to the chapter.
+    },
+    W8O: {
+      '-μι present active': 'W8_DIDOMI_PRESENT_INDICATIVE',
+      '-μι other tenses': 'W8_DIDOMI_TENSES',
+      '-μι middle/passive': 'W8_DIDOMAI_PRESENT'
+    }
+  };
+  const LEGACY_GRAMMAR_CHAPTER = { W3O: '9', W6O: '16', W7O: '18', W8O: '20' };
+  const legacyQSig = (q) => ['form', 'prompt', 'answer']
+    .map((f) => String((q && q[f]) || '').normalize('NFC').replace(/\s+/g, ' ').trim())
+    .join('¦');
+  const seenGrammarSigs = new Set();
+  Object.values(CHAPTER_GRAMMAR).forEach((set) =>
+    (set.items || []).forEach((it) => (it.questions || []).forEach((q) => seenGrammarSigs.add(legacyQSig(q)))));
+  const tiedByKey = {};
+  ['W3O', 'W6O', 'W7O', 'W8O'].forEach((wKey) => {
+    const src = WEEK_GRAMMAR[wKey];
+    const tieMap = LEGACY_GRAMMAR_TIE[wKey] || {};
+    const chapKey = LEGACY_GRAMMAR_CHAPTER[wKey];
+    if (src && Array.isArray(src.items)) {
+      src.items.forEach((item) => {
+        const target = tieMap[item.family] || chapKey; // paradigm set key, else chapter
+        const questions = (item.questions || []).filter((q) => {
+          const sig = legacyQSig(q);
+          if (seenGrammarSigs.has(sig)) return false;
+          seenGrammarSigs.add(sig);
+          return true;
+        });
+        if (!questions.length) return;
+        (tiedByKey[target] = tiedByKey[target] || []).push({ ...item, questions });
+      });
+    }
+    delete GRAMMAR_SETS[wKey];
+  });
+  Object.entries(tiedByKey).forEach(([key, items]) => {
+    const isChapter = /^\d+$/.test(key);
+    const existing = GRAMMAR_SETS[key];
+    let nextItems;
+    if (isChapter) {
+      // Chapters already render as multi-item grammar groups — just append.
+      nextItems = [...((existing && existing.items) || []), ...items];
+    } else {
+      // Collapse to one merged item so the paradigm set stays a single button.
+      const merged = items.length === 1 ? items[0] : {
+        family: items[0].family,
+        lemma: items[0].lemma,
+        questions: items.flatMap((it) => it.questions)
+      };
+      nextItems = [...((existing && existing.items) || []), merged];
+    }
+    GRAMMAR_SETS[key] = { label: (existing && existing.label) || key, items: nextItems };
+  });
+
   function notifyGrammarDataChanged() {
     if (typeof window.dispatchEvent !== 'function' || typeof window.CustomEvent !== 'function') return;
     window.dispatchEvent(new window.CustomEvent('greekSupplementalDataChanged', {
