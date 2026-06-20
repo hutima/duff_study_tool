@@ -1380,7 +1380,7 @@ export function resetCurrentDeck() {
 }
 
 // Shortcut entry point: opens the same reset modal as `resetCurrentDeck`
-// but pre-checks the "Required cards only" scope so the action only touches
+// but pre-checks the "Starred cards only" scope so the action only touches
 // graded vocabulary in the current selection. The user still chooses
 // between "Set all to now" and "Reset progress" inside the spaced modal.
 export function resetRequiredOnly() {
@@ -1397,7 +1397,7 @@ export function resetRequiredOnly() {
 }
 
 // Returns true when a card should be touched by the reset operation,
-// given the "Required cards only" scope toggle in the reset modal.
+// given the "Starred cards only" scope toggle in the reset modal.
 function shouldResetCard(card, requiredOnly) {
   if (!requiredOnly) return true;
   return !!(card && card.required);

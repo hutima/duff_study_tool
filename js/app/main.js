@@ -1721,6 +1721,9 @@ function onDueHistogramToggle(key, el) {
 
 function syncToggleButtons() {
   const requiredSwitch  = document.getElementById('requiredBtn');
+  // Mirror of the "Starred words only" toggle that also lives in the study
+  // selector (under "Deselect all"); both drive the same runtime.requiredOnly.
+  const requiredSelectorSwitch = document.getElementById('requiredBtnSelector');
   const shuffleSwitch   = document.getElementById('shuffleBtn');
   const directionSwitch = document.getElementById('directionBtn');
   const spacedSwitch    = document.getElementById('spacedBtn');
@@ -1760,6 +1763,7 @@ function syncToggleButtons() {
   const dailyResetSwitch = document.getElementById('unspacedDailyResetBtn');
   const shuffleToggle   = document.getElementById('shuffleToggle');
   const requiredToggle  = document.getElementById('requiredToggle');
+  const requiredToggleSelector = document.getElementById('requiredToggleSelector');
   const directionToggle = document.getElementById('directionToggle');
   const spacedToggle    = document.getElementById('spacedToggle');
   const hardReviewToggle = document.getElementById('hardReviewToggle');
@@ -1777,6 +1781,7 @@ function syncToggleButtons() {
 
   if (shuffleSwitch)   shuffleSwitch.classList.toggle('on',   !!runtime.shuffled);
   if (requiredSwitch)  requiredSwitch.classList.toggle('on',  !!runtime.requiredOnly);
+  if (requiredSelectorSwitch) requiredSelectorSwitch.classList.toggle('on', !!runtime.requiredOnly);
   if (directionSwitch) directionSwitch.classList.toggle('on', !!runtime.directionToGreek);
   if (spacedSwitch)    spacedSwitch.classList.toggle('on',    !!runtime.spacedRepetition);
   if (hardReviewSwitch) hardReviewSwitch.classList.toggle('on', !!runtime.hardVocabReviewMode);
@@ -1868,6 +1873,7 @@ function syncToggleButtons() {
   if (dailyResetSwitch) dailyResetSwitch.classList.toggle('on', !!runtime.unspacedAutoResetEnabled);
   if (shuffleToggle)   shuffleToggle.setAttribute('aria-checked',   runtime.shuffled ? 'true' : 'false');
   if (requiredToggle)  requiredToggle.setAttribute('aria-checked',  runtime.requiredOnly ? 'true' : 'false');
+  if (requiredToggleSelector) requiredToggleSelector.setAttribute('aria-checked', runtime.requiredOnly ? 'true' : 'false');
   if (directionToggle) directionToggle.setAttribute('aria-checked', runtime.directionToGreek ? 'true' : 'false');
   if (spacedToggle)    spacedToggle.setAttribute('aria-checked',    runtime.spacedRepetition ? 'true' : 'false');
   if (hardReviewToggle) hardReviewToggle.setAttribute('aria-checked', runtime.hardVocabReviewMode ? 'true' : 'false');
@@ -1962,8 +1968,11 @@ function syncLayoutVisibility() {
   // hidden. (Computed inline here — the shared `lookupActive` is declared
   // further down with the parsing-toggle visibility.)
   const lookupReference = isParsingMode() && runtime.parsingLookup;
-  const resetActionsGrid = document.querySelector('.reset-actions-grid');
-  if (resetActionsGrid) resetActionsGrid.style.display = (isReaderMode() || lookupReference) ? 'none' : '';
+  // The reset actions live in their own collapsable now — hide the whole
+  // <details> (summary included), not just the inner grid.
+  const resetActionsSection = document.getElementById('resetActionsDetails')
+    || document.querySelector('.reset-actions-grid');
+  if (resetActionsSection) resetActionsSection.style.display = (isReaderMode() || lookupReference) ? 'none' : '';
   if (cardArea) cardArea.style.display = cardMode ? '' : 'none';
   if (reviewShell) reviewShell.style.display = (reviewDeckMode && !lookupReference) ? '' : 'none';
   if (navRow) navRow.style.display = reviewDeckMode && runtime.selectedKeys.length && !lookupReference ? 'flex' : 'none';
