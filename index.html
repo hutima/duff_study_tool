@@ -19,11 +19,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Greek Cards">
-<link rel="manifest" href="manifest.json?v=293">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=293">
-<link rel="icon" type="image/svg+xml" href="favicon.svg?v=293">
+<link rel="manifest" href="manifest.json?v=294">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=294">
+<link rel="icon" type="image/svg+xml" href="favicon.svg?v=294">
 <title>Elementary NT Greek — Flashcards</title>
-<link rel="stylesheet" href="styles.css?v=293">
+<link rel="stylesheet" href="styles.css?v=294">
 <script>
 (function(){
   try {
@@ -85,12 +85,6 @@
     <a class="quick-btn" id="modeShortcutMemorizationBtn" href="pages/memorization.html">Paradigms</a>
   </div>
 
-  <details class="utility-section">
-    <summary>Progress tools</summary>
-    <button class="ctrl-btn" type="button" onclick="exportProgressJson()">Export progress</button>
-    <button class="ctrl-btn" type="button" onclick="triggerImportProgress()">Import progress</button>
-  </details>
-
   <div class="ornament">✦ · · · ✦</div>
 
   <details class="utility-section" id="advancedSettingsDetails">
@@ -143,8 +137,8 @@
       <span class="toggle-text">Accent/breathing look-alike distractors</span>
       <span class="toggle-switch" id="accentLookalikeBtn" aria-hidden="true"></span>
     </button>
-    <button class="toggle-label" id="requiredToggle" type="button" role="switch" aria-checked="false" onclick="toggleRequiredOnly()" title="Limit the deck to required (graded) vocabulary for your selection, leaving out optional and supplemental words.">
-      <span class="toggle-text">Required only</span>
+    <button class="toggle-label" id="requiredToggle" type="button" role="switch" aria-checked="false" onclick="toggleRequiredOnly()" title="Limit the deck to starred (graded) vocabulary for your selection — the words Duff stars to memorise — leaving out optional and supplemental words.">
+      <span class="toggle-text">Starred words only</span>
       <span class="toggle-switch" id="requiredBtn" aria-hidden="true"></span>
     </button>
     <button class="toggle-label" id="hardReviewToggle" type="button" role="switch" aria-checked="false" onclick="toggleHardVocabReview()" title="Drill only vocab you've missed more than 10 times and that's still under 40% confidence">
@@ -418,14 +412,22 @@
         </button>
       </details>
     </details>
-    <div class="reset-actions-grid">
-      <button class="ctrl-btn" type="button" onclick="reshuffleEligible()">Reshuffle</button>
-      <button class="ctrl-btn" id="resetDeckBtn" type="button" onclick="resetCurrentDeck()">Reset deck</button>
-      <button class="ctrl-btn" id="resetRequiredBtn" type="button" onclick="resetRequiredOnly()" title="Reset only the required (graded) cards in this deck">Reset required</button>
-      <button class="ctrl-btn" id="resetKnownBtn" type="button" onclick="resetKnownMorphs()" title="Set every form's parsing tally back to 0/2 — clears the per-form recent attempts so the dots all read as unseen. The per-paradigm rolling % is kept." style="display:none">Reset known</button>
-      <button class="ctrl-btn" id="clearParsingStatsBtn" type="button" onclick="clearParsingStats()" title="Wipe ALL parsing stats — every paradigm's accuracy %, the per-mood/tense breakdown, and per-form tallies. Parsing mode only; vocab/morphology/reader progress are kept. No undo." style="display:none">Clear parsing stats</button>
-      <button class="ctrl-btn" type="button" onclick="openResetStatsModal()">Reset stats</button>
-    </div>
+    <details class="utility-section reset-actions-section" id="resetActionsDetails">
+      <summary>Reset actions</summary>
+      <div class="reset-actions-grid">
+        <button class="ctrl-btn" type="button" onclick="reshuffleEligible()">Reshuffle</button>
+        <button class="ctrl-btn" id="resetDeckBtn" type="button" onclick="resetCurrentDeck()">Reset deck</button>
+        <button class="ctrl-btn" id="resetRequiredBtn" type="button" onclick="resetRequiredOnly()" title="Reset only the starred (graded) cards in this deck">Reset starred</button>
+        <button class="ctrl-btn" id="resetKnownBtn" type="button" onclick="resetKnownMorphs()" title="Set every form's parsing tally back to 0/2 — clears the per-form recent attempts so the dots all read as unseen. The per-paradigm rolling % is kept." style="display:none">Reset known</button>
+        <button class="ctrl-btn" id="clearParsingStatsBtn" type="button" onclick="clearParsingStats()" title="Wipe ALL parsing stats — every paradigm's accuracy %, the per-mood/tense breakdown, and per-form tallies. Parsing mode only; vocab/morphology/reader progress are kept. No undo." style="display:none">Clear parsing stats</button>
+        <button class="ctrl-btn" type="button" onclick="openResetStatsModal()">Reset stats</button>
+      </div>
+    </details>
+    <details class="utility-section progress-tools-section" id="progressToolsDetails">
+      <summary>Progress tools</summary>
+      <button class="ctrl-btn" type="button" onclick="exportProgressJson()">Export progress</button>
+      <button class="ctrl-btn" type="button" onclick="triggerImportProgress()">Import progress</button>
+    </details>
   </div>
   </details>
 
@@ -735,6 +737,10 @@
     </div>
     <div class="selector-section deselect-section">
       <button class="chapter-btn deselect-all-btn" type="button" onclick="deselectAll()">Deselect all</button>
+      <button class="toggle-label selector-required-toggle" id="requiredToggleSelector" type="button" role="switch" aria-checked="false" onclick="toggleRequiredOnly()" title="Limit the deck to starred (graded) vocabulary for your selection — the words Duff stars to memorise — leaving out optional and supplemental words. Mirrors the same toggle in Advanced review settings.">
+        <span class="toggle-text">Starred words only</span>
+        <span class="toggle-switch" id="requiredBtnSelector" aria-hidden="true"></span>
+      </button>
     </div>
     <div class="selector-section">
       <span class="selector-label">Sessions</span>
@@ -806,6 +812,7 @@
             <li><strong>Voice is a parsing step</strong> (Ch.&nbsp;14/15), with deponents kept lenient and fuller paradigm coverage across moods and voices.</li>
             <li><strong>Variant forms as cards</strong> &mdash; second aorist, liquid future, aorist passive, perfect active, and &mu;&iota;-verbs, each as its own card once its chapter is in scope.</li>
             <li><strong>Undo a parse guess</strong> for half credit, so you can re-pick and keep practising the right path.</li>
+            <li><strong>Tidier settings.</strong> &ldquo;Required only&rdquo; is now <strong>Starred words only</strong> (Duff&rsquo;s starred vocab), reachable from both Advanced settings and the session picker; resets and progress tools moved into their own collapsibles under Advanced settings.</li>
           </ul>
         </details>
         <details class="user-guide-changelog-version">
@@ -846,7 +853,7 @@
       <p>Tucked under <em>Advanced review settings</em>. All toggles persist across sessions.</p>
       <ul class="user-guide-list">
         <li><strong>Shuffle</strong> &mdash; randomize card order.</li>
-        <li><strong>Required only</strong> &mdash; hide optional / supplemental words. On by default.</li>
+        <li><strong>Starred words only</strong> &mdash; limit the deck to the words Duff stars to memorise, hiding optional / supplemental words. On by default. Also available as a toggle in the <strong>Choose session</strong> picker, under <em>Deselect all</em>.</li>
         <li><strong>Hard review</strong> &mdash; drill only vocab missed more than 10 times that's still under 40% confidence.</li>
         <li><strong>Eng &rarr; Gk</strong> &mdash; flip the prompt direction.</li>
         <li><strong>Spaced review</strong> &mdash; turn SRS on or off. On by default.</li>
@@ -856,7 +863,7 @@
         <li><strong>Self-check</strong> (grammar only) &mdash; hide the answer until you tap to reveal, then rate yourself.</li>
         <li><strong>Parsing options</strong> (parsing only) &mdash; per-dimension master toggles, per-value exclude sub-filters, and an <em>Optional paradigm</em> toggle for subjunctive / non-present infinitives / participle declensions / etc.</li>
         <li><strong>Display</strong> &mdash; Serif (Gentium Plus) or Sans (Noto Sans), plus Medium / Large / X-Large text size.</li>
-        <li><strong>Reshuffle / Reset deck / Reset required / Reset stats</strong> &mdash; reorder eligible cards, clear the current sets' progress, clear required flags, or wipe all stats globally (no undo).</li>
+        <li><strong>Reshuffle / Reset deck / Reset starred / Reset stats</strong> (grouped under <strong>Reset actions</strong> in Advanced settings) &mdash; reorder eligible cards, clear the current sets' progress, clear starred-card progress, or wipe all stats globally (no undo).</li>
       </ul>
 
       <h3 class="user-guide-heading">How spaced repetition works</h3>
@@ -870,7 +877,7 @@
       <p>With <strong>Spaced review off</strong>, the deck behaves as a flip deck: <em>Hard</em> and <em>Uncertain</em> shuffle the card to the back of the active pile, <em>Easy</em> archives it. At the end of a pass the still-active cards reshuffle; archived cards stay until you press <strong>&#x21BB; Reset</strong> (mid-deck asks for confirmation; at deck-end the <strong>Next</strong> arrow becomes a one-tap Reset) or pick a new session.</p>
 
       <h3 class="user-guide-heading">Progress tools and notice</h3>
-      <p><strong>Progress tools</strong> (collapsible) export your full progress as JSON or import a saved file &mdash; useful for moving between devices or backing up before a reset.</p>
+      <p><strong>Progress tools</strong> (collapsible, inside <strong>Advanced review settings</strong>) export your full progress as JSON or import a saved file &mdash; useful for moving between devices or backing up before a reset.</p>
       <p><strong>Study aid notice</strong> re-opens the AI / unofficial-content disclaimer.</p>
 
       <h3 class="user-guide-heading">Keyboard shortcuts (while studying)</h3>
@@ -924,7 +931,7 @@
       <p class="reset-scope-row">
         <label>
           <input type="checkbox" data-reset-required-only id="resetSpacedRequiredOnly">
-          <strong>Required cards only</strong> — apply just to graded vocabulary in the current selection (useful for quiz prep).
+          <strong>Starred cards only</strong> — apply just to graded vocabulary in the current selection (useful for quiz prep).
         </label>
       </p>
     </div>
@@ -964,7 +971,7 @@
       <p class="reset-scope-row">
         <label>
           <input type="checkbox" data-reset-required-only id="resetUnspacedRequiredOnly">
-          <strong>Required cards only</strong> — apply just to graded vocabulary in the current selection (useful for quiz prep).
+          <strong>Starred cards only</strong> — apply just to graded vocabulary in the current selection (useful for quiz prep).
         </label>
       </p>
     </div>
@@ -1051,62 +1058,62 @@
   </div>
 </div>
 
-<script defer src="js/data/words.js?v=293"></script>
-<script defer src="js/data/morphology.js?v=293"></script>
-<script defer src="js/data/lemma_inventory.js?v=293"></script>
-<script defer src="js/data/supplemental.js?v=293"></script>
-<script defer src="js/data/grammar.js?v=293"></script>
-<script defer src="js/data/supplementals/week_1_supplemental.js?v=293"></script>
-<script defer src="js/data/supplementals/week_1_paradigms.js?v=293"></script>
-<script defer src="js/data/supplementals/week_2_paradigms.js?v=293"></script>
-<script defer src="js/data/supplementals/week_3_paradigms.js?v=293"></script>
-<script defer src="js/data/supplementals/week_4_paradigms.js?v=293"></script>
-<script defer src="js/data/supplementals/second_aorist_flip.js?v=293"></script>
-<script defer src="js/data/supplementals/liquid_future_flip.js?v=293"></script>
-<script defer src="js/data/supplementals/week_5_paradigms.js?v=293"></script>
-<script defer src="js/data/supplementals/w6_aorist_passive_flip.js?v=293"></script>
-<script defer src="js/data/supplementals/w6_perfect_active_flip.js?v=293"></script>
-<script defer src="js/data/supplementals/w8_mi_verb_principal_parts_flip.js?v=293"></script>
-<script defer src="js/data/supplementals/week_6_paradigms.js?v=293"></script>
-<script defer src="js/data/supplementals/week_7_paradigms.js?v=293"></script>
-<script defer src="js/data/supplementals/week_8_paradigms.js?v=293"></script>
-<script defer src="js/data/supplementals/adj_paradigms.js?v=293"></script>
-<script defer src="js/data/supplementals/w3o_supplemental.js?v=293"></script>
-<script defer src="js/data/supplementals/w6o_supplemental.js?v=293"></script>
-<script defer src="js/data/supplementals/w7o_supplemental.js?v=293"></script>
-<script defer src="js/data/supplementals/w8o_supplemental.js?v=293"></script>
-<script defer src="js/data/supplementals/paradigm_morphology.js?v=293"></script>
-<script defer src="js/data/supplementals/stem_change_drills.js?v=293"></script>
-<script defer src="js/data/advanced/advanced_01.js?v=293"></script>
-<script defer src="js/data/advanced/advanced_02.js?v=293"></script>
-<script defer src="js/data/advanced/advanced_03.js?v=293"></script>
-<script defer src="js/data/advanced/advanced_04.js?v=293"></script>
-<script defer src="js/data/advanced/advanced_05.js?v=293"></script>
-<script defer src="js/data/advanced/advanced_06.js?v=293"></script>
-<script defer src="js/data/advanced/advanced_07.js?v=293"></script>
-<script defer src="js/data/advanced/advanced_08.js?v=293"></script>
-<script defer src="js/data/advanced/advanced_09.js?v=293"></script>
-<script defer src="js/data/advanced/advanced_10.js?v=293"></script>
-<script defer src="js/data/advanced/advanced_11.js?v=293"></script>
-<script defer src="js/data/advanced/advanced_12.js?v=293"></script>
-<script defer src="js/data/advanced/advanced_13.js?v=293"></script>
-<script defer src="js/data/advanced/advanced_14.js?v=293"></script>
-<script defer src="js/data/advanced/advanced_15.js?v=293"></script>
-<script defer src="js/data/advanced/advanced_16.js?v=293"></script>
-<script defer src="js/data/advanced/advanced_17.js?v=293"></script>
-<script defer src="js/data/advanced/advanced_18.js?v=293"></script>
-<script defer src="js/data/advanced/advanced_19.js?v=293"></script>
-<script defer src="js/data/advanced/advanced_20.js?v=293"></script>
-<script defer src="js/data/advanced/advanced_21.js?v=293"></script>
-<script defer src="js/data/advanced/advanced_22.js?v=293"></script>
-<script defer src="js/data/advanced/advanced_23.js?v=293"></script>
-<script defer src="js/data/advanced/advanced_24.js?v=293"></script>
-<script defer src="js/data/advanced/advanced_25.js?v=293"></script>
-<script defer src="js/data/nt_book_vocab.js?v=293"></script>
-<script defer src="js/data/reader.js?v=293"></script>
-<script defer src="js/data/reader_verse_literals.js?v=293"></script>
-<script defer src="js/data/reader_translations.js?v=293"></script>
-<script defer src="js/logic/pos_logic.js?v=293"></script>
-<script type="module" src="js/app/main.js?v=293"></script>
+<script defer src="js/data/words.js?v=294"></script>
+<script defer src="js/data/morphology.js?v=294"></script>
+<script defer src="js/data/lemma_inventory.js?v=294"></script>
+<script defer src="js/data/supplemental.js?v=294"></script>
+<script defer src="js/data/grammar.js?v=294"></script>
+<script defer src="js/data/supplementals/week_1_supplemental.js?v=294"></script>
+<script defer src="js/data/supplementals/week_1_paradigms.js?v=294"></script>
+<script defer src="js/data/supplementals/week_2_paradigms.js?v=294"></script>
+<script defer src="js/data/supplementals/week_3_paradigms.js?v=294"></script>
+<script defer src="js/data/supplementals/week_4_paradigms.js?v=294"></script>
+<script defer src="js/data/supplementals/second_aorist_flip.js?v=294"></script>
+<script defer src="js/data/supplementals/liquid_future_flip.js?v=294"></script>
+<script defer src="js/data/supplementals/week_5_paradigms.js?v=294"></script>
+<script defer src="js/data/supplementals/w6_aorist_passive_flip.js?v=294"></script>
+<script defer src="js/data/supplementals/w6_perfect_active_flip.js?v=294"></script>
+<script defer src="js/data/supplementals/w8_mi_verb_principal_parts_flip.js?v=294"></script>
+<script defer src="js/data/supplementals/week_6_paradigms.js?v=294"></script>
+<script defer src="js/data/supplementals/week_7_paradigms.js?v=294"></script>
+<script defer src="js/data/supplementals/week_8_paradigms.js?v=294"></script>
+<script defer src="js/data/supplementals/adj_paradigms.js?v=294"></script>
+<script defer src="js/data/supplementals/w3o_supplemental.js?v=294"></script>
+<script defer src="js/data/supplementals/w6o_supplemental.js?v=294"></script>
+<script defer src="js/data/supplementals/w7o_supplemental.js?v=294"></script>
+<script defer src="js/data/supplementals/w8o_supplemental.js?v=294"></script>
+<script defer src="js/data/supplementals/paradigm_morphology.js?v=294"></script>
+<script defer src="js/data/supplementals/stem_change_drills.js?v=294"></script>
+<script defer src="js/data/advanced/advanced_01.js?v=294"></script>
+<script defer src="js/data/advanced/advanced_02.js?v=294"></script>
+<script defer src="js/data/advanced/advanced_03.js?v=294"></script>
+<script defer src="js/data/advanced/advanced_04.js?v=294"></script>
+<script defer src="js/data/advanced/advanced_05.js?v=294"></script>
+<script defer src="js/data/advanced/advanced_06.js?v=294"></script>
+<script defer src="js/data/advanced/advanced_07.js?v=294"></script>
+<script defer src="js/data/advanced/advanced_08.js?v=294"></script>
+<script defer src="js/data/advanced/advanced_09.js?v=294"></script>
+<script defer src="js/data/advanced/advanced_10.js?v=294"></script>
+<script defer src="js/data/advanced/advanced_11.js?v=294"></script>
+<script defer src="js/data/advanced/advanced_12.js?v=294"></script>
+<script defer src="js/data/advanced/advanced_13.js?v=294"></script>
+<script defer src="js/data/advanced/advanced_14.js?v=294"></script>
+<script defer src="js/data/advanced/advanced_15.js?v=294"></script>
+<script defer src="js/data/advanced/advanced_16.js?v=294"></script>
+<script defer src="js/data/advanced/advanced_17.js?v=294"></script>
+<script defer src="js/data/advanced/advanced_18.js?v=294"></script>
+<script defer src="js/data/advanced/advanced_19.js?v=294"></script>
+<script defer src="js/data/advanced/advanced_20.js?v=294"></script>
+<script defer src="js/data/advanced/advanced_21.js?v=294"></script>
+<script defer src="js/data/advanced/advanced_22.js?v=294"></script>
+<script defer src="js/data/advanced/advanced_23.js?v=294"></script>
+<script defer src="js/data/advanced/advanced_24.js?v=294"></script>
+<script defer src="js/data/advanced/advanced_25.js?v=294"></script>
+<script defer src="js/data/nt_book_vocab.js?v=294"></script>
+<script defer src="js/data/reader.js?v=294"></script>
+<script defer src="js/data/reader_verse_literals.js?v=294"></script>
+<script defer src="js/data/reader_translations.js?v=294"></script>
+<script defer src="js/logic/pos_logic.js?v=294"></script>
+<script type="module" src="js/app/main.js?v=294"></script>
 </body>
 </html>

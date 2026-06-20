@@ -229,7 +229,7 @@ export function renderReview() {
   if (deckTagEl) {
     deckTagEl.textContent = host.isMorphologyMode()
       ? 'Grammar deck'
-      : (runtime.requiredOnly ? 'Required-only deck' : 'Full deck');
+      : (runtime.requiredOnly ? 'Starred-only deck' : 'Full deck');
   }
 
   document.getElementById('reviewStats').innerHTML = `

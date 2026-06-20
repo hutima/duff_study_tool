@@ -388,6 +388,10 @@
     border-color: var(--gold-dim);
   }
   @media (hover: hover) { .deselect-all-btn:hover { background: rgba(201,168,76,0.1); } }
+  /* "Starred words only" mirror toggle under Deselect all — centered, and the
+     whole button toggles (no text guard here), so the text stays a pointer. */
+  .selector-required-toggle { margin-top: 12px; width: 100%; justify-content: center; }
+  .selector-required-toggle > .toggle-text { cursor: pointer; }
 
   .supplemental-list {
     display: grid;

@@ -1686,7 +1686,7 @@ export function renderAnalyticsOverlay() {
 
   // ── Direction + scope labels reused across the vocab sections ──
   const dirLabel = analyticsDirection === 'e2g' ? 'English → Greek' : 'Greek → English';
-  const scopeLabel = analyticsRequiredOnly ? 'Required only' : 'All vocab';
+  const scopeLabel = analyticsRequiredOnly ? 'Starred only' : 'All vocab';
   const isConfirmedFor = (store, marks) => (card) => {
     if (marks[card.id] === 'known') return true;
     const pct = getConfidencePct(store[card.id]);
@@ -2064,7 +2064,7 @@ function renderVocabViewToggles() {
     <div class="analytics-view-toggle">
       <span class="analytics-view-toggle-label">Scope</span>
       <div class="analytics-view-toggle-group" role="group" aria-label="Vocabulary scope">
-        ${scopeBtn('required', 'Required only')}
+        ${scopeBtn('required', 'Starred only')}
         ${scopeBtn('all', 'All vocab')}
       </div>
     </div>
