@@ -746,6 +746,17 @@ function getAggregateSelectionKeys() {
   return [...union];
 }
 
+// Full paradigm scope = every chapter (1..20). Build/Lookup mode is a complete
+// paradigm reference and is deliberately NOT gated by the selected chapter: the
+// form pool already spans all chapters (getLookupFormsForLemma), so the focus
+// dropdown and default focus must too — otherwise picking a low chapter empties
+// the paradigm list ("No paradigms in current selection") even though every
+// form is available. The normal drill stays gated to the parsing chapter.
+const PARSING_FULL_SCOPE_KEYS = ['20'];
+function getParadigmFocusScopeKeys() {
+  return runtime.parsingLookup ? PARSING_FULL_SCOPE_KEYS : getAggregateSelectionKeys();
+}
+
 // Coerce runtime.parsingChapter to a valid 1..20 integer. Returns 20 as
 // the fallback (every Duff chapter in scope).
 function getParsingChapter() {
@@ -1249,11 +1260,11 @@ function getLookupFocusLemma() {
   let sel = runtime.morphFocusedParadigm;
   const category = parseCategoryShuffleValue(sel);
   if (category) {
-    const inCat = listAvailableParadigms(getAggregateSelectionKeys())
+    const inCat = listAvailableParadigms(getParadigmFocusScopeKeys())
       .filter((p) => p.category === category);
     sel = inCat.length ? inCat[0].lemma : null;
   }
-  if (!sel) sel = chooseDefaultFocusedParadigm(getAggregateSelectionKeys());
+  if (!sel) sel = chooseDefaultFocusedParadigm(getParadigmFocusScopeKeys());
   return sel || null;
 }
 
@@ -1267,7 +1278,7 @@ function getLookupFormsForLemma(lemma) {
   const poolKey = `lookup::${lemma}`;
   const st = runtime.morphLookupState;
   if (st && st.poolKey === poolKey && Array.isArray(st.pool)) return st.pool;
-  const cards = getCardsForFocusedParadigm(['20'], lemma, {
+  const cards = getCardsForFocusedParadigm(PARSING_FULL_SCOPE_KEYS, lemma, {
     includeOptional: true,
     includeSyncretic: true
   });
@@ -1494,7 +1505,9 @@ function syncParadigmFocusUi() {
   const select = document.getElementById('paradigmFocusSelectPrimary');
   if (!select) return;
   if (!isParsingMode()) return;
-  const aggregateKeys = getAggregateSelectionKeys();
+  // Build mode is not chapter-gated — widen to the full paradigm scope so every
+  // paradigm is focusable regardless of the selected chapter.
+  const aggregateKeys = getParadigmFocusScopeKeys();
   // Stem-recall drills ("Second-aorist stems", "Liquid-stem futures") have no
   // parse dimensions, so they stay in the dropdown as stem-recall links that
   // render a redirect card to the matching flip-card supplemental (see
