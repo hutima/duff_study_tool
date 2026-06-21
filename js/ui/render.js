@@ -8,7 +8,7 @@
 import { runtime } from '../state/runtime.js';
 import { buildGrammarSupportHtml } from '../domain/grammar/explanations.js';
 import { renderProgress, renderReview } from './progress.js';
-import { buildMorphSteps, computeAccessibleDimensionPools, parseAnswerDimensions, aspectMistakeNote, isSecondPluralPresentMoodAmbiguity, computeParadigmPresentValues, accentLookalikesFor, confusableFormHints, THIRD_PERSON_IMPERATIVE_CHAPTER } from '../domain/grammar/morph_steps.js';
+import { buildMorphSteps, computeAccessibleDimensionPools, parseAnswerDimensions, aspectMistakeNote, isSecondPluralPresentMoodAmbiguity, computeParadigmPresentValues, accentLookalikesFor, confusableFormHints, isSyncreticMiddlePassiveVoice, THIRD_PERSON_IMPERATIVE_CHAPTER } from '../domain/grammar/morph_steps.js';
 import { getAccessibleMorphCards, deriveSelectionLevels, buildMultiGenderLemmas, MIXED_FORM_NOUN_LEMMAS, THIRD_DECLENSION_NOUN_LEMMAS, paradigmCategoryForLemma } from '../domain/grammar/paradigm_focus.js';
 import { resolveLookupWalk } from '../domain/grammar/morph_lookup.js';
 
@@ -1319,6 +1319,19 @@ function resolveFormForPickedDims(card, steps, pickedValues, autoFilledDims) {
     if (cardVoice === 'middle' || cardVoice === 'middle/passive') {
       pickedDims.voice = cardVoice;
     }
+  }
+  // Present / imperfect / perfect / pluperfect middle and passive are one and
+  // the same form (λύομαι is equally "I loose for myself" and "I am loosed"),
+  // and the parse drill accepts either reading on the Voice step. Mirror that
+  // here so a (correctly) picked 'middle' still reconstructs the form even when
+  // the card's stored canonical labelled it one-sidedly — e.g. the W6 "passive
+  // indicative" set tags λύεται 'passive', so without this a student who picks
+  // present middle indicative 3rd plural sees a blank form ("—") instead of
+  // λύονται, because dimsCompatible('middle','passive') is false. Widening the
+  // picked voice to the syncretic 'middle/passive' matches a candidate stored
+  // as either 'middle' or 'passive'.
+  if (isSyncreticMiddlePassiveVoice(pickedDims, card.lemma)) {
+    pickedDims.voice = 'middle/passive';
   }
   const keys = Object.keys(pickedDims);
   if (keys.length === 0) return { kind: 'none' };

@@ -2011,6 +2011,22 @@
     align-items: center;
     gap: 8px;
   }
+  .dim-value-head {
+    display: grid;
+    grid-template-columns: 74px 1fr 34px 42px;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 2px;
+  }
+  .dim-value-head-pct,
+  .dim-value-head-cov {
+    font-size: calc((9px) * var(--text-scale));
+    font-family: var(--font-display);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    text-align: right;
+  }
   .dim-value-name {
     font-size: calc((12px) * var(--text-scale));
     color: var(--cream);
