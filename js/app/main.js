@@ -412,7 +412,13 @@ configureProgress({
       optionalFilters: runtime.optionalFormFilters,
       dimValueFilters: runtime.dimValueFilters
     }
-  )
+  ),
+  // Every concrete paradigm whose chapter gate is met at the current
+  // selection (excluding aggregate buckets), used by the default parsing
+  // review panel to list in-scope paradigms the student hasn't drilled yet.
+  getInScopeParadigmLemmas: () => listAvailableParadigms(getAggregateSelectionKeys())
+    .filter((p) => !p.isAggregate)
+    .map((p) => p.lemma)
 });
 configureRender({
   saveState: () => saveState(),
