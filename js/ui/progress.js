@@ -356,19 +356,38 @@ function renderParsingReviewPanel() {
   const deckTagEl = document.getElementById('reviewDeckTag');
   if (deckTagEl) deckTagEl.textContent = 'Paradigm parsing';
 
-  const focused = runtime.morphFocusedParadigm || '';
+  // Custom-set mode turns the panel into a live scorecard for the deck the
+  // user has hand-picked: the list tracks the *selected* paradigms rather than
+  // every paradigm ever drilled. Selected-but-undrilled paradigms still show
+  // (so the set is fully visible) as long as they have in-scope forms, and
+  // drilled paradigms outside the set drop out. There's no single focused
+  // paradigm in this mode (the dropdown is hidden), so nothing gets pinned.
+  // Outside custom mode the panel keeps its full "every drilled paradigm" view
+  // — and the analytics overlay always stays on the full set regardless.
+  const customMode = !!runtime.parsingCustomReview;
+  const focused = customMode ? '' : (runtime.morphFocusedParadigm || '');
   const stats = runtime.paradigmStepStats || {};
   const enabledDims = host.getEnabledParsingDims();
   const allStats = getAllLemmaStats(stats, enabledDims);
 
+  let baseStats = allStats;
+  if (customMode) {
+    const selectedMap = runtime.parsingCustomParadigms || {};
+    const drilledByLemma = new Map(allStats.map((s) => [s.lemma, s]));
+    baseStats = Object.keys(selectedMap)
+      .filter((lemma) => selectedMap[lemma])
+      .map((lemma) => drilledByLemma.get(lemma) || { lemma, attempts: 0 })
+      .filter((s) => (host.getMorphCardsForLemma(s.lemma) || []).length > 0);
+  }
+
   // Each drilled paradigm's breakdown comes from its in-scope forms (up to two
   // recent attempts per form, chapter-gated), folded into the cross-paradigm
-  // accumulator so the "All paradigms" row matches the per-lemma rows. The
-  // headline % is this per-form tally — every form, not a capped rolling
-  // window — consistent with the bars.
+  // accumulator so the overall row matches the per-lemma rows. The headline %
+  // is this per-form tally — every form, not a capped rolling window —
+  // consistent with the bars.
   const overallAcc = createValueBreakdownAcc();
   const lemmaBreakdowns = new Map();
-  allStats.forEach((s) => {
+  baseStats.forEach((s) => {
     const cards = host.getMorphCardsForLemma(s.lemma) || [];
     accumulateValueBreakdown(overallAcc, stats, s.lemma, cards, enabledDims);
     lemmaBreakdowns.set(s.lemma, summarizeLemmaValueBreakdown(stats, s.lemma, cards, enabledDims));
@@ -380,8 +399,8 @@ function renderParsingReviewPanel() {
 
   // Focused paradigm pinned on top; the rest worst-first by per-form accuracy
   // (paradigms with nothing seen yet sink to the bottom).
-  const focusedEntry = allStats.find((s) => s.lemma === focused);
-  const otherEntries = allStats.filter((s) => s.lemma !== focused);
+  const focusedEntry = focused ? baseStats.find((s) => s.lemma === focused) : null;
+  const otherEntries = focused ? baseStats.filter((s) => s.lemma !== focused) : baseStats.slice();
   otherEntries.sort((a, b) => {
     const pa = pctOf(a.lemma), pb = pctOf(b.lemma);
     if (pa == null && pb == null) return 0;
@@ -394,7 +413,7 @@ function renderParsingReviewPanel() {
   const drilledCount = ordered.length;
   document.getElementById('reviewStats').innerHTML = `
       <div class="review-stats-row">
-        <span class="stat-deck">▦ Paradigms drilled: ${drilledCount}</span>
+        <span class="stat-deck">▦ ${customMode ? 'Custom set' : 'Paradigms drilled'}: ${drilledCount}</span>
         <span class="stat-total">· Tap any row to break it down by mood, tense, and voice</span>
       </div>`;
 
@@ -420,18 +439,18 @@ function renderParsingReviewPanel() {
          aria-expanded="${overallExpanded ? 'true' : 'false'}"
          data-parsing-row="__overall">
       <div class="parsing-review-header">
-        <span class="parsing-review-lemma parsing-review-lemma-overall">All paradigms</span>
+        <span class="parsing-review-lemma parsing-review-lemma-overall">${customMode ? 'Selected paradigms' : 'All paradigms'}</span>
         <span class="parsing-review-pct ${overallPctClass}">${overallPct == null ? '—' : `${overallPct}%`}</span>
         <span class="parsing-review-attempts">${overallTotals.seen}/${overallTotals.scope} forms · ${drilledCount} paradigm${drilledCount === 1 ? '' : 's'}</span>
       </div>
       ${overallWeakest ? `<div class="parsing-review-weakline">${parsingWeakestTagHtml(overallWeakest)}</div>` : ''}
-      ${overallExpanded ? `<div class="parsing-review-chart">${buildDimValueBarsHtml(overallGroups, { caption: 'Per-dimension accuracy per value, across every paradigm · seen / in scope' })}</div>` : ''}
+      ${overallExpanded ? `<div class="parsing-review-chart">${buildDimValueBarsHtml(overallGroups, { caption: `Per-dimension accuracy per value, across ${customMode ? 'your selected paradigms' : 'every paradigm'} · seen / in scope` })}</div>` : ''}
     </div>`;
 
   if (!ordered.length) {
     document.getElementById('reviewList').innerHTML = `
       <div class="parsing-review-list">${overallRow}</div>
-      <span style="color:var(--muted);font-size:14px;font-style:italic">Complete a parse to start seeing per-paradigm accuracy here.</span>`;
+      <span style="color:var(--muted);font-size:14px;font-style:italic">${customMode ? 'Pick at least one paradigm in the custom set to see its accuracy here.' : 'Complete a parse to start seeing per-paradigm accuracy here.'}</span>`;
     bindParsingReviewInteractivity();
     return;
   }
