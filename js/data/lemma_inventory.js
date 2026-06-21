@@ -2329,6 +2329,28 @@
     };
   }
 
+  // λύω present middle/passive participle (λυόμενος) and aorist middle
+  // participle (λυσάμενος) — the -μενος (2-1-2 adjectival) declensions the
+  // rest of this file repeatedly cites as the model ("declines like
+  // λυόμενος"), yet λύω itself ships only the present passive nom sg masc
+  // (λυόμενος, drilled in W6) and no aorist middle participle at all. Both
+  // carry recessive accent, so menosParticipleParadigm applies — unlike the
+  // persistent-penult perfect m/p λελυμένος above, which is spelled out by
+  // hand. Gated at Ch 15 (middle/passive voice) and kept optional, matching
+  // λύω's other participle extensions (perfect/future). The drilled W6
+  // λυόμενος nom-sg card supersedes the duplicate here in getCardsFor-
+  // FocusedParadigm's per-form dedup, so only the remaining slots surface.
+  const LUO_PRESENT_MP_PARTICIPLE =
+    menosParticipleParadigm('λυό', 'λυο', 'present middle/passive participle');
+  const LUO_AORIST_MIDDLE_PARTICIPLE =
+    menosParticipleParadigm('λυσά', 'λυσα', 'aorist middle participle');
+  const LUO_PRESENT_AORIST_MID_PARTICIPLE_OPTIONAL = [
+    { chapter: 15, family: 'λύω — present middle/passive participle λυόμενος full declension (optional)',
+      forms: LUO_PRESENT_MP_PARTICIPLE },
+    { chapter: 15, family: 'λύω — aorist middle participle λυσάμενος full declension (optional)',
+      forms: LUO_AORIST_MIDDLE_PARTICIPLE }
+  ];
+
   // 2nd-aorist passive participle (-είς, θ-less: γραφείς). Same endings as the
   // θ-type aoristPassiveParticipleParadigm but on the bare 2nd-aorist stem, so
   // it parses as a plain "aorist passive participle".
@@ -2843,11 +2865,14 @@
         ...LUO_PERFECT_MP_PARTICIPLE,
         ...LUO_FUTURE_ACTIVE_PARTICIPLE,
         ...LUO_FUTURE_MIDDLE_PARTICIPLE,
-        ...LUO_FUTURE_PASSIVE_PARTICIPLE
+        ...LUO_FUTURE_PASSIVE_PARTICIPLE,
+        ...LUO_PRESENT_MP_PARTICIPLE,
+        ...LUO_AORIST_MIDDLE_PARTICIPLE
       },
       optionalFormGroups: [
         ...LUO_OPTIONAL_GROUPS,
         ...LUO_PARTICIPLE_OPTIONAL,
+        ...LUO_PRESENT_AORIST_MID_PARTICIPLE_OPTIONAL,
         ...LUO_FUTURE_PARTICIPLE_OPTIONAL
       ]
     },
