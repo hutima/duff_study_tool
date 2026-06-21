@@ -507,7 +507,7 @@ export function buildParsingAccuracyBucketsSvg(buckets, options = {}) {
 
 // Horizontal stacked composition of parse outcomes under the 3-tier scoring:
 // clean (every dim right first try), reattempted (eventually right via undo —
-// half credit), and missed. `rows` is an array of
+// reduced credit), and missed. `rows` is an array of
 // { label, clean, reattempted, missed }; each renders as a labelled stacked bar
 // with a count caption, so a glance reads how much of the recent drilling was
 // clean vs needed a nudge vs flat wrong. Returns '' when there's nothing to show.
@@ -548,7 +548,7 @@ export function buildParsingOutcomeMixHtml(rows, options = {}) {
       </div>`;
   }).join('');
   const caption = options.caption
-    || 'A reattempted parse was undone and re-answered — eventually right, half credit.';
+    || 'A reattempted parse was undone and re-answered — eventually right, but at reduced credit (a quarter for one undo, halving with each further undo).';
   return `
     <div class="analytics-chart-card">
       <div class="analytics-chart-title">${escapeHtml(options.title || 'Parse outcome mix')}</div>
