@@ -2621,6 +2621,7 @@ function getWordProgress(cardId, { persist = false } = {}) {
     existing.leechDrill = existing.leechDrill === true;
     existing.leechStreak = Number.isFinite(existing.leechStreak) ? Math.max(0, Math.floor(existing.leechStreak)) : 0;
     existing.cycleFacesPassed = Array.isArray(existing.cycleFacesPassed) ? existing.cycleFacesPassed.filter(f => typeof f === 'string') : [];
+    existing.cycleFacesHeld = (existing.cycleFacesHeld && typeof existing.cycleFacesHeld === 'object' && !Array.isArray(existing.cycleFacesHeld)) ? existing.cycleFacesHeld : {};
     return existing;
   }
   const fresh = {
@@ -2645,7 +2646,8 @@ function getWordProgress(cardId, { persist = false } = {}) {
     lapseCount: 0,
     leechDrill: false,
     leechStreak: 0,
-    cycleFacesPassed: []
+    cycleFacesPassed: [],
+    cycleFacesHeld: {}
   };
   if (persist) progressStore[cardId] = fresh;
   return fresh;
@@ -2658,21 +2660,31 @@ function isCardDue(card) {
 
   // Variant-form gating (Model B): cards that share one progress entry — a base
   // verb and its derived principal-part faces (the "… as cards" toggles) — only
-  // advance the shared schedule once EVERY active face is passed in the same
-  // cycle. A face passed mid-cycle is held 2h (so the set resurfaces together
-  // next session), but the still-unpassed faces must stay surfaceable now, even
-  // though they share that same +2h dueAt — otherwise the set could never be
-  // finished in one sitting. See applySpacedReview / getVariantCycleInfo.
+  // advance the shared schedule once EVERY active face is CLEARED (Easy) in the
+  // same cycle. Per-face state lives on the shared entry: cycleFacesPassed
+  // (faces Easy-cleared this cycle, hidden until the set completes) and
+  // cycleFacesHeld (faces marked Uncertain — re-queued for 2h, then they
+  // resurface to be tried again; an Uncertain never clears a face). The
+  // unpassed/expired faces must stay surfaceable now even though they share the
+  // set's +2h dueAt, or the set could never be finished in one sitting. See
+  // applySpacedReview / getVariantCycleInfo.
   const info = getVariantCycleInfo(card);
   if (info) {
+    const now = Date.now();
+    const passed = progress.cycleFacesPassed;
+    const held = progress.cycleFacesHeld;
+    const inProgress = passed.length > 0 || Object.keys(held).length > 0;
     if (naturallyDue) {
       // The shared timer has fired (a fresh sitting): re-test every face, so a
       // stale partial cycle from a previous, abandoned sitting is cleared.
-      if (progress.cycleFacesPassed.length) progress.cycleFacesPassed = [];
+      if (inProgress) { progress.cycleFacesPassed = []; progress.cycleFacesHeld = {}; }
       return true;
     }
-    // Held within the 2h window: keep unpassed faces active, hide passed ones.
-    return progress.cycleFacesPassed.length > 0 && !progress.cycleFacesPassed.includes(info.face);
+    if (!inProgress) return false;            // set scheduled out, not mid-cycle
+    if (passed.includes(info.face)) return false;   // Easy-cleared this cycle
+    const heldUntil = held[info.face];
+    if (Number.isFinite(heldUntil) && now < heldUntil) return false; // within its 2h re-queue
+    return true;                              // unpassed, or its hold has expired → due now
   }
   return naturallyDue;
 }
@@ -3228,33 +3240,51 @@ function applySpacedReview(card, outcome) {
 
   if (ratedOutcome === 'again') {
     // A miss resets any in-progress variant cycle and lapses the shared entry.
-    if (variant) progress.cycleFacesPassed = [];
+    if (variant) { progress.cycleFacesPassed = []; progress.cycleFacesHeld = {}; }
     const dropFromActive = applyHardLapse(progress, cadence, now);
     if (dropFromActive && Array.isArray(runtime.spacedActiveIds)) {
       runtime.spacedActiveIds = runtime.spacedActiveIds.filter(id => id !== card.id);
     }
     getDirectionalMarksStore()[card.id] = 'unsure';
   } else {
-    // Variant-form gating: only advance the shared schedule once every active
-    // face is passed in the same cycle. A face passed mid-cycle holds 2h
-    // (without growing) while the rest stay surfaceable this sitting; the
-    // completing pass falls through to normal scheduling. Bypassed while a
-    // relearn/leech ladder owns the shared schedule (the whole set relearns
-    // together) — the gating is for the steady-state growth phase.
+    // Variant-form gating: the shared schedule only advances once every active
+    // face is CLEARED with Easy in the same cycle. An Easy on one face holds it
+    // 2h (cleared) while the rest stay surfaceable this sitting; the Easy that
+    // clears the last face falls through to normal growth. An Uncertain does NOT
+    // clear a face — it re-queues that one face for 2h (its siblings stay
+    // active) and never completes the set, so a form you're shaky on keeps
+    // coming back until you can mark it Easy. Bypassed while a relearn/leech
+    // ladder owns the shared schedule (the whole set relearns together).
     if (variant && !progress.inRelearn && !progress.leechDrill) {
+      const held = { ...progress.cycleFacesHeld };
+      if (ratedOutcome === 'pass') {
+        // Uncertain → re-queue just this face for 2h; don't clear it, never completes.
+        held[variant.face] = now + SRS_VARIANT_HOLD_MS;
+        progress.cycleFacesHeld = held;
+        progress.streak += 1;
+        setProgressDelay(progress, SRS_VARIANT_HOLD_MS, now);
+        getDirectionalMarksStore()[card.id] = 'unsure';
+        progress.lastSpacedOutcome = ratedOutcome;
+        runtime.marks = getDirectionalMarksStore();
+        return;
+      }
+      // Easy → clear this face (and drop any pending re-queue for it).
       const passed = new Set(progress.cycleFacesPassed);
       passed.add(variant.face);
+      delete held[variant.face];
       const complete = [...variant.siblingFaces].every(f => passed.has(f));
       if (!complete) {
         progress.cycleFacesPassed = [...passed];
+        progress.cycleFacesHeld = held;
         progress.streak += 1;
         setProgressDelay(progress, SRS_VARIANT_HOLD_MS, now);
-        getDirectionalMarksStore()[card.id] = ratedOutcome === 'easy' ? 'known' : 'unsure';
+        getDirectionalMarksStore()[card.id] = 'known';
         progress.lastSpacedOutcome = ratedOutcome;
         runtime.marks = getDirectionalMarksStore();
         return;
       }
       progress.cycleFacesPassed = []; // set complete → advance, fresh cycle
+      progress.cycleFacesHeld = {};
     }
     applyCorrectOutcome(progress, cadence, now, ratedOutcome);
     getDirectionalMarksStore()[card.id] = ratedOutcome === 'easy' ? 'known' : 'unsure';
