@@ -1068,8 +1068,8 @@ const FORM_HISTORY_CAP = 10;
 
 // Record one attempt: a fully walked card with per-dimension credit. Each dim
 // value is 1 (clean correct), a fraction (reattempted via undo, re-picked
-// correctly — 0.5 per single undo, halving again for each extra undo: 0.25,
-// 0.125, …), or 0 (wrong). The accuracy aggregators sum the value (so a
+// correctly — 0.25 for a single undo, halving again for each extra undo: 0.125,
+// 0.0625, …), or 0 (wrong). The accuracy aggregators sum the value (so a
 // reattempt counts fractionally), while evaluateRecentAttempt's "known" test
 // requires an exact 1, so any reattempt keeps the form out of the 2/2
 // exclude-known set.
@@ -1137,7 +1137,7 @@ export function summarizeLemmaStats(stats, lemma, enabledDims) {
     let attemptTotal = 0, attemptCorrect = 0;
     for (const [dim, val] of Object.entries(a.dims)) {
       if (!isDimEnabled(enabledDims, dim)) continue;
-      // `val` is fractional credit: 1 = clean correct, a fraction (0.5, 0.25,
+      // `val` is fractional credit: 1 = clean correct, a fraction (0.25, 0.125,
       // …, halving per undo) = reattempted via undo (re-picked right), 0 =
       // wrong. Sum it so a reattempt counts fractionally.
       const credit = Number(val) || 0;
@@ -1199,9 +1199,10 @@ export function getParsingAccuracyBuckets(stats, enabledDims, bucketSize = PARSI
       for (const [dim, val] of Object.entries(a.dims)) {
         if (!isDimEnabled(enabledDims, dim)) continue;
         total += 1;
-        // Fractional credit: 0.5 for a reattempted (undo) dim, 1 for a clean
-        // correct one. A parse is `full` only when every dim is exactly 1, so
-        // a reattempt (correct < total) is never counted as fully correct.
+        // Fractional credit: a fraction (0.25, 0.125, … per undo) for a
+        // reattempted dim, 1 for a clean correct one. A parse is `full` only
+        // when every dim is exactly 1, so a reattempt (correct < total) is
+        // never counted as fully correct.
         correct += Number(val) || 0;
         if (val === 0) sawMiss = true;
         else if (val !== 1) sawHalf = true;
