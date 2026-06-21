@@ -2299,6 +2299,63 @@
     };
   }
 
+  // -μενος middle/passive participle (regular 2-1-2 adjective, λυόμενος
+  // pattern). accStem carries the accent on the connecting vowel for the
+  // short-ultima cells (nom/acc, -οι/-αι/-α, voc), bareStem is unaccented for
+  // the long-ultima cells where the accent shifts onto -μέν-. Works for plain
+  // stems (accStem 'λυό' / bareStem 'λυο' → λυόμενος…) and for contract verbs
+  // whose connecting vowel has already contracted (accStem 'ἀγαπώ' / bareStem
+  // 'ἀγαπω' → ἀγαπώμενος, ἀγαπωμένου, …).
+  function menosParticipleParadigm(accStem, bareStem, label) {
+    const a = accStem, b = bareStem, L = label;
+    return {
+      [`${a}μενος`]:  `${L} nominative singular masculine`,
+      [`${b}μένου`]:  `${L} genitive singular masculine/neuter`,
+      [`${b}μένῳ`]:   `${L} dative singular masculine/neuter`,
+      [`${a}μενον`]:  `${L} accusative singular masculine/neuter`,
+      [`${a}μενε`]:   `${L} vocative singular masculine`,
+      [`${a}μενοι`]:  `${L} nominative plural masculine`,
+      [`${b}μένους`]: `${L} accusative plural masculine`,
+      [`${b}μένων`]:  `${L} genitive plural masculine/feminine/neuter`,
+      [`${b}μένοις`]: `${L} dative plural masculine/neuter`,
+      [`${b}μένη`]:   `${L} nominative singular feminine`,
+      [`${b}μένης`]:  `${L} genitive singular feminine`,
+      [`${b}μένῃ`]:   `${L} dative singular feminine`,
+      [`${b}μένην`]:  `${L} accusative singular feminine`,
+      [`${a}μεναι`]:  `${L} nominative plural feminine`,
+      [`${b}μέναις`]: `${L} dative plural feminine`,
+      [`${b}μένας`]:  `${L} accusative plural feminine`,
+      [`${a}μενα`]:   `${L} nominative/accusative plural neuter`
+    };
+  }
+
+  // 2nd-aorist passive participle (-είς, θ-less: γραφείς). Same endings as the
+  // θ-type aoristPassiveParticipleParadigm but on the bare 2nd-aorist stem, so
+  // it parses as a plain "aorist passive participle".
+  function eisParticipleParadigm(stem) {
+    const s = stem;
+    return {
+      [`${s}είς`]:    'aorist passive participle nominative singular masculine',
+      [`${s}έντος`]:  'aorist passive participle genitive singular masculine/neuter',
+      [`${s}έντι`]:   'aorist passive participle dative singular masculine/neuter',
+      [`${s}έντα`]:   'aorist passive participle accusative singular masculine',
+      [`${s}έντες`]:  'aorist passive participle nominative plural masculine',
+      [`${s}έντων`]:  'aorist passive participle genitive plural masculine/feminine/neuter',
+      [`${s}εῖσι`]:   'aorist passive participle dative plural masculine/neuter',
+      [`${s}εῖσιν`]:  'aorist passive participle dative plural masculine/neuter',
+      [`${s}έντας`]:  'aorist passive participle accusative plural masculine',
+      [`${s}εῖσα`]:   'aorist passive participle nominative singular feminine',
+      [`${s}είσης`]:  'aorist passive participle genitive singular feminine',
+      [`${s}είσῃ`]:   'aorist passive participle dative singular feminine',
+      [`${s}εῖσαν`]:  'aorist passive participle accusative singular feminine',
+      [`${s}εῖσαι`]:  'aorist passive participle nominative plural feminine',
+      [`${s}εισῶν`]:  'aorist passive participle genitive plural feminine',
+      [`${s}είσαις`]: 'aorist passive participle dative plural feminine',
+      [`${s}είσας`]:  'aorist passive participle accusative plural feminine',
+      [`${s}έν`]:     'aorist passive participle nominative/accusative singular neuter'
+    };
+  }
+
   const LEIPO_PRESENT_ACTIVE_PARTICIPLE   = presentActiveNtParticiple('λείπ', 'λειπ', 'λεῖπον');
   const LAMBANO_PRESENT_ACTIVE_PARTICIPLE = presentActiveNtParticiple('λαμβάν', 'λαμβαν', 'λαμβάνον');
   const LEGO_PRESENT_ACTIVE_PARTICIPLE    = presentActiveNtParticiple('λέγ', 'λεγ', 'λέγον');
@@ -2365,6 +2422,390 @@
     'μου': 'first person genitive singular',
     'μοι': 'first person dative singular'
   };
+
+  // ─── Hand-authored optional coverage (no source paradigm in duff yet) ──
+  //
+  // These six verbs aren't paradigm exemplars in duff's morphology data, so
+  // the optional groups below don't surface as drill cards today — but the
+  // entries are registered (keyed by bare lemma, exactly like every other
+  // inventory entry) so the fallback form-lookup resolves them and the drill
+  // is ready the moment any of these lemmas gains paradigm tables. Ported from
+  // Mounce PR #86; chapters remapped from Mounce's numbering back to Duff/BBG
+  // (present 8–10, participle 12/14, passive system 15, subjunctive 17, μι 19)
+  // and participle declensions split via participleOptionalGroups (nom-sg early
+  // + full declension at Ch 14), the duff convention, instead of Mounce's
+  // single flat groups.
+
+  // ─── Contract verbs ἀγαπάω / ποιέω / πληρόω (present system) ───────
+  //
+  // The present system carries the contractions; future/aorist/perfect build
+  // on the lengthened uncontracted stem (ἀγαπήσω, ἐποίησα) so they're regular
+  // and left to the standard machinery. The present mid/pas participle uses the
+  // λυόμενος (-μενος) pattern; the present active participle ships recognition
+  // nominatives only (its full contracted -ῶν/-οῦντος declension is accent-
+  // dense and deferred).
+
+  // α-contract — ἀγαπάω
+  const AGAPAO_PRESENT_MP_INDICATIVE = {
+    'ἀγαπῶμαι':   'present middle/passive indicative first person singular',
+    'ἀγαπᾶται':   'present middle/passive indicative third person singular',
+    'ἀγαπώμεθα':  'present middle/passive indicative first person plural',
+    'ἀγαπᾶσθε':   'present middle/passive indicative second person plural',
+    'ἀγαπῶνται':  'present middle/passive indicative third person plural'
+  };
+  const AGAPAO_IMPERFECT_ACTIVE_INDICATIVE = {
+    'ἠγάπων':    'imperfect active indicative first person singular',
+    'ἠγάπας':    'imperfect active indicative second person singular',
+    'ἠγάπα':     'imperfect active indicative third person singular',
+    'ἠγαπῶμεν':  'imperfect active indicative first person plural',
+    'ἠγαπᾶτε':   'imperfect active indicative second person plural'
+  };
+  const AGAPAO_IMPERFECT_MP_INDICATIVE = {
+    'ἠγαπώμην':   'imperfect middle/passive indicative first person singular',
+    'ἠγαπῶ':      'imperfect middle/passive indicative second person singular',
+    'ἠγαπᾶτο':    'imperfect middle/passive indicative third person singular',
+    'ἠγαπώμεθα':  'imperfect middle/passive indicative first person plural',
+    'ἠγαπᾶσθε':   'imperfect middle/passive indicative second person plural',
+    'ἠγαπῶντο':   'imperfect middle/passive indicative third person plural'
+  };
+  const AGAPAO_PRESENT_ACTIVE_INFINITIVE = { 'ἀγαπᾶν': 'present active infinitive' };
+  const AGAPAO_PRESENT_MP_INFINITIVE = { 'ἀγαπᾶσθαι': 'present middle/passive infinitive' };
+  const AGAPAO_PRESENT_MP_PARTICIPLE = menosParticipleParadigm('ἀγαπώ', 'ἀγαπω', 'present middle/passive participle');
+  const AGAPAO_PRESENT_ACTIVE_PARTICIPLE_NOM = {
+    'ἀγαπῶν':  'present active participle nominative singular masculine',
+    'ἀγαπῶσα': 'present active participle nominative singular feminine'
+  };
+  const AGAPAO_EXTRA_FORMS = {
+    ...AGAPAO_PRESENT_MP_INDICATIVE,
+    ...AGAPAO_IMPERFECT_ACTIVE_INDICATIVE,
+    ...AGAPAO_IMPERFECT_MP_INDICATIVE,
+    ...AGAPAO_PRESENT_ACTIVE_INFINITIVE,
+    ...AGAPAO_PRESENT_MP_INFINITIVE,
+    ...AGAPAO_PRESENT_MP_PARTICIPLE,
+    ...AGAPAO_PRESENT_ACTIVE_PARTICIPLE_NOM
+  };
+  const AGAPAO_OPTIONAL_GROUPS = [
+    { chapter: 15, family: 'ἀγαπάω — present middle/passive indicative (optional)',
+      forms: AGAPAO_PRESENT_MP_INDICATIVE },
+    { chapter: 10, family: 'ἀγαπάω — imperfect active indicative (optional)',
+      forms: AGAPAO_IMPERFECT_ACTIVE_INDICATIVE },
+    { chapter: 15, family: 'ἀγαπάω — imperfect middle/passive indicative (optional)',
+      forms: AGAPAO_IMPERFECT_MP_INDICATIVE },
+    { chapter: 7, family: 'ἀγαπάω — present active infinitive ἀγαπᾶν (optional)',
+      forms: AGAPAO_PRESENT_ACTIVE_INFINITIVE },
+    { chapter: 7, family: 'ἀγαπάω — present middle/passive infinitive ἀγαπᾶσθαι (optional)',
+      forms: AGAPAO_PRESENT_MP_INFINITIVE },
+    ...participleOptionalGroups(12, 'ἀγαπάω — present active participle ἀγαπῶν',
+      AGAPAO_PRESENT_ACTIVE_PARTICIPLE_NOM, { core: false }),
+    ...participleOptionalGroups(15, 'ἀγαπάω — present middle/passive participle ἀγαπώμενος',
+      AGAPAO_PRESENT_MP_PARTICIPLE, { core: false })
+  ];
+
+  // ε-contract — ποιέω
+  const POIEO_PRESENT_MP_INDICATIVE = {
+    'ποιοῦμαι':   'present middle/passive indicative first person singular',
+    'ποιῇ':       'present middle/passive indicative second person singular',
+    'ποιεῖται':   'present middle/passive indicative third person singular',
+    'ποιούμεθα':  'present middle/passive indicative first person plural',
+    'ποιεῖσθε':   'present middle/passive indicative second person plural',
+    'ποιοῦνται':  'present middle/passive indicative third person plural'
+  };
+  const POIEO_IMPERFECT_ACTIVE_INDICATIVE = {
+    'ἐποίουν':   'imperfect active indicative first person singular',
+    'ἐποίεις':   'imperfect active indicative second person singular',
+    'ἐποίει':    'imperfect active indicative third person singular',
+    'ἐποιοῦμεν': 'imperfect active indicative first person plural',
+    'ἐποιεῖτε':  'imperfect active indicative second person plural'
+  };
+  const POIEO_IMPERFECT_MP_INDICATIVE = {
+    'ἐποιούμην':   'imperfect middle/passive indicative first person singular',
+    'ἐποιοῦ':      'imperfect middle/passive indicative second person singular',
+    'ἐποιεῖτο':    'imperfect middle/passive indicative third person singular',
+    'ἐποιούμεθα':  'imperfect middle/passive indicative first person plural',
+    'ἐποιεῖσθε':   'imperfect middle/passive indicative second person plural',
+    'ἐποιοῦντο':   'imperfect middle/passive indicative third person plural'
+  };
+  const POIEO_PRESENT_ACTIVE_INFINITIVE = { 'ποιεῖν': 'present active infinitive' };
+  const POIEO_PRESENT_MP_INFINITIVE = { 'ποιεῖσθαι': 'present middle/passive infinitive' };
+  const POIEO_PRESENT_MP_PARTICIPLE = menosParticipleParadigm('ποιού', 'ποιου', 'present middle/passive participle');
+  const POIEO_PRESENT_ACTIVE_PARTICIPLE_NOM = {
+    'ποιῶν':   'present active participle nominative singular masculine',
+    'ποιοῦσα': 'present active participle nominative singular feminine',
+    'ποιοῦν':  'present active participle nominative/accusative singular neuter'
+  };
+  const POIEO_EXTRA_FORMS = {
+    ...POIEO_PRESENT_MP_INDICATIVE,
+    ...POIEO_IMPERFECT_ACTIVE_INDICATIVE,
+    ...POIEO_IMPERFECT_MP_INDICATIVE,
+    ...POIEO_PRESENT_ACTIVE_INFINITIVE,
+    ...POIEO_PRESENT_MP_INFINITIVE,
+    ...POIEO_PRESENT_MP_PARTICIPLE,
+    ...POIEO_PRESENT_ACTIVE_PARTICIPLE_NOM
+  };
+  const POIEO_OPTIONAL_GROUPS = [
+    { chapter: 15, family: 'ποιέω — present middle/passive indicative (optional)',
+      forms: POIEO_PRESENT_MP_INDICATIVE },
+    { chapter: 10, family: 'ποιέω — imperfect active indicative (optional)',
+      forms: POIEO_IMPERFECT_ACTIVE_INDICATIVE },
+    { chapter: 15, family: 'ποιέω — imperfect middle/passive indicative (optional)',
+      forms: POIEO_IMPERFECT_MP_INDICATIVE },
+    { chapter: 7, family: 'ποιέω — present active infinitive ποιεῖν (optional)',
+      forms: POIEO_PRESENT_ACTIVE_INFINITIVE },
+    { chapter: 7, family: 'ποιέω — present middle/passive infinitive ποιεῖσθαι (optional)',
+      forms: POIEO_PRESENT_MP_INFINITIVE },
+    ...participleOptionalGroups(12, 'ποιέω — present active participle ποιῶν',
+      POIEO_PRESENT_ACTIVE_PARTICIPLE_NOM, { core: false }),
+    ...participleOptionalGroups(15, 'ποιέω — present middle/passive participle ποιούμενος',
+      POIEO_PRESENT_MP_PARTICIPLE, { core: false })
+  ];
+
+  // ο-contract — πληρόω
+  const PLEROO_PRESENT_MP_INDICATIVE = {
+    'πληροῦμαι':   'present middle/passive indicative first person singular',
+    'πληροῦται':   'present middle/passive indicative third person singular',
+    'πληρούμεθα':  'present middle/passive indicative first person plural',
+    'πληροῦσθε':   'present middle/passive indicative second person plural',
+    'πληροῦνται':  'present middle/passive indicative third person plural'
+  };
+  const PLEROO_IMPERFECT_ACTIVE_INDICATIVE = {
+    'ἐπλήρουν':   'imperfect active indicative first person singular',
+    'ἐπλήρους':   'imperfect active indicative second person singular',
+    'ἐπλήρου':    'imperfect active indicative third person singular',
+    'ἐπληροῦμεν': 'imperfect active indicative first person plural',
+    'ἐπληροῦτε':  'imperfect active indicative second person plural'
+  };
+  const PLEROO_IMPERFECT_MP_INDICATIVE = {
+    'ἐπληρούμην':   'imperfect middle/passive indicative first person singular',
+    'ἐπληροῦ':      'imperfect middle/passive indicative second person singular',
+    'ἐπληροῦτο':    'imperfect middle/passive indicative third person singular',
+    'ἐπληρούμεθα':  'imperfect middle/passive indicative first person plural',
+    'ἐπληροῦσθε':   'imperfect middle/passive indicative second person plural',
+    'ἐπληροῦντο':   'imperfect middle/passive indicative third person plural'
+  };
+  const PLEROO_PRESENT_ACTIVE_INFINITIVE = { 'πληροῦν': 'present active infinitive' };
+  const PLEROO_PRESENT_MP_INFINITIVE = { 'πληροῦσθαι': 'present middle/passive infinitive' };
+  const PLEROO_PRESENT_MP_PARTICIPLE = menosParticipleParadigm('πληρού', 'πληρου', 'present middle/passive participle');
+  const PLEROO_PRESENT_ACTIVE_PARTICIPLE_NOM = {
+    'πληρῶν':   'present active participle nominative singular masculine',
+    'πληροῦσα': 'present active participle nominative singular feminine',
+    'πληροῦν':  'present active participle nominative/accusative singular neuter'
+  };
+  const PLEROO_EXTRA_FORMS = {
+    ...PLEROO_PRESENT_MP_INDICATIVE,
+    ...PLEROO_IMPERFECT_ACTIVE_INDICATIVE,
+    ...PLEROO_IMPERFECT_MP_INDICATIVE,
+    ...PLEROO_PRESENT_ACTIVE_INFINITIVE,
+    ...PLEROO_PRESENT_MP_INFINITIVE,
+    ...PLEROO_PRESENT_MP_PARTICIPLE,
+    ...PLEROO_PRESENT_ACTIVE_PARTICIPLE_NOM
+  };
+  const PLEROO_OPTIONAL_GROUPS = [
+    { chapter: 15, family: 'πληρόω — present middle/passive indicative (optional)',
+      forms: PLEROO_PRESENT_MP_INDICATIVE },
+    { chapter: 10, family: 'πληρόω — imperfect active indicative (optional)',
+      forms: PLEROO_IMPERFECT_ACTIVE_INDICATIVE },
+    { chapter: 15, family: 'πληρόω — imperfect middle/passive indicative (optional)',
+      forms: PLEROO_IMPERFECT_MP_INDICATIVE },
+    { chapter: 7, family: 'πληρόω — present active infinitive πληροῦν (optional)',
+      forms: PLEROO_PRESENT_ACTIVE_INFINITIVE },
+    { chapter: 7, family: 'πληρόω — present middle/passive infinitive πληροῦσθαι (optional)',
+      forms: PLEROO_PRESENT_MP_INFINITIVE },
+    ...participleOptionalGroups(12, 'πληρόω — present active participle πληρῶν',
+      PLEROO_PRESENT_ACTIVE_PARTICIPLE_NOM, { core: false }),
+    ...participleOptionalGroups(15, 'πληρόω — present middle/passive participle πληρούμενος',
+      PLEROO_PRESENT_MP_PARTICIPLE, { core: false })
+  ];
+
+  // ─── γράφω (2nd aorist passive ἐγράφην, "to write") ───────────────
+  //
+  // Fills the non-indicative 2nd-aorist passive (subj γραφῶ / impv γράφηθι /
+  // inf γραφῆναι / ptc γραφείς — θ-less -είς type) plus the present active
+  // indicative. The 2nd-aorist passive non-indicatives parse as plain
+  // "aorist passive". (Aorist passive indicative ἐγράφην is already drilled.)
+  const GRAPHO_PRESENT_ACTIVE_INDICATIVE = {
+    'γράφω':     'present active indicative first person singular',
+    'γράφεις':   'present active indicative second person singular',
+    'γράφει':    'present active indicative third person singular',
+    'γράφομεν':  'present active indicative first person plural',
+    'γράφετε':   'present active indicative second person plural',
+    'γράφουσι':  'present active indicative third person plural',
+    'γράφουσιν': 'present active indicative third person plural'
+  };
+  const GRAPHO_AORIST_PASSIVE_SUBJUNCTIVE = {
+    'γραφῶ':    'aorist passive subjunctive first person singular',
+    'γραφῇς':   'aorist passive subjunctive second person singular',
+    'γραφῇ':    'aorist passive subjunctive third person singular',
+    'γραφῶμεν': 'aorist passive subjunctive first person plural',
+    'γραφῆτε':  'aorist passive subjunctive second person plural',
+    'γραφῶσι':  'aorist passive subjunctive third person plural',
+    'γραφῶσιν': 'aorist passive subjunctive third person plural'
+  };
+  const GRAPHO_AORIST_PASSIVE_IMPERATIVE = {
+    'γράφηθι':     'aorist passive imperative second person singular',
+    'γραφήτω':     'aorist passive imperative third person singular',
+    'γράφητε':     'aorist passive imperative second person plural',
+    'γραφήτωσαν':  'aorist passive imperative third person plural'
+  };
+  const GRAPHO_AORIST_PASSIVE_INFINITIVE = { 'γραφῆναι': 'aorist passive infinitive' };
+  const GRAPHO_AORIST_PASSIVE_PARTICIPLE = eisParticipleParadigm('γραφ');
+  const GRAPHO_EXTRA_FORMS = {
+    ...GRAPHO_PRESENT_ACTIVE_INDICATIVE,
+    ...GRAPHO_AORIST_PASSIVE_SUBJUNCTIVE,
+    ...GRAPHO_AORIST_PASSIVE_IMPERATIVE,
+    ...GRAPHO_AORIST_PASSIVE_INFINITIVE,
+    ...GRAPHO_AORIST_PASSIVE_PARTICIPLE
+  };
+  const GRAPHO_OPTIONAL_GROUPS = [
+    { chapter: 8, family: 'γράφω — present active indicative (optional)',
+      forms: GRAPHO_PRESENT_ACTIVE_INDICATIVE },
+    { chapter: 17, family: 'γράφω — aorist passive subjunctive γραφῶ (optional)',
+      forms: GRAPHO_AORIST_PASSIVE_SUBJUNCTIVE },
+    { chapter: 15, family: 'γράφω — aorist passive imperative γράφηθι (optional)',
+      forms: GRAPHO_AORIST_PASSIVE_IMPERATIVE },
+    { chapter: 15, family: 'γράφω — aorist passive infinitive γραφῆναι (optional)',
+      forms: GRAPHO_AORIST_PASSIVE_INFINITIVE },
+    ...participleOptionalGroups(15, 'γράφω — aorist passive participle γραφείς',
+      GRAPHO_AORIST_PASSIVE_PARTICIPLE, { core: false })
+  ];
+
+  // ─── πορεύομαι (middle deponent, "to go") ─────────────────────────
+  //
+  // Fills the present + imperfect middle indicative, the (passive-form) aorist
+  // deponent ἐπορεύθην, the present/aorist infinitives + imperatives, and the
+  // present middle + aorist passive participles. (Future middle πορεύσομαι is
+  // already drilled.)
+  const POREUOMAI_PRESENT_MP_INDICATIVE = {
+    'πορεύομαι':   'present middle indicative first person singular',
+    'πορεύῃ':      'present middle indicative second person singular',
+    'πορεύεται':   'present middle indicative third person singular',
+    'πορευόμεθα':  'present middle indicative first person plural',
+    'πορεύεσθε':   'present middle indicative second person plural',
+    'πορεύονται':  'present middle indicative third person plural'
+  };
+  const POREUOMAI_IMPERFECT_MP_INDICATIVE = {
+    'ἐπορευόμην':  'imperfect middle indicative first person singular',
+    'ἐπορεύου':    'imperfect middle indicative second person singular',
+    'ἐπορεύετο':   'imperfect middle indicative third person singular',
+    'ἐπορευόμεθα': 'imperfect middle indicative first person plural',
+    'ἐπορεύεσθε':  'imperfect middle indicative second person plural',
+    'ἐπορεύοντο':  'imperfect middle indicative third person plural'
+  };
+  const POREUOMAI_AORIST_PASSIVE_INDICATIVE = {
+    'ἐπορεύθην':   'aorist passive indicative first person singular',
+    'ἐπορεύθης':   'aorist passive indicative second person singular',
+    'ἐπορεύθη':    'aorist passive indicative third person singular',
+    'ἐπορεύθημεν': 'aorist passive indicative first person plural',
+    'ἐπορεύθητε':  'aorist passive indicative second person plural',
+    'ἐπορεύθησαν': 'aorist passive indicative third person plural'
+  };
+  const POREUOMAI_PRESENT_MP_INFINITIVE = { 'πορεύεσθαι': 'present middle infinitive' };
+  const POREUOMAI_AORIST_PASSIVE_INFINITIVE = { 'πορευθῆναι': 'aorist passive infinitive' };
+  const POREUOMAI_PRESENT_MP_IMPERATIVE = {
+    'πορεύου':       'present middle imperative second person singular',
+    'πορευέσθω':     'present middle imperative third person singular',
+    'πορεύεσθε':     'present middle imperative second person plural',
+    'πορευέσθωσαν':  'present middle imperative third person plural'
+  };
+  const POREUOMAI_AORIST_PASSIVE_IMPERATIVE = {
+    'πορεύθητι':     'aorist passive imperative second person singular',
+    'πορευθήτω':     'aorist passive imperative third person singular',
+    'πορεύθητε':     'aorist passive imperative second person plural',
+    'πορευθήτωσαν':  'aorist passive imperative third person plural'
+  };
+  const POREUOMAI_PRESENT_MP_PARTICIPLE = menosParticipleParadigm('πορευό', 'πορευο', 'present middle participle');
+  const POREUOMAI_AORIST_PASSIVE_PARTICIPLE = aoristPassiveParticipleParadigm('πορευ');
+  const POREUOMAI_EXTRA_FORMS = {
+    ...POREUOMAI_PRESENT_MP_INDICATIVE,
+    ...POREUOMAI_IMPERFECT_MP_INDICATIVE,
+    ...POREUOMAI_AORIST_PASSIVE_INDICATIVE,
+    ...POREUOMAI_PRESENT_MP_INFINITIVE,
+    ...POREUOMAI_AORIST_PASSIVE_INFINITIVE,
+    ...POREUOMAI_PRESENT_MP_IMPERATIVE,
+    ...POREUOMAI_AORIST_PASSIVE_IMPERATIVE,
+    ...POREUOMAI_PRESENT_MP_PARTICIPLE,
+    ...POREUOMAI_AORIST_PASSIVE_PARTICIPLE
+  };
+  const POREUOMAI_OPTIONAL_GROUPS = [
+    { chapter: 8, family: 'πορεύομαι — present middle indicative (optional)',
+      forms: POREUOMAI_PRESENT_MP_INDICATIVE },
+    { chapter: 8, family: 'πορεύομαι — imperfect middle indicative (optional)',
+      forms: POREUOMAI_IMPERFECT_MP_INDICATIVE },
+    { chapter: 15, family: 'πορεύομαι — aorist (passive-form) indicative ἐπορεύθην (optional)',
+      forms: POREUOMAI_AORIST_PASSIVE_INDICATIVE },
+    { chapter: 8, family: 'πορεύομαι — present middle infinitive πορεύεσθαι (optional)',
+      forms: POREUOMAI_PRESENT_MP_INFINITIVE },
+    { chapter: 15, family: 'πορεύομαι — aorist passive infinitive πορευθῆναι (optional)',
+      forms: POREUOMAI_AORIST_PASSIVE_INFINITIVE },
+    { chapter: 8, family: 'πορεύομαι — present middle imperative (optional)',
+      forms: POREUOMAI_PRESENT_MP_IMPERATIVE },
+    { chapter: 15, family: 'πορεύομαι — aorist passive imperative (optional)',
+      forms: POREUOMAI_AORIST_PASSIVE_IMPERATIVE },
+    ...participleOptionalGroups(12, 'πορεύομαι — present middle participle πορευόμενος',
+      POREUOMAI_PRESENT_MP_PARTICIPLE, { core: false }),
+    ...participleOptionalGroups(15, 'πορεύομαι — aorist passive participle πορευθείς',
+      POREUOMAI_AORIST_PASSIVE_PARTICIPLE, { core: false })
+  ];
+
+  // ─── δείκνυμι (μι-verb, no reduplication, "to show") ──────────────
+  //
+  // Fills out the present active indicative + infinitive, the 1st-aorist active
+  // ἔδειξα + infinitive, and the recognition nominatives of the present
+  // (δεικνύς) and aorist (δείξας) active participles. Full μι-/-ας participle
+  // declensions deferred (accent-dense). Everything gates at Ch 19 (μι-verbs),
+  // so it's all in scope whenever δείκνυμι is.
+  const DEIKNYMI_PRESENT_ACTIVE_INDICATIVE = {
+    'δείκνυμι':   'present active indicative first person singular',
+    'δείκνυς':    'present active indicative second person singular',
+    'δείκνυσι':   'present active indicative third person singular',
+    'δείκνυσιν':  'present active indicative third person singular',
+    'δείκνυμεν':  'present active indicative first person plural',
+    'δείκνυτε':   'present active indicative second person plural',
+    'δεικνύασι':  'present active indicative third person plural',
+    'δεικνύασιν': 'present active indicative third person plural'
+  };
+  const DEIKNYMI_PRESENT_ACTIVE_INFINITIVE = { 'δεικνύναι': 'present active infinitive' };
+  const DEIKNYMI_AORIST_ACTIVE_INDICATIVE = {
+    'ἔδειξα':    'aorist active indicative first person singular',
+    'ἔδειξας':   'aorist active indicative second person singular',
+    'ἔδειξε':    'aorist active indicative third person singular',
+    'ἔδειξεν':   'aorist active indicative third person singular',
+    'ἐδείξαμεν': 'aorist active indicative first person plural',
+    'ἐδείξατε':  'aorist active indicative second person plural',
+    'ἔδειξαν':   'aorist active indicative third person plural'
+  };
+  const DEIKNYMI_AORIST_ACTIVE_INFINITIVE = { 'δεῖξαι': 'aorist active infinitive' };
+  const DEIKNYMI_PRESENT_ACTIVE_PARTICIPLE_NOM = {
+    'δεικνύς':  'present active participle nominative singular masculine',
+    'δεικνῦσα': 'present active participle nominative singular feminine',
+    'δεικνύν':  'present active participle nominative/accusative singular neuter'
+  };
+  const DEIKNYMI_AORIST_ACTIVE_PARTICIPLE_NOM = {
+    'δείξας':  'aorist active participle nominative singular masculine',
+    'δείξασα': 'aorist active participle nominative singular feminine',
+    'δεῖξαν':  'aorist active participle nominative/accusative singular neuter'
+  };
+  const DEIKNYMI_EXTRA_FORMS = {
+    ...DEIKNYMI_PRESENT_ACTIVE_INDICATIVE,
+    ...DEIKNYMI_PRESENT_ACTIVE_INFINITIVE,
+    ...DEIKNYMI_AORIST_ACTIVE_INDICATIVE,
+    ...DEIKNYMI_AORIST_ACTIVE_INFINITIVE,
+    ...DEIKNYMI_PRESENT_ACTIVE_PARTICIPLE_NOM,
+    ...DEIKNYMI_AORIST_ACTIVE_PARTICIPLE_NOM
+  };
+  const DEIKNYMI_OPTIONAL_GROUPS = [
+    { chapter: 19, family: 'δείκνυμι — present active indicative (optional)',
+      forms: DEIKNYMI_PRESENT_ACTIVE_INDICATIVE },
+    { chapter: 19, family: 'δείκνυμι — present active infinitive δεικνύναι (optional)',
+      forms: DEIKNYMI_PRESENT_ACTIVE_INFINITIVE },
+    { chapter: 19, family: 'δείκνυμι — aorist active indicative ἔδειξα (optional)',
+      forms: DEIKNYMI_AORIST_ACTIVE_INDICATIVE },
+    { chapter: 19, family: 'δείκνυμι — aorist active infinitive δεῖξαι (optional)',
+      forms: DEIKNYMI_AORIST_ACTIVE_INFINITIVE },
+    ...participleOptionalGroups(19, 'δείκνυμι — present active participle δεικνύς',
+      DEIKNYMI_PRESENT_ACTIVE_PARTICIPLE_NOM, { core: false }),
+    ...participleOptionalGroups(19, 'δείκνυμι — aorist active participle δείξας',
+      DEIKNYMI_AORIST_ACTIVE_PARTICIPLE_NOM, { core: false })
+  ];
 
   const LEMMA_INVENTORY = {
     'First and second personal pronouns': {
@@ -2581,6 +3022,35 @@
     'δίδομαι': {
       extraForms: DIDOMAI_EXTRA_FORMS,
       optionalFormGroups: DIDOMAI_OPTIONAL_GROUPS
+    },
+    // Hand-authored optional coverage (ported from Mounce #86). These verbs
+    // aren't paradigm exemplars in duff's morphology data yet, so the optional
+    // groups stay dormant (no base paradigm to extend) while the extraForms
+    // back the fallback form-lookup; both go live the moment paradigm tables
+    // for the lemma land. Keyed by bare lemma, like every other entry.
+    'ἀγαπάω': {
+      extraForms: AGAPAO_EXTRA_FORMS,
+      optionalFormGroups: AGAPAO_OPTIONAL_GROUPS
+    },
+    'ποιέω': {
+      extraForms: POIEO_EXTRA_FORMS,
+      optionalFormGroups: POIEO_OPTIONAL_GROUPS
+    },
+    'πληρόω': {
+      extraForms: PLEROO_EXTRA_FORMS,
+      optionalFormGroups: PLEROO_OPTIONAL_GROUPS
+    },
+    'γράφω': {
+      extraForms: GRAPHO_EXTRA_FORMS,
+      optionalFormGroups: GRAPHO_OPTIONAL_GROUPS
+    },
+    'πορεύομαι': {
+      extraForms: POREUOMAI_EXTRA_FORMS,
+      optionalFormGroups: POREUOMAI_OPTIONAL_GROUPS
+    },
+    'δείκνυμι': {
+      extraForms: DEIKNYMI_EXTRA_FORMS,
+      optionalFormGroups: DEIKNYMI_OPTIONAL_GROUPS
     },
     'λόγος': {
       extraForms: LOGOS_VOCATIVE

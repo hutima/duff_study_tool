@@ -362,22 +362,44 @@ function renderParsingReviewPanel() {
   // (so the set is fully visible) as long as they have in-scope forms, and
   // drilled paradigms outside the set drop out. There's no single focused
   // paradigm in this mode (the dropdown is hidden), so nothing gets pinned.
-  // Outside custom mode the panel keeps its full "every drilled paradigm" view
-  // — and the analytics overlay always stays on the full set regardless.
+  //
+  // Outside custom mode the panel lists *every in-scope concrete paradigm*
+  // (chapter-gate met), including ones the student hasn't drilled yet, unioned
+  // with any already-drilled lemma — so the deck the student can study is fully
+  // visible up front rather than appearing one paradigm at a time as it's
+  // touched. The analytics overlay always stays on the full drilled set
+  // regardless.
   const customMode = !!runtime.parsingCustomReview;
   const focused = customMode ? '' : (runtime.morphFocusedParadigm || '');
   const stats = runtime.paradigmStepStats || {};
   const enabledDims = host.getEnabledParsingDims();
   const allStats = getAllLemmaStats(stats, enabledDims);
+  const drilledByLemma = new Map(allStats.map((s) => [s.lemma, s]));
 
   let baseStats = allStats;
   if (customMode) {
     const selectedMap = runtime.parsingCustomParadigms || {};
-    const drilledByLemma = new Map(allStats.map((s) => [s.lemma, s]));
     baseStats = Object.keys(selectedMap)
       .filter((lemma) => selectedMap[lemma])
       .map((lemma) => drilledByLemma.get(lemma) || { lemma, attempts: 0 })
       .filter((s) => (host.getMorphCardsForLemma(s.lemma) || []).length > 0);
+  } else {
+    // In-scope paradigms first (course-progression order), then any drilled
+    // lemma that's fallen out of scope (so its history never vanishes). Keep an
+    // entry if it has in-scope forms OR a stats entry.
+    const inScopeLemmas = (host.getInScopeParadigmLemmas && host.getInScopeParadigmLemmas()) || [];
+    const order = [];
+    const byLemma = new Map();
+    const add = (lemma, stat) => {
+      if (byLemma.has(lemma)) return;
+      byLemma.set(lemma, stat);
+      order.push(lemma);
+    };
+    inScopeLemmas.forEach((lemma) => add(lemma, drilledByLemma.get(lemma) || { lemma, attempts: 0 }));
+    allStats.forEach((s) => add(s.lemma, s));
+    baseStats = order
+      .map((lemma) => byLemma.get(lemma))
+      .filter((s) => drilledByLemma.has(s.lemma) || (host.getMorphCardsForLemma(s.lemma) || []).length > 0);
   }
 
   // Each drilled paradigm's breakdown comes from its in-scope forms (up to two
@@ -411,9 +433,16 @@ function renderParsingReviewPanel() {
   const ordered = focusedEntry ? [focusedEntry, ...otherEntries] : otherEntries;
 
   const drilledCount = ordered.length;
+  // In the default view the deck spans more than the drilled paradigms, so the
+  // headline distinguishes how many have actually been touched from how many
+  // are in scope. Custom mode keeps its hand-picked-set count.
+  const drilledParadigmCount = ordered.filter((s) => (s.attempts || 0) > 0).length;
+  const deckLabel = customMode
+    ? `▦ Custom set: ${drilledCount}`
+    : `▦ Paradigms: ${drilledParadigmCount} drilled · ${drilledCount} in scope`;
   document.getElementById('reviewStats').innerHTML = `
       <div class="review-stats-row">
-        <span class="stat-deck">▦ ${customMode ? 'Custom set' : 'Paradigms drilled'}: ${drilledCount}</span>
+        <span class="stat-deck">${deckLabel}</span>
         <span class="stat-total">· Tap any row to break it down by mood, tense, and voice</span>
       </div>`;
 
