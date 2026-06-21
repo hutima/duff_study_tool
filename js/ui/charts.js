@@ -590,7 +590,7 @@ export function buildDimValueBarsHtml(groups, options = {}) {
       </div>`;
   }).join('');
   const caption = options.caption
-    || 'Recent accuracy per value · the number = forms you’ve seen / forms in scope';
+    || 'Per-dimension accuracy per value (each dimension scored on its own) · the number = forms you’ve seen / forms in scope';
   // Column headers so the two right-hand numbers don't read as one figure: the
   // % is whole-parse accuracy, the fraction is form coverage (seen / in scope).
   const header = `
