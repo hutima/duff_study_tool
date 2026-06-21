@@ -591,8 +591,17 @@ export function buildDimValueBarsHtml(groups, options = {}) {
   }).join('');
   const caption = options.caption
     || 'Recent accuracy per value · the number = forms you’ve seen / forms in scope';
+  // Column headers so the two right-hand numbers don't read as one figure: the
+  // % is whole-parse accuracy, the fraction is form coverage (seen / in scope).
+  const header = `
+    <div class="dim-value-head" aria-hidden="true">
+      <span></span>
+      <span></span>
+      <span class="dim-value-head-pct">acc.</span>
+      <span class="dim-value-head-cov">seen</span>
+    </div>`;
   return `
-    <div class="dim-value-breakdown">${groupsHtml}</div>
+    <div class="dim-value-breakdown">${header}${groupsHtml}</div>
     <div class="dim-value-caption">${escapeHtml(caption)}</div>
   `;
 }
