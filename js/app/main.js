@@ -1182,6 +1182,17 @@ function skipMorphologyStep() {
   saveState();
 }
 
+// "I give up" jumps straight to the summary, which removes the choice / "I
+// give up" rows — so the nav row's "Next →" button slides up to roughly where
+// the finger just tapped. On touch devices the browser re-dispatches that tap
+// as a click to whatever now sits at the point, hitting "Next →" and advancing
+// past the summary the moment it appears. Stamp a short shield window on give-
+// up and swallow any Next that fires inside it (see handleNavNext). 200ms is
+// long enough to eat the ghost click but short enough that a real "advance"
+// tap a beat later still goes through.
+const MORPH_GIVEUP_SHIELD_MS = 200;
+let morphGiveUpShieldUntil = 0;
+
 // "I give up" — bail on the whole form, not just the current dimension.
 // Every remaining graded step is marked wrong and the walk jumps straight to
 // the summary (all sections wrong). Inferred (ungraded) follow-up steps are
@@ -1202,6 +1213,7 @@ function giveUpMorphologyStep() {
   state.stepIdx = state.steps.length;
   state.completed = true;
   finalizeMorphStepAttempt(card, state);
+  morphGiveUpShieldUntil = Date.now() + MORPH_GIVEUP_SHIELD_MS;
   renderCard();
   renderProgress();
   saveState();
@@ -3622,6 +3634,9 @@ function startNextCycle(mode = 'remaining', options = {}) {
 // press to a no-confirm reset (the button's label morphs to "↻ Reset" via
 // syncLayoutVisibility so the affordance matches the behaviour).
 function handleNavNext() {
+  // Swallow the touch "ghost click" that lands on Next → right after "I give
+  // up" collapses the step rows under the finger (see giveUpMorphologyStep).
+  if (Date.now() < morphGiveUpShieldUntil) return;
   navigate(1);
 }
 
