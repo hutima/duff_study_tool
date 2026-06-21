@@ -138,10 +138,12 @@ import { getStorage, isLikelyIOS } from '../utils/storage.js';
 import { compareGreekAlphabetical } from '../utils/greekSort.js';
 
 // Domain — SRS
-import { SRS_NEAR_WINDOW_MS, SRS_CYCLE_ADVANCE_MS, SESSION_IDLE_RESET_MS, getCadencePreset } from '../domain/srs/constants.js';
+import { SRS_NEAR_WINDOW_MS, SRS_CYCLE_ADVANCE_MS, SESSION_IDLE_RESET_MS, getCadencePreset,
+         SRS_UNCERTAIN_MIN_MS, SRS_VARIANT_HOLD_MS, SRS_RELEARN_STEP_DAYS, SRS_HARD_RELEARN_STEPS,
+         LEECH_LAPSE_THRESHOLD, LEECH_UNPIN_STREAK, LEECH_DRILL_DAYS } from '../domain/srs/constants.js';
 import { msFromDays, daysFromMs, setProgressDelay,
          getSrsEase, getSrsStage, getLastEasyIntervalDays, getNextEasyIntervalDays,
-         getEasyDelayMs, getUncertainDelayMs, formatRemainingForTable } from '../domain/srs/scheduler.js';
+         formatRemainingForTable } from '../domain/srs/scheduler.js';
 import { recordConfidenceSample, getConfidencePct, computeCardXpAward } from '../domain/srs/confidence.js';
 
 // Domain — Gamification
@@ -2608,6 +2610,16 @@ function getWordProgress(cardId, { persist = false } = {}) {
     existing.firstConfirmedAt = Number.isFinite(existing.firstConfirmedAt) ? Math.max(0, existing.firstConfirmedAt) : 0;
     existing.confidence = Number.isFinite(existing.confidence) ? Math.max(0, existing.confidence) : 0;
     existing.confidenceHistory = Array.isArray(existing.confidenceHistory) ? existing.confidenceHistory.filter(value => Number.isFinite(value)).slice(-10) : [];
+    // Lapse / relearn ladder + leech + variant-cycle bookkeeping (see
+    // applySpacedReview). All default to a no-lapse, no-cycle state so legacy
+    // entries keep their current schedule.
+    existing.inRelearn = existing.inRelearn === true;
+    existing.relearnLeft = Number.isFinite(existing.relearnLeft) ? Math.max(0, Math.floor(existing.relearnLeft)) : 0;
+    existing.preLapseIntervalDays = Number.isFinite(existing.preLapseIntervalDays) ? Math.max(0, existing.preLapseIntervalDays) : 0;
+    existing.lapseCount = Number.isFinite(existing.lapseCount) ? Math.max(0, Math.floor(existing.lapseCount)) : 0;
+    existing.leechDrill = existing.leechDrill === true;
+    existing.leechStreak = Number.isFinite(existing.leechStreak) ? Math.max(0, Math.floor(existing.leechStreak)) : 0;
+    existing.cycleFacesPassed = Array.isArray(existing.cycleFacesPassed) ? existing.cycleFacesPassed.filter(f => typeof f === 'string') : [];
     return existing;
   }
   const fresh = {
@@ -2625,7 +2637,14 @@ function getWordProgress(cardId, { persist = false } = {}) {
     firstSeenAt: 0,
     firstConfirmedAt: 0,
     confidence: 0,
-    confidenceHistory: []
+    confidenceHistory: [],
+    inRelearn: false,
+    relearnLeft: 0,
+    preLapseIntervalDays: 0,
+    lapseCount: 0,
+    leechDrill: false,
+    leechStreak: 0,
+    cycleFacesPassed: []
   };
   if (persist) progressStore[cardId] = fresh;
   return fresh;
@@ -2634,7 +2653,61 @@ function getWordProgress(cardId, { persist = false } = {}) {
 function isCardDue(card) {
   if (!runtime.spacedRepetition) return true;
   const progress = getWordProgress(card.id);
-  return !progress.dueAt || progress.dueAt <= Date.now();
+  const naturallyDue = !progress.dueAt || progress.dueAt <= Date.now();
+
+  // Variant-form gating (Model B): cards that share one progress entry — a base
+  // verb and its derived principal-part faces (the "… as cards" toggles) — only
+  // advance the shared schedule once EVERY active face is passed in the same
+  // cycle. A face passed mid-cycle is held 2h (so the set resurfaces together
+  // next session), but the still-unpassed faces must stay surfaceable now, even
+  // though they share that same +2h dueAt — otherwise the set could never be
+  // finished in one sitting. See applySpacedReview / getVariantCycleInfo.
+  const info = getVariantCycleInfo(card);
+  if (info) {
+    if (naturallyDue) {
+      // The shared timer has fired (a fresh sitting): re-test every face, so a
+      // stale partial cycle from a previous, abandoned sitting is cleared.
+      if (progress.cycleFacesPassed.length) progress.cycleFacesPassed = [];
+      return true;
+    }
+    // Held within the 2h window: keep unpassed faces active, hide passed ones.
+    return progress.cycleFacesPassed.length > 0 && !progress.cycleFacesPassed.includes(info.face);
+  }
+  return naturallyDue;
+}
+
+// Map of shared-progress id → set of face keys currently in the deck, memoized
+// against runtime.originalDeck (which already reflects the "… as cards" toggles,
+// so a face only appears here while its toggle is on). A progress id with two+
+// faces is a variant set subject to all-forms gating.
+let variantFacesCache = { deck: null, map: new Map() };
+function getVariantFacesMap() {
+  const deck = runtime.originalDeck || [];
+  if (variantFacesCache.deck === deck) return variantFacesCache.map;
+  const map = new Map();
+  deck.forEach(card => {
+    const face = derivedCardFaceKey(card);
+    if (!face) return;
+    const pid = progressCardId(card.id);
+    if (!map.has(pid)) map.set(pid, new Set());
+    map.get(pid).add(face);
+  });
+  variantFacesCache = { deck, map };
+  return map;
+}
+
+// For a card that belongs to a multi-face variant set, its own face key plus the
+// set of sibling faces in play. Returns null for ordinary single-face cards
+// (and for variant lemmas whose derived toggles are all off, so only the base
+// face is in the deck) — those have no all-forms gating.
+function getVariantCycleInfo(card) {
+  // Cheap reject first: only cards whose shared id has 2+ faces in the deck can
+  // be gated, so skip the flip-set scan in derivedCardFaceKey for everyone else.
+  const faces = getVariantFacesMap().get(progressCardId(card.id));
+  if (!faces || faces.size <= 1) return null;
+  const face = derivedCardFaceKey(card);
+  if (!face) return null;
+  return { face, siblingFaces: faces, siblingCount: faces.size };
 }
 
 function sortCardsByDue(cards) {
@@ -3010,16 +3083,6 @@ function getActiveCadence() {
   return getCadencePreset(runtime.spacingCadence);
 }
 
-function seedMinimumUncertainSchedule(cardId, reviewedAt = Date.now()) {
-  const progress = getWordProgress(cardId, { persist: true });
-  const minimumDelayMs = getUncertainDelayMs(progress, getActiveCadence());
-  const minimumDueAt = reviewedAt + minimumDelayMs;
-  if (!progress.dueAt || progress.dueAt < minimumDueAt) {
-    setProgressDelay(progress, minimumDelayMs, reviewedAt);
-  }
-  return progress;
-}
-
 function getDeckAggregateStats(cards = runtime.originalDeck) {
   // Shared base/second-aorist progress entries count once, not per face.
   const counted = new Set();
@@ -3035,91 +3098,168 @@ function getDeckAggregateStats(cards = runtime.originalDeck) {
   }, { seenCount: 0, passCount: 0, failCount: 0 });
 }
 
-// "Second aorists as cards": the derived aorist card and its base present
-// card share one progress entry, so one spaced schedule serves two recall
-// tasks — and it must resurface by the WEAKER of the two. Marking λέγω Easy
-// while εἶπον's last review was Hard would otherwise push the pair days out
-// with the aorist still unknown. Each face's own latest rating is kept on
-// the shared entry (faceOutcomes.present / faceOutcomes.aorist) and the
-// outcome actually applied is the lower of the two. The demotion is only
-// active while the toggle is on — with it off the aorist face can't be
-// re-reviewed, so a stale Hard from it must not pin the base card down.
-const SPACED_OUTCOME_RANK = { again: 0, pass: 1, easy: 2 };
-// A derived face counts toward the shared schedule only while its own toggle
-// is active; the base present face always counts. With a toggle off, a stale
-// rating from that face must not keep pinning the base card down.
-function isSharedFaceActive(face) {
-  if (face === 'base') return true;
-  const tag = String(face).split('::')[0];
-  return isIrregularCardEnabled(tag, runtime.selectedKeys, runtime.irregularCards);
+// Pre-lapse interval to resume at half of: the largest "real" spacing the card
+// had before it slipped (its last easy step or its current interval), captured
+// before the lapse resets the live interval.
+function preLapseIntervalDays(progress) {
+  return Math.max(getLastEasyIntervalDays(progress), Number(progress.intervalDays) || 0);
 }
-function resolveSharedFaceOutcome(card, ratedOutcome) {
-  const face = derivedCardFaceKey(card);
-  if (!face) return ratedOutcome;
-  const progress = getWordProgress(card.id, { persist: true });
-  const faces = (progress.faceOutcomes && typeof progress.faceOutcomes === 'object')
-    ? progress.faceOutcomes
-    : {};
-  faces[face] = ratedOutcome;
-  progress.faceOutcomes = faces;
-  if (runtime.studyMode !== 'vocab') return ratedOutcome;
-  // Grade the shared entry by its weakest active face so an Easy present
-  // doesn't bury a still-Hard derived form (or vice-versa).
-  let worst = ratedOutcome;
-  for (const [f, out] of Object.entries(faces)) {
-    if (!isSharedFaceActive(f)) continue;
-    const rank = SPACED_OUTCOME_RANK[out];
-    if (Number.isFinite(rank) && rank < SPACED_OUTCOME_RANK[worst]) worst = out;
+
+// Normal "easy" growth: confidence/ease-scaled step up the cadence ramp.
+function applyEasyGrowth(progress, cadence, now) {
+  const nextIntervalDays = getNextEasyIntervalDays(progress, cadence);
+  progress.streak += 1;
+  progress.easyStreak = (progress.easyStreak || 0) + 1;
+  progress.srsStage = getSrsStage(progress) + 1;
+  progress.ease = clamp(getSrsEase(progress) + 0.08, 1.3, 3.0);
+  progress.lastEasyIntervalDays = nextIntervalDays;
+  progress.firstConfirmedAt = progress.firstConfirmedAt || now;
+  setProgressDelay(progress, msFromDays(nextIntervalDays), now);
+}
+
+// Resume after a relearn ladder (or leech unpin): pick up at HALF the pre-lapse
+// interval, capped per cadence and floored at one relearn step, so weeks of
+// spacing aren't lost to a single slip.
+function resumeAfterLapse(progress, cadence, now) {
+  const resumeDays = clamp(preLapseIntervalDays(progress) * 0.5, SRS_RELEARN_STEP_DAYS, cadence.lapseResumeCapDays);
+  progress.inRelearn = false;
+  progress.relearnLeft = 0;
+  progress.streak += 1;
+  progress.easyStreak = (progress.easyStreak || 0) + 1;
+  progress.lastEasyIntervalDays = resumeDays;
+  setProgressDelay(progress, msFromDays(resumeDays), now);
+}
+
+// Hard lapse: drop ease, count the lapse, and either start the leech drill
+// (8-month, once a card has lapsed too many times) or the in-session relearn
+// ladder (due now → two 1-day passes → resume at ½). The pre-lapse interval is
+// preserved on the entry so the ladder's short steps don't erase it. Returns
+// true if the card should also be dropped from the active carry-over (it's
+// due-now and should route through the middle pile in-session).
+function applyHardLapse(progress, cadence, now) {
+  progress.streak = 0;
+  progress.easyStreak = 0;
+  progress.srsStage = Math.max(0, getSrsStage(progress) - 1);
+  progress.ease = clamp(getSrsEase(progress) - 0.2, 1.3, 3.0);
+  progress.lapseCount = (progress.lapseCount || 0) + 1;
+
+  // Leech (8-month only): a card that keeps failing is pinned to a 1-day drill
+  // until it earns a clean streak, rebuilding from the bottom.
+  if (cadence.leechEnabled && (progress.leechDrill || progress.lapseCount >= LEECH_LAPSE_THRESHOLD)) {
+    progress.leechDrill = true;
+    progress.leechStreak = 0;
+    progress.inRelearn = false;
+    progress.relearnLeft = 0;
+    progress.lastEasyIntervalDays = LEECH_DRILL_DAYS;
+    setProgressDelay(progress, msFromDays(LEECH_DRILL_DAYS), now);
+    return false;
   }
-  return worst;
+
+  // Capture the pre-lapse spacing once (a re-lapse mid-relearn keeps the
+  // original, not the now-tiny, interval).
+  if (!progress.inRelearn) progress.preLapseIntervalDays = preLapseIntervalDays(progress);
+  progress.inRelearn = true;
+  progress.relearnLeft = SRS_HARD_RELEARN_STEPS;
+  setProgressDelay(progress, 0, now); // due now — relearn in-session
+  return true;
+}
+
+// Uncertain lapse: one confirming pass in 2h, then resume at ½ previous. Ease
+// unchanged. (relearnLeft 0 → the next correct answer resumes directly.)
+function applyUncertainLapse(progress, now) {
+  if (!progress.inRelearn) progress.preLapseIntervalDays = preLapseIntervalDays(progress);
+  progress.inRelearn = true;
+  progress.relearnLeft = 0;
+  progress.streak += 1;
+  progress.easyStreak = 0;
+  setProgressDelay(progress, SRS_UNCERTAIN_MIN_MS, now); // 2h confirming pass
+}
+
+// A correct answer (Easy or Uncertain) while a card is mid-relearn or
+// mid-leech, or starting/continuing those ladders. Returns nothing; mutates
+// the schedule on `progress`.
+function applyCorrectOutcome(progress, cadence, now, ratedOutcome) {
+  // Leech drill: stay pinned at 1 day until LEECH_UNPIN_STREAK clean reviews,
+  // then rejoin normal growth (fall through to the easy ramp from a 1-day base).
+  if (progress.leechDrill) {
+    progress.leechStreak = (progress.leechStreak || 0) + 1;
+    if (progress.leechStreak < LEECH_UNPIN_STREAK) {
+      progress.streak += 1;
+      setProgressDelay(progress, msFromDays(LEECH_DRILL_DAYS), now);
+      return;
+    }
+    progress.leechDrill = false;
+    progress.leechStreak = 0;
+    progress.lapseCount = 0;
+    progress.lastEasyIntervalDays = LEECH_DRILL_DAYS;
+    applyEasyGrowth(progress, cadence, now);
+    return;
+  }
+
+  // Relearn ladder: spend the remaining 1-day steps, then resume at ½ previous.
+  if (progress.inRelearn) {
+    if ((progress.relearnLeft || 0) > 0) {
+      progress.relearnLeft -= 1;
+      progress.streak += 1;
+      setProgressDelay(progress, msFromDays(SRS_RELEARN_STEP_DAYS), now);
+      return;
+    }
+    resumeAfterLapse(progress, cadence, now);
+    return;
+  }
+
+  // Not in any ladder. An Uncertain on an established card IS a lapse — start
+  // the short uncertain relearn (ease unchanged, per spec). An Easy grows.
+  if (ratedOutcome === 'pass') {
+    applyUncertainLapse(progress, now);
+    return;
+  }
+  applyEasyGrowth(progress, cadence, now);
 }
 
 function applySpacedReview(card, outcome) {
   const now = Date.now();
   const ratedOutcome = outcome === 'pass' ? 'pass' : outcome === 'easy' ? 'easy' : 'again';
-  // May be lower than the rating the user just gave — a shared base/2-aorist
-  // entry is graded by its weaker face (see resolveSharedFaceOutcome).
-  const normalizedOutcome = resolveSharedFaceOutcome(card, ratedOutcome);
-  const progress = recordStudyOutcome(card.id, normalizedOutcome, now);
-
   const cadence = getActiveCadence();
-  if (normalizedOutcome === 'easy') {
-    const nextIntervalDays = getNextEasyIntervalDays(progress, cadence);
-    progress.streak += 1;
-    progress.easyStreak = (progress.easyStreak || 0) + 1;
-    progress.srsStage = getSrsStage(progress) + 1;
-    progress.ease = clamp(getSrsEase(progress) + 0.08, 1.3, 3.0);
-    progress.lastEasyIntervalDays = nextIntervalDays;
-    progress.firstConfirmedAt = progress.firstConfirmedAt || now;
-    setProgressDelay(progress, msFromDays(nextIntervalDays), now);
-    getDirectionalMarksStore()[card.id] = 'known';
-  } else if (normalizedOutcome === 'pass') {
-    progress.streak += 1;
-    progress.easyStreak = 0;
-    progress.ease = clamp(getSrsEase(progress) - 0.05, 1.3, 3.0);
-    progress.lastEasyIntervalDays = Math.max(getLastEasyIntervalDays(progress), progress.intervalDays || 0);
-    setProgressDelay(progress, getUncertainDelayMs(progress, cadence), now);
-    getDirectionalMarksStore()[card.id] = 'unsure';
-  } else {
-    // 'again' (default for any unknown outcome)
-    progress.streak = 0;
-    progress.easyStreak = 0;
-    progress.srsStage = Math.max(0, getSrsStage(progress) - 1);
-    progress.ease = clamp(getSrsEase(progress) - 0.2, 1.3, 3.0);
-    progress.lastEasyIntervalDays = Math.max(getLastEasyIntervalDays(progress), progress.intervalDays || 0);
-    // No deferred timer: leave dueAt at now so the card stays eligible, and
-    // drop its id from spacedActiveIds so buildStudyDeck routes it to the
-    // middle pile (due AND not in the carry-over active set). It then
-    // resurfaces when active drains and middle dumps in — alongside any
-    // cards whose pass/uncertain timer happened to expire during the pass.
-    setProgressDelay(progress, 0, now);
-    if (Array.isArray(runtime.spacedActiveIds)) {
+  // Variant-form set this card belongs to (null for ordinary single-face cards).
+  const variant = getVariantCycleInfo(card);
+  const progress = recordStudyOutcome(card.id, ratedOutcome, now);
+
+  if (ratedOutcome === 'again') {
+    // A miss resets any in-progress variant cycle and lapses the shared entry.
+    if (variant) progress.cycleFacesPassed = [];
+    const dropFromActive = applyHardLapse(progress, cadence, now);
+    if (dropFromActive && Array.isArray(runtime.spacedActiveIds)) {
       runtime.spacedActiveIds = runtime.spacedActiveIds.filter(id => id !== card.id);
     }
     getDirectionalMarksStore()[card.id] = 'unsure';
+  } else {
+    // Variant-form gating: only advance the shared schedule once every active
+    // face is passed in the same cycle. A face passed mid-cycle holds 2h
+    // (without growing) while the rest stay surfaceable this sitting; the
+    // completing pass falls through to normal scheduling. Bypassed while a
+    // relearn/leech ladder owns the shared schedule (the whole set relearns
+    // together) — the gating is for the steady-state growth phase.
+    if (variant && !progress.inRelearn && !progress.leechDrill) {
+      const passed = new Set(progress.cycleFacesPassed);
+      passed.add(variant.face);
+      const complete = [...variant.siblingFaces].every(f => passed.has(f));
+      if (!complete) {
+        progress.cycleFacesPassed = [...passed];
+        progress.streak += 1;
+        setProgressDelay(progress, SRS_VARIANT_HOLD_MS, now);
+        getDirectionalMarksStore()[card.id] = ratedOutcome === 'easy' ? 'known' : 'unsure';
+        progress.lastSpacedOutcome = ratedOutcome;
+        runtime.marks = getDirectionalMarksStore();
+        return;
+      }
+      progress.cycleFacesPassed = []; // set complete → advance, fresh cycle
+    }
+    applyCorrectOutcome(progress, cadence, now, ratedOutcome);
+    getDirectionalMarksStore()[card.id] = ratedOutcome === 'easy' ? 'known' : 'unsure';
   }
 
-  progress.lastSpacedOutcome = normalizedOutcome;
+  progress.lastSpacedOutcome = ratedOutcome;
   runtime.marks = getDirectionalMarksStore();
 }
 
