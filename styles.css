@@ -1471,6 +1471,13 @@
     gap: 7px;
     margin-bottom: 10px;
   }
+  /* A single-choice step (e.g. a deponent's middle-only voice step) centers a
+     lone button on wide screens with a capped width, instead of letting it fill
+     the left half of the 2-column grid. */
+  .morph-choices.morph-choices-single {
+    grid-template-columns: minmax(0, 260px);
+    justify-content: center;
+  }
 
   .choice-btn {
     background: var(--surface);
@@ -2577,15 +2584,24 @@
   }
   .morph-step-summary-row.morph-step-correct .morph-step-summary-pick { color: #9ad0a7; }
   .morph-step-summary-row.morph-step-incorrect .morph-step-summary-pick { color: #e7a1a1; }
-  /* Deponent voice soft-accept: 'middle' is correct but amber-flagged with
-     an "active (deponent)" note (see renderMorphStepSummary). */
-  .morph-step-summary-row.morph-step-soft .morph-step-summary-pick { color: #e7c79a; }
+  /* Deponent voice note (amber): repeated in the parse summary to explain why a
+     deponent reads as a single 'middle' (see DEPONENT_VOICE_NOTE in render.js). */
   .morph-step-deponent-note {
     display: block;
     margin-top: 4px;
     color: #e7c79a;
     font-size: calc((12px) * var(--text-scale));
     line-height: 1.4;
+  }
+  /* Reinforcement note under a single-option step's lone button (deponent voice,
+     single-gender noun gender) — neutral/muted, centered to match the button. */
+  .morph-step-single-note {
+    margin: -2px auto 10px;
+    max-width: 340px;
+    color: var(--muted);
+    font-size: calc((12.5px) * var(--text-scale));
+    line-height: 1.45;
+    text-align: center;
   }
   .morph-step-correction {
     color: var(--muted);
@@ -3927,7 +3943,6 @@
   html[data-theme="light"] .morph-step-summary-row.morph-step-correct .morph-step-summary-pick { color: #3a6a4a; }
   html[data-theme="light"] .morph-step-summary-row.morph-step-incorrect .morph-step-summary-pick { color: #8c3a3a; }
   html[data-theme="light"] .morph-step-aspect-note { color: #8c3a3a; }
-  html[data-theme="light"] .morph-step-summary-row.morph-step-soft .morph-step-summary-pick { color: #8a6a1f; }
   html[data-theme="light"] .morph-step-deponent-note { color: #8a6a1f; }
   html[data-theme="light"] .morph-step-dot.reattempted {
     border-color: #d8c48a;

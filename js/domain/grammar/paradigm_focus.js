@@ -181,6 +181,26 @@ const PARADIGM_DISPLAY_OVERRIDES = {
   'Liquid-stem futures':                'Liquid-future stem recall (what is the future / aorist of … ?)'
 };
 
+// Pseudo-lemmas that are stem-recall *drills*, not parseable paradigms — they
+// carry no tense/voice/mood/case dimensions to walk. Focusing one in parsing
+// mode surfaces a redirect into the matching stem-FLIP Vocabulary supplemental
+// (see renderCard's redirect branch); the value is that supplemental's key. The
+// genuinely parseable liquid-future paradigms (μένω, κρίνω) still appear in the
+// dropdown on their own — this is just the stem-recall link. They stay in the
+// focused-paradigm dropdown (the redirect is the point) but are filtered out of
+// the custom paradigm set checklist, where a non-parseable entry would only be
+// an inert checkbox that pools no cards.
+export const PARSING_INCOMPATIBLE_LEMMAS = {
+  'Second-aorist stems': 'W4_SECOND_AORIST_FLIP',
+  'Liquid-stem futures': 'W4_LIQUID_FUTURE_FLIP'
+};
+
+// True for the stem-recall redirect pseudo-lemmas above — lemmas with no
+// dimensional parse, so they don't belong in a paradigm-pool checklist.
+export function isParsingIncompatibleLemma(lemma) {
+  return Object.prototype.hasOwnProperty.call(PARSING_INCOMPATIBLE_LEMMAS, lemma);
+}
+
 // Display order for the optgroup headings in the dropdown. Order reflects
 // course progression (article → nouns → adjectives → pronouns → verbs →
 // participles → other). Categories not in this list are appended at the end.

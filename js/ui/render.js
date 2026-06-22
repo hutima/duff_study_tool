@@ -9,7 +9,7 @@ import { runtime } from '../state/runtime.js';
 import { buildGrammarSupportHtml } from '../domain/grammar/explanations.js';
 import { renderProgress, renderReview } from './progress.js';
 import { buildMorphSteps, computeAccessibleDimensionPools, parseAnswerDimensions, aspectMistakeNote, isSecondPluralPresentMoodAmbiguity, computeParadigmPresentValues, accentLookalikesFor, confusableFormHints, isSyncreticMiddlePassiveVoice, THIRD_PERSON_IMPERATIVE_CHAPTER } from '../domain/grammar/morph_steps.js';
-import { getAccessibleMorphCards, deriveSelectionLevels, buildMultiGenderLemmas, MIXED_FORM_NOUN_LEMMAS, THIRD_DECLENSION_NOUN_LEMMAS, paradigmCategoryForLemma } from '../domain/grammar/paradigm_focus.js';
+import { getAccessibleMorphCards, deriveSelectionLevels, buildMultiGenderLemmas, MIXED_FORM_NOUN_LEMMAS, THIRD_DECLENSION_NOUN_LEMMAS, paradigmCategoryForLemma, PARSING_INCOMPATIBLE_LEMMAS } from '../domain/grammar/paradigm_focus.js';
 import { resolveLookupWalk } from '../domain/grammar/morph_lookup.js';
 
 // Spell out the derived-card form abbreviation (card.derivedShort) for the
@@ -91,19 +91,11 @@ function hideGrammarChoiceAnnotations(choices) {
   return stripped;
 }
 
-// Focused-paradigm lemmas that are stem-recall prompts ("what is the aorist
-// of λαμβάνω?") rather than canonical paradigm forms. Parsing mode can't
-// dimension-walk them — they have no tense/voice/mood/case/etc. parse —
-// so we surface a redirect card that, when clicked, hops the student into
-// the matching stem-FLIP Vocab supplemental (diff-highlighted changing
-// letters). Second-aorist → W4_SECOND_AORIST_FLIP; liquid-future →
-// W4_LIQUID_FUTURE_FLIP. The parseable liquid-future paradigms (μένω, κρίνω)
-// still appear in the dropdown on their own — this entry is just the
-// stem-recall link, parallel to the second-aorist one.
-const PARSING_INCOMPATIBLE_LEMMAS = {
-  'Second-aorist stems': 'W4_SECOND_AORIST_FLIP',
-  'Liquid-stem futures': 'W4_LIQUID_FUTURE_FLIP'
-};
+// PARSING_INCOMPATIBLE_LEMMAS — the stem-recall redirect map (lemma → stem-FLIP
+// Vocab supplemental key) — is imported from paradigm_focus.js. Parsing mode
+// can't dimension-walk these (they have no tense/voice/mood/case parse), so the
+// redirect card rendered in renderCard below hops the student into the matching
+// supplemental instead.
 
 // The "nothing selected" placeholder — the same markup index.html ships in
 // #cardArea. Shown on a fresh start, after deselecting everything, and when
@@ -1024,17 +1016,58 @@ function renderMorphUndoRow(state) {
     </div>`;
 }
 
-function renderMorphStepCurrent(state) {
+// Reinforcement note shown under the lone button of a single-option parsing
+// step. Deponent voice ('middle' only): bridges the modern reading (deponents
+// are genuine middles) and the traditional one ("middle in form, active in
+// meaning"). Single-gender noun gender: see fixedGenderNote.
+const DEPONENT_VOICE_NOTE = 'Modern scholarship treats this as a true middle voice; traditionally, deponents are described as “middle in form but active in meaning.”';
+
+// Note for a single-gender noun's gender step — names the noun type ("λόγος is a
+// 2nd-decl. masculine noun") so the fixed gender is reinforced rather than just
+// asked. Falls back to "<lemma> is always <gender>" when the paradigm category
+// isn't a nameable "Nouns · …" type.
+function fixedGenderNote(card, step) {
+  const lemma = card && card.lemma ? card.lemma : '';
+  const gender = step.correct || '';
+  const category = lemma ? paradigmCategoryForLemma(lemma) : null;
+  if (category && /^Nouns\s*·/.test(category)) {
+    const typeLabel = category.replace(/^Nouns\s*·\s*/, '');
+    return `${lemma} is a ${typeLabel} noun — every form keeps this gender.`;
+  }
+  return lemma ? `${lemma} is always ${gender} — its gender is fixed.` : '';
+}
+
+// The reinforcement note (if any) for a single-option step. '' for ordinary
+// multi-choice steps.
+function stepReinforcementNote(step, card) {
+  if (!step) return '';
+  if (step.deponentMiddleOnly) return DEPONENT_VOICE_NOTE;
+  if (step.fixedGender) return fixedGenderNote(card, step);
+  return '';
+}
+
+function renderMorphStepCurrent(state, card) {
   const step = state.steps[state.stepIdx];
   if (!step) return '';
   const choiceButtons = step.displayChoices.map((label, idx) => {
     return `<button class="choice-btn" type="button" onclick="answerMorphologyStep(${idx})">${escapeHtml(label)}</button>`;
   }).join('');
+  // A lone choice (a deponent's middle-only voice step, or a single-gender
+  // noun's gender step) centers on wide screens via .morph-choices-single
+  // instead of sitting in the left half of the 2-column grid.
+  const choicesClass = step.choices && step.choices.length === 1
+    ? 'morph-choices morph-choices-single'
+    : 'morph-choices';
+  const note = stepReinforcementNote(step, card);
+  const noteHtml = note
+    ? `<div class="morph-step-single-note">${escapeHtml(note)}</div>`
+    : '';
   return `
     <div class="morph-step-current">
       <div class="morph-step-progress">Step ${state.stepIdx + 1}</div>
       <div class="morph-step-label">${escapeHtml(step.label)}?</div>
-      <div class="morph-choices">${choiceButtons}</div>
+      <div class="${choicesClass}">${choiceButtons}</div>
+      ${noteHtml}
       <div class="morph-dontknow-row">
         <button class="ctrl-btn morph-dontknow-btn" type="button" onclick="skipMorphologyStep()">I don't know</button>
         <button class="ctrl-btn morph-giveup-btn" type="button" onclick="giveUpMorphologyStep()">I give up</button>
@@ -1059,15 +1092,13 @@ function applyDisplaySuffixIfPerson(dimKey, value) {
 // singular" — slot the implied person token (from impliedDims, defaulting to
 // 2nd) in after mood when no Person step is present.
 // `impliedDims` carries dimensions that weren't asked as a step but still
-// belong to the canonical parse — currently single-gender gender (λόγος
-// is always masculine, the step is skipped, but the label still reads
-// "...singular masculine"). Injected after the 'number' position so the
-// nominal order case → number → gender is preserved.
+// belong to the canonical parse — currently just the implied 2nd person of a
+// pre-ch-17 imperative. (Gender is now always a real step, single-option for
+// single-gender nouns, so it's no longer implied.)
 function assembleParseLine(steps, values, impliedDims) {
   const parts = [];
   let moodImperativePos = -1;
   let hasPersonStep = false;
-  let postNumberPos = -1;
   steps.forEach((step, idx) => {
     if (step.key === 'person') hasPersonStep = true;
     const v = values[idx];
@@ -1076,16 +1107,10 @@ function assembleParseLine(steps, values, impliedDims) {
     if (step.key === 'mood' && String(v).toLowerCase() === 'imperative') {
       moodImperativePos = parts.length;
     }
-    if (step.key === 'number') postNumberPos = parts.length;
   });
   if (moodImperativePos >= 0 && !hasPersonStep) {
     const impliedPerson = (impliedDims && impliedDims.person) ? impliedDims.person : 'second';
     parts.splice(moodImperativePos, 0, `${impliedPerson} person`);
-    if (postNumberPos >= moodImperativePos) postNumberPos += 1;
-  }
-  if (impliedDims && impliedDims.gender) {
-    const insertAt = postNumberPos >= 0 ? postNumberPos : parts.length;
-    parts.splice(insertAt, 0, impliedDims.gender);
   }
   return parts.join(' · ');
 }
@@ -1756,18 +1781,11 @@ function renderMorphStepSummary(card, state) {
     const forcedWrong = !!(state.forcedWrong && state.forcedWrong[step.key]);
     const pickCorrect = !!(answer && answer.isCorrect);
     const correct = !forcedWrong && pickCorrect;
-    // Deponent voice soft-accept. For a deponent the form is middle (or
-    // middle/passive) but Duff parses it as active — so both grade correct
-    // (morph_steps.js seeds step.acceptable = [middle, 'active']). 'active'
-    // is the headline answer; when the student instead names the formal
-    // 'middle' voice it still counts, but render it amber with an "active
-    // (deponent)" note rather than a plain green ✓, so the convention is
-    // reinforced instead of reading as fully, unremarkably right.
-    const pickedRaw = answer && answer.selectedIdx >= 0 ? step.choices[answer.selectedIdx] : null;
-    const deponentVoiceStep = step.key === 'voice'
-      && Array.isArray(step.acceptable) && step.acceptable.includes('active')
-      && (step.correct === 'middle' || step.correct === 'middle/passive');
-    const softDeponentMiddle = !!correct && deponentVoiceStep && !!pickedRaw && pickedRaw !== 'active';
+    // Deponent voice note. A deponent's voice step is single-choice ('middle'
+    // only — see buildMorphSteps), so the pick is always the plain-correct
+    // 'middle'. The summary repeats the contested-voice note so the completed
+    // parse still explains why a deponent reads as middle.
+    const deponentMiddleVoice = step.key === 'voice' && !!step.deponentMiddleOnly;
     let markClass;
     let mark;
     if (forcedWrong && pickCorrect) {
@@ -1777,9 +1795,6 @@ function renderMorphStepSummary(card, state) {
       // branch below, so it reads like any other miss and needs no footnote.
       markClass = 'morph-step-reattempted';
       mark = '*';
-    } else if (softDeponentMiddle) {
-      markClass = 'morph-step-soft';
-      mark = '✓';
     } else if (correct) {
       markClass = 'morph-step-correct';
       mark = '✓';
@@ -1787,8 +1802,8 @@ function renderMorphStepSummary(card, state) {
       markClass = 'morph-step-incorrect';
       mark = '✗';
     }
-    const deponentNoteHtml = softDeponentMiddle
-      ? `<span class="morph-step-deponent-note">active (deponent) — middle in form, active in meaning</span>`
+    const deponentNoteHtml = deponentMiddleVoice
+      ? `<span class="morph-step-deponent-note">${escapeHtml(DEPONENT_VOICE_NOTE)}</span>`
       : '';
     let acceptable = Array.isArray(step.acceptable) ? step.acceptable : [step.correct];
     // When the combined 'middle/passive' is accepted, don't also spell out its
@@ -2266,7 +2281,7 @@ function renderMorphStepCard(area, card) {
 
   const body = state.completed
     ? renderMorphStepSummary(card, state)
-    : renderMorphStepCurrent(state);
+    : renderMorphStepCurrent(state, card);
 
   // Identify the word by its dictionary lemma (λύω), not the paradigm set's
   // display label. For the participle sets that label is the principal-parts
