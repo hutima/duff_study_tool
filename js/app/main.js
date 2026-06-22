@@ -3823,55 +3823,47 @@ function preventDoubleTapZoom(el) {
 if ('serviceWorker' in navigator) {
   let pendingWorker = null;
   let reloading = false;
+  // Only reload as the result of a user-initiated update. Auto-reloading on
+  // controllerchange at launch froze iOS standalone PWAs (the page renders
+  // but taps do nothing until a force-quit). The new worker now waits until
+  // the user taps "Refresh now", so the reload runs inside their gesture —
+  // which iOS handles reliably.
+  let refreshAccepted = false;
 
   navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (reloading) return;
+    if (!refreshAccepted || reloading) return;
     reloading = true;
     window.location.reload();
   });
 
-  let refreshOverlayTimer = null;
-
   window.acceptRefreshAvailable = function () {
+    refreshAccepted = true;
     if (pendingWorker) {
       try { pendingWorker.postMessage({ type: 'SKIP_WAITING' }); } catch (_) {}
     }
-    // The new worker activating fires `controllerchange`, which reloads us.
-    // If that never happens (the stuck-on-stale-assets state this modal is
-    // the fallback for), force a fresh navigation so the user can't get
-    // trapped on a broken app after clicking through.
+    // Belt-and-suspenders: if the worker activating doesn't fire
+    // controllerchange shortly, reload anyway so the tap is never a no-op.
     setTimeout(() => {
       if (!reloading) { reloading = true; window.location.reload(); }
     }, 1500);
   };
 
-  function actuallyShowRefreshOverlay() {
+  function showRefreshOverlay(sw) {
+    pendingWorker = sw;
     const overlay = document.getElementById('refreshAvailableOverlay');
     if (!overlay) return;
-    // Visibility is driven by the `.show` class (see styles.css);
-    // aria-hidden alone won't display it.
+    // Visibility needs the `.show` class (see styles.css); aria-hidden alone
+    // won't display it. We show it right away: the worker is waiting and
+    // won't apply on its own this session, so there's no auto-reload to race.
     overlay.classList.add('show');
     overlay.setAttribute('aria-hidden', 'false');
     document.body.classList.add('modal-open');
   }
 
-  function showRefreshOverlay(sw) {
-    pendingWorker = sw;
-    // The primary update path is the silent auto-reload (skipWaiting in
-    // sw.js → controllerchange → reload above). This modal is only a
-    // FALLBACK for when that doesn't complete — stale in-memory JS on an
-    // old client, or an iOS PWA that didn't pick up the controllerchange.
-    // So defer showing it: if the auto-reload fires first, this page
-    // navigates away and the timer is discarded; if we're still alive
-    // after the delay, we're stuck on stale assets and surface a mandatory
-    // click-through prompt (no dismiss — the app won't work outdated).
-    if (refreshOverlayTimer) return;
-    refreshOverlayTimer = setTimeout(actuallyShowRefreshOverlay, 3000);
-  }
-
   function trackUpdates(reg) {
-    // The new SW only counts as an update if a controller is already in place
-    // (i.e. this isn't the first install on a fresh device).
+    // A waiting (or just-installed) worker while a controller already exists
+    // means a returning user has a new version ready. Surface the prompt;
+    // the worker stays waiting until they tap "Refresh now".
     if (reg.waiting && navigator.serviceWorker.controller) {
       showRefreshOverlay(reg.waiting);
     }
