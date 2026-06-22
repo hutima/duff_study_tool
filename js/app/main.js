@@ -3820,21 +3820,43 @@ if ('serviceWorker' in navigator) {
     window.location.reload();
   });
 
+  let refreshOverlayTimer = null;
+
   window.acceptRefreshAvailable = function () {
     if (pendingWorker) {
       try { pendingWorker.postMessage({ type: 'SKIP_WAITING' }); } catch (_) {}
     }
+    // The new worker activating fires `controllerchange`, which reloads us.
+    // If that never happens (the stuck-on-stale-assets state this modal is
+    // the fallback for), force a fresh navigation so the user can't get
+    // trapped on a broken app after clicking through.
+    setTimeout(() => {
+      if (!reloading) { reloading = true; window.location.reload(); }
+    }, 1500);
   };
 
-  window.dismissRefreshAvailable = function () {
+  function actuallyShowRefreshOverlay() {
     const overlay = document.getElementById('refreshAvailableOverlay');
-    if (overlay) overlay.setAttribute('aria-hidden', 'true');
-  };
+    if (!overlay) return;
+    // Visibility is driven by the `.show` class (see styles.css);
+    // aria-hidden alone won't display it.
+    overlay.classList.add('show');
+    overlay.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('modal-open');
+  }
 
   function showRefreshOverlay(sw) {
     pendingWorker = sw;
-    const overlay = document.getElementById('refreshAvailableOverlay');
-    if (overlay) overlay.setAttribute('aria-hidden', 'false');
+    // The primary update path is the silent auto-reload (skipWaiting in
+    // sw.js → controllerchange → reload above). This modal is only a
+    // FALLBACK for when that doesn't complete — stale in-memory JS on an
+    // old client, or an iOS PWA that didn't pick up the controllerchange.
+    // So defer showing it: if the auto-reload fires first, this page
+    // navigates away and the timer is discarded; if we're still alive
+    // after the delay, we're stuck on stale assets and surface a mandatory
+    // click-through prompt (no dismiss — the app won't work outdated).
+    if (refreshOverlayTimer) return;
+    refreshOverlayTimer = setTimeout(actuallyShowRefreshOverlay, 3000);
   }
 
   function trackUpdates(reg) {
