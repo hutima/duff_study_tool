@@ -169,7 +169,7 @@ import { getSelectedVocabCards, getSelectedGrammarCards, getAllVocabKeys, getAll
 // Domain — Grammar
 import { buildGrammarSupportHtml } from '../domain/grammar/explanations.js';
 import { recordParadigmAttempt, inferredFollowupDims, buildInferredStep, structuralImpossibilityReason, paradigmGapReason, lemmaInventoryGapReason, isLemmaFormKnown, getLemmaFormStatus, parseAnswerDimensions } from '../domain/grammar/morph_steps.js';
-import { listAvailableParadigms, listAvailableParadigmsByCategory, getCardsForFocusedParadigm, getCardsForParadigmCategory, getCardsForParadigmLemmas, getAllParsingCards, parseCategoryShuffleValue, makeCategoryShuffleValue, chooseDefaultFocusedParadigm } from '../domain/grammar/paradigm_focus.js';
+import { listAvailableParadigms, listAvailableParadigmsByCategory, getCardsForFocusedParadigm, getCardsForParadigmCategory, getCardsForParadigmLemmas, getAllParsingCards, parseCategoryShuffleValue, makeCategoryShuffleValue, chooseDefaultFocusedParadigm, isParsingIncompatibleLemma } from '../domain/grammar/paradigm_focus.js';
 import { buildLookupPool, truncatePicksFrom } from '../domain/grammar/morph_lookup.js';
 
 // UI
@@ -533,8 +533,12 @@ configureNavigation({
   // Pin the focused paradigm to a concrete lemma when lookup mode turns on.
   prepareLookupFocus: () => prepareLookupFocus(),
   // In-scope paradigm lemmas at the current selection — used by the custom
-  // paradigm set's "Select all" action.
-  listAvailableParadigmLemmas: () => listAvailableParadigms(getAggregateSelectionKeys()).map((p) => p.lemma)
+  // paradigm set's "Select all" action. Stem-recall pseudo-lemmas are dropped so
+  // Select-all matches the checklist (which excludes them) and never ticks an
+  // inert, non-parseable entry into the set.
+  listAvailableParadigmLemmas: () => listAvailableParadigms(getAggregateSelectionKeys())
+    .map((p) => p.lemma)
+    .filter((lemma) => !isParsingIncompatibleLemma(lemma))
 });
 configureAnalytics({
   ensureUsageStats: () => ensureUsageStats(),
@@ -1532,7 +1536,7 @@ function syncParadigmFocusUi() {
   // Stem-recall drills ("Second-aorist stems", "Liquid-stem futures") have no
   // parse dimensions, so they stay in the dropdown as stem-recall links that
   // render a redirect card to the matching flip-card supplemental (see
-  // PARSING_INCOMPATIBLE_LEMMAS in render.js). The parseable liquid-future
+  // PARSING_INCOMPATIBLE_LEMMAS in paradigm_focus.js). The parseable liquid-future
   // paradigms (μένω, κρίνω) are listed separately under "Verbs · liquid
   // future", so nothing needs hiding or substituting here.
   const PARSING_DROPDOWN_SUBSTITUTIONS = {};
@@ -1617,7 +1621,13 @@ function syncParsingCustomParadigmsUi() {
   if (!list) return;
   if (!isParsingMode()) return;
   const aggregateKeys = getAggregateSelectionKeys();
-  const grouped = listAvailableParadigmsByCategory(aggregateKeys);
+  // Drop stem-recall pseudo-lemmas (second-aorist / liquid-future): they're
+  // redirect-only drills with no parse to pool, so a checkbox for them would be
+  // inert. They still appear in the focused-paradigm dropdown for the redirect
+  // card; this checklist is parseable paradigms only. Empty groups fall away.
+  const grouped = listAvailableParadigmsByCategory(aggregateKeys)
+    .map((g) => ({ ...g, lemmas: g.lemmas.filter((p) => !isParsingIncompatibleLemma(p.lemma)) }))
+    .filter((g) => g.lemmas.length);
   const selected = runtime.parsingCustomParadigms || {};
   if (!grouped.length) {
     list.innerHTML = '<div class="paradigm-custom-empty">No paradigms in the current selection. Choose a chapter (or raise the parsing chapter) to pick paradigms.</div>';

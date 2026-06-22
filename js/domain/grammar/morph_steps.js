@@ -34,6 +34,20 @@ const DIM_LABEL = {
   gender: 'Gender'
 };
 
+// Display order for MC choice lists (sortChoicesCanonically). Extends the bare
+// DIM_POOLS singles with the syncretic/composite values, placed immediately
+// after the singles they combine — so a combined option (the neuter
+// "nominative/accusative", a 2-termination adjective's "masculine/feminine")
+// sits next to its components instead of being exiled to the end of the list,
+// where it's easy to overlook and skip past. This only affects ORDERING, never
+// which choices appear (that's buildChoices) — composites still surface only
+// when they're the actual syncretic answer, not as distractors. Dimensions
+// without an entry here fall back to DIM_POOLS order.
+const CHOICE_SORT_ORDER = {
+  case:   ['nominative', 'accusative', 'nominative/accusative', 'genitive', 'dative', 'vocative'],
+  gender: ['masculine', 'feminine', 'neuter', 'masculine/feminine', 'masculine/neuter', 'masculine/feminine/neuter']
+};
+
 // Aspect is implicit in tense in Duff's pedagogy. Present and future are
 // genuinely ambiguous between continuous (imperfective) and undefined
 // (aoristic) — the form alone doesn't pick one (progressive vs gnomic for
@@ -154,15 +168,16 @@ export function parseAnswerDimensions(answer) {
 }
 
 // Stable canonical ordering for parsing-mode MC option lists. Items present
-// in DIM_POOLS keep that pedagogical order (present → future → imperfect →
-// aorist → …; nom → acc → gen → dat → voc; etc.); composite/syncretic
-// values not in DIM_POOLS (e.g. 'masculine/feminine/neuter') sort last,
-// alphabetically among themselves. Used instead of random shuffling so the
-// same dimension always presents its choices in the same order card-to-card
-// — random reordering forced re-reading on every step and broke the
-// muscle-memory mapping between paradigm-table position and option slot.
+// in the dimension's order (CHOICE_SORT_ORDER, else DIM_POOLS) keep that
+// pedagogical order (present → future → imperfect → aorist → …; nom → acc →
+// nom/acc → gen → dat → voc; masc → fem → neut → masc/fem → masc/neut →
+// masc/fem/neut). Any value still not listed (an unforeseen composite) sorts
+// last, alphabetically among such values. Used instead of random shuffling so
+// the same dimension always presents its choices in the same order
+// card-to-card — random reordering forced re-reading on every step and broke
+// the muscle-memory mapping between paradigm-table position and option slot.
 function sortChoicesCanonically(dimensionKey, values) {
-  const canonical = DIM_POOLS[dimensionKey] || [];
+  const canonical = CHOICE_SORT_ORDER[dimensionKey] || DIM_POOLS[dimensionKey] || [];
   const ord = (v) => {
     const i = canonical.indexOf(v);
     return i === -1 ? canonical.length : i;
@@ -918,37 +933,27 @@ export function buildMorphSteps(card, accessiblePools = null, options = {}) {
       skippedCorrect[dimKey] = correct;
       continue;
     }
-    // Single-gender lemma auto-skip. Asking "what gender?" for a noun
-    // like λόγος tests whether the student remembers the lemma's fixed
-    // gender, not whether they're parsing the form — the form λόγου is
-    // masculine because λόγος is, not because the genitive ending
-    // distinguishes a gender. Multi-gender paradigms (articles,
-    // adjectives, pronouns, participles) keep the step: there the form
-    // genuinely commits to a gender. The implied gender is auto-filled
-    // for form lookup AND surfaced in the final parse summary so the
-    // canonical label still reads e.g. "genitive singular masculine".
+    // Single-gender noun gender step. A noun like λόγος (masc.), ἀγάπη (fem.),
+    // or ἔργον (neut.) has one fixed gender across its whole paradigm — the form
+    // λόγου is masculine because λόγος is, not because the genitive ending picks
+    // a gender. Drilling it as a real multi-choice test would probe lemma memory,
+    // not form-parsing; auto-skipping it (the old behavior) hid the gender from
+    // the walk entirely. Instead show a single-option reinforcement step — one
+    // button for the noun's gender, with a note naming the noun type — so the
+    // gender↔noun-type link is reinforced without being a guessable test. Marked
+    // `fixedGenderNoun` here and turned into a single-choice step below.
     //
-    // Exception: mixed-form nouns (1st-decl. masc. -ης/-ας like
-    // προφήτης, μαθητής) keep the step. Their endings match the 1st-
-    // decl. feminine pattern, so the form-shape misleads the student
-    // into a feminine reading; the gender check is the whole point of
-    // drilling these and the lemma's gender isn't "obvious from the
-    // article" the way it is for λόγος.
-    //
-    // Same exception for third-declension nouns (σάρξ fem., ὄνομα neut.,
-    // βασιλεύς masc., …): the ending doesn't betray the gender, so it has
-    // to be recalled — the form λόγου is masculine because λόγος is, but
-    // σαρκός gives no such tell. Both sets are single-gender; only the
-    // auto-skip is bypassed, not the gender value-filter.
+    // Multi-gender paradigms (articles, adjectives, pronouns, participles) are
+    // excluded — there the form genuinely commits to a gender, so they keep the
+    // normal multi-choice step. So are mixed-form -ης/-ας masculines (προφήτης,
+    // μαθητής, whose endings mimic the 1st-decl. feminine) and 3rd-declension
+    // nouns (σάρξ fem., ὄνομα neut., βασιλεύς masc.): their gender has to be
+    // recalled (σαρκός gives no tell), so they stay a real multi-choice test.
     const isMixedFormNoun = !!(mixedFormNouns && card.lemma && mixedFormNouns.has(card.lemma));
     const isThirdDeclNoun = !!(thirdDeclensionNouns && card.lemma && thirdDeclensionNouns.has(card.lemma));
-    if (dimKey === 'gender' && multiGenderLemmas && card.lemma
-        && !multiGenderLemmas.has(card.lemma)
-        && !isMixedFormNoun && !isThirdDeclNoun) {
-      skippedCorrect[dimKey] = correct;
-      impliedDims[dimKey] = correct;
-      continue;
-    }
+    const fixedGenderNoun = dimKey === 'gender' && !!multiGenderLemmas && !!card.lemma
+      && !multiGenderLemmas.has(card.lemma)
+      && !isMixedFormNoun && !isThirdDeclNoun;
     let pool = accessiblePools ? accessiblePools[dimKey] : null;
     // No 1st-person imperative exists in Koine — when the person step is asked
     // for an imperative (ch 17+), offer only 2nd / 3rd as choices.
@@ -960,14 +965,38 @@ export function buildMorphSteps(card, accessiblePools = null, options = {}) {
     // (λύομαι), so a card the source set labelled one-sidedly ("λύω — passive
     // indicative") should parse as the combined 'middle/passive' and accept
     // either reading. The future/aorist (where the two voices diverge) and
-    // deponents (handled by their own active-accepting rule below) are left
-    // untouched. Collapsing before buildChoices makes 'middle/passive' a real
-    // option and the headline correct value, so the correction never points
-    // at a voice the student couldn't have picked.
+    // deponents (handled by the middle-only rule below) are left untouched.
+    // Collapsing before buildChoices makes 'middle/passive' a real option and
+    // the headline correct value, so the correction never points at a voice the
+    // student couldn't have picked.
     const syncreticMiddlePassive = dimKey === 'voice'
       && isSyncreticMiddlePassiveVoice(dims, card.lemma);
-    const stepCorrect = syncreticMiddlePassive ? 'middle/passive' : correct;
-    const choices = buildChoices(dimKey, stepCorrect, pool, dimValueFilters);
+    // Deponent voice = middle. A deponent's dictionary form is medio-passive in
+    // shape, but the verb has no active form to contrast and (being deponent) no
+    // passive sense — so its voice is simply the middle. Instead of asking
+    // active-vs-middle (the old "deponent counts as active" soft-accept), the
+    // step offers a single 'middle' choice plus a note: modern scholarship reads
+    // deponents as genuine middles, while the traditional framing calls them
+    // "middle in form, active in meaning". Guarded to the middle / middle-passive
+    // voices so a deponent's genuinely passive forms (γίνομαι's aorist passive
+    // ἐγενήθην, the θη-aorists of passive deponents like ἀπεκρίθην) stay a strict
+    // 'passive', and to deponent lemmas so a regular verb's middle/passive
+    // (λύομαι) keeps the syncretic treatment above — λύω is not deponent and not
+    // middle-only.
+    const deponentMiddleOnly = dimKey === 'voice'
+      && (correct === 'middle' || correct === 'middle/passive')
+      && isDeponentLemma(card.lemma);
+    const stepCorrect = deponentMiddleOnly
+      ? 'middle'
+      : (syncreticMiddlePassive ? 'middle/passive' : correct);
+    // Single-option steps show one button and skip the distractor pool: the
+    // deponent voice step ('middle' only) and the single-gender noun's gender
+    // step (its one fixed gender). Every other dimension draws its distractors
+    // from the chapter-gated accessible pool.
+    let choices;
+    if (deponentMiddleOnly) choices = ['middle'];
+    else if (fixedGenderNoun) choices = [stepCorrect];
+    else choices = buildChoices(dimKey, stepCorrect, pool, dimValueFilters);
     const displayCorrect = applyDisplaySuffix(dimKey, stepCorrect);
     const displayChoices = choices.map((c) => applyDisplaySuffix(dimKey, c));
     // Each dimension has exactly one correct value per card. For aspect on
@@ -994,17 +1023,21 @@ export function buildMorphSteps(card, accessiblePools = null, options = {}) {
     if (syncreticMiddlePassive) {
       step.acceptable = ['middle/passive', 'middle', 'passive'];
     }
-    // Deponent voice handling. Duff treats deponent verbs (dictionary form in
-    // -μαι, plus εἰμί's future ἔσομαι) as functionally active even though the
-    // form is middle / middle-passive — so when voice IS asked (ch 14+ for
-    // participles, ch 15+ otherwise) both 'active' and the formal middle voice
-    // grade as correct. A regular verb's genuine middle (e.g. λύω's ἐλύσω) is
-    // NOT a deponent and stays strict — 'active' is wrong there. Genuine
-    // passives (voice='passive') stay strict too: passive isn't active.
-    if (dimKey === 'voice'
-        && (correct === 'middle' || correct === 'middle/passive')
-        && isDeponentLemma(card.lemma)) {
-      step.acceptable = [correct, 'active'];
+    // Flag the deponent middle-only voice step so the renderer shows the single
+    // centered 'Middle' choice with its contested-voice note. `acceptable` is
+    // already ['middle'] (from stepCorrect), so grading stays strict — there's
+    // no 'active' option to pick, replacing the old "deponent counts as active"
+    // soft-accept. The chapter gate still applies (ch 14+ participles, ch 15+
+    // finite); below it the voice is silently filled and never asked.
+    if (deponentMiddleOnly) {
+      step.deponentMiddleOnly = true;
+    }
+    // Flag the single-gender noun's gender step so the renderer shows the lone
+    // centered button with a noun-type note. `acceptable` is already the one
+    // gender (from stepCorrect), so it can't be answered wrong — it's
+    // reinforcement, not a test.
+    if (fixedGenderNoun) {
+      step.fixedGender = true;
     }
     if (dimKey === 'mood' && isSecondPluralPresentMoodAmbiguity(card.answer, dims)) {
       step.acceptable = ['indicative', 'imperative'];
