@@ -10,7 +10,9 @@ export const SRS_DAY_MS = 22 * 60 * 60 * 1000;
 export const SRS_FULL_DAY_MS = 24 * 60 * 60 * 1000;
 export const SRS_AGAIN_MS = 5 * 60 * 1000;
 // 2h re-test floor — used both for an Uncertain lapse's single confirming pass
-// and for the variant-form "hold" when a shared set is only partly known.
+// and as the variant-form ROUND WINDOW: a "split card" set has 2h from when its
+// first face is seen to clear every face, after which the round is closed out
+// (its confidence recorded, unreached faces counting 0%) and a fresh one begins.
 export const SRS_UNCERTAIN_MIN_MS = 2 * 60 * 60 * 1000;
 export const SRS_VARIANT_HOLD_MS = SRS_UNCERTAIN_MIN_MS;
 // Unspaced recovery delay is decoupled from the spaced uncertain floor — bumping
