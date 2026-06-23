@@ -169,7 +169,7 @@ import { getSelectedVocabCards, getSelectedGrammarCards, getAllVocabKeys, getAll
 
 // Domain — Grammar
 import { buildGrammarSupportHtml } from '../domain/grammar/explanations.js';
-import { recordParadigmAttempt, inferredFollowupDims, buildInferredStep, structuralImpossibilityReason, paradigmGapReason, lemmaInventoryGapReason, isLemmaFormKnown, getLemmaFormStatus, weightedRecentMissScore, parseAnswerDimensions } from '../domain/grammar/morph_steps.js';
+import { recordParadigmAttempt, inferredFollowupDims, buildInferredStep, structuralImpossibilityReason, paradigmGapReason, lemmaInventoryGapReason, isLemmaFormKnown, getLemmaFormStatus, weightedRecentMissScore, parseAnswerDimensions, isPartialCompositePick, PARTIAL_COMPOSITE_CREDIT } from '../domain/grammar/morph_steps.js';
 import { listAvailableParadigms, listAvailableParadigmsByCategory, getCardsForFocusedParadigm, getCardsForParadigmCategory, getCardsForParadigmLemmas, getAllParsingCards, parseCategoryShuffleValue, makeCategoryShuffleValue, chooseDefaultFocusedParadigm, isParsingIncompatibleLemma } from '../domain/grammar/paradigm_focus.js';
 import { buildLookupPool, truncatePicksFrom } from '../domain/grammar/morph_lookup.js';
 
@@ -1013,8 +1013,26 @@ function answerMorphologyStep(choiceIdx) {
   const validSet = Array.isArray(step.acceptable) && step.acceptable.length
     ? new Set(step.acceptable)
     : new Set([step.correct]);
-  const isCorrect = step.inferred ? null : validSet.has(picked);
-  state.answers[state.stepIdx] = { selectedIdx: choiceIdx, isCorrect };
+  // Partial composite credit: naming one valid value of a multi-value case /
+  // gender form (e.g. 'nominative' for a 'nominative/accusative' neuter) is
+  // accepted — isCorrect true so it advances and the shuffler treats it as
+  // right — but flagged `partial` so finalizeMorphStepAttempt scores it 0.75
+  // and the strict 2/2 "known" test never passes (the form keeps coming back
+  // until the full composite is named). Full-composite / exact picks stay plain
+  // correct; values outside the composite stay plain wrong.
+  let isCorrect;
+  let partial = false;
+  if (step.inferred) {
+    isCorrect = null;
+  } else if (validSet.has(picked)) {
+    isCorrect = true;
+  } else if (isPartialCompositePick(step, picked)) {
+    isCorrect = true;
+    partial = true;
+  } else {
+    isCorrect = false;
+  }
+  state.answers[state.stepIdx] = { selectedIdx: choiceIdx, isCorrect, partial };
 
   const answeredIdx = state.stepIdx;
   const wasInferred = !!step.inferred;
@@ -1244,6 +1262,8 @@ function finalizeMorphStepAttempt(card, state) {
     const pickRight = !!ans.isCorrect;
     // Scoring per dimension:
     //   clean correct pick     → 1   (full credit)
+    //   partial composite pick → PARTIAL_COMPOSITE_CREDIT (0.75) — named one
+    //                            valid value of a multi-value case/gender form
     //   reattempted via undo   → 0.5^(undos+1) if the final pick was right, else 0
     //                            (1 undo → 0.25, 2 → 0.125, 3 → 0.0625, …)
     //   wrong pick             → 0
@@ -1251,12 +1271,15 @@ function finalizeMorphStepAttempt(card, state) {
     // already drops it to a quarter (half credit was too generous for a guess
     // you had to take back), and each further undo halves it again. Any value
     // below 1 also keeps the form out of "known": evaluateRecentAttempt counts a
-    // dimension correct only when it's exactly 1, so any reattempt fails the 2/2
-    // exclude-known test (the whole parse reads as not-yet-known) while still
-    // scoring fractional credit in the accuracy stats.
+    // dimension correct only when it's exactly 1, so a reattempt OR a partial
+    // composite fails the 2/2 exclude-known test (the whole parse reads as
+    // not-yet-known) while still scoring fractional credit in the accuracy
+    // stats. An undo dominates a partial (the undo branch runs first), so an
+    // undone partial scores as a reattempt, not 0.75.
     const undos = Number(forced[step.key]) || 0;
     let credit;
     if (undos > 0) credit = pickRight ? Math.pow(0.5, undos + 1) : 0;
+    else if (ans.partial) credit = PARTIAL_COMPOSITE_CREDIT; // one value of a multi-value form
     else credit = pickRight ? 1 : 0;
     dims[step.key] = credit;
   });
@@ -2469,6 +2492,11 @@ function buildFilteredFocusedParadigmCards() {
 //      unseen    — never attempted          → highest priority (fixed)
 //      wrong     — 0/n recent               → high, GRADED (see below)
 //      uncertain — 1/2 recent               → mid, GRADED
+//      partial   — only ever named one value → low (fixed, = right): treated as
+//                  of a multi-value form        correct so it isn't hammered,
+//                                               but never excluded as known, so
+//                                               it keeps coming back until the
+//                                               full form is named.
 //      right     — 1/1 recent               → low (fixed)
 //      known     — 2/2 recent (mastered)    → lowest (fixed, flat)
 //    For the wrong/uncertain tier — the only "unknown" forms with recorded
@@ -2494,6 +2522,10 @@ function buildFilteredFocusedParadigmCards() {
 // rule applies) so the user can still walk a paradigm top-to-bottom.
 const PARSING_UNSEEN_WEIGHT = 6;   // never attempted → highest
 const PARSING_RIGHT_WEIGHT = 1.5;  // 1/1 clean → low (confirm once more)
+const PARSING_PARTIAL_WEIGHT = 1.5; // named one value of a multi-value form →
+                                    // treat as correct (low), but it's never
+                                    // excluded as 2/2-known, so it still
+                                    // resurfaces until the full form is named.
 const PARSING_KNOWN_WEIGHT = 1;    // 2/2 clean → lowest, flat (not re-ranked)
 // Wrong/uncertain forms: a base that lifts any form with recent misses above a
 // clean 1/1, plus the comprehension-weighted recent miss magnitude, capped just
@@ -2507,6 +2539,7 @@ function parsingFormPriorityWeight(card, stats, enabledDims) {
   if (status === 'unseen') return PARSING_UNSEEN_WEIGHT;
   if (status === 'known') return PARSING_KNOWN_WEIGHT;
   if (status === 'right') return PARSING_RIGHT_WEIGHT;
+  if (status === 'partial') return PARSING_PARTIAL_WEIGHT;
   // wrong | uncertain — grade by how badly / how importantly it's been missed.
   const miss = weightedRecentMissScore(stats, card.lemma, card.id, enabledDims);
   return Math.min(PARSING_WRONG_BASE + PARSING_WRONG_SCALE * miss, PARSING_WRONG_MAX);
