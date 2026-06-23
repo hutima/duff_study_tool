@@ -2636,6 +2636,17 @@
   }
   /* Reattempted-row pick colour, matching the amber footnote/asterisk. */
   .morph-step-summary-row.morph-step-reattempted .morph-step-summary-pick { color: #e7c79a; }
+  /* Correct-on-first-attempt-then-undone (correct → undo → correct): full
+     credit, shown green with an asterisk. Green footnote, distinct from the
+     amber "reattempted/miss" note. */
+  .morph-step-correct-note {
+    display: block;
+    margin-top: 6px;
+    color: #9ad0a7;
+    font-size: calc((11px) * var(--text-scale));
+    font-style: italic;
+    line-height: 1.4;
+  }
   /* Partial composite pick: one valid value of a multi-value form, accepted but
      not full. Yellow superscript dagger + footnote, distinct from the amber
      undo asterisk. */
@@ -3976,6 +3987,7 @@
   }
   html[data-theme="light"] .morph-step-summary-row.morph-step-reattempted .morph-step-summary-pick { color: #8a6a1f; }
   html[data-theme="light"] .morph-step-undone-note { color: #8a6a1f; }
+  html[data-theme="light"] .morph-step-correct-note { color: #3a6a4a; }
   html[data-theme="light"] .morph-step-dot.partial {
     border-color: #cdbd72;
     color: #7a6a16;
