@@ -8,7 +8,7 @@
 import { runtime } from '../state/runtime.js';
 import { buildGrammarSupportHtml } from '../domain/grammar/explanations.js';
 import { renderProgress, renderReview } from './progress.js';
-import { buildMorphSteps, computeAccessibleDimensionPools, parseAnswerDimensions, aspectMistakeNote, isSecondPluralPresentMoodAmbiguity, computeParadigmPresentValues, accentLookalikesFor, confusableFormHints, isSyncreticMiddlePassiveVoice, THIRD_PERSON_IMPERATIVE_CHAPTER } from '../domain/grammar/morph_steps.js';
+import { buildMorphSteps, computeAccessibleDimensionPools, parseAnswerDimensions, aspectMistakeNote, isSecondPluralPresentMoodAmbiguity, computeParadigmPresentValues, accentLookalikesFor, confusableFormHints, isSyncreticMiddlePassiveVoice, THIRD_PERSON_IMPERATIVE_CHAPTER, PARTIAL_COMPOSITE_CREDIT } from '../domain/grammar/morph_steps.js';
 import { getAccessibleMorphCards, deriveSelectionLevels, buildMultiGenderLemmas, MIXED_FORM_NOUN_LEMMAS, THIRD_DECLENSION_NOUN_LEMMAS, paradigmCategoryForLemma, PARSING_INCOMPATIBLE_LEMMAS } from '../domain/grammar/paradigm_focus.js';
 import { resolveLookupWalk } from '../domain/grammar/morph_lookup.js';
 
@@ -677,11 +677,15 @@ function ensureStepStateForCard(card) {
     // force-failed via undo. Both reset per card.
     history: [],
     forcedWrong: {},
-    // Step keys whose rolled-back (undone) answer was a partial-composite pick.
-    // finalizeMorphStepAttempt credits these the partial 0.75 instead of the
-    // full undo penalty, so getting a multi-value form partly right on the
-    // first try isn't unfairly erased by undoing to re-pick.
-    partialBeforeUndo: {}
+    // Per step key, the merit credit (1 full / 0.75 partial / 0 wrong) of the
+    // FIRST committed pick that was later undone — set once, first rollback
+    // wins. finalizeMorphStepAttempt floors an undone dimension at this value
+    // (capped by a valid final pick) so an undo can't erase credit the first
+    // attempt already earned.
+    firstAttemptCredit: {},
+    // Per step key, the final per-dimension credit computed at finalize time.
+    // The summary reads this so its marks/colours match the recorded score.
+    finalCredit: {}
   };
   return runtime.morphStepState;
 }
@@ -993,17 +997,26 @@ function renderMorphStepBreadcrumb(state) {
   const dots = state.steps.slice(0, visibleCount).map((step, idx) => {
     const answer = state.answers[idx];
     let cls = 'morph-step-dot';
+    const finalC = (state.completed && state.finalCredit && Object.prototype.hasOwnProperty.call(state.finalCredit, step.key))
+      ? Number(state.finalCredit[step.key]) : null;
     if (idx === state.stepIdx && !state.completed) cls += ' current';
     // Inferred steps (ungraded follow-ups) and steps whose correctness
     // is deferred pending a follow-up answer render as neutral — the
     // student shouldn't see "wrong" on mood before they've committed
     // to the dynamic person that completes their parse.
     else if (answer && (step.inferred || answer.deferred)) cls += ' neutral';
-    // A dimension undone but re-picked correctly counts as a miss yet isn't a
-    // flat wrong answer — amber. A reattempt that's still wrong stays red.
+    // Once complete, colour by the recorded credit so the breadcrumb matches
+    // the summary: full (incl. an undo floored back to full) → green, partial
+    // 0.75 → yellow, the small undo-recovery credit → amber, 0 → red.
+    else if (finalC !== null) {
+      if (finalC >= 1) cls += ' correct';
+      else if (finalC >= PARTIAL_COMPOSITE_CREDIT) cls += ' partial';
+      else if (finalC > 0) cls += ' reattempted';
+      else cls += ' incorrect';
+    }
+    // Live (mid-walk): a dimension undone but re-picked correctly shows amber;
+    // a fresh partial shows yellow; otherwise plain correct/incorrect.
     else if (answer && state.forcedWrong && state.forcedWrong[step.key] && answer.isCorrect === true) cls += ' reattempted';
-    // Partial composite pick (one valid value of a multi-value form) — yellow,
-    // accepted but not full. Checked before the plain-correct branch.
     else if (answer && answer.partial) cls += ' partial';
     else if (answer && answer.isCorrect === true) cls += ' correct';
     else if (answer && answer.isCorrect === false) cls += ' incorrect';
@@ -1788,32 +1801,38 @@ function renderMorphStepSummary(card, state) {
     // `correct` is the graded verdict, which an undo forces to false.
     const forcedWrong = !!(state.forcedWrong && state.forcedWrong[step.key]);
     const pickCorrect = !!(answer && answer.isCorrect);
-    const correct = !forcedWrong && pickCorrect;
+    // Colour/mark by the RECORDED credit (stashed by finalizeMorphStepAttempt)
+    // so the summary matches the score: full (1) → green ✓, partial (0.75) →
+    // yellow †, the small undo-recovery credit (0 < c < 0.75) → amber * "counts
+    // as a miss", 0 → red ✗. Falling back to the live answer keeps a pre-finalize
+    // render sane. The credit-floor means an undone-but-first-correct dimension
+    // lands at 1 here (green ✓) — the undo is forgiven, not punished.
+    const hasCredit = state.finalCredit && Object.prototype.hasOwnProperty.call(state.finalCredit, step.key);
+    const credit = hasCredit
+      ? Number(state.finalCredit[step.key])
+      : (pickCorrect ? (answer && answer.partial ? PARTIAL_COMPOSITE_CREDIT : 1) : 0);
+    const isPartial = credit >= PARTIAL_COMPOSITE_CREDIT && credit < 1;
+    const isReattemptMiss = forcedWrong && credit > 0 && credit < PARTIAL_COMPOSITE_CREDIT;
     // Deponent voice note. A deponent's voice step is single-choice ('middle'
     // only — see buildMorphSteps), so the pick is always the plain-correct
     // 'middle'. The summary repeats the contested-voice note so the completed
     // parse still explains why a deponent reads as middle.
     const deponentMiddleVoice = step.key === 'voice' && !!step.deponentMiddleOnly;
-    // Partial composite pick: one valid value of a multi-value case/gender form,
-    // accepted but not full. Yellow superscript dagger (distinct from the amber
-    // undo asterisk) pointing to its own footnote. An undo dominates a partial
-    // (forcedWrong wins), matching the credit, so check reattempt first.
-    const isPartial = !!(answer && answer.partial) && !forcedWrong;
     let markClass;
     let mark;
-    if (forcedWrong && pickCorrect) {
-      // Reattempted via undo and re-picked correctly — amber asterisk (not a
-      // red ✗, which would falsely read as wrong) pointing to a shared
-      // footnote. A reattempt that's STILL wrong falls through to the red ✗
-      // branch below, so it reads like any other miss and needs no footnote.
-      markClass = 'morph-step-reattempted';
-      mark = '*';
-    } else if (isPartial) {
-      markClass = 'morph-step-partial';
-      mark = '<sup class="morph-step-dagger">†</sup>';
-    } else if (correct) {
+    if (credit >= 1) {
       markClass = 'morph-step-correct';
       mark = '✓';
+    } else if (isPartial) {
+      // Partial composite (0.75) — yellow superscript dagger pointing to its own
+      // footnote. Covers both a fresh partial and one floored through an undo.
+      markClass = 'morph-step-partial';
+      mark = '<sup class="morph-step-dagger">†</sup>';
+    } else if (isReattemptMiss) {
+      // Reattempted via undo, re-picked correctly but below the partial floor —
+      // amber asterisk (not a red ✗) pointing to the "counts as a miss" note.
+      markClass = 'morph-step-reattempted';
+      mark = '*';
     } else {
       markClass = 'morph-step-incorrect';
       mark = '✗';
@@ -1843,10 +1862,11 @@ function renderMorphStepSummary(card, state) {
       const note = aspectMistakeNote(step.context.tense, pickedRaw, step.correct);
       if (note) aspectNoteHtml = `<span class="morph-step-aspect-note">${escapeHtml(note)}</span>`;
     }
-    // Show the correction arrow on a miss, and also on a partial — there the
-    // arrow names the FULL composite (e.g. "→ nominative/accusative") so the
-    // student sees the complete answer they only partly gave.
-    const showCorrection = (!pickCorrect || isPartial) && answer
+    // Show the correction arrow on a miss (credit 0), and also on a partial —
+    // there the arrow names the FULL composite (e.g. "→ nominative/accusative")
+    // so the student sees the complete answer they only partly gave. A
+    // re-picked-correct reattempt (small credit) and a full credit need no arrow.
+    const showCorrection = (credit === 0 || isPartial) && answer
       ? `<span class="morph-step-correction">→ ${correctionInner}</span>${aspectNoteHtml}`
       : '';
     return `
@@ -1857,56 +1877,53 @@ function renderMorphStepSummary(card, state) {
       </div>`;
   }).join('');
 
-  // Footnotes for the amber asterisks — the reattempted (undone, re-picked
-  // correctly) dimensions in display order. Split by how they were credited:
-  // a dimension whose first attempt was a partial-composite pick keeps that
-  // 0.75 credit through the undo ("credited partial for first attempt"); every
-  // other reattempt still counts as a miss. Only reattempts re-picked
-  // *correctly* get an asterisk (a still-wrong reattempt shows a plain red ✗).
-  const reattemptedSteps = state.steps
-    .filter((step, idx) => step && !step.inferred
-      && state.forcedWrong && state.forcedWrong[step.key]
-      && state.answers[idx] && state.answers[idx].isCorrect);
-  const partialCreditedDims = reattemptedSteps
-    .filter((step) => state.partialBeforeUndo && state.partialBeforeUndo[step.key])
-    .map((step) => String(step.label || '').toLowerCase());
-  const missReattemptedDims = reattemptedSteps
-    .filter((step) => !(state.partialBeforeUndo && state.partialBeforeUndo[step.key]))
-    .map((step) => String(step.label || '').toLowerCase());
-  const missReattemptedNote = missReattemptedDims.length
+  // Per-dimension recorded credit (mirrors finalizeMorphStepAttempt; falls back
+  // to the live answer if a summary renders before finalize). Drives the
+  // footnotes and the X/N tally so they agree with the row marks.
+  const dimCredit = (step, idx) => {
+    if (state.finalCredit && Object.prototype.hasOwnProperty.call(state.finalCredit, step.key)) {
+      return Number(state.finalCredit[step.key]);
+    }
+    const a = state.answers[idx];
+    return (a && a.isCorrect) ? (a.partial ? PARTIAL_COMPOSITE_CREDIT : 1) : 0;
+  };
+  const gradedAnswered = state.steps
+    .map((step, idx) => ({ step, idx }))
+    .filter(({ step, idx }) => step && !step.inferred && state.answers[idx]);
+  const undone = ({ step }) => !!(state.forcedWrong && state.forcedWrong[step.key]);
+
+  // Amber `*`: undone and re-picked correctly, but below the partial floor (the
+  // small self-correction credit) — counts as a miss. A still-wrong reattempt
+  // shows a plain red ✗ and isn't listed here.
+  const missReattemptedDims = gradedAnswered
+    .filter((e) => undone(e) && dimCredit(e.step, e.idx) > 0 && dimCredit(e.step, e.idx) < PARTIAL_COMPOSITE_CREDIT)
+    .map((e) => String(e.step.label || '').toLowerCase());
+  const reattemptedNote = missReattemptedDims.length
     ? `<div class="morph-step-undone-note">* ${escapeHtml(missReattemptedDims.join(', '))} reattempted — counts as a miss</div>`
     : '';
-  const partialCreditedNote = partialCreditedDims.length
-    ? `<div class="morph-step-undone-note">* ${escapeHtml(partialCreditedDims.join(', '))} reattempted — credited partial for first attempt</div>`
-    : '';
-  const reattemptedNote = `${missReattemptedNote}${partialCreditedNote}`;
 
-  // Shared footnote for the yellow daggers — lists the dimensions where the
-  // student named only one value of a multi-value form. Partial credit: it's
-  // accepted (and the shuffler treats it as correct) but won't count as
-  // mastered until the full form (shown by each row's → arrow) is named.
-  const partialDims = state.steps
-    .filter((step, idx) => step && !step.inferred
-      && state.answers[idx] && state.answers[idx].partial
-      && !(state.forcedWrong && state.forcedWrong[step.key]))
-    .map((step) => String(step.label || '').toLowerCase());
-  const partialNote = partialDims.length
-    ? `<div class="morph-step-partial-note"><sup class="morph-step-dagger">†</sup> ${escapeHtml(partialDims.join(', '))}: partial credit — you named one valid value; name the full form (shown by →) to master it</div>`
+  // Yellow `†` footnotes — partial credit (0.75). Two flavours: a fresh partial
+  // (named one value of a multi-value form) and one floored through an undo
+  // (first attempt was partial). Both keep the form out of "mastered" until the
+  // full form is named.
+  const freshPartialDims = gradedAnswered
+    .filter((e) => !undone(e) && dimCredit(e.step, e.idx) >= PARTIAL_COMPOSITE_CREDIT && dimCredit(e.step, e.idx) < 1)
+    .map((e) => String(e.step.label || '').toLowerCase());
+  const partialNote = freshPartialDims.length
+    ? `<div class="morph-step-partial-note"><sup class="morph-step-dagger">†</sup> ${escapeHtml(freshPartialDims.join(', '))}: partial credit — you named one valid value; name the full form (shown by →) to master it</div>`
+    : '';
+  const partialFirstDims = gradedAnswered
+    .filter((e) => undone(e) && dimCredit(e.step, e.idx) >= PARTIAL_COMPOSITE_CREDIT && dimCredit(e.step, e.idx) < 1)
+    .map((e) => String(e.step.label || '').toLowerCase());
+  const partialFirstNote = partialFirstDims.length
+    ? `<div class="morph-step-partial-note"><sup class="morph-step-dagger">†</sup> ${escapeHtml(partialFirstDims.join(', '))}: reattempted — credited partial for first attempt</div>`
     : '';
 
-  // X/N excludes inferred (ungraded) follow-up steps and steps that were
-  // never asked because a structural impossibility ended the walk early.
+  // X/N counts only dimensions scored full credit (1). Partials and reattempt-
+  // misses are excluded; an undone-but-first-correct dimension floors at 1 and
+  // so does count here. Excludes inferred / never-asked steps.
   const gradedCount = state.steps.filter((s, i) => !s.inferred && state.answers[i]).length;
-  const totalCorrect = state.answers.filter((a, i) => {
-    const step = state.steps[i];
-    if (!a || !a.isCorrect || step.inferred) return false;
-    // An undone dimension counts as a miss even when re-answered correctly.
-    if (state.forcedWrong && state.forcedWrong[step.key]) return false;
-    // A partial composite pick (one value of a multi-value form) is accepted
-    // but not a full correct — it doesn't count toward X/N.
-    if (a.partial) return false;
-    return true;
-  }).length;
+  const totalCorrect = gradedAnswered.filter((e) => dimCredit(e.step, e.idx) >= 1).length;
   const totalStr = `${totalCorrect}/${gradedCount} correct`;
 
   // Side-by-side "Your parse" vs "Correct parse" with the corresponding
@@ -2037,6 +2054,7 @@ function renderMorphStepSummary(card, state) {
       <div class="morph-step-summary-body">${rows}</div>
       ${reattemptedNote}
       ${partialNote}
+      ${partialFirstNote}
       ${youParseLine}
       ${paradigmGapNote}
       ${ambigNote}
