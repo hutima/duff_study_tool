@@ -1119,16 +1119,16 @@ export const PARTIAL_COMPOSITE_CREDIT = 0.75;
 
 // True when `picked` names a proper, non-empty SUBSET of a multi-value
 // (slash-composite) correct answer — e.g. 'nominative' for 'nominative/
-// accusative', or 'masculine' for 'masculine/neuter' (or 'masculine/feminine/
-// neuter'). Scoped to case + gender, the nominal syncretisms the drill rewards
-// partially; voice's middle/passive is already accepted in full via
-// step.acceptable, and aspect keeps its own continuous/undefined comparator, so
-// both are excluded. Returns false for the full composite or an exact pick
-// (that's plain-correct) and for any value carrying a component outside the
+// accusative', 'masculine' for 'masculine/neuter', or 'continuous' for the
+// present/future aspect 'continuous/undefined'. Scoped to case, gender, and
+// aspect — the syncretisms the drill rewards partially. Voice's middle/passive
+// is already accepted in full via step.acceptable, so it's excluded (it stays
+// full credit, not partial). Returns false for the full composite or an exact
+// pick (plain-correct) and for any value carrying a component outside the
 // correct set (plain-wrong).
 export function isPartialCompositePick(step, picked) {
   if (!step || !picked) return false;
-  if (step.key !== 'case' && step.key !== 'gender') return false;
+  if (step.key !== 'case' && step.key !== 'gender' && step.key !== 'aspect') return false;
   const correct = String(step.correct || '');
   if (!correct.includes('/')) return false;            // not a composite answer
   const acceptable = Array.isArray(step.acceptable) && step.acceptable.length

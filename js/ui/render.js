@@ -676,7 +676,12 @@ function ensureStepStateForCard(card) {
     // (pushed by the answer/skip/give-up handlers) and the set of step keys
     // force-failed via undo. Both reset per card.
     history: [],
-    forcedWrong: {}
+    forcedWrong: {},
+    // Step keys whose rolled-back (undone) answer was a partial-composite pick.
+    // finalizeMorphStepAttempt credits these the partial 0.75 instead of the
+    // full undo penalty, so getting a multi-value form partly right on the
+    // first try isn't unfairly erased by undoing to re-pick.
+    partialBeforeUndo: {}
   };
   return runtime.morphStepState;
 }
@@ -1852,20 +1857,29 @@ function renderMorphStepSummary(card, state) {
       </div>`;
   }).join('');
 
-  // Single shared footnote for the amber asterisks — lists the reattempted
-  // dimensions in display order ("number, gender reattempted") and explains
-  // why they're amber: the undo still counts as a miss. Only reattempts that
-  // were re-picked *correctly* get an asterisk (a still-wrong reattempt shows
-  // a plain red ✗), so the footnote lists only those — and disappears entirely
-  // when there are none.
-  const reattemptedDims = state.steps
+  // Footnotes for the amber asterisks — the reattempted (undone, re-picked
+  // correctly) dimensions in display order. Split by how they were credited:
+  // a dimension whose first attempt was a partial-composite pick keeps that
+  // 0.75 credit through the undo ("credited partial for first attempt"); every
+  // other reattempt still counts as a miss. Only reattempts re-picked
+  // *correctly* get an asterisk (a still-wrong reattempt shows a plain red ✗).
+  const reattemptedSteps = state.steps
     .filter((step, idx) => step && !step.inferred
       && state.forcedWrong && state.forcedWrong[step.key]
-      && state.answers[idx] && state.answers[idx].isCorrect)
+      && state.answers[idx] && state.answers[idx].isCorrect);
+  const partialCreditedDims = reattemptedSteps
+    .filter((step) => state.partialBeforeUndo && state.partialBeforeUndo[step.key])
     .map((step) => String(step.label || '').toLowerCase());
-  const reattemptedNote = reattemptedDims.length
-    ? `<div class="morph-step-undone-note">* ${escapeHtml(reattemptedDims.join(', '))} reattempted — counts as a miss</div>`
+  const missReattemptedDims = reattemptedSteps
+    .filter((step) => !(state.partialBeforeUndo && state.partialBeforeUndo[step.key]))
+    .map((step) => String(step.label || '').toLowerCase());
+  const missReattemptedNote = missReattemptedDims.length
+    ? `<div class="morph-step-undone-note">* ${escapeHtml(missReattemptedDims.join(', '))} reattempted — counts as a miss</div>`
     : '';
+  const partialCreditedNote = partialCreditedDims.length
+    ? `<div class="morph-step-undone-note">* ${escapeHtml(partialCreditedDims.join(', '))} reattempted — credited partial for first attempt</div>`
+    : '';
+  const reattemptedNote = `${missReattemptedNote}${partialCreditedNote}`;
 
   // Shared footnote for the yellow daggers — lists the dimensions where the
   // student named only one value of a multi-value form. Partial credit: it's
