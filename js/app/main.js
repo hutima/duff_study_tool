@@ -998,10 +998,10 @@ function undoMorphologyStep() {
   if (!state.firstAttemptCredit || typeof state.firstAttemptCredit !== 'object') state.firstAttemptCredit = {};
   const afterKeys = gradedAnsweredStepKeys(state.steps, state.answers);
   // Count undos per dimension rather than a flat flag: each time a graded
-  // step's committed answer is rolled back, bump its tally so the credit can
-  // drop per undo (1 undo → 0.25, 2 → 0.125, …) when the walk completes. Record
-  // the FIRST rolled-back pick's merit (set once) as the floor finalize won't
-  // let the undo penalty drop below.
+  // step's committed answer is rolled back, bump its tally so a wrong-first
+  // dimension's self-correction credit halves per undo (1 undo → 0.5, 2 →
+  // 0.25, …) when the walk completes. Record the FIRST rolled-back pick's merit
+  // (set once) as the floor finalize won't let the undo penalty drop below.
   beforeKeys.forEach((k) => {
     if (!afterKeys.has(k)) {
       state.forcedWrong[k] = (Number(state.forcedWrong[k]) || 0) + 1;
@@ -1292,17 +1292,18 @@ function finalizeMorphStepAttempt(card, state) {
     //
     // Undo credit-floor: an undo can never drop a dimension below the credit
     // its FIRST attempt earned (1 if it was clean-correct, 0.75 if partial),
-    // so an accidental/curious undo of a right answer isn't penalised and the
-    // form-parity is kept (undo stays available everywhere). It's cheat-proof:
-    // the floor is what you actually picked first, never more — a wrong first
-    // attempt floors at 0 and only earns the small self-correction credit
-    // (0.5^(undos+1)). And a final WRONG pick (the "alternate" carried through
-    // to the end) scores 0 regardless of what came before.
+    // so "correct → undo" stays full (an accidental/curious undo of a right
+    // answer isn't penalised) and form-parity is kept (undo stays available
+    // everywhere). A wrong first attempt floors at 0, so "undo → correct"
+    // earns only the self-correction credit 0.5^undos — half for one undo,
+    // a quarter for two, … It's cheat-proof: the floor is what you actually
+    // picked first, never more. And a final WRONG pick (the "alternate"
+    // carried through to the end) scores 0 regardless of what came before.
     const undos = Number(forced[step.key]) || 0;
     let credit;
     if (undos > 0) {
       if (!pickRight) credit = 0;
-      else credit = Math.max(Number(firstAttemptCredit[step.key]) || 0, Math.pow(0.5, undos + 1));
+      else credit = Math.max(Number(firstAttemptCredit[step.key]) || 0, Math.pow(0.5, undos));
     } else if (ans.partial) {
       credit = PARTIAL_COMPOSITE_CREDIT; // one value of a multi-value form
     } else {
