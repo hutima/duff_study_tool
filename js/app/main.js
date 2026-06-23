@@ -976,6 +976,16 @@ function undoMorphologyStep() {
   // roll back — the forced-wrong dims are simply recorded when the walk later
   // completes normally.
   const beforeKeys = gradedAnsweredStepKeys(state.steps, state.answers);
+  // Capture, from the pre-pop answers, which graded dims about to be rolled
+  // back held a PARTIAL-composite pick — so a multi-value form the student got
+  // partly right on the first try keeps its 0.75 credit through an undo rather
+  // than being dropped to the full undo penalty.
+  const beforePartial = {};
+  (state.steps || []).forEach((s, i) => {
+    if (!s || s.inferred) return;
+    const a = state.answers[i];
+    if (a && a.partial) beforePartial[s.key] = true;
+  });
   const frame = state.history.pop();
   state.steps = frame.steps;
   state.answers = frame.answers;
@@ -984,12 +994,18 @@ function undoMorphologyStep() {
   state.structuralImpossibility = frame.structuralImpossibility;
   state.paradigmGap = frame.paradigmGap;
   if (!state.forcedWrong || typeof state.forcedWrong !== 'object') state.forcedWrong = {};
+  if (!state.partialBeforeUndo || typeof state.partialBeforeUndo !== 'object') state.partialBeforeUndo = {};
   const afterKeys = gradedAnsweredStepKeys(state.steps, state.answers);
   // Count undos per dimension rather than a flat flag: each time a graded
   // step's committed answer is rolled back, bump its tally so the credit can
-  // drop per undo (1 undo → 0.25, 2 → 0.125, …) when the walk completes.
+  // drop per undo (1 undo → 0.25, 2 → 0.125, …) when the walk completes. If the
+  // rolled-back answer was a partial-composite pick, remember that so the undo
+  // doesn't penalize a partially-right first attempt below 0.75.
   beforeKeys.forEach((k) => {
-    if (!afterKeys.has(k)) state.forcedWrong[k] = (Number(state.forcedWrong[k]) || 0) + 1;
+    if (!afterKeys.has(k)) {
+      state.forcedWrong[k] = (Number(state.forcedWrong[k]) || 0) + 1;
+      if (beforePartial[k]) state.partialBeforeUndo[k] = true;
+    }
   });
   renderCard();
   renderProgress();
@@ -1251,6 +1267,7 @@ function giveUpMorphologyStep() {
 function finalizeMorphStepAttempt(card, state) {
   if (!card || !card.lemma) return;
   const forced = (state && state.forcedWrong) || {};
+  const partialBeforeUndo = (state && state.partialBeforeUndo) || {};
   const dims = {};
   state.steps.forEach((step, idx) => {
     if (step.inferred) return; // ungraded — don't contribute to per-dim stats
@@ -1274,13 +1291,26 @@ function finalizeMorphStepAttempt(card, state) {
     // dimension correct only when it's exactly 1, so a reattempt OR a partial
     // composite fails the 2/2 exclude-known test (the whole parse reads as
     // not-yet-known) while still scoring fractional credit in the accuracy
-    // stats. An undo dominates a partial (the undo branch runs first), so an
-    // undone partial scores as a reattempt, not 0.75.
+    // stats. Special case: if a rolled-back attempt at a composite was already
+    // partial-correct, the undo is floored at the partial 0.75 (not the smaller
+    // undo penalty) so a partially-right first attempt isn't unfairly erased —
+    // unless the final pick is wrong, which still scores 0.
     const undos = Number(forced[step.key]) || 0;
     let credit;
-    if (undos > 0) credit = pickRight ? Math.pow(0.5, undos + 1) : 0;
-    else if (ans.partial) credit = PARTIAL_COMPOSITE_CREDIT; // one value of a multi-value form
-    else credit = pickRight ? 1 : 0;
+    if (undos > 0) {
+      // Undone. Normally a reattempt is worth at most 0.5^(undos+1), or 0 if the
+      // final pick is wrong. Exception: if a rolled-back attempt at this
+      // composite was already partial-correct, don't let the undo penalize it
+      // below the partial credit — as long as the final pick is still valid
+      // (full or partial), credit the partial 0.75. A final wrong pick (the
+      // "alternate" carried through) still scores 0, unchanged.
+      if (partialBeforeUndo[step.key] && pickRight) credit = PARTIAL_COMPOSITE_CREDIT;
+      else credit = pickRight ? Math.pow(0.5, undos + 1) : 0;
+    } else if (ans.partial) {
+      credit = PARTIAL_COMPOSITE_CREDIT; // one value of a multi-value form
+    } else {
+      credit = pickRight ? 1 : 0;
+    }
     dims[step.key] = credit;
   });
   if (!runtime.paradigmStepStats || typeof runtime.paradigmStepStats !== 'object') {
