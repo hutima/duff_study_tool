@@ -169,7 +169,7 @@ import { getSelectedVocabCards, getSelectedGrammarCards, getAllVocabKeys, getAll
 
 // Domain — Grammar
 import { buildGrammarSupportHtml } from '../domain/grammar/explanations.js';
-import { recordParadigmAttempt, inferredFollowupDims, buildInferredStep, structuralImpossibilityReason, paradigmGapReason, lemmaInventoryGapReason, isLemmaFormKnown, getLemmaFormStatus, parseAnswerDimensions } from '../domain/grammar/morph_steps.js';
+import { recordParadigmAttempt, inferredFollowupDims, buildInferredStep, structuralImpossibilityReason, paradigmGapReason, lemmaInventoryGapReason, isLemmaFormKnown, getLemmaFormStatus, weightedRecentMissScore, parseAnswerDimensions } from '../domain/grammar/morph_steps.js';
 import { listAvailableParadigms, listAvailableParadigmsByCategory, getCardsForFocusedParadigm, getCardsForParadigmCategory, getCardsForParadigmLemmas, getAllParsingCards, parseCategoryShuffleValue, makeCategoryShuffleValue, chooseDefaultFocusedParadigm, isParsingIncompatibleLemma } from '../domain/grammar/paradigm_focus.js';
 import { buildLookupPool, truncatePicksFrom } from '../domain/grammar/morph_lookup.js';
 
@@ -2463,34 +2463,53 @@ function buildFilteredFocusedParadigmCards() {
 //    mid-cycle rebuild (reshuffle / option change) re-deals a partially-walked
 //    deck; a normal full pass keeps every count equal.
 //
-// 2. Status weight (the soft bias, applied *within* a show-count bucket). We
-//    lean on each form's per-form recent status (the same 0/2 → 2/2 tally the
-//    dots and the exclude-known filter read via getLemmaFormStatus):
-//      unseen    — never attempted          → highest priority
-//      wrong     — 0/n recent               → next
-//      uncertain — 1/2 recent               → middle
-//      right     — 1/1 recent               → low
-//      known     — 2/2 recent (mastered)    → lowest
+// 2. Status weight (the soft bias, applied *within* a show-count bucket). Each
+//    form's per-form recent status (the same 0/2 → 2/2 tally the dots and the
+//    exclude-known filter read via getLemmaFormStatus) sets a base priority:
+//      unseen    — never attempted          → highest priority (fixed)
+//      wrong     — 0/n recent               → high, GRADED (see below)
+//      uncertain — 1/2 recent               → mid, GRADED
+//      right     — 1/1 recent               → low (fixed)
+//      known     — 2/2 recent (mastered)    → lowest (fixed, flat)
+//    For the wrong/uncertain tier — the only "unknown" forms with recorded
+//    misses — the weight isn't flat: it scales with weightedRecentMissScore,
+//    the comprehension-weighted magnitude of the form's recent wrong steps. So
+//    a form that keeps blowing high-impact dimensions (mood, tense, case) is
+//    surfaced ahead of one that only fumbles a low-impact one (gender), and a
+//    verb (more, weightier steps) outranks a noun at similar shakiness. Unseen
+//    stays on top; right/known stay fixed at the bottom (the grading is for
+//    unknowns only — a mastered form is just deprioritized, not re-ranked).
 //    It's a soft bias, not a hard sort: Efraimidis–Spirakis weighted random
 //    ordering (key = random^(1/weight), sort descending) gives, for any two
 //    forms in the same bucket, P(a before b) = weight_a / (weight_a +
-//    weight_b). An unseen form leads a mastered one ~6:1, a wrong one leads a
-//    mastered one ~4:1, but nothing is pinned — every form can still surface
-//    anywhere, so the deck feels shuffled while leaning toward what needs work.
+//    weight_b). Nothing is pinned — every form can still surface anywhere, so
+//    the deck feels shuffled while leaning toward what needs work.
+//
+// The show-count rule (1) stays the PRIMARY sort, so the soft weighting never
+// breaks the "shown at most twice before every form has had a turn" cap: a
+// mastered form is deprioritized within its show-count bucket but still rejoins
+// the weighted-random order once all forms have been seen at least once.
 //
 // When the shuffle toggle is off the deck keeps strict paradigm order (neither
 // rule applies) so the user can still walk a paradigm top-to-bottom.
-const PARSING_PRIORITY_WEIGHTS = {
-  unseen: 6,
-  wrong: 4,
-  uncertain: 3,
-  right: 1.5,
-  known: 1
-};
+const PARSING_UNSEEN_WEIGHT = 6;   // never attempted → highest
+const PARSING_RIGHT_WEIGHT = 1.5;  // 1/1 clean → low (confirm once more)
+const PARSING_KNOWN_WEIGHT = 1;    // 2/2 clean → lowest, flat (not re-ranked)
+// Wrong/uncertain forms: a base that lifts any form with recent misses above a
+// clean 1/1, plus the comprehension-weighted recent miss magnitude, capped just
+// under PARSING_UNSEEN_WEIGHT so an unseen form still leads the most-missed one.
+const PARSING_WRONG_BASE = 2.5;
+const PARSING_WRONG_SCALE = 0.7;
+const PARSING_WRONG_MAX = 5.5;
 function parsingFormPriorityWeight(card, stats, enabledDims) {
-  if (!card) return PARSING_PRIORITY_WEIGHTS.right;
+  if (!card) return PARSING_RIGHT_WEIGHT;
   const status = getLemmaFormStatus(stats, card.lemma, card.id, enabledDims);
-  return PARSING_PRIORITY_WEIGHTS[status] || PARSING_PRIORITY_WEIGHTS.right;
+  if (status === 'unseen') return PARSING_UNSEEN_WEIGHT;
+  if (status === 'known') return PARSING_KNOWN_WEIGHT;
+  if (status === 'right') return PARSING_RIGHT_WEIGHT;
+  // wrong | uncertain — grade by how badly / how importantly it's been missed.
+  const miss = weightedRecentMissScore(stats, card.lemma, card.id, enabledDims);
+  return Math.min(PARSING_WRONG_BASE + PARSING_WRONG_SCALE * miss, PARSING_WRONG_MAX);
 }
 function orderParsingPool(pool) {
   const list = Array.isArray(pool) ? [...pool] : [];
