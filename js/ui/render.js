@@ -1792,21 +1792,19 @@ function renderMorphStepSummary(card, state) {
           <span class="morph-step-summary-pick">${escapeHtml(pickedLabel)}</span>
         </div>`;
     }
-    // A dimension the student undid still counts as a miss in the stats no
-    // matter what they ultimately re-picked. But it shouldn't read as flatly
-    // *wrong* in the summary — the re-picked value is often the right one — so
-    // an undone step renders amber with an asterisk (not a red ✗) pointing to
-    // a "<dim> reattempted" note. `pickCorrect` is the literal correctness of
-    // the final pick (used to decide whether a correction arrow is useful);
-    // `correct` is the graded verdict, which an undo forces to false.
     const forcedWrong = !!(state.forcedWrong && state.forcedWrong[step.key]);
     const pickCorrect = !!(answer && answer.isCorrect);
     // Colour/mark by the RECORDED credit (stashed by finalizeMorphStepAttempt)
-    // so the summary matches the score: full (1) → green ✓, partial (0.75) →
-    // yellow †, the small undo-recovery credit (0 < c < 0.75) → amber * "counts
-    // as a miss", 0 → red ✗. Falling back to the live answer keeps a pre-finalize
-    // render sane. The credit-floor means an undone-but-first-correct dimension
-    // lands at 1 here (green ✓) — the undo is forgiven, not punished.
+    // so the summary matches the score:
+    //   1, undone   → green *  "counted correct due to correct first attempt"
+    //                 (correct → undo → correct: full credit; the * flags the undo)
+    //   1           → green ✓  (clean correct, no undo)
+    //   0.75        → yellow † (partial composite — fresh or floored through an undo)
+    //   0 < c < 0.75 → amber * "counts as a miss" (wrong first, self-corrected via undo)
+    //   0           → red ✗    (wrong — incl. correct → undo → WRONG: wrong is wrong)
+    // `pickCorrect` is the literal correctness of the final pick (used to decide
+    // whether a correction arrow is useful). Falling back to the live answer
+    // keeps a pre-finalize render sane.
     const hasCredit = state.finalCredit && Object.prototype.hasOwnProperty.call(state.finalCredit, step.key);
     const credit = hasCredit
       ? Number(state.finalCredit[step.key])
@@ -1820,7 +1818,15 @@ function renderMorphStepSummary(card, state) {
     const deponentMiddleVoice = step.key === 'voice' && !!step.deponentMiddleOnly;
     let markClass;
     let mark;
-    if (credit >= 1) {
+    if (credit >= 1 && forcedWrong) {
+      // Correct on the FIRST attempt, undone, then re-confirmed correct
+      // (correct → undo → correct). Full credit on the strength of the first
+      // attempt, but a green asterisk (not a plain ✓) flags that an undo was
+      // involved, pointing to the "counted correct due to correct first
+      // attempt" note. A wrong final pick can't land here — it scores 0 (red ✗).
+      markClass = 'morph-step-correct';
+      mark = '*';
+    } else if (credit >= 1) {
       markClass = 'morph-step-correct';
       mark = '✓';
     } else if (isPartial) {
@@ -1917,6 +1923,17 @@ function renderMorphStepSummary(card, state) {
     .map((e) => String(e.step.label || '').toLowerCase());
   const partialFirstNote = partialFirstDims.length
     ? `<div class="morph-step-partial-note"><sup class="morph-step-dagger">†</sup> ${escapeHtml(partialFirstDims.join(', '))}: reattempted — credited partial for first attempt</div>`
+    : '';
+
+  // Green `*`: correct on the first attempt, undone, then re-confirmed correct
+  // (correct → undo → correct). Still full credit and counts toward X/N — the
+  // asterisk just flags that an undo was involved. (A wrong final pick scores 0
+  // and shows a red ✗, so it never appears here: wrong is wrong.)
+  const correctFirstDims = gradedAnswered
+    .filter((e) => undone(e) && dimCredit(e.step, e.idx) >= 1)
+    .map((e) => String(e.step.label || '').toLowerCase());
+  const correctFirstNote = correctFirstDims.length
+    ? `<div class="morph-step-correct-note">* ${escapeHtml(correctFirstDims.join(', '))}: counted correct due to correct first attempt</div>`
     : '';
 
   // X/N counts only dimensions scored full credit (1). Partials and reattempt-
@@ -2055,6 +2072,7 @@ function renderMorphStepSummary(card, state) {
       ${reattemptedNote}
       ${partialNote}
       ${partialFirstNote}
+      ${correctFirstNote}
       ${youParseLine}
       ${paradigmGapNote}
       ${ambigNote}
