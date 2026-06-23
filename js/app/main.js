@@ -3359,6 +3359,16 @@ function applySpacedReview(card, outcome) {
         // until Easy, all within this round's 2 h window. Never completes the set.
         progress.streak += 1;
         setProgressDelay(progress, roundDeadlineMs, now);
+        // Drop the face from the active pile so it returns from "middle" after
+        // the other due cards instead of re-showing at the same slot. Without
+        // this the card stays in active at runtime.currentIdx and navigate(1)
+        // (which advances by relying on a marked card leaving active, not by
+        // incrementing the cursor) re-renders the very same card — making
+        // Uncertain look like it does nothing. It's still due within the round
+        // (isCardDue forces it), so it keeps coming back to be retried.
+        if (Array.isArray(runtime.spacedActiveIds)) {
+          runtime.spacedActiveIds = runtime.spacedActiveIds.filter(id => id !== card.id);
+        }
         getDirectionalMarksStore()[card.id] = 'unsure';
         progress.lastSpacedOutcome = ratedOutcome;
         runtime.marks = getDirectionalMarksStore();
