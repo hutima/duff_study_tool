@@ -673,17 +673,19 @@ function buildLemmaTestableFormsHtml(lemma) {
   const sorted = cards.slice().sort(compareGreekAlphabetical);
   const stats = runtime.paradigmStepStats || {};
   const enabledDims = host.getEnabledParsingDims();
-  const counts = { known: 0, right: 0, wrong: 0, uncertain: 0, unseen: 0 };
+  const counts = { known: 0, right: 0, partial: 0, wrong: 0, uncertain: 0, unseen: 0 };
   const rows = sorted.map((card) => {
     const status = getLemmaFormStatus(stats, lemma, card.id, enabledDims);
     counts[status] += 1;
     const dotClass = status === 'known' ? 'parsing-review-form-dot-known'
       : status === 'right' ? 'parsing-review-form-dot-right'
+      : status === 'partial' ? 'parsing-review-form-dot-partial'
       : status === 'wrong' ? 'parsing-review-form-dot-wrong'
       : status === 'uncertain' ? 'parsing-review-form-dot-uncertain'
       : 'parsing-review-form-dot-unseen';
     const statusLabel = status === 'known' ? 'both recent attempts correct'
       : status === 'right' ? 'recent attempt correct'
+      : status === 'partial' ? 'named one value of a multi-value form — partial, not yet mastered'
       : status === 'wrong' ? 'recent attempts all wrong'
       : status === 'uncertain' ? '1 of last 2 attempts correct'
       : 'not yet attempted';
@@ -704,7 +706,8 @@ function buildLemmaTestableFormsHtml(lemma) {
         ${clearBtn}
       </li>`;
   }).join('');
-  const summary = `${counts.known} known · ${counts.right} correct · ${counts.uncertain} uncertain · ${counts.wrong} missed · ${counts.unseen} unseen`;
+  const partialSummary = counts.partial ? ` · ${counts.partial} partial` : '';
+  const summary = `${counts.known} known · ${counts.right} correct${partialSummary} · ${counts.uncertain} uncertain · ${counts.wrong} missed · ${counts.unseen} unseen`;
   return `
     <div class="parsing-review-forms">
       <div class="parsing-review-forms-header">
