@@ -1474,6 +1474,7 @@ function performSpacedProgressReset(requiredOnly) {
       p.leechDrill = false;
       p.leechStreak = 0;
       p.cycleFacesPassed = [];
+      p.cycleFacesUncertain = [];
       p.cycleFacesHeld = {};
       p.cycleStartedAt = 0;
       p.cycleFaceSamples = {};

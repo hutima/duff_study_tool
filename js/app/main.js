@@ -2734,6 +2734,7 @@ function getWordProgress(cardId, { persist = false } = {}) {
     existing.leechDrill = existing.leechDrill === true;
     existing.leechStreak = Number.isFinite(existing.leechStreak) ? Math.max(0, Math.floor(existing.leechStreak)) : 0;
     existing.cycleFacesPassed = Array.isArray(existing.cycleFacesPassed) ? existing.cycleFacesPassed.filter(f => typeof f === 'string') : [];
+    existing.cycleFacesUncertain = Array.isArray(existing.cycleFacesUncertain) ? existing.cycleFacesUncertain.filter(f => typeof f === 'string') : [];
     existing.cycleFacesHeld = (existing.cycleFacesHeld && typeof existing.cycleFacesHeld === 'object' && !Array.isArray(existing.cycleFacesHeld)) ? existing.cycleFacesHeld : {};
     existing.cycleStartedAt = Number.isFinite(existing.cycleStartedAt) ? Math.max(0, existing.cycleStartedAt) : 0;
     existing.cycleFaceSamples = (existing.cycleFaceSamples && typeof existing.cycleFaceSamples === 'object' && !Array.isArray(existing.cycleFaceSamples)) ? existing.cycleFaceSamples : {};
@@ -2762,6 +2763,7 @@ function getWordProgress(cardId, { persist = false } = {}) {
     leechDrill: false,
     leechStreak: 0,
     cycleFacesPassed: [],
+    cycleFacesUncertain: [],
     cycleFacesHeld: {},
     cycleStartedAt: 0,
     cycleFaceSamples: {}
@@ -2775,29 +2777,34 @@ function isCardDue(card) {
   const progress = getWordProgress(card.id);
   const naturallyDue = !progress.dueAt || progress.dueAt <= Date.now();
 
-  // Variant-form gating (Model B): cards that share one progress entry — a base
-  // verb and its derived principal-part faces (the "… as cards" toggles) — only
-  // advance the shared schedule once EVERY active face is CLEARED (Easy) in the
-  // same ROUND. A round is one attempt at the whole set, bounded by a 2 h window
-  // from when its first face is seen (progress.cycleStartedAt); the shared dueAt
-  // holds that deadline. Within the round every un-cleared face stays surfaceable
-  // (so an unknown form can be repeated until known); cycleFacesPassed lists the
-  // faces already Easy-cleared this round (hidden until the set completes). When
-  // the 2 h deadline fires the round is closed out and its confidence recorded
-  // (mean across faces, an unseen form counting 0%) before a fresh round begins.
-  // See applySpacedReview / getVariantCycleInfo / endVariantRound.
+  // Variant-form round model: cards that share one progress entry — a base verb
+  // and its derived principal-part faces (the "… as cards" toggles) — run as a
+  // ROUND, one attempt at the whole set bounded by a 2 h window from when its
+  // first face is seen (progress.cycleStartedAt). Each face is marked until it
+  // reaches a FINAL disposition this round — Easy (cycleFacesPassed) or Uncertain
+  // (cycleFacesUncertain); a Hard just requeues the face (no final mark). A face
+  // that is final is parked OUT of "Due now" (deferred until the round resolves);
+  // a face still pending (unreached, or Hard-requeued) stays due so it keeps
+  // surfacing. The set only advances its shared schedule when EVERY face is
+  // cleared Easy in one round (see applySpacedReview); any Uncertain in the mix —
+  // or the 2 h window elapsing with faces still pending — resets the whole set so
+  // it can be re-attempted. Each round close records one confidence sample (mean
+  // across faces, an unreached form counting 0%). See applySpacedReview /
+  // getVariantCycleInfo / endVariantRound.
   const info = getVariantCycleInfo(card);
   if (info) {
     const passed = progress.cycleFacesPassed;
+    const uncertain = progress.cycleFacesUncertain || [];
     const inProgress = progress.cycleStartedAt > 0
       || passed.length > 0
+      || uncertain.length > 0
       || (progress.cycleFacesHeld && Object.keys(progress.cycleFacesHeld).length > 0);
     if (naturallyDue) {
       // The shared 2 h round window has elapsed (or a fresh sitting): close out
       // any in-progress round — recording its confidence with unreached faces at
       // 0% — then put the WHOLE set due-now so a fresh round begins cleanly with
       // every face surfaceable again (an incomplete set, where not all faces were
-      // passed in time, isn't left half-cleared — all forms reset to due now).
+      // cleared in time, isn't left half-done — all forms reset to due now).
       if (inProgress) {
         endVariantRound(progress, info.siblingFaces);
         progress.dueAt = Date.now();
@@ -2805,9 +2812,10 @@ function isCardDue(card) {
       }
       return true;
     }
-    if (!inProgress) return false;                 // set scheduled out, not mid-round
-    if (passed.includes(info.face)) return false;  // Easy-cleared this round
-    return true;                                   // un-cleared face → due now (retry until Easy)
+    if (!inProgress) return false;                   // set scheduled out, not mid-round
+    if (passed.includes(info.face)) return false;    // Easy-cleared this round → parked
+    if (uncertain.includes(info.face)) return false; // Uncertain this round → parked (deferred)
+    return true;                                     // pending face → due now (unreached / Hard-requeued)
   }
   return naturallyDue;
 }
@@ -2820,6 +2828,7 @@ function isCardDue(card) {
 function endVariantRound(progress, siblingFaces) {
   if (progress.cycleStartedAt > 0) recordVariantRoundConfidence(progress, siblingFaces);
   progress.cycleFacesPassed = [];
+  progress.cycleFacesUncertain = [];
   progress.cycleFacesHeld = {};
   progress.cycleStartedAt = 0;
   progress.cycleFaceSamples = {};
@@ -3382,85 +3391,122 @@ function applySpacedReview(card, outcome) {
   const progress = recordStudyOutcome(card.id, ratedOutcome, now, { skipConfidence: !!variant });
 
   if (variant) {
-    // Open a fresh round on the first mark after the previous one ended — or if
-    // the 2 h window of a still-open round has already elapsed (the user came
-    // back late), close that one out first so this mark starts a new attempt.
-    if (progress.cycleStartedAt > 0 && now >= progress.cycleStartedAt + SRS_VARIANT_HOLD_MS) {
-      endVariantRound(progress, variant.siblingFaces);
-    }
-    if (!(progress.cycleStartedAt > 0)) {
-      progress.cycleStartedAt = now;
-      progress.cycleFaceSamples = {};
-    }
-    addVariantFaceSample(progress, variant.face, ratedOutcome);
+    applyVariantRoundReview(card, ratedOutcome, variant, progress, cadence, now);
+    return;
   }
 
   if (ratedOutcome === 'again') {
-    // A miss ends the round: record its confidence (the missed face's 0 is
-    // already in the samples) and lapse the shared entry.
-    if (variant) endVariantRound(progress, variant.siblingFaces);
     const dropFromActive = applyHardLapse(progress, cadence, now);
     if (dropFromActive && Array.isArray(runtime.spacedActiveIds)) {
       runtime.spacedActiveIds = runtime.spacedActiveIds.filter(id => id !== card.id);
     }
     getDirectionalMarksStore()[card.id] = 'unsure';
   } else {
-    // Variant-form gating: the shared schedule only advances once every active
-    // face is CLEARED with Easy in the same round, which is bounded by a single
-    // 2 h window from when the set's first face is seen (so there are 2 h to
-    // clear the whole set). Within that window an un-cleared face stays
-    // surfaceable, so an Uncertain doesn't wall a form off — the form keeps
-    // coming back to be repeated until it's marked Easy. The Easy that clears
-    // the last face falls through to schedule growth. This gating also governs a
-    // relearn/leech ladder: only the cleared-the-whole-set Easy advances the
-    // ladder a step (applyCorrectOutcome below), so a single Easy on one face —
-    // or an easy+uncertain mix — can't promote a lapsed set to the next interval
-    // while its siblings are still unreviewed.
-    if (variant) {
-      // The round shares one deadline: 2 h after its first face was seen.
-      const roundDeadlineMs = Math.max(0, (progress.cycleStartedAt + SRS_VARIANT_HOLD_MS) - now);
-      if (ratedOutcome === 'pass') {
-        // Uncertain → don't clear the face; it stays due so it can be retried
-        // until Easy, all within this round's 2 h window. Never completes the set.
-        progress.streak += 1;
-        setProgressDelay(progress, roundDeadlineMs, now);
-        // Drop the face from the active pile so it returns from "middle" after
-        // the other due cards instead of re-showing at the same slot. Without
-        // this the card stays in active at runtime.currentIdx and navigate(1)
-        // (which advances by relying on a marked card leaving active, not by
-        // incrementing the cursor) re-renders the very same card — making
-        // Uncertain look like it does nothing. It's still due within the round
-        // (isCardDue forces it), so it keeps coming back to be retried.
-        if (Array.isArray(runtime.spacedActiveIds)) {
-          runtime.spacedActiveIds = runtime.spacedActiveIds.filter(id => id !== card.id);
-        }
-        getDirectionalMarksStore()[card.id] = 'unsure';
-        progress.lastSpacedOutcome = ratedOutcome;
-        runtime.marks = getDirectionalMarksStore();
-        return;
-      }
-      // Easy → clear this face.
-      const passed = new Set(progress.cycleFacesPassed);
-      passed.add(variant.face);
-      const complete = [...variant.siblingFaces].every(f => passed.has(f));
-      if (!complete) {
-        progress.cycleFacesPassed = [...passed];
-        progress.streak += 1;
-        setProgressDelay(progress, roundDeadlineMs, now);
-        getDirectionalMarksStore()[card.id] = 'known';
-        progress.lastSpacedOutcome = ratedOutcome;
-        runtime.marks = getDirectionalMarksStore();
-        return;
-      }
-      // Last face cleared → round complete: record its confidence and advance.
-      endVariantRound(progress, variant.siblingFaces);
-    }
     applyCorrectOutcome(progress, cadence, now, ratedOutcome);
     getDirectionalMarksStore()[card.id] = ratedOutcome === 'easy' ? 'known' : 'unsure';
   }
 
   progress.lastSpacedOutcome = ratedOutcome;
   runtime.marks = getDirectionalMarksStore();
+}
+
+// One review of a face in a variant "split card" set (a base verb + its derived
+// principal-part faces sharing one progress entry). The set runs as a ROUND —
+// one attempt at the whole set, bounded by a 2 h window from when its first face
+// is seen — and resolves like this:
+//   • Hard  → requeue the face through the middle pile (no lapse, no round end).
+//             It stays pending, so it keeps coming back until it's Easy/Uncertain.
+//   • Easy  → finalize the face as cleared; it parks out of "Due now" (deferred)
+//             until the round resolves.
+//   • Uncertain → finalize the face as uncertain; it also parks out of "Due now"
+//             (deferred) until the round resolves. It does NOT keep re-surfacing
+//             this sitting — the whole set resets first (see below).
+// Once EVERY face is final (Easy or Uncertain): all-Easy advances the shared
+// schedule (~1 day for a fresh set, growing thereafter); any Uncertain in the
+// mix resets the whole set — every face back to due-now for a fresh round. The
+// 2 h window elapsing with faces still pending resets it the same way (handled
+// in isCardDue). Each round close records one confidence sample.
+function applyVariantRoundReview(card, ratedOutcome, variant, progress, cadence, now) {
+  const marks = getDirectionalMarksStore();
+  // Open a fresh round on the first mark after the previous one ended — or if the
+  // 2 h window of a still-open round has already elapsed (the user came back
+  // late), close that one out first so this mark starts a new attempt.
+  if (progress.cycleStartedAt > 0 && now >= progress.cycleStartedAt + SRS_VARIANT_HOLD_MS) {
+    endVariantRound(progress, variant.siblingFaces);
+  }
+  if (!(progress.cycleStartedAt > 0)) {
+    progress.cycleStartedAt = now;
+    progress.cycleFaceSamples = {};
+  }
+  addVariantFaceSample(progress, variant.face, ratedOutcome);
+
+  // The round shares one deadline: 2 h after its first face was seen.
+  const roundDeadlineMs = Math.max(0, (progress.cycleStartedAt + SRS_VARIANT_HOLD_MS) - now);
+  const finish = () => {
+    progress.lastSpacedOutcome = ratedOutcome;
+    runtime.marks = marks;
+  };
+  // Drop the just-marked face from the active pile so navigate(1) advances to the
+  // next card rather than re-rendering this one (it advances by relying on a
+  // marked card leaving active, not by incrementing the cursor). A pending face
+  // (Hard) returns from "middle" after the other due cards; a final face is
+  // deferred and won't return until the round resolves.
+  const dropFromActive = () => {
+    if (Array.isArray(runtime.spacedActiveIds)) {
+      runtime.spacedActiveIds = runtime.spacedActiveIds.filter(id => id !== card.id);
+    }
+  };
+
+  // Hard / miss → requeue the face (no lapse, no round end). It stays pending and
+  // keeps coming back (via the middle pile) until it's marked Easy or Uncertain.
+  if (ratedOutcome === 'again') {
+    setProgressDelay(progress, roundDeadlineMs, now);
+    dropFromActive();
+    marks[card.id] = 'unsure';
+    finish();
+    return;
+  }
+
+  // Easy or Uncertain → finalize this face (it parks out of "Due now").
+  const passed = new Set(progress.cycleFacesPassed);
+  const uncertain = new Set(progress.cycleFacesUncertain || []);
+  if (ratedOutcome === 'easy') {
+    passed.add(variant.face);
+    uncertain.delete(variant.face);
+    marks[card.id] = 'known';
+  } else { // 'pass' → Uncertain
+    uncertain.add(variant.face);
+    passed.delete(variant.face);
+    marks[card.id] = 'unsure';
+  }
+  progress.cycleFacesPassed = [...passed];
+  progress.cycleFacesUncertain = [...uncertain];
+  progress.streak += 1;
+  setProgressDelay(progress, roundDeadlineMs, now);
+  dropFromActive();
+
+  // Not every face is final yet → leave the round in progress.
+  const allFinal = [...variant.siblingFaces].every(f => passed.has(f) || uncertain.has(f));
+  if (!allFinal) {
+    finish();
+    return;
+  }
+
+  // Every face is final this round. Record the round's confidence, then:
+  if (uncertain.size === 0) {
+    // All Easy → set complete: advance the shared schedule (~1 day for a fresh
+    // set, growing with confidence on later rounds).
+    endVariantRound(progress, variant.siblingFaces);
+    applyCorrectOutcome(progress, cadence, now, 'easy');
+    marks[card.id] = 'known';
+  } else {
+    // Any Uncertain in the mix → reset the whole set: every face back to due-now
+    // for a fresh round so the learner can re-attempt the forms they were unsure
+    // of (along with the rest).
+    endVariantRound(progress, variant.siblingFaces);
+    setProgressDelay(progress, 0, now);
+  }
+  finish();
 }
 
 function getDueCount(cards = runtime.originalDeck) {
