@@ -1397,6 +1397,7 @@ export function resetRequiredOnly() {
   const overlay = document.getElementById(overlayId);
   const checkbox = overlay && overlay.querySelector('input[type="checkbox"][data-reset-required-only]');
   if (checkbox) checkbox.checked = true;
+  if (runtime.spacedRepetition) updateResetSpacedScopeLabels();
 }
 
 // Returns true when a card should be touched by the reset operation,
@@ -1622,6 +1623,25 @@ function isResetScopeRequiredOnly(modalId) {
   return !!(checkbox && checkbox.checked);
 }
 
+// Rewrites the spaced-reset action labels to name the scope the buttons will
+// actually touch — the current selection ("selected"), or just its starred /
+// graded cards when the scope toggle is on ("starred selected") — so the
+// labels never read "all" (which looks like "every word in the app" rather
+// than the current selection). Updates the body action-names and the buttons
+// together; button text is CSS-uppercased, so case here is cosmetic. Re-run on
+// open and whenever the "Starred cards only" checkbox changes.
+export function updateResetSpacedScopeLabels() {
+  const overlay = document.getElementById('resetSpacedOverlay');
+  if (!overlay) return;
+  const word = isResetScopeRequiredOnly('resetSpacedOverlay') ? 'starred selected' : 'selected';
+  overlay.querySelectorAll('[data-reset-scope="timing"]').forEach((el) => {
+    el.textContent = `Set ${word} to now`;
+  });
+  overlay.querySelectorAll('[data-reset-scope="progress"]').forEach((el) => {
+    el.textContent = `Reset ${word}`;
+  });
+}
+
 function openResetSpacedModal() {
   const overlay = document.getElementById('resetSpacedOverlay');
   if (!overlay) {
@@ -1636,6 +1656,7 @@ function openResetSpacedModal() {
   // default behaviour ("reset the whole deck") is unambiguous.
   const checkbox = overlay.querySelector('input[type="checkbox"][data-reset-required-only]');
   if (checkbox) checkbox.checked = false;
+  updateResetSpacedScopeLabels();
   overlay.classList.add('show');
   overlay.setAttribute('aria-hidden', 'false');
   document.body.classList.add('modal-open');
