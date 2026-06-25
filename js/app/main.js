@@ -4071,8 +4071,14 @@ if ('serviceWorker' in navigator) {
         // Re-check whenever the tab regains focus, so a PWA reopened a day
         // later picks up a deploy without needing a hard reload first.
         document.addEventListener('visibilitychange', () => {
-          if (document.visibilityState === 'visible') {
-            try { reg.update(); } catch (_) {}
+          if (document.visibilityState !== 'visible') return;
+          try { reg.update(); } catch (_) {}
+          // A worker can already be waiting from before this resume — the
+          // one-time check in trackUpdates only runs at initial registration,
+          // so reopening a backgrounded PWA would otherwise sit silently on the
+          // old version. Re-surface the "Update available" prompt here.
+          if (reg.waiting && navigator.serviceWorker.controller) {
+            showRefreshOverlay(reg.waiting);
           }
         });
       })
