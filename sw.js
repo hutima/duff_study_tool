@@ -3,135 +3,148 @@
 // GitHub Pages note: all app-shell URLs are resolved relative to the
 // service worker registration scope so this works both at a domain root
 // and at a project path such as https://user.github.io/repository/.
-const CACHE_NAME = 'greek-flashcards-pwa-v325-github-pages';
+const CACHE_NAME = 'greek-flashcards-pwa-v326-github-pages';
 const BASE_URL = new URL('./', self.registration.scope);
 
 const APP_SHELL_PATHS = [
   './',
   'index.html',
   'pages/memorization.html',
-  'styles.css?v=325',
-  'fonts/gentium-plus-latin-400-normal.woff2?v=325',
-  'fonts/gentium-plus-latin-ext-400-normal.woff2?v=325',
-  'fonts/gentium-plus-greek-400-normal.woff2?v=325',
-  'fonts/gentium-plus-greek-ext-400-normal.woff2?v=325',
-  'fonts/gentium-plus-latin-400-italic.woff2?v=325',
-  'fonts/gentium-plus-latin-ext-400-italic.woff2?v=325',
-  'fonts/gentium-plus-greek-400-italic.woff2?v=325',
-  'fonts/gentium-plus-greek-ext-400-italic.woff2?v=325',
-  'fonts/gentium-plus-latin-700-normal.woff2?v=325',
-  'fonts/gentium-plus-latin-ext-700-normal.woff2?v=325',
-  'fonts/gentium-plus-greek-700-normal.woff2?v=325',
-  'fonts/gentium-plus-greek-ext-700-normal.woff2?v=325',
-  'fonts/gentium-plus-latin-700-italic.woff2?v=325',
-  'fonts/gentium-plus-latin-ext-700-italic.woff2?v=325',
-  'fonts/gentium-plus-greek-700-italic.woff2?v=325',
-  'fonts/gentium-plus-greek-ext-700-italic.woff2?v=325',
-  'fonts/noto-sans-latin-normal.woff2?v=325',
-  'fonts/noto-sans-latin-ext-normal.woff2?v=325',
-  'fonts/noto-sans-greek-normal.woff2?v=325',
-  'fonts/noto-sans-greek-ext-normal.woff2?v=325',
-  'fonts/noto-sans-latin-italic.woff2?v=325',
-  'fonts/noto-sans-latin-ext-italic.woff2?v=325',
-  'fonts/noto-sans-greek-italic.woff2?v=325',
-  'fonts/noto-sans-greek-ext-italic.woff2?v=325',
-  'manifest.json?v=325',
-  'favicon.svg?v=325',
-  'js/data/words.js?v=325',
-  'js/data/morphology.js?v=325',
-  'js/data/lemma_inventory.js?v=325',
-  'js/data/supplemental.js?v=325',
-  'js/data/grammar.js?v=325',
-  'js/data/parsing_examples.js?v=325',
-  'js/data/concept_examples.js?v=325',
-  'js/data/grammar_examples.js?v=325',
-  'js/data/setMeta.js?v=325',
-  'js/logic/pos_logic.js?v=325',
-  'js/data/nt_book_vocab.js?v=325',
-  'js/data/reader.js?v=325',
-  'js/data/reader_verse_literals.js?v=325',
-  'js/data/reader_translations.js?v=325',
-  'js/app/main.js?v=325',
-  'js/data/supplementals/week_1_paradigms.js?v=325',
-  'js/data/supplementals/week_2_paradigms.js?v=325',
-  'js/data/supplementals/week_3_paradigms.js?v=325',
-  'js/data/supplementals/week_4_paradigms.js?v=325',
-  'js/data/supplementals/second_aorist_flip.js?v=325',
-  'js/data/supplementals/liquid_future_flip.js?v=325',
-  'js/data/supplementals/week_5_paradigms.js?v=325',
-  'js/data/supplementals/w6_aorist_passive_flip.js?v=325',
-  'js/data/supplementals/w6_perfect_active_flip.js?v=325',
-  'js/data/supplementals/w8_mi_verb_principal_parts_flip.js?v=325',
-  'js/data/supplementals/week_6_paradigms.js?v=325',
-  'js/data/supplementals/week_7_paradigms.js?v=325',
-  'js/data/supplementals/week_8_paradigms.js?v=325',
-  'js/data/supplementals/adj_paradigms.js?v=325',
-  'js/data/supplementals/paradigm_morphology.js?v=325',
-  'js/data/supplementals/stem_change_drills.js?v=325',
-  'js/data/advanced/advanced_01.js?v=325',
-  'js/data/advanced/advanced_02.js?v=325',
-  'js/data/advanced/advanced_03.js?v=325',
-  'js/data/advanced/advanced_04.js?v=325',
-  'js/data/advanced/advanced_05.js?v=325',
-  'js/data/advanced/advanced_06.js?v=325',
-  'js/data/advanced/advanced_07.js?v=325',
-  'js/data/advanced/advanced_08.js?v=325',
-  'js/data/advanced/advanced_09.js?v=325',
-  'js/data/advanced/advanced_10.js?v=325',
-  'js/data/advanced/advanced_11.js?v=325',
-  'js/data/advanced/advanced_12.js?v=325',
-  'js/data/advanced/advanced_13.js?v=325',
-  'js/data/advanced/advanced_14.js?v=325',
-  'js/data/advanced/advanced_15.js?v=325',
-  'js/data/advanced/advanced_16.js?v=325',
-  'js/data/advanced/advanced_17.js?v=325',
-  'js/data/advanced/advanced_18.js?v=325',
-  'js/data/advanced/advanced_19.js?v=325',
-  'js/data/advanced/advanced_20.js?v=325',
-  'js/data/advanced/advanced_21.js?v=325',
-  'js/data/advanced/advanced_22.js?v=325',
-  'js/data/advanced/advanced_23.js?v=325',
-  'js/data/advanced/advanced_24.js?v=325',
-  'js/data/advanced/advanced_25.js?v=325',
-  'js/utils/helpers.js?v=325',
-  'js/utils/time.js?v=325',
-  'js/utils/storage.js?v=325',
-  'js/utils/greekSort.js?v=325',
-  'js/utils/clickShield.js?v=325',
-  'js/domain/srs/constants.js?v=325',
-  'js/domain/srs/scheduler.js?v=325',
-  'js/domain/srs/confidence.js?v=325',
-  'js/domain/gamification/levels.js?v=325',
-  'js/domain/gamification/usageStats.js?v=325',
-  'js/domain/gamification/xp.js?v=325',
-  'js/domain/deck/ordering.js?v=325',
-  'js/domain/deck/filters.js?v=325',
-  'js/domain/grammar/explanations.js?v=325',
-  'js/domain/grammar/morph_steps.js?v=325',
-  'js/domain/grammar/paradigm_focus.js?v=325',
-  'js/domain/grammar/morph_lookup.js?v=325',
-  'js/ui/reader.js?v=325',
-  'js/ui/keyboard.js?v=325',
-  'js/ui/toast.js?v=325',
-  'js/ui/touchTapBridge.js?v=325',
-  'js/ui/charts.js?v=325',
-  'js/ui/modals.js?v=325',
-  'js/ui/progress.js?v=325',
-  'js/ui/render.js?v=325',
-  'js/ui/selectors.js?v=325',
-  'js/ui/navigation.js?v=325',
-  'js/ui/analytics.js?v=325',
-  'js/state/migrations.js?v=325',
-  'js/state/store.js?v=325',
-  'js/state/runtime.js?v=325',
-  'js/state/persistence.js?v=325',
+  'styles.css?v=326',
+  'fonts/gentium-plus-latin-400-normal.woff2?v=326',
+  'fonts/gentium-plus-latin-ext-400-normal.woff2?v=326',
+  'fonts/gentium-plus-greek-400-normal.woff2?v=326',
+  'fonts/gentium-plus-greek-ext-400-normal.woff2?v=326',
+  'fonts/gentium-plus-latin-400-italic.woff2?v=326',
+  'fonts/gentium-plus-latin-ext-400-italic.woff2?v=326',
+  'fonts/gentium-plus-greek-400-italic.woff2?v=326',
+  'fonts/gentium-plus-greek-ext-400-italic.woff2?v=326',
+  'fonts/gentium-plus-latin-700-normal.woff2?v=326',
+  'fonts/gentium-plus-latin-ext-700-normal.woff2?v=326',
+  'fonts/gentium-plus-greek-700-normal.woff2?v=326',
+  'fonts/gentium-plus-greek-ext-700-normal.woff2?v=326',
+  'fonts/gentium-plus-latin-700-italic.woff2?v=326',
+  'fonts/gentium-plus-latin-ext-700-italic.woff2?v=326',
+  'fonts/gentium-plus-greek-700-italic.woff2?v=326',
+  'fonts/gentium-plus-greek-ext-700-italic.woff2?v=326',
+  'fonts/noto-sans-latin-normal.woff2?v=326',
+  'fonts/noto-sans-latin-ext-normal.woff2?v=326',
+  'fonts/noto-sans-greek-normal.woff2?v=326',
+  'fonts/noto-sans-greek-ext-normal.woff2?v=326',
+  'fonts/noto-sans-latin-italic.woff2?v=326',
+  'fonts/noto-sans-latin-ext-italic.woff2?v=326',
+  'fonts/noto-sans-greek-italic.woff2?v=326',
+  'fonts/noto-sans-greek-ext-italic.woff2?v=326',
+  'manifest.json?v=326',
+  'favicon.svg?v=326',
+  'js/data/words.js?v=326',
+  'js/data/morphology.js?v=326',
+  'js/data/lemma_inventory.js?v=326',
+  'js/data/supplemental.js?v=326',
+  'js/data/grammar.js?v=326',
+  'js/data/parsing_examples.js?v=326',
+  'js/data/concept_examples.js?v=326',
+  'js/data/grammar_examples.js?v=326',
+  'js/data/setMeta.js?v=326',
+  'js/logic/pos_logic.js?v=326',
+  'js/data/nt_book_vocab.js?v=326',
+  'js/data/reader.js?v=326',
+  'js/data/reader_verse_literals.js?v=326',
+  'js/data/reader_translations.js?v=326',
+  'js/app/main.js?v=326',
+  'js/data/supplementals/week_1_paradigms.js?v=326',
+  'js/data/supplementals/week_2_paradigms.js?v=326',
+  'js/data/supplementals/week_3_paradigms.js?v=326',
+  'js/data/supplementals/week_4_paradigms.js?v=326',
+  'js/data/supplementals/second_aorist_flip.js?v=326',
+  'js/data/supplementals/liquid_future_flip.js?v=326',
+  'js/data/supplementals/week_5_paradigms.js?v=326',
+  'js/data/supplementals/w6_aorist_passive_flip.js?v=326',
+  'js/data/supplementals/w6_perfect_active_flip.js?v=326',
+  'js/data/supplementals/w8_mi_verb_principal_parts_flip.js?v=326',
+  'js/data/supplementals/week_6_paradigms.js?v=326',
+  'js/data/supplementals/week_7_paradigms.js?v=326',
+  'js/data/supplementals/week_8_paradigms.js?v=326',
+  'js/data/supplementals/adj_paradigms.js?v=326',
+  'js/data/supplementals/paradigm_morphology.js?v=326',
+  'js/data/supplementals/stem_change_drills.js?v=326',
+  'js/data/advanced/advanced_01.js?v=326',
+  'js/data/advanced/advanced_02.js?v=326',
+  'js/data/advanced/advanced_03.js?v=326',
+  'js/data/advanced/advanced_04.js?v=326',
+  'js/data/advanced/advanced_05.js?v=326',
+  'js/data/advanced/advanced_06.js?v=326',
+  'js/data/advanced/advanced_07.js?v=326',
+  'js/data/advanced/advanced_08.js?v=326',
+  'js/data/advanced/advanced_09.js?v=326',
+  'js/data/advanced/advanced_10.js?v=326',
+  'js/data/advanced/advanced_11.js?v=326',
+  'js/data/advanced/advanced_12.js?v=326',
+  'js/data/advanced/advanced_13.js?v=326',
+  'js/data/advanced/advanced_14.js?v=326',
+  'js/data/advanced/advanced_15.js?v=326',
+  'js/data/advanced/advanced_16.js?v=326',
+  'js/data/advanced/advanced_17.js?v=326',
+  'js/data/advanced/advanced_18.js?v=326',
+  'js/data/advanced/advanced_19.js?v=326',
+  'js/data/advanced/advanced_20.js?v=326',
+  'js/data/advanced/advanced_21.js?v=326',
+  'js/data/advanced/advanced_22.js?v=326',
+  'js/data/advanced/advanced_23.js?v=326',
+  'js/data/advanced/advanced_24.js?v=326',
+  'js/data/advanced/advanced_25.js?v=326',
+  'js/utils/helpers.js?v=326',
+  'js/utils/time.js?v=326',
+  'js/utils/storage.js?v=326',
+  'js/utils/greekSort.js?v=326',
+  'js/utils/clickShield.js?v=326',
+  'js/domain/srs/constants.js?v=326',
+  'js/domain/srs/scheduler.js?v=326',
+  'js/domain/srs/confidence.js?v=326',
+  'js/domain/gamification/levels.js?v=326',
+  'js/domain/gamification/usageStats.js?v=326',
+  'js/domain/gamification/xp.js?v=326',
+  'js/domain/deck/ordering.js?v=326',
+  'js/domain/deck/filters.js?v=326',
+  'js/domain/grammar/explanations.js?v=326',
+  'js/domain/grammar/morph_steps.js?v=326',
+  'js/domain/grammar/paradigm_focus.js?v=326',
+  'js/domain/grammar/morph_lookup.js?v=326',
+  'js/ui/reader.js?v=326',
+  'js/ui/keyboard.js?v=326',
+  'js/ui/toast.js?v=326',
+  'js/ui/touchTapBridge.js?v=326',
+  'js/ui/charts.js?v=326',
+  'js/ui/modals.js?v=326',
+  'js/ui/progress.js?v=326',
+  'js/ui/render.js?v=326',
+  'js/ui/selectors.js?v=326',
+  'js/ui/navigation.js?v=326',
+  'js/ui/analytics.js?v=326',
+  'js/state/migrations.js?v=326',
+  'js/state/store.js?v=326',
+  'js/state/runtime.js?v=326',
+  'js/state/persistence.js?v=326',
   'icons/icon-192.png',
   'icons/icon-512.png',
-  'icons/apple-touch-icon.png?v=325'
+  'icons/apple-touch-icon.png?v=326'
 ];
 
 const APP_SHELL = APP_SHELL_PATHS.map(path => new URL(path, BASE_URL).toString());
 const INDEX_URL = new URL('index.html', BASE_URL).toString();
+
+// Upper bound on how long a navigation may wait for the network before we fall
+// back to the cached app shell. A stalled (not errored) launch fetch would
+// otherwise hang indefinitely — and on iOS standalone PWAs that renders a frozen
+// page whose taps do nothing until a force-quit. 4s is long enough that a
+// healthy connection still serves fresh HTML.
+const NAV_TIMEOUT_MS = 4000;
+
+// The cached app shell for a navigation: the exact cached navigation response if
+// present, otherwise the precached index. Used as the bounded-wait fallback.
+function cachedShell(req) {
+  return caches.match(req).then(cached => cached || caches.match(INDEX_URL));
+}
 
 self.addEventListener('install', event => {
   // Deliberately NO skipWaiting() here: a new worker installs and then
@@ -185,21 +198,35 @@ self.addEventListener('fetch', event => {
   const req = event.request;
   if (req.method !== 'GET') return;
 
-  // Navigation: network first, then cached app shell.
+  // Navigation: network first, but BOUNDED — fall back to the cached shell if
+  // the network errors OR stalls past NAV_TIMEOUT_MS, so a launch can never hang
+  // (see NAV_TIMEOUT_MS). The network request keeps running past a timeout to
+  // refresh the cache for next launch; the update-prompt flow (main.js) is what
+  // surfaces the newer version once it's cached.
   if (req.mode === 'navigate') {
-    event.respondWith(
-      fetch(req)
-        .then(res => {
-          // Only cache good responses — a 404/500 (e.g. a Pages outage)
-          // must not overwrite the working cached shell.
-          if (res.ok) {
-            const copy = res.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put(req, copy));
-          }
-          return res;
-        })
-        .catch(() => caches.match(req).then(cached => cached || caches.match(INDEX_URL)))
-    );
+    event.respondWith((async () => {
+      const network = fetch(req).then(res => {
+        // Only cache good responses — a 404/500 (e.g. a Pages outage) must not
+        // overwrite the working cached shell.
+        if (res.ok) {
+          const copy = res.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(req, copy));
+        }
+        return res;
+      });
+      try {
+        return await Promise.race([
+          network,
+          new Promise((_, reject) => setTimeout(() => reject(new Error('nav-timeout')), NAV_TIMEOUT_MS))
+        ]);
+      } catch (_) {
+        // Timeout or network error: serve the cached app so launch stays
+        // responsive. If nothing is cached yet, wait out the real network.
+        const cached = await cachedShell(req);
+        if (cached) return cached;
+        return network.catch(() => caches.match(INDEX_URL));
+      }
+    })());
     return;
   }
 
