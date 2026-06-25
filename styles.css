@@ -1842,6 +1842,7 @@
   }
   .parsing-review-bar-track {
     flex: 1 1 auto;
+    display: flex;
     height: 6px;
     border-radius: 4px;
     background: rgba(255,255,255,0.08);
@@ -1850,16 +1851,19 @@
   html[data-theme="light"] .parsing-review-bar-track {
     background: rgba(0,0,0,0.08);
   }
-  .parsing-review-bar-fill {
+  /* Stacked form-status segments: known · right once · seen-but-wrong · not
+     seen. Colours mirror the per-form status dots so the bar and the expanded
+     dot list read the same. "Not seen" is left transparent so the track's grey
+     shows through as the unfilled remainder. */
+  .parsing-review-seg {
     display: block;
     height: 100%;
-    border-radius: 4px;
     transition: width 0.25s ease;
   }
-  .parsing-review-bar-fill.parsing-review-bar-high  { background: #9ad0a7; }
-  .parsing-review-bar-fill.parsing-review-bar-mid   { background: var(--gold); }
-  .parsing-review-bar-fill.parsing-review-bar-low   { background: #e7a1a1; }
-  .parsing-review-bar-fill.parsing-review-bar-empty { background: transparent; }
+  .parsing-review-seg-known  { background: rgba( 70, 142, 218, 0.88); }
+  .parsing-review-seg-right  { background: rgba(102, 164, 120, 0.85); }
+  .parsing-review-seg-wrong  { background: rgba(166,  88,  88, 0.85); }
+  .parsing-review-seg-unseen { background: transparent; }
   .parsing-review-bar-label {
     flex: 0 0 auto;
     font-family: var(--font-display);
@@ -1867,8 +1871,6 @@
     letter-spacing: 0.5px;
     color: var(--muted);
   }
-  html[data-theme="light"] .parsing-review-bar-fill.parsing-review-bar-high { background: #4f8a63; }
-  html[data-theme="light"] .parsing-review-bar-fill.parsing-review-bar-low  { background: #c06a6a; }
 
   /* ── Paradigm parsing performance bar chart (tappable row expand) ── */
   .paradigm-stat-row,
