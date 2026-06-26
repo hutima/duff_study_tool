@@ -35,16 +35,17 @@ const DIM_LABEL = {
 };
 
 // Display order for MC choice lists (sortChoicesCanonically). Extends the bare
-// DIM_POOLS singles with the syncretic/composite values, placed immediately
-// after the singles they combine — so a combined option (the neuter
-// "nominative/accusative", a 2-termination adjective's "masculine/feminine")
-// sits next to its components instead of being exiled to the end of the list,
-// where it's easy to overlook and skip past. This only affects ORDERING, never
-// which choices appear (that's buildChoices) — composites still surface only
-// when they're the actual syncretic answer, not as distractors. Dimensions
-// without an entry here fall back to DIM_POOLS order.
+// DIM_POOLS singles with the syncretic/composite values, keeping each combined
+// option (the neuter "nominative/accusative", a 2-termination adjective's
+// "masculine/feminine") next to a component it combines instead of exiling it
+// to the end of the list where it's easy to overlook and skip past. Case uses
+// a deliberate teaching order (nominative, nominative/accusative, vocative,
+// accusative, genitive, dative) rather than strict alphabetical. This only
+// affects ORDERING, never which choices appear (that's buildChoices) —
+// composites still surface only when they're the actual syncretic answer, not
+// as distractors. Dimensions without an entry here fall back to DIM_POOLS order.
 const CHOICE_SORT_ORDER = {
-  case:   ['nominative', 'accusative', 'nominative/accusative', 'genitive', 'dative', 'vocative'],
+  case:   ['nominative', 'nominative/accusative', 'vocative', 'accusative', 'genitive', 'dative'],
   gender: ['masculine', 'feminine', 'neuter', 'masculine/feminine', 'masculine/neuter', 'masculine/feminine/neuter']
 };
 
