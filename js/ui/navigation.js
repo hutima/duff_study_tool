@@ -804,8 +804,10 @@ export function toggleSpacedRepetition() {
   host.saveState();
 }
 
-// Switch the spaced-review spacing cadence between the 2-month intensive
-// default ('intensive') and the relaxed 8-month course pace ('relaxed').
+// Switch the spaced-review spacing cadence between the relaxed 8-month
+// course pace ('relaxed', the default for new users) and the 2-month
+// intensive pace ('intensive'). The Advanced-settings toggle is framed as
+// the intensive opt-in (ON = intensive), but this flip is symmetric.
 // This only changes how *future* flips are scheduled (the easy-interval
 // growth curve and the max-interval cap) — already-scheduled cards keep
 // their due dates, so the deck and current due states are untouched and
