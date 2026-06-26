@@ -1504,6 +1504,18 @@
     }
   }
 
+  /* Alternate-terminology sub-label under an aspect choice (Duff's
+     "continuous/undefined/completed" → the common imperfective/perfective/
+     stative labels). Small, italic, dimmed; sits on its own line. */
+  .choice-btn-alt {
+    display: block;
+    margin-top: 2px;
+    font-style: italic;
+    font-size: calc((12px) * var(--text-scale));
+    color: var(--gold-dim);
+    opacity: 0.75;
+  }
+
   .choice-btn.correct {
     border-color: #3a5a42;
     background: rgba(74,122,90,0.18);
