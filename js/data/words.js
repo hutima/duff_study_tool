@@ -3184,7 +3184,7 @@ const SETS = {
 const SESSIONS = [
   {
     "id": "wk1t",
-    "tag": "Week 1",
+    "tag": "Part 1-1",
     "label": "Chapters 1-3",
     "sets": [
       "1",
@@ -3206,7 +3206,7 @@ const SESSIONS = [
   },
   {
     "id": "wk1f",
-    "tag": "Week 1",
+    "tag": "Part 1-2",
     "label": "Chapters 4-5",
     "sets": [
       "4",
@@ -3227,7 +3227,7 @@ const SESSIONS = [
   },
   {
     "id": "wk2t",
-    "tag": "Week 2",
+    "tag": "Part 2-1",
     "label": "Chapter 6",
     "sets": [
       "6",
@@ -3243,7 +3243,7 @@ const SESSIONS = [
   },
   {
     "id": "wk2f",
-    "tag": "Week 2",
+    "tag": "Part 2-2",
     "label": "Chapter 7",
     "sets": [
       "7",
@@ -3259,7 +3259,7 @@ const SESSIONS = [
   },
   {
     "id": "wk3t",
-    "tag": "Week 3",
+    "tag": "Part 3-1",
     "label": "Chapter 8",
     "sets": [
       "8",
@@ -3276,7 +3276,7 @@ const SESSIONS = [
   },
   {
     "id": "wk3f",
-    "tag": "Week 3",
+    "tag": "Part 3-2",
     "label": "Chapter 9",
     "sets": [
       "9",
@@ -3293,7 +3293,7 @@ const SESSIONS = [
   },
   {
     "id": "wk4t",
-    "tag": "Week 4",
+    "tag": "Part 4-1",
     "label": "Chapters 10-11",
     "sets": [
       "10",
@@ -3349,7 +3349,7 @@ const SESSIONS = [
   },
   {
     "id": "wk5t",
-    "tag": "Week 5",
+    "tag": "Part 5-1",
     "label": "Chapters 12-13",
     "sets": [
       "12",
@@ -3368,7 +3368,7 @@ const SESSIONS = [
   },
   {
     "id": "wk5f",
-    "tag": "Week 5",
+    "tag": "Part 5-2",
     "label": "Chapter 14",
     "sets": [
       "14",
@@ -3382,7 +3382,7 @@ const SESSIONS = [
   },
   {
     "id": "wk6t",
-    "tag": "Week 6",
+    "tag": "Part 6-1",
     "label": "Chapter 15",
     "sets": [
       "15",
@@ -3395,7 +3395,7 @@ const SESSIONS = [
   },
   {
     "id": "wk6f",
-    "tag": "Week 6",
+    "tag": "Part 6-2",
     "label": "Chapter 16",
     "sets": [
       "16",
@@ -3407,7 +3407,7 @@ const SESSIONS = [
   },
   {
     "id": "wk7t",
-    "tag": "Week 7",
+    "tag": "Part 7-1",
     "label": "Chapter 17",
     "sets": [
       "17",
@@ -3418,7 +3418,7 @@ const SESSIONS = [
   },
   {
     "id": "wk7f",
-    "tag": "Week 7",
+    "tag": "Part 7-2",
     "label": "Chapter 18",
     "sets": [
       "18",
@@ -3430,7 +3430,7 @@ const SESSIONS = [
   },
   {
     "id": "wk8t",
-    "tag": "Week 8",
+    "tag": "Part 8-1",
     "label": "Chapter 19",
     "sets": [
       "19",
@@ -3447,7 +3447,7 @@ const SESSIONS = [
   },
   {
     "id": "wk8f",
-    "tag": "Week 8",
+    "tag": "Part 8-2",
     "label": "Chapter 20",
     "sets": [
       "20",

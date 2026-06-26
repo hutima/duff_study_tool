@@ -1067,11 +1067,23 @@ function stepReinforcementNote(step, card) {
   return '';
 }
 
+// Duff names the verbal aspects "continuous / undefined / completed". Other
+// grammars use the more common linguistic labels — shown as a small italic
+// sub-label under each aspect choice so students can map between the two.
+const ASPECT_ALTERNATE_LABELS = {
+  'continuous': 'imperfective',
+  'undefined': 'perfective / aoristic',
+  'continuous/undefined': 'imperfective / perfective',
+  'completed': 'stative / perfect'
+};
+
 function renderMorphStepCurrent(state, card) {
   const step = state.steps[state.stepIdx];
   if (!step) return '';
   const choiceButtons = step.displayChoices.map((label, idx) => {
-    return `<button class="choice-btn" type="button" onclick="answerMorphologyStep(${idx})">${escapeHtml(label)}</button>`;
+    const alt = step.key === 'aspect' ? ASPECT_ALTERNATE_LABELS[step.choices[idx]] : '';
+    const altHtml = alt ? `<span class="choice-btn-alt">${escapeHtml(alt)}</span>` : '';
+    return `<button class="choice-btn" type="button" onclick="answerMorphologyStep(${idx})">${escapeHtml(label)}${altHtml}</button>`;
   }).join('');
   // A lone choice (a deponent's middle-only voice step, or a single-gender
   // noun's gender step) centers on wide screens via .morph-choices-single

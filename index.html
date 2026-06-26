@@ -19,11 +19,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Greek Cards">
-<link rel="manifest" href="manifest.json?v=326">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=326">
-<link rel="icon" type="image/svg+xml" href="favicon.svg?v=326">
+<link rel="manifest" href="manifest.json?v=327">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=327">
+<link rel="icon" type="image/svg+xml" href="favicon.svg?v=327">
 <title>Elementary NT Greek — Flashcards</title>
-<link rel="stylesheet" href="styles.css?v=326">
+<link rel="stylesheet" href="styles.css?v=327">
 <script>
 (function(){
   try {
@@ -153,8 +153,8 @@
       <span class="toggle-text">Spaced review</span>
       <span class="toggle-switch" id="spacedBtn" aria-hidden="true"></span>
     </button>
-    <button class="toggle-label" id="cadenceToggle" type="button" role="switch" aria-checked="false" onclick="toggleSpacingCadence()" title="Spacing cadence. Off = 2-month intensive: tighter intervals, ~2-week cap. On = 8-month / continuous review: intervals grow gently and adapt to each card's difficulty, resting up to ~2 months — also works as an ongoing retention deck. A slip no longer wipes a well-known card: it runs a short relearn ladder, then resumes at half its old spacing. Affects spaced review only; switching reschedules future reviews, not cards already due.">
-      <span class="toggle-text">8-month pace</span>
+    <button class="toggle-label" id="cadenceToggle" type="button" role="switch" aria-checked="false" onclick="toggleSpacingCadence()" title="Spacing cadence. Off = 8-month / continuous review (default): intervals grow gently and adapt to each card's difficulty, resting up to ~2 months — also works as an ongoing retention deck. A slip no longer wipes a well-known card: it runs a short relearn ladder, then resumes at half its old spacing. On = 2-month intensive: tighter intervals, ~2-week cap — for a fast-paced course. Affects spaced review only; switching reschedules future reviews, not cards already due.">
+      <span class="toggle-text">2-month pace</span>
       <span class="toggle-switch" id="cadenceBtn" aria-hidden="true"></span>
     </button>
     <button class="toggle-label" id="unspacedDailyResetToggle" type="button" role="switch" aria-checked="false" onclick="toggleUnspacedDailyReset()" title="Auto-clear archived (Easy) cards once a day around 5 AM local time so you wake up to a fresh deck.">
@@ -816,9 +816,10 @@
             <li><strong>Parsing progress at a glance.</strong> The review panel now lists every in-scope paradigm &mdash; including ones you haven&rsquo;t drilled yet &mdash; so you can see the whole deck and how much you&rsquo;ve covered (&ldquo;X drilled &middot; Y in scope&rdquo;).</li>
             <li><strong>Variant forms as cards</strong> &mdash; second aorist, liquid future, aorist passive, perfect active, and &mu;&iota;-verbs, each as its own card once its chapter is in scope. A shared word only moves on once <em>all</em> its forms are cleared <em>Easy</em> together in one 2-hour round. As you answer each form it drops out of &ldquo;due now&rdquo;; <em>Hard</em> just sends a form back through the queue, while any form you mark <em>Uncertain</em> resets the whole set so you re-try them all &mdash; so the word advances (~1&nbsp;day) only when every form is cleared in a single pass.</li>
             <li><strong>Gentler spaced lapses.</strong> Missing a well-known card no longer resets it: a slip runs a short relearn ladder (Uncertain re-tests in 2&nbsp;h, Hard over a day or two), then resumes at half its old spacing. The 8-month pace now grows more evenly (capped near 2 months) and drills a card that keeps lapsing.</li>
+            <li><strong>Pick your pace on first launch.</strong> New users choose between the relaxed <strong>8-month</strong> pace (now the default) and the <strong>2-month</strong> intensive course pace right from the opening screen &mdash; switchable anytime in Advanced settings.</li>
             <li><strong>Undo a parse guess</strong> for partial credit, so you can re-pick and keep practising the right path.</li>
             <li><strong>Tidier settings.</strong> &ldquo;Required only&rdquo; is now <strong>Starred words only</strong> (Duff&rsquo;s starred vocab), reachable from both Advanced settings and the session picker; <strong>Reset actions</strong> are now their own top-level section, and Progress tools (export/import) sit in an always-open frame in Advanced settings.</li>
-            <li><strong>Cleaner session picker.</strong> The old course-supplement sets were merged away: duplicate supplemental vocab was folded back into the regular chapters (so each word appears once), every chapter now uses the same group layout, and the legacy lecture-week grammar rides along with the matching paradigm (or its chapter) instead of a separate supplemental.</li>
+            <li><strong>Cleaner session picker.</strong> The old course-supplement sets were merged away: duplicate supplemental vocab was folded back into the regular chapters (so each word appears once), every chapter now uses the same group layout, and the legacy lecture-week grammar rides along with the matching paradigm (or its chapter) instead of a separate supplemental. Pre-built sessions are now labelled <strong>Part&nbsp;N-M</strong> rather than by week.</li>
           </ul>
         </details>
         <details class="user-guide-changelog-version">
@@ -915,6 +916,20 @@
       <p>Always check vocabulary, parsing, grammar explanations, and quiz content against your course content, instructor guidance, and official materials.</p>
       <p>This app is meant to help with review and memorization, not to replace assigned coursework or authoritative sources.</p>
       <p>Quick start: flip a card, then mark <strong>Hard</strong>, <strong>Uncertain</strong>, or <strong>Easy</strong>.</p>
+    </div>
+    <div class="consent-pacing" id="consentPacingRow">
+      <div class="consent-pacing-label">Choose your study pace</div>
+      <div class="consent-pacing-options" role="radiogroup" aria-label="Study pace">
+        <label class="consent-pacing-option">
+          <input type="radio" name="consentPacing" value="relaxed" checked>
+          <span><strong>8-month</strong> — relaxed, ongoing review that grows gently and rests up to ~2 months. Good for long-term retention.</span>
+        </label>
+        <label class="consent-pacing-option">
+          <input type="radio" name="consentPacing" value="intensive">
+          <span><strong>2-month</strong> — intensive course pace with tighter intervals (~2-week cap). Good for a fast semester.</span>
+        </label>
+      </div>
+      <div class="consent-pacing-note">You can change this anytime in Advanced settings.</div>
     </div>
     <label class="consent-check-row" id="consentCheckRow">
       <input type="checkbox" id="consentCheckbox">
@@ -1063,57 +1078,57 @@
   </div>
 </div>
 
-<script defer src="js/data/words.js?v=326"></script>
-<script defer src="js/data/morphology.js?v=326"></script>
-<script defer src="js/data/lemma_inventory.js?v=326"></script>
-<script defer src="js/data/supplemental.js?v=326"></script>
-<script defer src="js/data/grammar.js?v=326"></script>
-<script defer src="js/data/supplementals/week_1_paradigms.js?v=326"></script>
-<script defer src="js/data/supplementals/week_2_paradigms.js?v=326"></script>
-<script defer src="js/data/supplementals/week_3_paradigms.js?v=326"></script>
-<script defer src="js/data/supplementals/week_4_paradigms.js?v=326"></script>
-<script defer src="js/data/supplementals/second_aorist_flip.js?v=326"></script>
-<script defer src="js/data/supplementals/liquid_future_flip.js?v=326"></script>
-<script defer src="js/data/supplementals/week_5_paradigms.js?v=326"></script>
-<script defer src="js/data/supplementals/w6_aorist_passive_flip.js?v=326"></script>
-<script defer src="js/data/supplementals/w6_perfect_active_flip.js?v=326"></script>
-<script defer src="js/data/supplementals/w8_mi_verb_principal_parts_flip.js?v=326"></script>
-<script defer src="js/data/supplementals/week_6_paradigms.js?v=326"></script>
-<script defer src="js/data/supplementals/week_7_paradigms.js?v=326"></script>
-<script defer src="js/data/supplementals/week_8_paradigms.js?v=326"></script>
-<script defer src="js/data/supplementals/adj_paradigms.js?v=326"></script>
-<script defer src="js/data/supplementals/paradigm_morphology.js?v=326"></script>
-<script defer src="js/data/supplementals/stem_change_drills.js?v=326"></script>
-<script defer src="js/data/advanced/advanced_01.js?v=326"></script>
-<script defer src="js/data/advanced/advanced_02.js?v=326"></script>
-<script defer src="js/data/advanced/advanced_03.js?v=326"></script>
-<script defer src="js/data/advanced/advanced_04.js?v=326"></script>
-<script defer src="js/data/advanced/advanced_05.js?v=326"></script>
-<script defer src="js/data/advanced/advanced_06.js?v=326"></script>
-<script defer src="js/data/advanced/advanced_07.js?v=326"></script>
-<script defer src="js/data/advanced/advanced_08.js?v=326"></script>
-<script defer src="js/data/advanced/advanced_09.js?v=326"></script>
-<script defer src="js/data/advanced/advanced_10.js?v=326"></script>
-<script defer src="js/data/advanced/advanced_11.js?v=326"></script>
-<script defer src="js/data/advanced/advanced_12.js?v=326"></script>
-<script defer src="js/data/advanced/advanced_13.js?v=326"></script>
-<script defer src="js/data/advanced/advanced_14.js?v=326"></script>
-<script defer src="js/data/advanced/advanced_15.js?v=326"></script>
-<script defer src="js/data/advanced/advanced_16.js?v=326"></script>
-<script defer src="js/data/advanced/advanced_17.js?v=326"></script>
-<script defer src="js/data/advanced/advanced_18.js?v=326"></script>
-<script defer src="js/data/advanced/advanced_19.js?v=326"></script>
-<script defer src="js/data/advanced/advanced_20.js?v=326"></script>
-<script defer src="js/data/advanced/advanced_21.js?v=326"></script>
-<script defer src="js/data/advanced/advanced_22.js?v=326"></script>
-<script defer src="js/data/advanced/advanced_23.js?v=326"></script>
-<script defer src="js/data/advanced/advanced_24.js?v=326"></script>
-<script defer src="js/data/advanced/advanced_25.js?v=326"></script>
-<script defer src="js/data/nt_book_vocab.js?v=326"></script>
-<script defer src="js/data/reader.js?v=326"></script>
-<script defer src="js/data/reader_verse_literals.js?v=326"></script>
-<script defer src="js/data/reader_translations.js?v=326"></script>
-<script defer src="js/logic/pos_logic.js?v=326"></script>
-<script type="module" src="js/app/main.js?v=326"></script>
+<script defer src="js/data/words.js?v=327"></script>
+<script defer src="js/data/morphology.js?v=327"></script>
+<script defer src="js/data/lemma_inventory.js?v=327"></script>
+<script defer src="js/data/supplemental.js?v=327"></script>
+<script defer src="js/data/grammar.js?v=327"></script>
+<script defer src="js/data/supplementals/week_1_paradigms.js?v=327"></script>
+<script defer src="js/data/supplementals/week_2_paradigms.js?v=327"></script>
+<script defer src="js/data/supplementals/week_3_paradigms.js?v=327"></script>
+<script defer src="js/data/supplementals/week_4_paradigms.js?v=327"></script>
+<script defer src="js/data/supplementals/second_aorist_flip.js?v=327"></script>
+<script defer src="js/data/supplementals/liquid_future_flip.js?v=327"></script>
+<script defer src="js/data/supplementals/week_5_paradigms.js?v=327"></script>
+<script defer src="js/data/supplementals/w6_aorist_passive_flip.js?v=327"></script>
+<script defer src="js/data/supplementals/w6_perfect_active_flip.js?v=327"></script>
+<script defer src="js/data/supplementals/w8_mi_verb_principal_parts_flip.js?v=327"></script>
+<script defer src="js/data/supplementals/week_6_paradigms.js?v=327"></script>
+<script defer src="js/data/supplementals/week_7_paradigms.js?v=327"></script>
+<script defer src="js/data/supplementals/week_8_paradigms.js?v=327"></script>
+<script defer src="js/data/supplementals/adj_paradigms.js?v=327"></script>
+<script defer src="js/data/supplementals/paradigm_morphology.js?v=327"></script>
+<script defer src="js/data/supplementals/stem_change_drills.js?v=327"></script>
+<script defer src="js/data/advanced/advanced_01.js?v=327"></script>
+<script defer src="js/data/advanced/advanced_02.js?v=327"></script>
+<script defer src="js/data/advanced/advanced_03.js?v=327"></script>
+<script defer src="js/data/advanced/advanced_04.js?v=327"></script>
+<script defer src="js/data/advanced/advanced_05.js?v=327"></script>
+<script defer src="js/data/advanced/advanced_06.js?v=327"></script>
+<script defer src="js/data/advanced/advanced_07.js?v=327"></script>
+<script defer src="js/data/advanced/advanced_08.js?v=327"></script>
+<script defer src="js/data/advanced/advanced_09.js?v=327"></script>
+<script defer src="js/data/advanced/advanced_10.js?v=327"></script>
+<script defer src="js/data/advanced/advanced_11.js?v=327"></script>
+<script defer src="js/data/advanced/advanced_12.js?v=327"></script>
+<script defer src="js/data/advanced/advanced_13.js?v=327"></script>
+<script defer src="js/data/advanced/advanced_14.js?v=327"></script>
+<script defer src="js/data/advanced/advanced_15.js?v=327"></script>
+<script defer src="js/data/advanced/advanced_16.js?v=327"></script>
+<script defer src="js/data/advanced/advanced_17.js?v=327"></script>
+<script defer src="js/data/advanced/advanced_18.js?v=327"></script>
+<script defer src="js/data/advanced/advanced_19.js?v=327"></script>
+<script defer src="js/data/advanced/advanced_20.js?v=327"></script>
+<script defer src="js/data/advanced/advanced_21.js?v=327"></script>
+<script defer src="js/data/advanced/advanced_22.js?v=327"></script>
+<script defer src="js/data/advanced/advanced_23.js?v=327"></script>
+<script defer src="js/data/advanced/advanced_24.js?v=327"></script>
+<script defer src="js/data/advanced/advanced_25.js?v=327"></script>
+<script defer src="js/data/nt_book_vocab.js?v=327"></script>
+<script defer src="js/data/reader.js?v=327"></script>
+<script defer src="js/data/reader_verse_literals.js?v=327"></script>
+<script defer src="js/data/reader_translations.js?v=327"></script>
+<script defer src="js/logic/pos_logic.js?v=327"></script>
+<script type="module" src="js/app/main.js?v=327"></script>
 </body>
 </html>

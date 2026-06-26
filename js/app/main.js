@@ -376,7 +376,13 @@ configureModals({
   setHasAcceptedDisclaimer: (v) => { runtime.hasAcceptedDisclaimer = v; },
   getDisclaimerModalRequiresAgreement: () => runtime.disclaimerModalRequiresAgreement,
   setDisclaimerModalRequiresAgreement: (v) => { runtime.disclaimerModalRequiresAgreement = v; },
-  hasSelectedKeys: () => runtime.selectedKeys.length > 0
+  hasSelectedKeys: () => runtime.selectedKeys.length > 0,
+  setSpacingCadence: (cadence) => {
+    if (cadence !== 'relaxed' && cadence !== 'intensive') return;
+    runtime.spacingCadence = cadence;
+    syncToggleButtons();
+    saveState();
+  }
 });
 configureProgress({
   accumulateUsageTime: () => accumulateUsageTime(),
@@ -1894,12 +1900,14 @@ function syncToggleButtons() {
   // collapsed, so the default-on-by-chapter state isn't hidden.
   const variantFormsCount = document.getElementById('variantFormsCount');
   if (variantFormsCount) variantFormsCount.textContent = irregularOnCount ? ` · ${irregularOnCount} on` : '';
-  // Spacing cadence: ON = relaxed (8-month course), OFF = intensive (2-month, default).
-  const cadenceRelaxed = runtime.spacingCadence === 'relaxed';
+  // Spacing cadence (inverted toggle): ON = intensive (2-month course),
+  // OFF = relaxed (8-month, the default for new users). Old users keep
+  // intensive via their persisted value / the DEFAULT_SRS_CADENCE fallback.
+  const cadenceIntensive = runtime.spacingCadence === 'intensive';
   const cadenceSwitch = document.getElementById('cadenceBtn');
-  if (cadenceSwitch) cadenceSwitch.classList.toggle('on', cadenceRelaxed);
+  if (cadenceSwitch) cadenceSwitch.classList.toggle('on', cadenceIntensive);
   const cadenceToggleEl = document.getElementById('cadenceToggle');
-  if (cadenceToggleEl) cadenceToggleEl.setAttribute('aria-checked', cadenceRelaxed ? 'true' : 'false');
+  if (cadenceToggleEl) cadenceToggleEl.setAttribute('aria-checked', cadenceIntensive ? 'true' : 'false');
   if (splitSelectionSwitch) splitSelectionSwitch.classList.toggle('on', !!runtime.splitSelection);
   if (selfCheckBtn)    selfCheckBtn.classList.toggle('on',    !!runtime.morphSelfCheck && isMorphologyMode());
   if (aspectStepSwitch) aspectStepSwitch.classList.toggle('on', runtime.aspectStep !== false);
