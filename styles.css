@@ -3235,6 +3235,13 @@
     margin-top: 18px;
   }
 
+  /* User-guide footer: Contact author on the left, Close on the right. */
+  .user-guide-actions {
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
   .reset-spaced-actions {
     flex-wrap: wrap;
     gap: 10px;
