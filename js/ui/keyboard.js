@@ -20,6 +20,8 @@ export function installKeyboardShortcuts(deps) {
     closeAspectDefaultOffModal,
     isToggleInfoModalOpen,
     closeToggleInfoModal,
+    isContactAuthorModalOpen,
+    closeContactAuthorModal,
     isDisclaimerModalOpen,
     isTransferModalOpen,
     closeTransferModal,
@@ -42,8 +44,9 @@ export function installKeyboardShortcuts(deps) {
     if (e.key === 'Escape' && isWhatsNewV1_5ModalOpen()) { closeWhatsNewV1_5Modal(); return; }
     if (e.key === 'Escape' && isAspectDefaultOffModalOpen()) { closeAspectDefaultOffModal(); return; }
     if (e.key === 'Escape' && isToggleInfoModalOpen()) { closeToggleInfoModal(); return; }
+    if (e.key === 'Escape' && isContactAuthorModalOpen()) { closeContactAuthorModal(); return; }
     if (e.key === 'Escape' && isTransferModalOpen()) { closeTransferModal(); return; }
-    if (isDisclaimerModalOpen() || isTransferModalOpen() || isAnalyticsModalOpen() || isStudySelectorOpen() || isShortcutsModalOpen() || isWhatsNewV1_5ModalOpen() || isAspectDefaultOffModalOpen() || isToggleInfoModalOpen()) return;
+    if (isDisclaimerModalOpen() || isTransferModalOpen() || isAnalyticsModalOpen() || isStudySelectorOpen() || isShortcutsModalOpen() || isWhatsNewV1_5ModalOpen() || isAspectDefaultOffModalOpen() || isToggleInfoModalOpen() || isContactAuthorModalOpen()) return;
     if (!isReviewDeckMode() || !getSelectedKeys().length) return;
 
     if (isMorphologyMode()) {

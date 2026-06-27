@@ -3027,6 +3027,27 @@
     margin-bottom: 12px;
   }
 
+  /* Small "Contact author" credit link below the progress panel. */
+  .app-footer {
+    text-align: center;
+    margin-top: 18px;
+    padding-bottom: 10px;
+  }
+  .app-footer-link {
+    background: none;
+    border: 0;
+    color: var(--muted);
+    font-family: var(--font-body);
+    font-size: calc((12px) * var(--text-scale));
+    letter-spacing: 0.3px;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+    padding: 4px 8px;
+    transition: color 0.08s;
+  }
+  .app-footer-link:hover { color: var(--gold); }
+
   .study-selector-modal {
     max-width: 920px;
   }
@@ -3124,6 +3145,19 @@
   .consent-copy p + p {
     margin-top: 10px;
   }
+
+  .consent-copy a {
+    color: var(--gold);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .consent-copy a:hover { color: var(--gold-light); }
+
+  .contact-projects {
+    margin: 6px 0 0;
+    padding-left: 20px;
+  }
+  .contact-projects li + li { margin-top: 4px; }
 
   /* First-launch study-pace chooser (8-month relaxed vs 2-month intensive).
      Shown only on the first-run consent gate; hidden when the disclaimer is

@@ -1820,6 +1820,30 @@ function isToggleInfoModalOpen() {
   return !!overlay && overlay.classList.contains('show');
 }
 
+function openContactAuthorModal() {
+  const overlay = document.getElementById('contactAuthorOverlay');
+  if (!overlay) return;
+  overlay.classList.add('show');
+  overlay.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('modal-open');
+}
+
+function closeContactAuthorModal() {
+  const overlay = document.getElementById('contactAuthorOverlay');
+  if (!overlay) return;
+  overlay.classList.remove('show');
+  overlay.setAttribute('aria-hidden', 'true');
+  if (!document.querySelector('.consent-overlay.show')) document.body.classList.remove('modal-open');
+  // Absorb the iOS ghost click after the "Close" tap, same guard every other
+  // modal close handler uses.
+  shieldClicksBriefly();
+}
+
+function isContactAuthorModalOpen() {
+  const overlay = document.getElementById('contactAuthorOverlay');
+  return !!overlay && overlay.classList.contains('show');
+}
+
 // Persist the review-panel due-histogram's collapsed state. Reuses the
 // already-persisted runtime.analyticsCollapsed map (so no extra save field is
 // needed); the analytics-overlay copy is handled by that overlay's own
@@ -3919,7 +3943,7 @@ installKeyboardShortcuts({
   isWhatsNewV1_5ModalOpen, closeWhatsNewV1_5Modal,
   isAspectDefaultOffModalOpen, closeAspectDefaultOffModal,
   isToggleInfoModalOpen, closeToggleInfoModal,
-  isToggleInfoModalOpen, closeToggleInfoModal,
+  isContactAuthorModalOpen, closeContactAuthorModal,
   isDisclaimerModalOpen, isTransferModalOpen, closeTransferModal,
   isReviewDeckMode,
   getSelectedKeys: () => runtime.selectedKeys,
@@ -3958,7 +3982,8 @@ const GLOBAL_CLICK_HANDLERS = {
   toggleMorphStepByStep, setMorphFocusedParadigm, setParsingChapter, goToStemDrillFromParsing,
   toggleRequiredOnly, toggleHardVocabReview, toggleStemNotes, toggleIrregularCards, toggleIrregularTense, toggleShuffle, toggleSpacedRepetition, toggleSpacingCadence, toggleSplitSelection, toggleAspectStep, toggleDimStep, toggleOptionalForms, toggleOptionalFormFilter, toggleDimValueFilter, toggleExcludeKnownMorphs, toggleParsingShuffleAll, toggleParsingCustomReview, toggleParsingCustomParadigm, setAllParsingCustomParadigms, toggleParsingReverse, toggleParsingLookup, pickLookupDimension, editLookupDimension, resetLookup, toggleAccentLookalikes, resetKnownMorphs, closeResetKnownModal, confirmResetKnownFocused, confirmResetKnownAll, clearParsingStats, toggleUnspacedDailyReset, triggerImportProgress,
   openReaderTab, selectReaderDrillChoice, advanceReaderDrill,
-  closeWhatsNewV1_5Modal, closeAspectDefaultOffModal, closeToggleInfoModal, onDueHistogramToggle
+  closeWhatsNewV1_5Modal, closeAspectDefaultOffModal, closeToggleInfoModal, onDueHistogramToggle,
+  openContactAuthorModal, closeContactAuthorModal
 };
 if (typeof globalThis !== 'undefined') Object.assign(globalThis, GLOBAL_CLICK_HANDLERS);
 if (typeof window !== 'undefined' && window !== globalThis) Object.assign(window, GLOBAL_CLICK_HANDLERS);
