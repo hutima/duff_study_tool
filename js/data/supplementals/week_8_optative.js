@@ -31,7 +31,7 @@
       // The forms that actually occur in the GNT.
       { g: 'εἴη', e: 'he/she/it might be (Present active optative, 3rd person sg.) — the only optative of εἰμί in the GNT, always 3rd sg.', lemma: 'εἰμί', required: true },
       { g: 'δῴη', e: 'may he/she/it grant / give (Aorist active optative, 3rd person sg.) — “may the Lord grant”, 2 Tim 1:16', lemma: 'δίδωμι', required: true },
-      { g: 'γένοιτο', e: 'may it be! / may it happen! (2nd aorist middle optative, 3rd person sg.) — Paul’s μὴ γένοιτο, “may it never be!”', lemma: 'γίνομαι', required: true },
+      { g: 'γένοιτο', e: 'may it be! / may it happen! (Aorist middle optative, 3rd person sg.) — Paul’s μὴ γένοιτο, “may it never be!”', lemma: 'γίνομαι', required: true },
       // λύω in the slot of each occurring parse.
       { g: 'λύοι', e: 'he/she/it might untie / loose (Present active optative, 3rd person sg.) — λύω in the slot of εἴη', lemma: 'λύω', required: true },
       { g: 'λύσαι', e: 'he/she/it might untie / loose (Aorist active optative, 3rd person sg.) — λύω in the slot of δῴη; acute accent, unlike the infinitive λῦσαι', lemma: 'λύω', required: true },
