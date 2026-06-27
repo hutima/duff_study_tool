@@ -3183,32 +3183,23 @@ const SETS = {
 
 const SESSIONS = [
   {
-    "id": "wk1t",
-    "tag": "Part 1-1",
-    "label": "Chapters 1-3",
+    "id": "wk0",
+    "tag": "Part 0",
+    "label": "Chapter 0",
+    "sets": [
+      "0"
+    ],
+    "special": false,
+    "summary": "The Greek alphabet"
+  },
+  {
+    "id": "wk1",
+    "tag": "Part 1",
+    "label": "Chapters 1-5",
     "sets": [
       "1",
       "2",
       "3",
-      "W1_LUO_PRESENT_ACTIVE",
-      "W1_PHILEO_PRESENT_ACTIVE",
-      "W1_LOGOS_DECLENSION",
-      "W1_ARCHE_DECLENSION",
-      "W1_ERGON_DECLENSION",
-      "W1_HEMERA_DECLENSION",
-      "W1_DOXA_DECLENSION",
-      "W1_AUTOS_PARADIGM",
-      "W1_EIMI_PRESENT",
-      "W1_ADJ_PARADIGMS"
-    ],
-    "special": false,
-    "summary": "Alphabet · λύω / φιλέω · article / noun patterns"
-  },
-  {
-    "id": "wk1f",
-    "tag": "Part 1-2",
-    "label": "Chapters 4-5",
-    "sets": [
       "4",
       "5",
       "W1_LUO_PRESENT_ACTIVE",
@@ -3223,29 +3214,14 @@ const SESSIONS = [
       "W1_ADJ_PARADIGMS"
     ],
     "special": false,
-    "summary": "Cases / adjectives · αὐτός · εἰμί"
+    "summary": "Alphabet, cases & adjectives · λύω / φιλέω · noun patterns · αὐτός · εἰμί"
   },
   {
-    "id": "wk2t",
-    "tag": "Part 2-1",
-    "label": "Chapter 6",
+    "id": "wk2",
+    "tag": "Part 2",
+    "label": "Chapters 6-7",
     "sets": [
       "6",
-      "W2_LUO_INDICATIVE",
-      "W2_PHILEO_INDICATIVE",
-      "W2_LUO_ACTIVE_IMPERATIVE",
-      "W2_LUO_ACTIVE_INFINITIVE",
-      "W2_LUO_ACTIVE_PARTICIPLE",
-      "W2_PHILEO_ACTIVE_PARTICIPLE"
-    ],
-    "special": false,
-    "summary": "Indicative paradigms · contract indicative"
-  },
-  {
-    "id": "wk2f",
-    "tag": "Part 2-2",
-    "label": "Chapter 7",
-    "sets": [
       "7",
       "W2_LUO_INDICATIVE",
       "W2_PHILEO_INDICATIVE",
@@ -3255,30 +3231,14 @@ const SESSIONS = [
       "W2_PHILEO_ACTIVE_PARTICIPLE"
     ],
     "special": false,
-    "summary": "Moods · imperative · active participles"
+    "summary": "Tenses & moods · indicative / imperative · active participles"
   },
   {
-    "id": "wk3t",
-    "tag": "Part 3-1",
-    "label": "Chapter 8",
+    "id": "wk3",
+    "tag": "Part 3",
+    "label": "Chapters 8-9",
     "sets": [
       "8",
-      "W3_RHUOMAI_INDICATIVE",
-      "W3_RHUOMAI_OTHER_MOODS",
-      "W3_EIMI_COMPLETE",
-      "W3_EIMI_INFINITIVE_PARTICIPLE",
-      "W3_EKEINOS",
-      "W3_HOUTOS",
-      "W3_PERSONAL_PRONOUNS"
-    ],
-    "special": false,
-    "summary": "Middle voice · εἰμί infinitive / participle"
-  },
-  {
-    "id": "wk3f",
-    "tag": "Part 3-2",
-    "label": "Chapter 9",
-    "sets": [
       "9",
       "W3_RHUOMAI_INDICATIVE",
       "W3_RHUOMAI_OTHER_MOODS",
@@ -3289,11 +3249,11 @@ const SESSIONS = [
       "W3_PERSONAL_PRONOUNS"
     ],
     "special": false,
-    "summary": "Demonstratives · personal pronouns"
+    "summary": "Middle voice · demonstratives · personal pronouns · εἰμί"
   },
   {
-    "id": "wk4t",
-    "tag": "Part 4-1",
+    "id": "wk4",
+    "tag": "Part 4",
     "label": "Chapters 10-11",
     "sets": [
       "10",
@@ -3345,15 +3305,16 @@ const SESSIONS = [
       "W4_FUTURE_LIQUID_STEMS"
     ],
     "special": true,
-    "summary": "Weeks 1–4 chapters"
+    "summary": ""
   },
   {
-    "id": "wk5t",
-    "tag": "Part 5-1",
-    "label": "Chapters 12-13",
+    "id": "wk5",
+    "tag": "Part 5",
+    "label": "Chapters 12-14",
     "sets": [
       "12",
       "13",
+      "14",
       "W5_SARX",
       "W5_ONOMA",
       "W5_TIS",
@@ -3361,101 +3322,64 @@ const SESSIONS = [
       "W5_ASTER",
       "W5_POLIS",
       "W5_BASILEUS",
-      "W5_PAS"
-    ],
-    "special": false,
-    "summary": "Third declension stems · second / third declension"
-  },
-  {
-    "id": "wk5f",
-    "tag": "Part 5-2",
-    "label": "Chapter 14",
-    "sets": [
-      "14",
+      "W5_PAS",
       "W5_LUO_PRESENT_ACTIVE_PARTICIPLE",
       "W5_LUO_AORIST_ACTIVE_PARTICIPLE",
       "W5_RHUOMAI_PRESENT_MIDDLE_PARTICIPLE",
       "W5_RHUOMAI_AORIST_MIDDLE_PARTICIPLE"
     ],
     "special": false,
-    "summary": "Participial paradigms"
+    "summary": "Third declension · participial paradigms"
   },
   {
-    "id": "wk6t",
-    "tag": "Part 6-1",
-    "label": "Chapter 15",
+    "id": "wk6",
+    "tag": "Part 6",
+    "label": "Chapters 15-16",
     "sets": [
       "15",
+      "16",
       "W6_LUO_PASSIVE_INDICATIVE",
       "W6_LUO_PASSIVE_OTHER_MOODS",
-      "W6_LUTHEIS_PARTICIPLE"
-    ],
-    "special": false,
-    "summary": "Passive endings · passive moods / participles"
-  },
-  {
-    "id": "wk6f",
-    "tag": "Part 6-2",
-    "label": "Chapter 16",
-    "sets": [
-      "16",
+      "W6_LUTHEIS_PARTICIPLE",
       "W6_LUO_PERFECT",
       "W6_LUO_PLUPERFECT"
     ],
     "special": false,
-    "summary": "Perfect · pluperfect · irregular passive forms"
+    "summary": "Passive & perfect · pluperfect"
   },
   {
-    "id": "wk7t",
-    "tag": "Part 7-1",
-    "label": "Chapter 17",
+    "id": "wk7",
+    "tag": "Part 7",
+    "label": "Chapters 17-18",
     "sets": [
       "17",
-      "W7_SUBJUNCTIVE_MOOD"
-    ],
-    "special": false,
-    "summary": "Subjunctive mood · aspect"
-  },
-  {
-    "id": "wk7f",
-    "tag": "Part 7-2",
-    "label": "Chapter 18",
-    "sets": [
       "18",
+      "W7_SUBJUNCTIVE_MOOD",
       "W7_INDEFINITE_CONSTRUCTIONS",
       "W7_THIRD_PERSON_IMPERATIVE"
     ],
     "special": false,
-    "summary": "Indefinite constructions · 3rd person imperative"
+    "summary": "Subjunctive · indefinite constructions · 3rd-person imperative"
   },
   {
-    "id": "wk8t",
-    "tag": "Part 8-1",
-    "label": "Chapter 19",
+    "id": "wk8",
+    "tag": "Part 8",
+    "label": "Chapters 19-20",
     "sets": [
       "19",
+      "20",
       "W8_TITHEMI_PRESENT_INDICATIVE",
       "W8_HISTEMI_PRESENT_INDICATIVE",
       "W8_DIDOMI_PRESENT_INDICATIVE",
       "W8_TITHEMI_PRESENT_SUBJUNCTIVE",
       "W8_HISTEMI_PRESENT_SUBJUNCTIVE",
       "W8_DIDOMI_PRESENT_SUBJUNCTIVE",
-      "W8_MI_OTHER_ACTIVE_FORMS"
-    ],
-    "special": false,
-    "summary": "-μι present active verbs"
-  },
-  {
-    "id": "wk8f",
-    "tag": "Part 8-2",
-    "label": "Chapter 20",
-    "sets": [
-      "20",
+      "W8_MI_OTHER_ACTIVE_FORMS",
       "W8_DIDOMI_TENSES",
       "W8_DIDOMAI_PRESENT"
     ],
     "special": false,
-    "summary": "-μι other tenses · middle voice"
+    "summary": "-μι verbs · other tenses · middle voice"
   },
   {
     "id": "all",
@@ -3542,7 +3466,7 @@ const SESSIONS = [
       "W8_DIDOMAI_PRESENT"
     ],
     "special": true,
-    "summary": "Ch. 1–20"
+    "summary": ""
   }
 ];
 
@@ -3554,6 +3478,59 @@ if (!SETS.EXTRA) {
     cards: []
   };
 }
+
+// ── Chapter 0: the Greek alphabet ──────────────────────────────────────────
+// Letter-recognition cards — not real vocabulary, so Chapter 0 is left out of
+// every "select all" (the Mid-Term / Final Exam sessions never list it) and is
+// only reachable via Part 0 or the Chapter 0 button. Each card carries the
+// alphabet flag, which routes it to a dedicated render branch (see render.js):
+// the front shows the Greek letter with its name spelt out in small text (the
+// same muted treatment the second-aorist cards use for the stem), the back the
+// transliteration with the English name.
+// Columns: [letter, Greek name, transliteration, English name].
+const GREEK_ALPHABET = [
+  ['Α α', 'αλφα', 'a', 'alpha'],
+  ['Β β', 'βητα', 'b', 'beta'],
+  ['Γ γ', 'γαμμα', 'g', 'gamma'],
+  ['Δ δ', 'δελτα', 'd', 'delta'],
+  ['Ε ε', 'εψιλον', 'e', 'epsilon'],
+  ['Ζ ζ', 'ζητα', 'z', 'zeta'],
+  ['Η η', 'ητα', 'ē', 'eta'],
+  ['Θ θ', 'θητα', 'th', 'theta'],
+  ['Ι ι', 'ιωτα', 'i', 'iota'],
+  ['Κ κ', 'καππα', 'k', 'kappa'],
+  ['Λ λ', 'λαμβδα', 'l', 'lambda'],
+  ['Μ μ', 'μυ', 'm', 'mu'],
+  ['Ν ν', 'νυ', 'n', 'nu'],
+  ['Ξ ξ', 'ξι', 'x', 'xi'],
+  ['Ο ο', 'ομικρον', 'o', 'omicron'],
+  ['Π π', 'πι', 'p', 'pi'],
+  ['Ρ ρ', 'ρω', 'r', 'rho'],
+  ['Σ σ/ς', 'σιγμα', 's', 'sigma'],
+  ['Τ τ', 'ταυ', 't', 'tau'],
+  ['Υ υ', 'υψιλον', 'y', 'upsilon'],
+  ['Φ φ', 'φι', 'ph', 'phi'],
+  ['Χ χ', 'χι', 'ch', 'chi'],
+  ['Ψ ψ', 'ψι', 'ps', 'psi'],
+  ['Ω ω', 'ωμεγα', 'ō', 'omega']
+];
+SETS['0'] = {
+  label: 'Chapter 0',
+  type: 'chapter',
+  cards: GREEK_ALPHABET.map(([g, gName, e, eName]) => ({
+    g,
+    e,
+    gName,
+    eName,
+    alphabet: true,
+    // Every letter is essential, so they're all "required" — this also keeps
+    // the deck from coming up empty under the default "Starred words only"
+    // filter (which drops non-required cards). The req/opt label is suppressed
+    // on the card itself (see render.js) since the distinction is meaningless
+    // for the alphabet.
+    required: true
+  }))
+};
 
 window.SETS = SETS;
 window.SESSIONS = SESSIONS;

@@ -298,7 +298,8 @@ import {
   closeResetStatsModal,
   confirmResetStatsKeepSettings,
   confirmResetToStart,
-  resetAllStats
+  resetAllStats,
+  PARSING_SHUFFLE_ALL_VALUE
 } from '../ui/navigation.js';
 import {
   configureAnalytics,
@@ -1621,6 +1622,31 @@ function syncParadigmFocusUi() {
     .filter((g) => g.lemmas.length);
   const shuffleableCategories = new Set(grouped.filter((g) => g.lemmas.length >= 2).map((g) => g.category));
 
+  // "All paradigms through selected chapter" heads the list as the dropdown
+  // face of the shuffle-all toggle (see setMorphFocusedParadigm / the
+  // PARSING_SHUFFLE_ALL_VALUE sentinel) — mirrors the chapter dropdown's "Build
+  // mode" entry driving Lookup mode.
+  const sentinelOpt = `<option value="${PARSING_SHUFFLE_ALL_VALUE}">All paradigms through selected chapter</option>`;
+  const groupsHtml = grouped.map((g) => {
+    const shuffleOpt = shuffleableCategories.has(g.category)
+      ? `<option value="${escapeAttr(makeCategoryShuffleValue(g.category))}">${escapeAttr(categoryShuffleLabel(g.category))}</option>`
+      : '';
+    const opts = g.lemmas
+      .map((p) => `<option value="${escapeAttr(p.lemma)}">${escapeAttr(p.displayLabel)}</option>`)
+      .join('');
+    return `<optgroup label="${escapeAttr(g.category)}">${shuffleOpt}${opts}</optgroup>`;
+  }).join('');
+
+  // Shuffle-all on: the dropdown stays visible but is the toggle's face — show
+  // the sentinel selected and leave runtime.morphFocusedParadigm untouched (the
+  // toggle owns the multi-paradigm deck). Picking a concrete paradigm drops back
+  // out of shuffle-all via setMorphFocusedParadigm.
+  if (runtime.parsingShuffleAll) {
+    select.innerHTML = sentinelOpt + groupsHtml;
+    select.value = PARSING_SHUFFLE_ALL_VALUE;
+    return;
+  }
+
   const currentValue = runtime.morphFocusedParadigm;
   const currentCategory = parseCategoryShuffleValue(currentValue);
   let chosen;
@@ -1641,15 +1667,7 @@ function syncParadigmFocusUi() {
     runtime.morphFocusedParadigm = chosen;
     rebuildMorphDeckForStepMode();
   }
-  select.innerHTML = grouped.map((g) => {
-    const shuffleOpt = shuffleableCategories.has(g.category)
-      ? `<option value="${escapeAttr(makeCategoryShuffleValue(g.category))}">${escapeAttr(categoryShuffleLabel(g.category))}</option>`
-      : '';
-    const opts = g.lemmas
-      .map((p) => `<option value="${escapeAttr(p.lemma)}">${escapeAttr(p.displayLabel)}</option>`)
-      .join('');
-    return `<optgroup label="${escapeAttr(g.category)}">${shuffleOpt}${opts}</optgroup>`;
-  }).join('');
+  select.innerHTML = sentinelOpt + groupsHtml;
   select.value = chosen;
 }
 
@@ -2109,11 +2127,12 @@ function syncLayoutVisibility() {
   const parsingChapterRow = document.getElementById('parsingChapterRow');
   if (parsingChapterRow) parsingChapterRow.style.display = isParsingMode() ? 'flex' : 'none';
   const paradigmFocusRowPrimary = document.getElementById('paradigmFocusRowPrimary');
-  // Shuffle-all and the custom paradigm set both turn the single focused
-  // paradigm off, so hide its dropdown whenever either is on (the deck is
-  // then a mix of multiple paradigms). Lookup always uses a single focused
-  // paradigm, so its dropdown stays.
-  if (paradigmFocusRowPrimary) paradigmFocusRowPrimary.style.display = (isParsingMode() && (lookupActive || (!runtime.parsingShuffleAll && !runtime.parsingCustomReview))) ? 'flex' : 'none';
+  // Shuffle-all keeps the dropdown visible — its head "All paradigms through
+  // selected chapter" entry is the toggle's face (selecting a real paradigm
+  // drops back out). Only the custom paradigm set hides it, swapping in the
+  // checkbox selector. Lookup always uses a single focused paradigm, so its
+  // dropdown stays too.
+  if (paradigmFocusRowPrimary) paradigmFocusRowPrimary.style.display = (isParsingMode() && (lookupActive || !runtime.parsingCustomReview)) ? 'flex' : 'none';
   // Custom paradigm set: the checkbox selector takes the dropdown's place
   // while the toggle is on.
   const parsingCustomParadigmsRow = document.getElementById('parsingCustomParadigmsRow');
