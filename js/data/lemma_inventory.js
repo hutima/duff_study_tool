@@ -3024,15 +3024,16 @@
     { chapter: 20, family: 'δίδωμι — aorist active optative (optional)',  forms: DIDOMI_AORIST_ACTIVE_OPTATIVE }
   ];
 
-  // γίνομαι — 2nd-aorist middle optative; the 3sg γένοιτο is the NT's most
-  // common optative (μὴ γένοιτο).
+  // γίνομαι — aorist middle optative (stem γεν‑, the strong aorist ἐγενόμην);
+  // the 3sg γένοιτο is the NT's most common optative (μὴ γένοιτο). Parsed as
+  // plain 'aorist' — the drill collapses the first/second-aorist distinction.
   const GINOMAI_AORIST_MIDDLE_OPTATIVE = {
-    'γενοίμην':   'second aorist middle optative first person singular',
-    'γένοιο':     'second aorist middle optative second person singular',
-    'γένοιτο':    'second aorist middle optative third person singular',
-    'γενοίμεθα':  'second aorist middle optative first person plural',
-    'γένοισθε':   'second aorist middle optative second person plural',
-    'γένοιντο':   'second aorist middle optative third person plural'
+    'γενοίμην':   'aorist middle optative first person singular',
+    'γένοιο':     'aorist middle optative second person singular',
+    'γένοιτο':    'aorist middle optative third person singular',
+    'γενοίμεθα':  'aorist middle optative first person plural',
+    'γένοισθε':   'aorist middle optative second person plural',
+    'γένοιντο':   'aorist middle optative third person plural'
   };
   const GINOMAI_OPTATIVE_GROUPS = [
     { chapter: 20, family: 'γίνομαι — aorist middle optative (optional)', forms: GINOMAI_AORIST_MIDDLE_OPTATIVE }
@@ -3072,14 +3073,15 @@
     { chapter: 20, family: 'ποιέω — future active optative (optional)',         forms: POIEO_FUTURE_ACTIVE_OPTATIVE }
   ];
 
-  // λαμβάνω — 2nd-aorist active optative (λάβοιμι, from ἔλαβον).
+  // λαμβάνω — aorist active optative λάβοιμι (stem λαβ‑, the strong aorist
+  // ἔλαβον; parsed as plain 'aorist').
   const LAMBANO_AORIST_ACTIVE_OPTATIVE = {
-    'λάβοιμι':   'second aorist active optative first person singular',
-    'λάβοις':    'second aorist active optative second person singular',
-    'λάβοι':     'second aorist active optative third person singular',
-    'λάβοιμεν':  'second aorist active optative first person plural',
-    'λάβοιτε':   'second aorist active optative second person plural',
-    'λάβοιεν':   'second aorist active optative third person plural'
+    'λάβοιμι':   'aorist active optative first person singular',
+    'λάβοις':    'aorist active optative second person singular',
+    'λάβοι':     'aorist active optative third person singular',
+    'λάβοιμεν':  'aorist active optative first person plural',
+    'λάβοιτε':   'aorist active optative second person plural',
+    'λάβοιεν':   'aorist active optative third person plural'
   };
   const LAMBANO_OPTATIVE_GROUPS = [
     { chapter: 20, family: 'λαμβάνω — aorist active optative (optional)', forms: LAMBANO_AORIST_ACTIVE_OPTATIVE }
