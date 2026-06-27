@@ -508,6 +508,42 @@ export function renderCard() {
   // line of the Greek-bearing face, anchoring each noun to its model paradigm.
   const declModelTag = notesOn ? nounDeclensionModelSuffix(card, maxCh) : '';
 
+  // Alphabet cards (Chapter 0): a single Greek letter on one face, its
+  // transliteration on the other, each with the letter's name spelt out in
+  // small text beneath — the same muted "spelling" treatment the second-aorist
+  // cards give the stem. Respects the study direction (Greek ⇄ English) like a
+  // normal card. Handled before the standard layout so the letter-name subtitle
+  // and the larger glyph render without the usual stem/POS annotations.
+  if (card.alphabet) {
+    const greekFace = `
+          <span class="card-label">Greek</span>
+          <div class="card-greek card-alphabet-letter">${escapeHtml(card.g)}</div>
+          ${card.gName ? `<div class="card-letter-name">${escapeHtml(card.gName)}</div>` : ''}`;
+    const englishFace = `
+          <span class="card-label">English</span>
+          <div class="card-english card-alphabet-letter">${escapeHtml(card.e || '—')}</div>
+          ${card.eName ? `<div class="card-letter-name">${escapeHtml(card.eName)}</div>` : ''}`;
+    const greekIsFront = !runtime.directionToGreek;
+    const frontFace = greekIsFront ? greekFace : englishFace;
+    const backFace = greekIsFront ? englishFace : greekFace;
+    area.innerHTML = `
+      <div class="card-wrapper" id="cardWrapper" onclick="flipCard()">
+        <div class="card-inner" id="cardInner">
+          <div class="card-face card-front card-alphabet">
+            ${frontFace}
+            <div class="card-hint">${escapeHtml(card.sourceLabel || 'Alphabet')}</div>
+            <div class="flip-hint">click to reveal →</div>
+          </div>
+          <div class="card-face card-back card-alphabet">
+            ${backFace}
+          </div>
+        </div>
+      </div>`;
+    runtime.isFlipped = false;
+    renderProgress();
+    return;
+  }
+
   // Stem-flip cards (second-aorist supplement set): both faces show Greek +
   // English gloss subtitle, with the differing characters highlighted so the
   // stem change between present and aorist is visually obvious.

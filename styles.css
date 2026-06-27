@@ -846,6 +846,23 @@
     font-style: italic;
     margin-top: 6px;
   }
+  /* Alphabet cards (Chapter 0): one large glyph with the letter's name spelt
+     out in small muted text beneath it. The glyph is scaled up from the usual
+     headword size; the name mirrors the small "spelling" treatment the
+     second-aorist stem (.card-stem-inline) gets. */
+  .card-alphabet-letter {
+    font-size: calc((clamp(40px, 11vw, 72px)) * var(--text-scale));
+    line-height: 1.15;
+    margin-bottom: 4px;
+  }
+  .card-letter-name {
+    font-family: var(--font-greek);
+    font-size: calc((16px) * var(--text-scale));
+    color: var(--gold-dim);
+    text-align: center;
+    letter-spacing: 1px;
+    margin-top: 2px;
+  }
   /* Principal-parts annotation under a chapter-vocab verb's headword: one
    * line of bracketed forms in smaller Greek (2 aor. / fut. / aor. pass. /
    * pf.), each paired with a tiny label, so the present is associated with

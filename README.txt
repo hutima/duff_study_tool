@@ -34,11 +34,13 @@ Study modes (top-level mode strip)
   English, or notes for self-testing.
 
 Session / set selectors
-- Preset Sessions — weekly study days (wk1t, wk1f, wk2t, …),
-  Mid-Term Prep (Ch 1–11), and Final Exam Prep (Ch 1–20). Sessions
-  expand to chapters plus the per-week odd supplements (W1O–W8O);
-  paradigm breakdown sets are opt-in via the supplemental selector.
-- Manual chapter selection — toggle individual chapters 1–20.
+- Preset Sessions — Part 0 (the Greek alphabet, Chapter 0) and
+  Parts 1–8 (one per course week, wk0, wk1, wk2, …), plus
+  Mid-Term Prep (Ch 1–11) and Final Exam Prep (Ch 1–20). The
+  Mid-Term / Final Exam select-alls exclude Chapter 0 (the alphabet
+  isn't vocabulary). Sessions expand to chapters; paradigm breakdown
+  sets are opt-in via the supplemental selector.
+- Manual chapter selection — toggle individual chapters (0, 1–20).
 - Supplemental selector — grouped by week and expandable into the
   per-week odd supplement (W1O–W8O), "all of set X" button, paradigm
   rows (Morphology / Grammar items), and the per-week stem-flip drills

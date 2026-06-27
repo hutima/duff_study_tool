@@ -87,7 +87,7 @@ export function buildSessions() {
     btn.className = 'session-btn' + (s.special ? ' special' : '');
     btn.id = 'sess-' + s.id;
     btn.dataset.sessionId = s.id;
-    const summaryHtml = host.canAccessGrammarUi()
+    const summaryHtml = (host.canAccessGrammarUi() && s.summary)
       ? `<br><span class="session-chapters">${s.summary}</span>`
       : '';
     btn.innerHTML = `<span class="session-tag">${s.tag}</span>${s.label}${summaryHtml}`;

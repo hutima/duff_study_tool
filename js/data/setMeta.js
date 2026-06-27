@@ -29,6 +29,7 @@ export const WEEK_FIRST_CHAPTER = (() => {
 // in the study selector, and as the chapter-group subtitle in paradigm
 // practice. A couple of the longer titles are trimmed to fit a button.
 export const CHAPTER_TITLES = {
+  0: 'The Greek alphabet',
   1: 'The alphabet',
   2: 'Basic sentences',
   3: 'Cases and gender',
@@ -52,14 +53,15 @@ export const CHAPTER_TITLES = {
 };
 
 export const SESSION_WEEK_META = {
-  wk1t: [1], wk1f: [1],
-  wk2t: [2], wk2f: [2],
-  wk3t: [3], wk3f: [3],
-  wk4t: [4],
+  wk0: [],
+  wk1: [1],
+  wk2: [2],
+  wk3: [3],
+  wk4: [4],
   mt: [1, 2, 3, 4],
-  wk5t: [5], wk5f: [5],
-  wk6t: [6], wk6f: [6],
-  wk7t: [7], wk7f: [7],
-  wk8t: [8], wk8f: [8],
+  wk5: [5],
+  wk6: [6],
+  wk7: [7],
+  wk8: [8],
   all: [1, 2, 3, 4, 5, 6, 7, 8]
 };
