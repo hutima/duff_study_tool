@@ -298,8 +298,7 @@ import {
   closeResetStatsModal,
   confirmResetStatsKeepSettings,
   confirmResetToStart,
-  resetAllStats,
-  PARSING_SHUFFLE_ALL_VALUE
+  resetAllStats
 } from '../ui/navigation.js';
 import {
   configureAnalytics,
@@ -1586,6 +1585,15 @@ function syncParsingChapterUi() {
   // syncToggleButtons, so the dropdown follows the toggle and vice versa.)
   select.value = runtime.parsingLookup ? PARSING_BUILD_MODE_VALUE : String(chapter);
 }
+
+// Sentinel value for the "All paradigms through selected chapter" dropdown
+// option. Defined locally (NOT imported from navigation.js) on purpose: ES-module
+// import paths carry no `?v=` cache-bust, so during a service-worker update the
+// new main.js can momentarily load against an OLD cached navigation.js. Importing
+// a brand-new export across that boundary throws a SyntaxError that wedges the
+// whole app (frozen page, no update prompt). Keep this string identical to the
+// `PARSING_SHUFFLE_ALL_VALUE` export in navigation.js — both must match.
+const PARSING_SHUFFLE_ALL_VALUE = '__shuffleAllToChapter__';
 
 // Populate the primary focused-paradigm dropdown from the current selection
 // when parsing mode is active, and resync runtime.morphFocusedParadigm if

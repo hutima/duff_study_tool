@@ -40,11 +40,13 @@ export function installKeyboardShortcuts(deps) {
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && isAnalyticsModalOpen()) { closeAnalyticsOverlay(); return; }
     if (e.key === 'Escape' && isStudySelectorOpen()) { closeStudySelector(); return; }
+    // Contact card can open stacked on top of the user guide, so close it first
+    // (topmost wins) — must come before the shortcuts/user-guide check below.
+    if (e.key === 'Escape' && isContactAuthorModalOpen()) { closeContactAuthorModal(); return; }
     if (e.key === 'Escape' && isShortcutsModalOpen()) { closeShortcutsModal(); return; }
     if (e.key === 'Escape' && isWhatsNewV1_5ModalOpen()) { closeWhatsNewV1_5Modal(); return; }
     if (e.key === 'Escape' && isAspectDefaultOffModalOpen()) { closeAspectDefaultOffModal(); return; }
     if (e.key === 'Escape' && isToggleInfoModalOpen()) { closeToggleInfoModal(); return; }
-    if (e.key === 'Escape' && isContactAuthorModalOpen()) { closeContactAuthorModal(); return; }
     if (e.key === 'Escape' && isTransferModalOpen()) { closeTransferModal(); return; }
     if (isDisclaimerModalOpen() || isTransferModalOpen() || isAnalyticsModalOpen() || isStudySelectorOpen() || isShortcutsModalOpen() || isWhatsNewV1_5ModalOpen() || isAspectDefaultOffModalOpen() || isToggleInfoModalOpen() || isContactAuthorModalOpen()) return;
     if (!isReviewDeckMode() || !getSelectedKeys().length) return;

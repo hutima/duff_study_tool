@@ -638,6 +638,12 @@ export function toggleMorphStepByStep() {
 // setMorphFocusedParadigm / syncParadigmFocusUi in main.js). Mirrors how the
 // chapter dropdown's "Build mode" sentinel drives the Lookup-mode toggle. Not a
 // real lemma, so it can never collide with a paradigm value.
+//
+// Kept as an export even though main.js now defines its own local copy (rather
+// than importing this): an OLDER shipped main.js may still `import` it across a
+// service-worker update, and removing the export would SyntaxError that stale
+// importer. main.js's copy must stay byte-identical to this string — see the
+// cache-busting note in CLAUDE.md.
 export const PARSING_SHUFFLE_ALL_VALUE = '__shuffleAllToChapter__';
 
 export function setMorphFocusedParadigm(lemma) {

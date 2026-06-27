@@ -3110,6 +3110,7 @@
   }
 
   .consent-modal {
+    position: relative;
     width: 100%;
     max-width: 620px;
     background: linear-gradient(180deg, #181a24 0%, #12141d 100%);
@@ -3118,6 +3119,24 @@
     box-shadow: var(--shadow);
     padding: 26px 24px 22px;
   }
+
+  /* Top-right ✕ on a modal (user guide, contact card). Anchors to the
+     position:relative .consent-modal above. */
+  .modal-close-x {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    z-index: 2;
+    background: none;
+    border: 0;
+    color: var(--muted);
+    font-size: calc((20px) * var(--text-scale));
+    line-height: 1;
+    cursor: pointer;
+    padding: 6px 10px;
+    transition: color 0.08s;
+  }
+  .modal-close-x:hover { color: var(--gold); }
 
   .consent-label {
     font-family: var(--font-display);
@@ -3233,6 +3252,19 @@
     display: flex;
     justify-content: flex-end;
     margin-top: 18px;
+  }
+
+  /* User-guide footer: Contact author on the left, Close on the right. */
+  .user-guide-actions {
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
+  /* Contact card opens stacked on top of the user guide (z-index:1000), so it
+     sits above. Esc closes this topmost modal first (see keyboard.js). */
+  #contactAuthorOverlay {
+    z-index: 1100;
   }
 
   .reset-spaced-actions {
