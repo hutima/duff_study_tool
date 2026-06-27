@@ -16,7 +16,7 @@ const DIM_POOLS = {
   aspect: ['continuous', 'undefined', 'continuous/undefined', 'completed'],
   tense:  ['present', 'future', 'imperfect', 'aorist', 'first aorist', 'second aorist', 'perfect', 'pluperfect'],
   voice:  ['active', 'middle', 'passive', 'middle/passive'],
-  mood:   ['indicative', 'subjunctive', 'imperative', 'infinitive', 'participle'],
+  mood:   ['indicative', 'subjunctive', 'optative', 'imperative', 'infinitive', 'participle'],
   person: ['first', 'second', 'third'],
   case:   ['nominative', 'accusative', 'genitive', 'dative', 'vocative'],
   number: ['singular', 'plural'],
@@ -141,7 +141,7 @@ export function parseAnswerDimensions(answer) {
     || findToken(cleaned, /\b(present|future|imperfect|aorist|perfect|pluperfect)\b/);
   const voice = findToken(cleaned, /\b(middle\/passive|middle or passive|active|middle|passive)\b/)
     .replace(/middle or passive/, 'middle/passive');
-  const mood = findToken(cleaned, /\b(indicative|subjunctive|imperative|infinitive|participle)\b/);
+  const mood = findToken(cleaned, /\b(indicative|subjunctive|optative|imperative|infinitive|participle)\b/);
   let person = findToken(cleaned, /\b(first|second|third) person\b/).replace(/\s+person$/, '');
   if (!person) {
     const abbrev = cleaned.match(/\b(1st|2nd|3rd|first|second|third)\b(?=\s+(?:sg\.?|pl\.?|singular|plural)\b)/);
@@ -457,6 +457,12 @@ export function inferredFollowupDims(stepKey, picked, existingStepKeys, options 
 const STRUCTURAL_TENSE_MOOD_IMPOSSIBILITIES = [
   { tense: 'future',     mood: 'imperative',  why: 'no future imperative exists' },
   { tense: 'future',     mood: 'subjunctive', why: 'no future subjunctive exists' },
+  // The optative IS attested in present, future, aorist, and perfect — the
+  // future optative (λυσοίμην, λύσοιμι) is the one mood that keeps a future
+  // form Koine's subjunctive lacks — so there is no future-optative gap here.
+  // It is barred only from the two indicative-only past tenses.
+  { tense: 'imperfect',  mood: 'optative',    why: 'no imperfect optative exists (imperfect is indicative-only)' },
+  { tense: 'pluperfect', mood: 'optative',    why: 'no pluperfect optative exists (pluperfect is indicative-only)' },
   { tense: 'imperfect',  mood: 'subjunctive', why: 'no imperfect subjunctive exists (imperfect is indicative-only)' },
   { tense: 'imperfect',  mood: 'imperative',  why: 'no imperfect imperative exists (imperfect is indicative-only)' },
   { tense: 'imperfect',  mood: 'infinitive',  why: 'no imperfect infinitive exists (imperfect is indicative-only)' },
@@ -1573,7 +1579,7 @@ export function getParadigmStepAttemptWindow() {
 const VALUE_BREAKDOWN_DIMS = ['tense', 'mood', 'voice', 'person', 'case', 'number', 'gender'];
 const VALUE_ORDER = {
   tense:  ['present', 'future', 'imperfect', 'aorist', 'perfect', 'pluperfect'],
-  mood:   ['indicative', 'subjunctive', 'imperative', 'infinitive', 'participle'],
+  mood:   ['indicative', 'subjunctive', 'optative', 'imperative', 'infinitive', 'participle'],
   voice:  ['active', 'middle', 'passive', 'middle/passive'],
   person: ['first', 'second', 'third'],
   case:   ['nominative', 'accusative', 'genitive', 'dative', 'vocative'],

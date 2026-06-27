@@ -5,7 +5,7 @@
 (function () {
   if (typeof window.registerSupplementalMorphologySet !== 'function') return;
 
-  const PARSING_KEYWORDS = /(?:\bNom\.?\b|\bGen\.?\b|\bDat\.?\b|\bAcc\.?\b|\bVoc\.?\b|\bsg\.?\b|\bpl\.?\b|\bsingular\b|\bplural\b|\bperson\b|\bmasc(?:uline)?\b|\bfem(?:inine)?\b|\bneut(?:er)?\b|\bnominative\b|\bgenitive\b|\bdative\b|\baccusative\b|\bvocative\b|\bPresent\b|\bFuture\b|\bImperfect\b|\bAorist\b|\bPerfect\b|\bPluperfect\b|\bpresent\b|\bfuture\b|\bimperfect\b|\baorist\b|\bperfect\b|\bpluperfect\b|\bactive\b|\bmiddle\b|\bpassive\b|\bindicative\b|\bsubjunctive\b|\bimperative\b|\binfinitive\b|\bparticiple\b|\b1st\b|\b2nd\b|\b3rd\b|\bTime\b|\bPlace\b|\bManner\b|\bReason\b|\bIndefinite construction\b|\bSimple relative\b)/i;
+  const PARSING_KEYWORDS = /(?:\bNom\.?\b|\bGen\.?\b|\bDat\.?\b|\bAcc\.?\b|\bVoc\.?\b|\bsg\.?\b|\bpl\.?\b|\bsingular\b|\bplural\b|\bperson\b|\bmasc(?:uline)?\b|\bfem(?:inine)?\b|\bneut(?:er)?\b|\bnominative\b|\bgenitive\b|\bdative\b|\baccusative\b|\bvocative\b|\bPresent\b|\bFuture\b|\bImperfect\b|\bAorist\b|\bPerfect\b|\bPluperfect\b|\bpresent\b|\bfuture\b|\bimperfect\b|\baorist\b|\bperfect\b|\bpluperfect\b|\bactive\b|\bmiddle\b|\bpassive\b|\bindicative\b|\bsubjunctive\b|\boptative\b|\bimperative\b|\binfinitive\b|\bparticiple\b|\b1st\b|\b2nd\b|\b3rd\b|\bTime\b|\bPlace\b|\bManner\b|\bReason\b|\bIndefinite construction\b|\bSimple relative\b)/i;
 
   const TENSE_PREFIX_REGEX = /^(1st Aorist [A-Za-z]+|2nd Aorist [A-Za-z]+|Aorist Passive|Present|Future|Imperfect|Aorist|Perfect|Pluperfect)\s*:\s*/;
 
@@ -47,7 +47,7 @@
     const qualifier = find(/\b(first aorist|second aorist)\b/);
     const tense = find(/\b(present|future|imperfect|aorist|perfect|pluperfect)\b/);
     const voice = find(/\b(middle\/passive|middle or passive|active|middle|passive)\b/);
-    const mood = find(/\b(indicative|subjunctive|imperative|infinitive|participle)\b/);
+    const mood = find(/\b(indicative|subjunctive|optative|imperative|infinitive|participle)\b/);
     // Person normalization: prefer explicit "<first|second|third> person".
     // Fall back to the bare ordinal when followed by a number word so the
     // canonical always reads "<N> person <singular|plural>" rather than
@@ -167,7 +167,7 @@
   function setDefaults(set) {
     const label = String(set && set.label || '').toLowerCase();
     const lemma = String(extractLemma(set && set.label) || '').toLowerCase();
-    const moodMatches = label.match(/\b(indicative|subjunctive|imperative|infinitive|participle)\b/g) || [];
+    const moodMatches = label.match(/\b(indicative|subjunctive|optative|imperative|infinitive|participle)\b/g) || [];
     const voiceMatches = label.match(/\b(middle\/passive|middle or passive|active|middle|passive)\b/g) || [];
     const tenseMatches = label.match(/\b(present|future|imperfect|aorist|perfect|pluperfect)\b/g) || [];
     const mood = moodMatches.length === 1 ? moodMatches[0] : '';
@@ -273,7 +273,7 @@
       const isNominalCard = !isParticipleSet
         && /\b(nom\.?|acc\.?|gen\.?|dat\.?|voc\.?|nominative|accusative|genitive|dative|vocative|masc\.?|fem\.?|neut\.?|masculine|feminine|neuter)\b/i.test(raw)
         && !/\b(1st|2nd|3rd|first|second|third)\s+(person|sg\.?|pl\.?|singular|plural)\b/i.test(raw)
-        && !/\b(present|future|imperfect|aorist|perfect|pluperfect|indicative|subjunctive|imperative|infinitive|participle|active|middle|passive)\b/i.test(raw);
+        && !/\b(present|future|imperfect|aorist|perfect|pluperfect|indicative|subjunctive|optative|imperative|infinitive|participle|active|middle|passive)\b/i.test(raw);
       if (!isNominalCard) {
         if (defaults.tense && !/\b(present|future|imperfect|aorist|perfect|pluperfect)\b/i.test(raw)) {
           raw = `${defaults.tense} ${raw}`;
@@ -293,7 +293,7 @@
         if (defaults.voice && !/\b(active|middle|passive|middle\/passive)\b/i.test(raw)) {
           raw = `${defaults.voice} ${raw}`;
         }
-        if (defaults.mood && !/\b(indicative|subjunctive|imperative|infinitive|participle)\b/i.test(raw)) {
+        if (defaults.mood && !/\b(indicative|subjunctive|optative|imperative|infinitive|participle)\b/i.test(raw)) {
           raw = `${defaults.mood} ${raw}`;
         }
       }

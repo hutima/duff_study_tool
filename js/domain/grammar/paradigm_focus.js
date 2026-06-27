@@ -356,6 +356,7 @@ function buildOptionalMorphCardsForLemma(lemma, levels, filters, select = 'all')
     const parse = String(parsedAnswer || '').toLowerCase();
     if (filters.imperative === false   && /\bimperative\b/.test(parse))    return false;
     if (filters.subjunctive === false  && /\bsubjunctive\b/.test(parse))   return false;
+    if (filters.optative === false     && /\boptative\b/.test(parse))      return false;
     if (filters.infinitive === false   && /\binfinitive\b/.test(parse))    return false;
     if (filters.participle === false   && /\bparticiple\b/.test(parse))    return false;
     if (filters.thirdPerson === false  && /\bthird person\b/.test(parse))  return false;

@@ -1203,7 +1203,7 @@ export function clearParsingStats() {
   host.saveState();
 }
 
-const OPTIONAL_FILTER_KEYS = new Set(['imperative', 'subjunctive', 'infinitive', 'participle', 'thirdPerson', 'futureTense', 'perfectTense']);
+const OPTIONAL_FILTER_KEYS = new Set(['imperative', 'subjunctive', 'optative', 'infinitive', 'participle', 'thirdPerson', 'futureTense', 'perfectTense']);
 
 // Per-category filter on the optional-form pool. Off → cards whose
 // canonical parse contains that category are excluded from the drill
@@ -1244,7 +1244,7 @@ const DIM_VALUE_FILTER_VALUES = {
   aspect: ['continuousUndefined', 'completed'],
   tense:  ['present', 'future', 'imperfect', 'aorist', 'perfect', 'pluperfect'],
   voice:  ['active', 'middle', 'passive'],
-  mood:   ['indicative', 'subjunctive', 'imperative', 'infinitive', 'participle'],
+  mood:   ['indicative', 'subjunctive', 'optative', 'imperative', 'infinitive', 'participle'],
   person: ['first', 'second', 'third'],
   number: ['singular', 'plural'],
   case:   ['nominative', 'accusative', 'genitive', 'dative', 'vocative'],

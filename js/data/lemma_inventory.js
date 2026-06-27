@@ -2829,6 +2829,280 @@
       DEIKNYMI_AORIST_ACTIVE_PARTICIPLE_NOM, { core: false })
   ];
 
+  // ─── Optative mood (Duff Ch 20) ───────────────────────────────────────
+  //
+  // The optative is introduced in Ch 20 but is vanishingly rare in the NT
+  // (~68 of 28,000+ verbs). Only a handful of forms actually occur in the
+  // GNT — γένοιτο (γίνομαι, the "μὴ γένοιτο" of Paul), εἴη (εἰμί, always 3sg),
+  // and δῴη (δίδωμι, the benediction "may the Lord grant") — plus a model
+  // λύω / ῥύομαι form. Those required forms live as starred drill cards in
+  // the W8_OPTATIVE_NT_FORMS supplemental set; everything below is the FULL
+  // paradigm parked in the OPTIONAL pool (non-core groups, chapter 20), so a
+  // student turning on "Optional paradigm" at Ch 20 can browse/drill the
+  // complete optative without a NT class being forced to memorise it.
+  //
+  // No augment (like the subjunctive); the iota mood-sign is the tell —
+  // ‑οι‑ (present/future), ‑αι‑ (1st aorist), ‑ει‑/‑ιη‑ (aorist passive,
+  // athematic). Forms verbatim from the reference grammar's optative tables;
+  // shorter/longer or thematic/athematic doublets keep the primary form in
+  // the drill group and the alternate in extraForms (lookup resolves both).
+  // No future/perfect non-indicative *gap* applies — the optative is the one
+  // mood that keeps a future (λύσοιμι); only imperfect/pluperfect are barred
+  // (handled in morph_steps.STRUCTURAL_TENSE_MOOD_IMPOSSIBILITIES).
+
+  // λύω — model regular ω-verb, all voices.
+  const LUO_PRESENT_ACTIVE_OPTATIVE = {
+    'λύοιμι':   'present active optative first person singular',
+    'λύοις':    'present active optative second person singular',
+    'λύοι':     'present active optative third person singular',
+    'λύοιμεν':  'present active optative first person plural',
+    'λύοιτε':   'present active optative second person plural',
+    'λύοιεν':   'present active optative third person plural'
+  };
+  const LUO_FUTURE_ACTIVE_OPTATIVE = {
+    'λύσοιμι':   'future active optative first person singular',
+    'λύσοις':    'future active optative second person singular',
+    'λύσοι':     'future active optative third person singular',
+    'λύσοιμεν':  'future active optative first person plural',
+    'λύσοιτε':   'future active optative second person plural',
+    'λύσοιεν':   'future active optative third person plural'
+  };
+  const LUO_AORIST_ACTIVE_OPTATIVE = {
+    'λύσαιμι':   'aorist active optative first person singular',
+    'λύσαις':    'aorist active optative second person singular',
+    // λύσαι (acute) = aorist active optative 3sg; distinct in accent from the
+    // drilled infinitive λῦσαι (circumflex) and the middle imperative λῦσαι.
+    'λύσαι':     'aorist active optative third person singular',
+    'λύσαιμεν':  'aorist active optative first person plural',
+    'λύσαιτε':   'aorist active optative second person plural',
+    'λύσαιεν':   'aorist active optative third person plural'
+  };
+  const LUO_PRESENT_MP_OPTATIVE = {
+    'λυοίμην':   'present middle/passive optative first person singular',
+    'λύοιο':     'present middle/passive optative second person singular',
+    'λύοιτο':    'present middle/passive optative third person singular',
+    'λυοίμεθα':  'present middle/passive optative first person plural',
+    'λύοισθε':   'present middle/passive optative second person plural',
+    'λύοιντο':   'present middle/passive optative third person plural'
+  };
+  const LUO_FUTURE_MIDDLE_OPTATIVE = {
+    'λυσοίμην':   'future middle optative first person singular',
+    'λύσοιο':     'future middle optative second person singular',
+    'λύσοιτο':    'future middle optative third person singular',
+    'λυσοίμεθα':  'future middle optative first person plural',
+    'λύσοισθε':   'future middle optative second person plural',
+    'λύσοιντο':   'future middle optative third person plural'
+  };
+  const LUO_AORIST_MIDDLE_OPTATIVE = {
+    'λυσαίμην':   'aorist middle optative first person singular',
+    'λύσαιο':     'aorist middle optative second person singular',
+    'λύσαιτο':    'aorist middle optative third person singular',
+    'λυσαίμεθα':  'aorist middle optative first person plural',
+    'λύσαισθε':   'aorist middle optative second person plural',
+    'λύσαιντο':   'aorist middle optative third person plural'
+  };
+  const LUO_FUTURE_PASSIVE_OPTATIVE = {
+    'λυθησοίμην':   'future passive optative first person singular',
+    'λυθήσοιο':     'future passive optative second person singular',
+    'λυθήσοιτο':    'future passive optative third person singular',
+    'λυθησοίμεθα':  'future passive optative first person plural',
+    'λυθήσοισθε':   'future passive optative second person plural',
+    'λυθήσοιντο':   'future passive optative third person plural'
+  };
+  const LUO_AORIST_PASSIVE_OPTATIVE = {
+    'λυθείην':   'aorist passive optative first person singular',
+    'λυθείης':   'aorist passive optative second person singular',
+    'λυθείη':    'aorist passive optative third person singular',
+    'λυθεῖμεν':  'aorist passive optative first person plural',
+    'λυθεῖτε':   'aorist passive optative second person plural',
+    'λυθεῖεν':   'aorist passive optative third person plural'
+  };
+  const LUO_PERFECT_ACTIVE_OPTATIVE = {
+    'λελύκοιμι':   'perfect active optative first person singular',
+    'λελύκοις':    'perfect active optative second person singular',
+    'λελύκοι':     'perfect active optative third person singular',
+    'λελύκοιμεν':  'perfect active optative first person plural',
+    'λελύκοιτε':   'perfect active optative second person plural',
+    'λελύκοιεν':   'perfect active optative third person plural'
+  };
+  // Aeolic/athematic doublets (lookup-only): the ‑ειας/‑ειε/‑ειαν 1st-aorist
+  // active alternates and the longer ‑ίημεν/‑ίητε/‑ίησαν aorist passive forms.
+  const LUO_OPTATIVE_EXTRA = {
+    'λύσειας':     'aorist active optative second person singular',
+    'λύσειε':      'aorist active optative third person singular',
+    'λύσειεν':     'aorist active optative third person singular',
+    'λύσειαν':     'aorist active optative third person plural',
+    'λυθείημεν':   'aorist passive optative first person plural',
+    'λυθείητε':    'aorist passive optative second person plural',
+    'λυθείησαν':   'aorist passive optative third person plural'
+  };
+  const LUO_OPTATIVE_GROUPS = [
+    { chapter: 20, family: 'λύω — present active optative (optional)',  forms: LUO_PRESENT_ACTIVE_OPTATIVE },
+    { chapter: 20, family: 'λύω — future active optative (optional)',   forms: LUO_FUTURE_ACTIVE_OPTATIVE },
+    { chapter: 20, family: 'λύω — aorist active optative (optional)',   forms: LUO_AORIST_ACTIVE_OPTATIVE },
+    { chapter: 20, family: 'λύω — present middle/passive optative (optional)', forms: LUO_PRESENT_MP_OPTATIVE },
+    { chapter: 20, family: 'λύω — future middle optative (optional)',   forms: LUO_FUTURE_MIDDLE_OPTATIVE },
+    { chapter: 20, family: 'λύω — aorist middle optative (optional)',   forms: LUO_AORIST_MIDDLE_OPTATIVE },
+    { chapter: 20, family: 'λύω — future passive optative (optional)',  forms: LUO_FUTURE_PASSIVE_OPTATIVE },
+    { chapter: 20, family: 'λύω — aorist passive optative (optional)',  forms: LUO_AORIST_PASSIVE_OPTATIVE },
+    { chapter: 20, family: 'λύω — perfect active optative (optional)',  forms: LUO_PERFECT_ACTIVE_OPTATIVE }
+  ];
+
+  // ῥύομαι — model middle/deponent.
+  const RHUOMAI_PRESENT_MIDDLE_OPTATIVE = {
+    'ῥυοίμην':   'present middle optative first person singular',
+    'ῥύοιο':     'present middle optative second person singular',
+    'ῥύοιτο':    'present middle optative third person singular',
+    'ῥυοίμεθα':  'present middle optative first person plural',
+    'ῥύοισθε':   'present middle optative second person plural',
+    'ῥύοιντο':   'present middle optative third person plural'
+  };
+  const RHUOMAI_AORIST_MIDDLE_OPTATIVE = {
+    'ῥυσαίμην':   'aorist middle optative first person singular',
+    'ῥύσαιο':     'aorist middle optative second person singular',
+    'ῥύσαιτο':    'aorist middle optative third person singular',
+    'ῥυσαίμεθα':  'aorist middle optative first person plural',
+    'ῥύσαισθε':   'aorist middle optative second person plural',
+    'ῥύσαιντο':   'aorist middle optative third person plural'
+  };
+  const RHUOMAI_OPTATIVE_GROUPS = [
+    { chapter: 20, family: 'ῥύομαι — present middle optative (optional)', forms: RHUOMAI_PRESENT_MIDDLE_OPTATIVE },
+    { chapter: 20, family: 'ῥύομαι — aorist middle optative (optional)',  forms: RHUOMAI_AORIST_MIDDLE_OPTATIVE }
+  ];
+
+  // εἰμί — present active optative (εἴην series; the NT only ever shows the
+  // 3sg εἴη) and the deponent future middle optative (ἐσοίμην series).
+  const EIMI_PRESENT_ACTIVE_OPTATIVE = {
+    'εἴην':   'present active optative first person singular',
+    'εἴης':   'present active optative second person singular',
+    'εἴη':    'present active optative third person singular',
+    'εἶμεν':  'present active optative first person plural',
+    'εἶτε':   'present active optative second person plural',
+    'εἶεν':   'present active optative third person plural'
+  };
+  const EIMI_FUTURE_MIDDLE_OPTATIVE = {
+    'ἐσοίμην':   'future middle optative first person singular',
+    'ἔσοιο':     'future middle optative second person singular',
+    'ἔσοιτο':    'future middle optative third person singular',
+    'ἐσοίμεθα':  'future middle optative first person plural',
+    'ἔσοισθε':   'future middle optative second person plural',
+    'ἔσοιντο':   'future middle optative third person plural'
+  };
+  const EIMI_OPTATIVE_EXTRA = {
+    'εἴημεν':  'present active optative first person plural',
+    'εἴητε':   'present active optative second person plural',
+    'εἴησαν':  'present active optative third person plural'
+  };
+  const EIMI_OPTATIVE_GROUPS = [
+    { chapter: 20, family: 'εἰμί — present optative (optional)',        forms: EIMI_PRESENT_ACTIVE_OPTATIVE },
+    { chapter: 20, family: 'εἰμί — future middle optative (optional)',  forms: EIMI_FUTURE_MIDDLE_OPTATIVE }
+  ];
+
+  // δίδωμι — athematic present (διδοίην) + root-aorist (δοίην) optative. NT
+  // attests the aorist 3sg δῴη ("may he grant"); the regular δοίη is below.
+  const DIDOMI_PRESENT_ACTIVE_OPTATIVE = {
+    'διδοίην':   'present active optative first person singular',
+    'διδοίης':   'present active optative second person singular',
+    'διδοίη':    'present active optative third person singular',
+    'διδοῖμεν':  'present active optative first person plural',
+    'διδοῖτε':   'present active optative second person plural',
+    'διδοῖεν':   'present active optative third person plural'
+  };
+  const DIDOMI_AORIST_ACTIVE_OPTATIVE = {
+    'δοίην':   'aorist active optative first person singular',
+    'δοίης':   'aorist active optative second person singular',
+    'δοίη':    'aorist active optative third person singular',
+    'δοῖμεν':  'aorist active optative first person plural',
+    'δοῖτε':   'aorist active optative second person plural',
+    'δοῖεν':   'aorist active optative third person plural'
+  };
+  const DIDOMI_OPTATIVE_EXTRA = {
+    'διδοῖ':  'present active optative third person singular'
+  };
+  const DIDOMI_OPTATIVE_GROUPS = [
+    { chapter: 20, family: 'δίδωμι — present active optative (optional)', forms: DIDOMI_PRESENT_ACTIVE_OPTATIVE },
+    { chapter: 20, family: 'δίδωμι — aorist active optative (optional)',  forms: DIDOMI_AORIST_ACTIVE_OPTATIVE }
+  ];
+
+  // γίνομαι — 2nd-aorist middle optative; the 3sg γένοιτο is the NT's most
+  // common optative (μὴ γένοιτο).
+  const GINOMAI_AORIST_MIDDLE_OPTATIVE = {
+    'γενοίμην':   'second aorist middle optative first person singular',
+    'γένοιο':     'second aorist middle optative second person singular',
+    'γένοιτο':    'second aorist middle optative third person singular',
+    'γενοίμεθα':  'second aorist middle optative first person plural',
+    'γένοισθε':   'second aorist middle optative second person plural',
+    'γένοιντο':   'second aorist middle optative third person plural'
+  };
+  const GINOMAI_OPTATIVE_GROUPS = [
+    { chapter: 20, family: 'γίνομαι — aorist middle optative (optional)', forms: GINOMAI_AORIST_MIDDLE_OPTATIVE }
+  ];
+
+  // ποιέω — contract (ε) model: present active/middle + future active optative.
+  const POIEO_PRESENT_ACTIVE_OPTATIVE = {
+    'ποιοίην':   'present active optative first person singular',
+    'ποιοίης':   'present active optative second person singular',
+    'ποιοίη':    'present active optative third person singular',
+    'ποιοῖμεν':  'present active optative first person plural',
+    'ποιοῖτε':   'present active optative second person plural',
+    'ποιοῖεν':   'present active optative third person plural'
+  };
+  const POIEO_PRESENT_MP_OPTATIVE = {
+    'ποιοίμην':   'present middle/passive optative first person singular',
+    'ποιοῖο':     'present middle/passive optative second person singular',
+    'ποιοῖτο':    'present middle/passive optative third person singular',
+    'ποιοίμεθα':  'present middle/passive optative first person plural',
+    'ποιοῖσθε':   'present middle/passive optative second person plural',
+    'ποιοῖντο':   'present middle/passive optative third person plural'
+  };
+  const POIEO_FUTURE_ACTIVE_OPTATIVE = {
+    'ποιήσοιμι':   'future active optative first person singular',
+    'ποιήσοις':    'future active optative second person singular',
+    'ποιήσοι':     'future active optative third person singular',
+    'ποιήσοιμεν':  'future active optative first person plural',
+    'ποιήσοιτε':   'future active optative second person plural',
+    'ποιήσοιεν':   'future active optative third person plural'
+  };
+  const POIEO_OPTATIVE_EXTRA = {
+    'ποιοῖ':  'present active optative third person singular'
+  };
+  const POIEO_OPTATIVE_GROUPS = [
+    { chapter: 20, family: 'ποιέω — present active optative (optional)',        forms: POIEO_PRESENT_ACTIVE_OPTATIVE },
+    { chapter: 20, family: 'ποιέω — present middle/passive optative (optional)', forms: POIEO_PRESENT_MP_OPTATIVE },
+    { chapter: 20, family: 'ποιέω — future active optative (optional)',         forms: POIEO_FUTURE_ACTIVE_OPTATIVE }
+  ];
+
+  // λαμβάνω — 2nd-aorist active optative (λάβοιμι, from ἔλαβον).
+  const LAMBANO_AORIST_ACTIVE_OPTATIVE = {
+    'λάβοιμι':   'second aorist active optative first person singular',
+    'λάβοις':    'second aorist active optative second person singular',
+    'λάβοι':     'second aorist active optative third person singular',
+    'λάβοιμεν':  'second aorist active optative first person plural',
+    'λάβοιτε':   'second aorist active optative second person plural',
+    'λάβοιεν':   'second aorist active optative third person plural'
+  };
+  const LAMBANO_OPTATIVE_GROUPS = [
+    { chapter: 20, family: 'λαμβάνω — aorist active optative (optional)', forms: LAMBANO_AORIST_ACTIVE_OPTATIVE }
+  ];
+
+  // Flat optative maps spread into each lemma's extraForms so the fallback
+  // form-lookup resolves an optative pick even when the "Optional paradigm"
+  // toggle is off (mirrors how the subjunctive sits in both the groups and
+  // extraForms). All keys are distinct Greek strings — the iota mood-sign
+  // keeps them clear of the subjunctive (η/ω) and indicative forms.
+  const LUO_OPTATIVE_ALL = {
+    ...LUO_PRESENT_ACTIVE_OPTATIVE, ...LUO_FUTURE_ACTIVE_OPTATIVE, ...LUO_AORIST_ACTIVE_OPTATIVE,
+    ...LUO_PRESENT_MP_OPTATIVE, ...LUO_FUTURE_MIDDLE_OPTATIVE, ...LUO_AORIST_MIDDLE_OPTATIVE,
+    ...LUO_FUTURE_PASSIVE_OPTATIVE, ...LUO_AORIST_PASSIVE_OPTATIVE, ...LUO_PERFECT_ACTIVE_OPTATIVE,
+    ...LUO_OPTATIVE_EXTRA
+  };
+  const RHUOMAI_OPTATIVE_ALL = { ...RHUOMAI_PRESENT_MIDDLE_OPTATIVE, ...RHUOMAI_AORIST_MIDDLE_OPTATIVE };
+  const EIMI_OPTATIVE_ALL = { ...EIMI_PRESENT_ACTIVE_OPTATIVE, ...EIMI_FUTURE_MIDDLE_OPTATIVE, ...EIMI_OPTATIVE_EXTRA };
+  const DIDOMI_OPTATIVE_ALL = { ...DIDOMI_PRESENT_ACTIVE_OPTATIVE, ...DIDOMI_AORIST_ACTIVE_OPTATIVE, ...DIDOMI_OPTATIVE_EXTRA };
+  const GINOMAI_OPTATIVE_ALL = { ...GINOMAI_AORIST_MIDDLE_OPTATIVE };
+  const POIEO_OPTATIVE_ALL = { ...POIEO_PRESENT_ACTIVE_OPTATIVE, ...POIEO_PRESENT_MP_OPTATIVE, ...POIEO_FUTURE_ACTIVE_OPTATIVE, ...POIEO_OPTATIVE_EXTRA };
+  const LAMBANO_OPTATIVE_ALL = { ...LAMBANO_AORIST_ACTIVE_OPTATIVE };
+
   const LEMMA_INVENTORY = {
     'First and second personal pronouns': {
       // Lookup/fallback only (not drill cards — the enclitics share the
@@ -2854,9 +3128,10 @@
         ...EIMI_FUTURE_MIDDLE_INFINITIVE,
         ...EIMI_PRESENT_ACTIVE_IMPERATIVE,
         ...EIMI_PRESENT_ACTIVE_SUBJUNCTIVE,
-        ...EIMI_PRESENT_PARTICIPLE_NOM
+        ...EIMI_PRESENT_PARTICIPLE_NOM,
+        ...EIMI_OPTATIVE_ALL
       },
-      optionalFormGroups: EIMI_OPTIONAL_GROUPS
+      optionalFormGroups: [...EIMI_OPTIONAL_GROUPS, ...EIMI_OPTATIVE_GROUPS]
     },
     'λύω': {
       extraForms: {
@@ -2867,18 +3142,20 @@
         ...LUO_FUTURE_MIDDLE_PARTICIPLE,
         ...LUO_FUTURE_PASSIVE_PARTICIPLE,
         ...LUO_PRESENT_MP_PARTICIPLE,
-        ...LUO_AORIST_MIDDLE_PARTICIPLE
+        ...LUO_AORIST_MIDDLE_PARTICIPLE,
+        ...LUO_OPTATIVE_ALL
       },
       optionalFormGroups: [
         ...LUO_OPTIONAL_GROUPS,
+        ...LUO_OPTATIVE_GROUPS,
         ...LUO_PARTICIPLE_OPTIONAL,
         ...LUO_PRESENT_AORIST_MID_PARTICIPLE_OPTIONAL,
         ...LUO_FUTURE_PARTICIPLE_OPTIONAL
       ]
     },
     'ῥύομαι': {
-      extraForms: RHUOMAI_EXTRA_FORMS,
-      optionalFormGroups: RHUOMAI_OPTIONAL_GROUPS
+      extraForms: { ...RHUOMAI_EXTRA_FORMS, ...RHUOMAI_OPTATIVE_ALL },
+      optionalFormGroups: [...RHUOMAI_OPTIONAL_GROUPS, ...RHUOMAI_OPTATIVE_GROUPS]
     },
     'βάλλω': {
       extraForms: {
@@ -2899,10 +3176,12 @@
         ...GINOMAI_EXTRA_FORMS,
         ...GINOMAI_AORIST_MIDDLE_PARTICIPLE,
         ...GINOMAI_PERFECT_ACTIVE_PARTICIPLE,
-        ...GINOMAI_AORIST_PASSIVE_PARTICIPLE
+        ...GINOMAI_AORIST_PASSIVE_PARTICIPLE,
+        ...GINOMAI_OPTATIVE_ALL
       },
       optionalFormGroups: [
         ...GINOMAI_OPTIONAL_GROUPS,
+        ...GINOMAI_OPTATIVE_GROUPS,
         ...GINOMAI_PARTICIPLE_OPTIONAL,
         { chapter: 15, family: 'γίνομαι — aorist passive participle γενηθείς (optional)',
           forms: GINOMAI_AORIST_PASSIVE_PARTICIPLE }
@@ -2913,10 +3192,12 @@
         ...LAMBANO_PRESENT_ACTIVE_PARTICIPLE,
         ...LAMBANO_EXTRA_FORMS,
         ...LAMBANO_AORIST_ACTIVE_PARTICIPLE,
-        ...LAMBANO_AORIST_PASSIVE_PARTICIPLE
+        ...LAMBANO_AORIST_PASSIVE_PARTICIPLE,
+        ...LAMBANO_OPTATIVE_ALL
       },
       optionalFormGroups: [
         ...LAMBANO_OPTIONAL_GROUPS,
+        ...LAMBANO_OPTATIVE_GROUPS,
         ...LAMBANO_PARTICIPLE_OPTIONAL,
         { chapter: 15, family: 'λαμβάνω — aorist passive participle λημφθείς (optional)',
           forms: LAMBANO_AORIST_PASSIVE_PARTICIPLE }
@@ -3006,10 +3287,12 @@
         ...DIDOMI_EXTRA_FORMS,
         ...DIDOMI_PRESENT_ACTIVE_PARTICIPLE,
         ...DIDOMI_AORIST_ACTIVE_PARTICIPLE,
-        ...DIDOMI_AORIST_PASSIVE_PARTICIPLE
+        ...DIDOMI_AORIST_PASSIVE_PARTICIPLE,
+        ...DIDOMI_OPTATIVE_ALL
       },
       optionalFormGroups: [
         ...DIDOMI_OPTIONAL_GROUPS,
+        ...DIDOMI_OPTATIVE_GROUPS,
         ...DIDOMI_PARTICIPLE_OPTIONAL,
         { chapter: 19, family: 'δίδωμι — aorist passive participle δοθείς (optional)',
           forms: DIDOMI_AORIST_PASSIVE_PARTICIPLE }
@@ -3058,8 +3341,8 @@
       optionalFormGroups: AGAPAO_OPTIONAL_GROUPS
     },
     'ποιέω': {
-      extraForms: POIEO_EXTRA_FORMS,
-      optionalFormGroups: POIEO_OPTIONAL_GROUPS
+      extraForms: { ...POIEO_EXTRA_FORMS, ...POIEO_OPTATIVE_ALL },
+      optionalFormGroups: [...POIEO_OPTIONAL_GROUPS, ...POIEO_OPTATIVE_GROUPS]
     },
     'πληρόω': {
       extraForms: PLEROO_EXTRA_FORMS,

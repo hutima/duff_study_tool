@@ -1830,7 +1830,7 @@ function syncToggleButtons() {
   const dimStepToggles = Object.fromEntries(DIM_TOGGLE_KEYS.map(k => [k, document.getElementById(`${k}StepToggle`)]));
   const optionalFormsSwitch = document.getElementById('optionalFormsBtn');
   const optionalFormsToggle = document.getElementById('optionalFormsToggle');
-  const OPTIONAL_FILTER_KEYS = ['imperative', 'subjunctive', 'infinitive', 'participle', 'thirdPerson', 'futureTense', 'perfectTense'];
+  const OPTIONAL_FILTER_KEYS = ['imperative', 'subjunctive', 'optative', 'infinitive', 'participle', 'thirdPerson', 'futureTense', 'perfectTense'];
   const optionalFilterSwitches = Object.fromEntries(OPTIONAL_FILTER_KEYS.map(k => [k, document.getElementById(`optionalFilter_${k}_Btn`)]));
   const optionalFilterToggles  = Object.fromEntries(OPTIONAL_FILTER_KEYS.map(k => [k, document.getElementById(`optionalFilter_${k}_Toggle`)]));
   // Per-value sub-filters under each parsing dim. Keys mirror DIM_VALUE_FILTER_VALUES
@@ -1841,7 +1841,7 @@ function syncToggleButtons() {
     aspect: ['continuousUndefined', 'completed'],
     tense:  ['present', 'future', 'imperfect', 'aorist', 'perfect', 'pluperfect'],
     voice:  ['active', 'middle', 'passive'],
-    mood:   ['indicative', 'subjunctive', 'imperative', 'infinitive', 'participle'],
+    mood:   ['indicative', 'subjunctive', 'optative', 'imperative', 'infinitive', 'participle'],
     person: ['first', 'second', 'third'],
     number: ['singular', 'plural'],
     case:   ['nominative', 'accusative', 'genitive', 'dative', 'vocative'],
