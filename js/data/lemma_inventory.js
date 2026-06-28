@@ -357,7 +357,14 @@
     { chapter: 17, core: true, family: 'λύω — aorist passive subjunctive (required)',
       forms: LUO_AORIST_PASSIVE_SUBJUNCTIVE },
     { chapter: 17, core: true, family: 'λύω — present middle/passive subjunctive (required)',
-      forms: LUO_PRESENT_MIDDLE_PASSIVE_SUBJUNCTIVE }
+      forms: LUO_PRESENT_MIDDLE_PASSIVE_SUBJUNCTIVE },
+    // Required principal part (1sg) + present infinitive. λύω's other five
+    // principal parts (λύω, λύσω, ἔλυσα, λέλυκα, ἐλύθην) are already required
+    // via its W-drill paradigms; only the perfect m/p was optional-only.
+    { chapter: 7,  core: true, family: 'λύω — present infinitive (required)',
+      forms: { 'λύειν': 'present active infinitive' } },
+    { chapter: 16, core: true, family: 'λύω — perfect middle/passive principal part (required)',
+      forms: { 'λέλυμαι': 'perfect middle/passive indicative first person singular' } }
   ];
 
   // Flat extraForms map for the fallback lookup. Duplicate-key
@@ -1092,7 +1099,43 @@
     'φιλούμενος': 'present middle/passive participle nominative singular masculine'
   };
 
+  // Perfect active + perfect middle/passive indicative (reduplication πε- on the
+  // long-vowel φιλη- stem). Full paradigms for the optional drill / wrong-pick
+  // lookup; the 1sg principal parts (πεφίληκα, πεφίλημαι) are pulled in as
+  // required via the core groups below.
+  const PHILEO_PERFECT_ACTIVE_INDICATIVE = {
+    'πεφίληκα':      'perfect active indicative first person singular',
+    'πεφίληκας':     'perfect active indicative second person singular',
+    'πεφίληκε(ν)':   'perfect active indicative third person singular',
+    'πεφιλήκαμεν':   'perfect active indicative first person plural',
+    'πεφιλήκατε':    'perfect active indicative second person plural',
+    'πεφιλήκασι(ν)': 'perfect active indicative third person plural'
+  };
+  const PHILEO_PERFECT_MP_INDICATIVE = {
+    'πεφίλημαι':   'perfect middle/passive indicative first person singular',
+    'πεφίλησαι':   'perfect middle/passive indicative second person singular',
+    'πεφίληται':   'perfect middle/passive indicative third person singular',
+    'πεφιλήμεθα':  'perfect middle/passive indicative first person plural',
+    'πεφίλησθε':   'perfect middle/passive indicative second person plural',
+    'πεφίληνται':  'perfect middle/passive indicative third person plural'
+  };
+
   const PHILEO_OPTIONAL_GROUPS = [
+    // Required principal parts (1sg) + present infinitive — core groups enter
+    // the deck unconditionally, each gated to where Duff teaches that part.
+    { chapter: 7,  core: true, family: 'φιλέω — present infinitive (required)',
+      forms: { 'φιλεῖν': 'present active infinitive' } },
+    { chapter: 15, core: true, family: 'φιλέω — aorist passive principal part (required)',
+      forms: { 'ἐφιλήθην': 'aorist passive indicative first person singular' } },
+    { chapter: 16, core: true, family: 'φιλέω — perfect active principal part (required)',
+      forms: { 'πεφίληκα': 'perfect active indicative first person singular' } },
+    { chapter: 16, core: true, family: 'φιλέω — perfect middle/passive principal part (required)',
+      forms: { 'πεφίλημαι': 'perfect middle/passive indicative first person singular' } },
+    // Full perfect paradigms — optional (wrong-pick / lookup).
+    { chapter: 16, family: 'φιλέω — perfect active indicative (optional)',
+      forms: PHILEO_PERFECT_ACTIVE_INDICATIVE },
+    { chapter: 16, family: 'φιλέω — perfect middle/passive indicative (optional)',
+      forms: PHILEO_PERFECT_MP_INDICATIVE },
     { chapter: 7,  family: 'φιλέω — present active imperative (optional)',
       forms: PHILEO_PRESENT_ACTIVE_IMPERATIVE },
     { chapter: 7,  family: 'φιλέω — aorist active imperative (optional)',
@@ -1121,6 +1164,8 @@
     ...PHILEO_AORIST_ACTIVE_IMPERATIVE,
     ...PHILEO_INFINITIVES,
     ...PHILEO_PRESENT_MP_PARTICIPLE,
+    ...PHILEO_PERFECT_ACTIVE_INDICATIVE,
+    ...PHILEO_PERFECT_MP_INDICATIVE,
     // Subjunctive last so φιλῇ resolves to "present active subjunctive
     // 3sg" (the most common single-form reading) rather than the m/p
     // 2sg from the present passive indicative spread above.
