@@ -99,6 +99,7 @@ const PARADIGM_CATEGORIES = {
   'πόλις':                               'Nouns · 3rd declension',
   'βασιλεύς':                            'Nouns · 3rd declension',
   'ἀστήρ':                               'Nouns · 3rd declension',
+  'μάρτυς':                              'Nouns · 3rd declension',
 
   // ─── Adjectives ───
   'πᾶς, πᾶσα, πᾶν':                      'Adjectives',
@@ -123,6 +124,7 @@ const PARADIGM_CATEGORIES = {
   'λύω':                                 'Verbs · standard ω-pattern',
   'φιλέω':                               'Verbs · contract (-έω)',
   'εἰμί':                                'Verbs · irregular (εἰμί)',
+  'οἶδα':                                'Verbs · irregular (οἶδα)',
   'ῥύομαι':                              'Verbs · middle / deponent',
   'βάλλω':                               'Verbs · second aorist',
   'γίνομαι':                             'Verbs · second aorist',
@@ -142,7 +144,10 @@ const PARADIGM_CATEGORIES = {
   'δίδομαι':                             'Verbs · μι-verbs',
   'ἵστημι':                              'Verbs · μι-verbs',
   'τίθημι':                              'Verbs · μι-verbs',
-  '-μι verbs':                           'Verbs · μι-verbs'
+  '-μι verbs':                           'Verbs · μι-verbs',
+  // δύναμαι is a deponent athematic (-μαι) verb — conjugates like the middle
+  // of ἵστημι — so it sits with the μι-verbs.
+  'δύναμαι':                             'Verbs · μι-verbs'
 
   // ─── Participles ───
   // The dedicated participle paradigm sets (λύων…, λύσας…, λυθείς…,
@@ -221,6 +226,7 @@ const CATEGORY_ORDER = [
   'Verbs · standard ω-pattern',
   'Verbs · contract (-έω)',
   'Verbs · irregular (εἰμί)',
+  'Verbs · irregular (οἶδα)',
   'Verbs · middle / deponent',
   'Verbs · second aorist',
   'Verbs · liquid future',

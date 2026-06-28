@@ -92,4 +92,93 @@
     ]
   });
 
+  // ── Chapter 18 irregular verbs: δύναμαι and οἶδα ──────────────────────────
+  // Duff introduces δύναμαι ("I am able") and οἶδα ("I know") in Ch 18 as
+  // irregular/defective verbs. Neither was a parsing paradigm before, so these
+  // sets give them full finite paradigms, chapter-gated to 18 (chapter: 18).
+  //
+  // δύναμαι is a deponent athematic (-μαι) verb — it conjugates like the middle
+  // of ἵστημι (stem δυνα-), so every form is middle/passive in shape.
+  window.registerSupplementalVocabSet('W7_DUNAMAI_PRESENT_INDICATIVE', {
+    label: 'δύναμαι — present middle/passive indicative',
+    week: 7,
+    chapter: 18,
+    cards: [
+      { g: 'δύναμαι', e: 'I am able (Present middle/passive indicative, 1st person sg.)', required: true },
+      { g: 'δύνασαι', e: 'you are able (Present middle/passive indicative, 2nd person sg.)', required: true },
+      { g: 'δύναται', e: 'he/she/it is able (Present middle/passive indicative, 3rd person sg.)', required: true },
+      { g: 'δυνάμεθα', e: 'we are able (Present middle/passive indicative, 1st person pl.)', required: true },
+      { g: 'δύνασθε', e: 'you are able (Present middle/passive indicative, 2nd person pl.)', required: true },
+      { g: 'δύνανται', e: 'they are able (Present middle/passive indicative, 3rd person pl.)', required: true }
+    ]
+  });
+
+  // Imperfect uses the regular ε-augment (ἐδυνάμην…); the NT also attests an
+  // η-augment variant (ἠδυνάμην…). Listing the ε-augment keeps the paradigm
+  // systematic for parsing.
+  window.registerSupplementalVocabSet('W7_DUNAMAI_IMPERFECT_INDICATIVE', {
+    label: 'δύναμαι — imperfect middle/passive indicative',
+    week: 7,
+    chapter: 18,
+    cards: [
+      { g: 'ἐδυνάμην', e: 'I was able (Imperfect middle/passive indicative, 1st person sg.)', required: true },
+      { g: 'ἐδύνασο', e: 'you were able (Imperfect middle/passive indicative, 2nd person sg.)', required: true },
+      { g: 'ἐδύνατο', e: 'he/she/it was able (Imperfect middle/passive indicative, 3rd person sg.)', required: true },
+      { g: 'ἐδυνάμεθα', e: 'we were able (Imperfect middle/passive indicative, 1st person pl.)', required: true },
+      { g: 'ἐδύνασθε', e: 'you were able (Imperfect middle/passive indicative, 2nd person pl.)', required: true },
+      { g: 'ἐδύναντο', e: 'they were able (Imperfect middle/passive indicative, 3rd person pl.)', required: true }
+    ]
+  });
+
+  // οἶδα is a second perfect that functions as a PRESENT ("I know"). It is
+  // parsed morphologically as perfect active indicative; its pluperfect
+  // (ᾔδειν…) functions as a past ("I knew"). Gloss avoids the word "present"
+  // so the set-label tense default resolves cleanly to "perfect".
+  window.registerSupplementalVocabSet('W7_OIDA_PERFECT_INDICATIVE', {
+    label: 'οἶδα — perfect active indicative (I know)',
+    week: 7,
+    chapter: 18,
+    cards: [
+      { g: 'οἶδα', e: 'I know (Perfect active indicative, 1st person sg.)', required: true },
+      { g: 'οἶδας', e: 'you know (Perfect active indicative, 2nd person sg.)', required: true },
+      { g: 'οἶδεν', e: 'he/she/it knows (Perfect active indicative, 3rd person sg.)', required: true },
+      { g: 'οἴδαμεν', e: 'we know (Perfect active indicative, 1st person pl.)', required: true },
+      { g: 'οἴδατε', e: 'you know (Perfect active indicative, 2nd person pl.)', required: true },
+      { g: 'οἴδασιν', e: 'they know (Perfect active indicative, 3rd person pl.)', required: true }
+    ]
+  });
+
+  window.registerSupplementalVocabSet('W7_OIDA_PLUPERFECT_INDICATIVE', {
+    label: 'οἶδα — pluperfect active indicative (I knew)',
+    week: 7,
+    chapter: 18,
+    cards: [
+      { g: 'ᾔδειν', e: 'I knew (Pluperfect active indicative, 1st person sg.)', required: true },
+      { g: 'ᾔδεις', e: 'you knew (Pluperfect active indicative, 2nd person sg.)', required: true },
+      { g: 'ᾔδει', e: 'he/she/it knew (Pluperfect active indicative, 3rd person sg.)', required: true },
+      { g: 'ᾔδειμεν', e: 'we knew (Pluperfect active indicative, 1st person pl.)', required: true },
+      { g: 'ᾔδειτε', e: 'you knew (Pluperfect active indicative, 2nd person pl.)', required: true },
+      { g: 'ᾔδεισαν', e: 'they knew (Pluperfect active indicative, 3rd person pl.)', required: true }
+    ]
+  });
+
+  // ── Chapter 18 noun: μάρτυς (3rd declension, masculine) ───────────────────
+  // Stem μαρτυρ-; the ρ drops before ς in the nom. sg. (μάρτυς) and dat. pl.
+  // (μάρτυσι). Modelled on the other 3rd-decl. noun paradigms (σάρξ, ἀστήρ).
+  window.registerSupplementalVocabSet('W7_MARTUS', {
+    label: 'μάρτυς — 3rd-decl. masculine (witness)',
+    week: 7,
+    chapter: 18,
+    cards: [
+      { g: 'μάρτυς', e: 'witness (masc. Nom. sg.)', required: true },
+      { g: 'μάρτυρα', e: 'witness (masc. Acc. sg.)', required: true },
+      { g: 'μάρτυρος', e: 'of a witness (masc. Gen. sg.)', required: true },
+      { g: 'μάρτυρι', e: 'to/for a witness (masc. Dat. sg.)', required: true },
+      { g: 'μάρτυρες', e: 'witnesses (masc. Nom. pl.)', required: true },
+      { g: 'μάρτυρας', e: 'witnesses (masc. Acc. pl.)', required: true },
+      { g: 'μαρτύρων', e: 'of witnesses (masc. Gen. pl.)', required: true },
+      { g: 'μάρτυσι(ν)', e: 'to/for witnesses (masc. Dat. pl.)', required: true }
+    ]
+  });
+
 })();

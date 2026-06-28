@@ -88,7 +88,13 @@
       entry('δείκνυμι', 'I show',                        'ἔδειξα', 'I showed',                    'aorist active (1st sg.)',   'δεικ-', 'loses -νυ- suffix; κ → ξ before σ in 1st aorist'),
       entry('δείκνυμι', 'I show',                        'δείξω', 'I will show',                  'future active (1st sg.)',   'δεικ-', 'loses -νυ- suffix; -ξω future'),
       entry('δείκνυμι', 'I show',                        'δέδειχα', 'I have shown',               'perfect active (1st sg.)',  'δεικ-', 'δε- reduplication; κ → χ before -α'),
-      entry('δείκνυμι', 'I show',                        'ἐδείχθην', 'I was shown',               'aorist passive (1st sg.)',  'δεικ-', 'κ → χ before θ')
+      entry('δείκνυμι', 'I show',                        'ἐδείχθην', 'I was shown',               'aorist passive (1st sg.)',  'δεικ-', 'κ → χ before θ'),
+      // δύναμαι — deponent athematic (-μαι) verb (Duff ch 18). No active forms;
+      // its principal parts build on the δυνη- stem (future middle, deponent
+      // aorist in the passive form). Grouped with the μι-verbs since it is
+      // athematic and shares their middle endings.
+      entry('δύναμαι', 'I am able',                      'δυνήσομαι', 'I will be able',          'future (1st sg., deponent)', 'δυνη-', 'deponent future middle on δυνη- stem'),
+      entry('δύναμαι', 'I am able',                      'ἠδυνήθην', 'I was able',               'aorist (1st sg., deponent)', 'δυνη-', 'deponent; aorist passive in form (η-augment + -θη-)')
     ]
   });
 })();
