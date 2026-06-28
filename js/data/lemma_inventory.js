@@ -3351,6 +3351,83 @@
   ];
   const MENO_PP_EXTRA = { ...MENO_AORIST_ACTIVE_INDICATIVE, ...MENO_PERFECT_ACTIVE_INDICATIVE };
 
+  // ── μι-verbs (introduced Ch 19, so every part gates there) ──
+  // Not deponent (‑μι), so perfect m/p and aorist passive parse normally.
+  // Future / aorist-passive full paradigms already exist (optional); here we add
+  // the missing perfect paradigms + the 1sg principal parts as required core.
+  const DIDOMI_PERFECT_MP_INDICATIVE = {
+    'δέδομαι':  'perfect middle/passive indicative first person singular',
+    'δέδοσαι':  'perfect middle/passive indicative second person singular',
+    'δέδοται':  'perfect middle/passive indicative third person singular',
+    'δεδόμεθα': 'perfect middle/passive indicative first person plural',
+    'δέδοσθε':  'perfect middle/passive indicative second person plural',
+    'δέδονται': 'perfect middle/passive indicative third person plural'
+  };
+  const DIDOMI_PP_CORE = [
+    { chapter: 19, core: true, family: 'δίδωμι — present infinitive (required)',
+      forms: { 'διδόναι': 'present active infinitive' } },
+    { chapter: 19, core: true, family: 'δίδωμι — aorist passive principal part (required)',
+      forms: { 'ἐδόθην': 'aorist passive indicative first person singular' } },
+    { chapter: 19, core: true, family: 'δίδωμι — perfect middle/passive principal part (required)',
+      forms: { 'δέδομαι': 'perfect middle/passive indicative first person singular' } },
+    { chapter: 19, family: 'δίδωμι — perfect middle/passive indicative (optional)', forms: DIDOMI_PERFECT_MP_INDICATIVE }
+  ];
+
+  const TITHEMI_PERFECT_ACTIVE_INDICATIVE = {
+    'τέθεικα':      'perfect active indicative first person singular',
+    'τέθεικας':     'perfect active indicative second person singular',
+    'τέθεικε(ν)':   'perfect active indicative third person singular',
+    'τεθείκαμεν':   'perfect active indicative first person plural',
+    'τεθείκατε':    'perfect active indicative second person plural',
+    'τεθείκασι(ν)': 'perfect active indicative third person plural'
+  };
+  const TITHEMI_PERFECT_MP_INDICATIVE = {
+    'τέθειμαι':  'perfect middle/passive indicative first person singular',
+    'τέθεισαι':  'perfect middle/passive indicative second person singular',
+    'τέθειται':  'perfect middle/passive indicative third person singular',
+    'τεθείμεθα': 'perfect middle/passive indicative first person plural',
+    'τέθεισθε':  'perfect middle/passive indicative second person plural',
+    'τέθεινται': 'perfect middle/passive indicative third person plural'
+  };
+  const TITHEMI_PP_CORE = [
+    { chapter: 19, core: true, family: 'τίθημι — present infinitive (required)',
+      forms: { 'τιθέναι': 'present active infinitive' } },
+    { chapter: 19, core: true, family: 'τίθημι — future principal part (required)',
+      forms: { 'θήσω': 'future active indicative first person singular' } },
+    { chapter: 19, core: true, family: 'τίθημι — aorist passive principal part (required)',
+      forms: { 'ἐτέθην': 'aorist passive indicative first person singular' } },
+    { chapter: 19, core: true, family: 'τίθημι — perfect active principal part (required)',
+      forms: { 'τέθεικα': 'perfect active indicative first person singular' } },
+    { chapter: 19, core: true, family: 'τίθημι — perfect middle/passive principal part (required)',
+      forms: { 'τέθειμαι': 'perfect middle/passive indicative first person singular' } },
+    { chapter: 19, family: 'τίθημι — perfect active indicative (optional)', forms: TITHEMI_PERFECT_ACTIVE_INDICATIVE },
+    { chapter: 19, family: 'τίθημι — perfect middle/passive indicative (optional)', forms: TITHEMI_PERFECT_MP_INDICATIVE }
+  ];
+  const TITHEMI_PP_EXTRA = { ...TITHEMI_PERFECT_ACTIVE_INDICATIVE, ...TITHEMI_PERFECT_MP_INDICATIVE };
+
+  // ἵστημι: perfect ἕστηκα is active-intransitive ("I stand") — no perfect m/p.
+  // (Full paradigm reuses the existing HISTEMI_PERFECT_ACTIVE_INDICATIVE above.)
+  const HISTEMI_PP_CORE = [
+    { chapter: 19, core: true, family: 'ἵστημι — present infinitive (required)',
+      forms: { 'ἱστάναι': 'present active infinitive' } },
+    { chapter: 19, core: true, family: 'ἵστημι — future principal part (required)',
+      forms: { 'στήσω': 'future active indicative first person singular' } },
+    { chapter: 19, core: true, family: 'ἵστημι — aorist passive principal part (required)',
+      forms: { 'ἐστάθην': 'aorist passive indicative first person singular' } },
+    { chapter: 19, core: true, family: 'ἵστημι — perfect active principal part (required)',
+      forms: { 'ἕστηκα': 'perfect active indicative first person singular' } },
+    { chapter: 19, family: 'ἵστημι — perfect active indicative (optional)', forms: HISTEMI_PERFECT_ACTIVE_INDICATIVE }
+  ];
+
+  // δίδομαι is δίδωμι's middle/passive slice (ends ‑μαι → treated as deponent
+  // middle). Give it the present m/p infinitive + perfect m/p principal part.
+  const DIDOMAI_PP_CORE = [
+    { chapter: 19, core: true, family: 'δίδομαι — present infinitive (required)',
+      forms: { 'δίδοσθαι': 'present middle/passive infinitive' } },
+    { chapter: 19, core: true, family: 'δίδομαι — perfect middle/passive principal part (required)',
+      forms: { 'δέδομαι': 'perfect middle/passive indicative first person singular' } }
+  ];
+
   const LEMMA_INVENTORY = {
     'First and second personal pronouns': {
       // Lookup/fallback only (not drill cards — the enclitics share the
@@ -3561,14 +3638,16 @@
         ...DIDOMI_PRESENT_ACTIVE_PARTICIPLE,
         ...DIDOMI_AORIST_ACTIVE_PARTICIPLE,
         ...DIDOMI_AORIST_PASSIVE_PARTICIPLE,
-        ...DIDOMI_OPTATIVE_ALL
+        ...DIDOMI_OPTATIVE_ALL,
+        ...DIDOMI_PERFECT_MP_INDICATIVE
       },
       optionalFormGroups: [
         ...DIDOMI_OPTIONAL_GROUPS,
         ...DIDOMI_OPTATIVE_GROUPS,
         ...DIDOMI_PARTICIPLE_OPTIONAL,
         { chapter: 19, family: 'δίδωμι — aorist passive participle δοθείς (optional)',
-          forms: DIDOMI_AORIST_PASSIVE_PARTICIPLE }
+          forms: DIDOMI_AORIST_PASSIVE_PARTICIPLE },
+        ...DIDOMI_PP_CORE
       ]
     },
     'τίθημι': {
@@ -3576,13 +3655,15 @@
         ...TITHEMI_EXTRA_FORMS,
         ...TITHEMI_PRESENT_ACTIVE_PARTICIPLE,
         ...TITHEMI_AORIST_ACTIVE_PARTICIPLE,
-        ...TITHEMI_AORIST_PASSIVE_PARTICIPLE
+        ...TITHEMI_AORIST_PASSIVE_PARTICIPLE,
+        ...TITHEMI_PP_EXTRA
       },
       optionalFormGroups: [
         ...TITHEMI_OPTIONAL_GROUPS,
         ...TITHEMI_PARTICIPLE_OPTIONAL,
         { chapter: 19, family: 'τίθημι — aorist passive participle τεθείς (optional)',
-          forms: TITHEMI_AORIST_PASSIVE_PARTICIPLE }
+          forms: TITHEMI_AORIST_PASSIVE_PARTICIPLE },
+        ...TITHEMI_PP_CORE
       ]
     },
     'ἵστημι': {
@@ -3591,18 +3672,20 @@
         ...HISTEMI_PRESENT_ACTIVE_PARTICIPLE,
         ...HISTEMI_SECOND_AORIST_ACTIVE_PARTICIPLE,
         ...HISTEMI_PERFECT_ACTIVE_PARTICIPLE,
-        ...HISTEMI_AORIST_PASSIVE_PARTICIPLE
+        ...HISTEMI_AORIST_PASSIVE_PARTICIPLE,
+        ...HISTEMI_PERFECT_ACTIVE_INDICATIVE
       },
       optionalFormGroups: [
         ...HISTEMI_OPTIONAL_GROUPS,
         ...HISTEMI_PARTICIPLE_OPTIONAL,
         { chapter: 19, family: 'ἵστημι — aorist passive participle σταθείς (optional)',
-          forms: HISTEMI_AORIST_PASSIVE_PARTICIPLE }
+          forms: HISTEMI_AORIST_PASSIVE_PARTICIPLE },
+        ...HISTEMI_PP_CORE
       ]
     },
     'δίδομαι': {
-      extraForms: DIDOMAI_EXTRA_FORMS,
-      optionalFormGroups: DIDOMAI_OPTIONAL_GROUPS
+      extraForms: { ...DIDOMAI_EXTRA_FORMS, ...DIDOMI_PERFECT_MP_INDICATIVE },
+      optionalFormGroups: [...DIDOMAI_OPTIONAL_GROUPS, ...DIDOMAI_PP_CORE]
     },
     // Hand-authored optional coverage (ported from Mounce #86). These verbs
     // aren't paradigm exemplars in duff's morphology data yet, so the optional
