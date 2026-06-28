@@ -3105,6 +3105,129 @@
   const POIEO_OPTATIVE_ALL = { ...POIEO_PRESENT_ACTIVE_OPTATIVE, ...POIEO_PRESENT_MP_OPTATIVE, ...POIEO_FUTURE_ACTIVE_OPTATIVE, ...POIEO_OPTATIVE_EXTRA };
   const LAMBANO_OPTATIVE_ALL = { ...LAMBANO_AORIST_ACTIVE_OPTATIVE };
 
+  // ─── δύναμαι (deponent -μαι verb, Ch 18) optional / lookup forms ────
+  // Required drill (W7_DUNAMAI_*): present/imperfect/future/aorist indicative,
+  // present infinitive + participle (nom. masc.), present subjunctive. These
+  // add the rest: the present participle's full declension, and the rarer
+  // (passive-deponent) aorist infinitive / subjunctive / participle. Present
+  // participle declines like λυόμενος; the aorist non-finite forms take the
+  // -θη-/-θε- (aorist passive) shape, like δυνηθείς / δυνηθῆναι.
+  const DUNAMAI_PRESENT_MP_PARTICIPLE = {
+    'δυνάμενος':  'present middle/passive participle nominative singular masculine',
+    'δυναμένου':  'present middle/passive participle genitive singular masculine/neuter',
+    'δυναμένῳ':   'present middle/passive participle dative singular masculine/neuter',
+    'δυνάμενον':  'present middle/passive participle accusative singular masculine/neuter',
+    'δυνάμενε':   'present middle/passive participle vocative singular masculine',
+    'δυνάμενοι':  'present middle/passive participle nominative plural masculine',
+    'δυναμένους': 'present middle/passive participle accusative plural masculine',
+    'δυναμένων':  'present middle/passive participle genitive plural masculine/feminine/neuter',
+    'δυναμένοις': 'present middle/passive participle dative plural masculine/neuter',
+    'δυναμένη':   'present middle/passive participle nominative singular feminine',
+    'δυναμένης':  'present middle/passive participle genitive singular feminine',
+    'δυναμένῃ':   'present middle/passive participle dative singular feminine',
+    'δυναμένην':  'present middle/passive participle accusative singular feminine',
+    'δυνάμεναι':  'present middle/passive participle nominative plural feminine',
+    'δυναμέναις': 'present middle/passive participle dative plural feminine',
+    'δυναμένας':  'present middle/passive participle accusative plural feminine',
+    'δυνάμενα':   'present middle/passive participle nominative/accusative plural neuter'
+  };
+  const DUNAMAI_AORIST_PASSIVE_INFINITIVE = {
+    'δυνηθῆναι': 'aorist passive infinitive'
+  };
+  const DUNAMAI_AORIST_PASSIVE_SUBJUNCTIVE = {
+    'δυνηθῶ':      'aorist passive subjunctive first person singular',
+    'δυνηθῇς':     'aorist passive subjunctive second person singular',
+    'δυνηθῇ':      'aorist passive subjunctive third person singular',
+    'δυνηθῶμεν':   'aorist passive subjunctive first person plural',
+    'δυνηθῆτε':    'aorist passive subjunctive second person plural',
+    'δυνηθῶσι(ν)': 'aorist passive subjunctive third person plural'
+  };
+  // Aorist passive participle δυνηθείς — nominative forms only (rare; the full
+  // 3rd-decl. declension isn't worth the table for a form this scarce).
+  const DUNAMAI_AORIST_PASSIVE_PARTICIPLE = {
+    'δυνηθείς':  'aorist passive participle nominative singular masculine',
+    'δυνηθεῖσα': 'aorist passive participle nominative singular feminine',
+    'δυνηθέν':   'aorist passive participle nominative/accusative singular neuter'
+  };
+  const DUNAMAI_EXTRA_FORMS = {
+    ...DUNAMAI_PRESENT_MP_PARTICIPLE,
+    ...DUNAMAI_AORIST_PASSIVE_INFINITIVE,
+    ...DUNAMAI_AORIST_PASSIVE_SUBJUNCTIVE,
+    ...DUNAMAI_AORIST_PASSIVE_PARTICIPLE
+  };
+  const DUNAMAI_OPTIONAL_GROUPS = [
+    { chapter: 18, family: 'δύναμαι — aorist passive infinitive (optional)',
+      forms: DUNAMAI_AORIST_PASSIVE_INFINITIVE },
+    { chapter: 18, family: 'δύναμαι — aorist passive subjunctive (optional)',
+      forms: DUNAMAI_AORIST_PASSIVE_SUBJUNCTIVE },
+    { chapter: 18, family: 'δύναμαι — aorist passive participle δυνηθείς (optional)',
+      forms: DUNAMAI_AORIST_PASSIVE_PARTICIPLE },
+    ...participleOptionalGroups(18, 'δύναμαι — present middle/passive participle',
+      DUNAMAI_PRESENT_MP_PARTICIPLE, { core: false })
+  ];
+
+  // ─── οἶδα (defective second perfect, Ch 18) optional / lookup forms ─
+  // Required drill (W7_OIDA_*): perfect + pluperfect indicative, and the
+  // participle's nom. masc. (εἰδώς / εἰδότες). These add the perfect
+  // subjunctive, imperative, infinitive, and the participle's full declension.
+  // οἶδα is morphologically perfect throughout (present in meaning), active-
+  // only, with no present/imperfect/aorist forms — see its impossible* lists.
+  const OIDA_PERFECT_SUBJUNCTIVE = {
+    'εἰδῶ':      'perfect active subjunctive first person singular',
+    'εἰδῇς':     'perfect active subjunctive second person singular',
+    'εἰδῇ':      'perfect active subjunctive third person singular',
+    'εἰδῶμεν':   'perfect active subjunctive first person plural',
+    'εἰδῆτε':    'perfect active subjunctive second person plural',
+    'εἰδῶσι(ν)': 'perfect active subjunctive third person plural'
+  };
+  const OIDA_PERFECT_IMPERATIVE = {
+    'ἴσθι':    'perfect active imperative second person singular',
+    'ἴστω':    'perfect active imperative third person singular',
+    'ἴστε':    'perfect active imperative second person plural',
+    'ἴστωσαν': 'perfect active imperative third person plural'
+  };
+  const OIDA_PERFECT_INFINITIVE = {
+    'εἰδέναι': 'perfect active infinitive'
+  };
+  // Perfect active participle εἰδώς / εἰδυῖα / εἰδός (stem εἰδοτ-), declining
+  // like λελυκώς. Gen. pl. splits by gender (masc./neut. εἰδότων vs fem.
+  // εἰδυιῶν). Syncretic keys (εἰδότα masc. acc. sg. = neut. nom./acc. pl.;
+  // εἰδυίας fem. gen. sg. = fem. acc. pl.) carry the more common parse.
+  const OIDA_PERFECT_ACTIVE_PARTICIPLE = {
+    'εἰδώς':     'perfect active participle nominative singular masculine',
+    'εἰδότα':    'perfect active participle accusative singular masculine',
+    'εἰδότος':   'perfect active participle genitive singular masculine/neuter',
+    'εἰδότι':    'perfect active participle dative singular masculine/neuter',
+    'εἰδότες':   'perfect active participle nominative plural masculine',
+    'εἰδότας':   'perfect active participle accusative plural masculine',
+    'εἰδότων':   'perfect active participle genitive plural masculine/neuter',
+    'εἰδόσι(ν)': 'perfect active participle dative plural masculine/neuter',
+    'εἰδυῖα':    'perfect active participle nominative singular feminine',
+    'εἰδυίας':   'perfect active participle genitive singular feminine',
+    'εἰδυίᾳ':    'perfect active participle dative singular feminine',
+    'εἰδυῖαν':   'perfect active participle accusative singular feminine',
+    'εἰδυῖαι':   'perfect active participle nominative plural feminine',
+    'εἰδυιῶν':   'perfect active participle genitive plural feminine',
+    'εἰδυίαις':  'perfect active participle dative plural feminine',
+    'εἰδός':     'perfect active participle nominative/accusative singular neuter'
+  };
+  const OIDA_EXTRA_FORMS = {
+    ...OIDA_PERFECT_SUBJUNCTIVE,
+    ...OIDA_PERFECT_IMPERATIVE,
+    ...OIDA_PERFECT_INFINITIVE,
+    ...OIDA_PERFECT_ACTIVE_PARTICIPLE
+  };
+  const OIDA_OPTIONAL_GROUPS = [
+    { chapter: 18, family: 'οἶδα — perfect subjunctive (optional)',
+      forms: OIDA_PERFECT_SUBJUNCTIVE },
+    { chapter: 18, family: 'οἶδα — perfect imperative ἴσθι (optional)',
+      forms: OIDA_PERFECT_IMPERATIVE },
+    { chapter: 18, family: 'οἶδα — perfect infinitive εἰδέναι (optional)',
+      forms: OIDA_PERFECT_INFINITIVE },
+    ...participleOptionalGroups(18, 'οἶδα — perfect active participle εἰδώς',
+      OIDA_PERFECT_ACTIVE_PARTICIPLE, { core: false })
+  ];
+
   const LEMMA_INVENTORY = {
     'First and second personal pronouns': {
       // Lookup/fallback only (not drill cards — the enclitics share the
@@ -3158,6 +3281,23 @@
     'ῥύομαι': {
       extraForms: { ...RHUOMAI_EXTRA_FORMS, ...RHUOMAI_OPTATIVE_ALL },
       optionalFormGroups: [...RHUOMAI_OPTIONAL_GROUPS, ...RHUOMAI_OPTATIVE_GROUPS]
+    },
+    'δύναμαι': {
+      // Deponent: middle/passive in form, no active forms. Aorist is the
+      // passive-deponent -θη- type (ἠδυνήθην). No impossible* lists — like
+      // ῥύομαι, leave voice open so the deponent-accepts handling applies.
+      extraForms: { ...DUNAMAI_EXTRA_FORMS },
+      optionalFormGroups: [...DUNAMAI_OPTIONAL_GROUPS]
+    },
+    'οἶδα': {
+      // Defective second perfect: present in meaning, no present/imperfect/
+      // aorist forms (the pluperfect ᾔδειν serves as the past), and active-
+      // only — so a present/aorist or middle/passive pick is genuinely "[no
+      // morph exists]", not just a data gap.
+      impossibleTenses: ['present', 'imperfect', 'aorist', 'first aorist', 'second aorist'],
+      impossibleVoices: ['middle', 'passive', 'middle/passive'],
+      extraForms: { ...OIDA_EXTRA_FORMS },
+      optionalFormGroups: [...OIDA_OPTIONAL_GROUPS]
     },
     'βάλλω': {
       extraForms: {

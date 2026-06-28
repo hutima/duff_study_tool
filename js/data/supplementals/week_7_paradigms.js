@@ -130,6 +130,68 @@
     ]
   });
 
+  // δύναμαι's future is deponent middle (δυνήσομαι series, δυνη- stem + σ).
+  window.registerSupplementalVocabSet('W7_DUNAMAI_FUTURE_INDICATIVE', {
+    label: 'δύναμαι — future middle indicative',
+    week: 7,
+    chapter: 18,
+    cards: [
+      { g: 'δυνήσομαι', e: 'I will be able (Future middle indicative, 1st person sg.)', required: true },
+      { g: 'δυνήσῃ', e: 'you will be able (Future middle indicative, 2nd person sg.)', required: true },
+      { g: 'δυνήσεται', e: 'he/she/it will be able (Future middle indicative, 3rd person sg.)', required: true },
+      { g: 'δυνησόμεθα', e: 'we will be able (Future middle indicative, 1st person pl.)', required: true },
+      { g: 'δυνήσεσθε', e: 'you will be able (Future middle indicative, 2nd person pl.)', required: true },
+      { g: 'δυνήσονται', e: 'they will be able (Future middle indicative, 3rd person pl.)', required: true }
+    ]
+  });
+
+  // δύναμαι's aorist is a PASSIVE-deponent: it takes the -θη- (aorist passive)
+  // form ἠδυνήθην, parsed as aorist passive (like ἀπεκρίθην), even though the
+  // sense is the same active "was able". (The NT also attests a middle-form
+  // ἠδυνάσθην; the -θη- form is the more common and the one drilled here.)
+  window.registerSupplementalVocabSet('W7_DUNAMAI_AORIST_INDICATIVE', {
+    label: 'δύναμαι — aorist passive indicative (deponent)',
+    week: 7,
+    chapter: 18,
+    cards: [
+      { g: 'ἠδυνήθην', e: 'I was able (Aorist passive indicative, 1st person sg.)', required: true },
+      { g: 'ἠδυνήθης', e: 'you were able (Aorist passive indicative, 2nd person sg.)', required: true },
+      { g: 'ἠδυνήθη', e: 'he/she/it was able (Aorist passive indicative, 3rd person sg.)', required: true },
+      { g: 'ἠδυνήθημεν', e: 'we were able (Aorist passive indicative, 1st person pl.)', required: true },
+      { g: 'ἠδυνήθητε', e: 'you were able (Aorist passive indicative, 2nd person pl.)', required: true },
+      { g: 'ἠδυνήθησαν', e: 'they were able (Aorist passive indicative, 3rd person pl.)', required: true }
+    ]
+  });
+
+  // δύναμαι present infinitive + participle (nom. masc.) — Duff's base
+  // non-finite requirement for a verb. Rarer aorist non-finite forms
+  // (δυνηθῆναι, δυνηθείς) and the full participle declension are optional —
+  // see LEMMA_INVENTORY['δύναμαι'].
+  window.registerSupplementalVocabSet('W7_DUNAMAI_PRESENT_INF_PART', {
+    label: 'δύναμαι — present infinitive & participle',
+    week: 7,
+    chapter: 18,
+    cards: [
+      { g: 'δύνασθαι', e: 'to be able (Present middle/passive infinitive)', required: true },
+      { g: 'δυνάμενος', e: '(being) able (Present middle/passive participle, masc. Nom. sg.)', required: true },
+      { g: 'δυνάμενοι', e: '(being) able (Present middle/passive participle, masc. Nom. pl.)', required: true }
+    ]
+  });
+
+  window.registerSupplementalVocabSet('W7_DUNAMAI_PRESENT_SUBJUNCTIVE', {
+    label: 'δύναμαι — present middle/passive subjunctive',
+    week: 7,
+    chapter: 18,
+    cards: [
+      { g: 'δύνωμαι', e: '(that) I may be able (Present middle/passive subjunctive, 1st person sg.)', required: true },
+      { g: 'δύνῃ', e: '(that) you may be able (Present middle/passive subjunctive, 2nd person sg.)', required: true },
+      { g: 'δύνηται', e: '(that) he/she/it may be able (Present middle/passive subjunctive, 3rd person sg.)', required: true },
+      { g: 'δυνώμεθα', e: '(that) we may be able (Present middle/passive subjunctive, 1st person pl.)', required: true },
+      { g: 'δύνησθε', e: '(that) you may be able (Present middle/passive subjunctive, 2nd person pl.)', required: true },
+      { g: 'δύνωνται', e: '(that) they may be able (Present middle/passive subjunctive, 3rd person pl.)', required: true }
+    ]
+  });
+
   // οἶδα is a second perfect that functions as a PRESENT ("I know"). It is
   // parsed morphologically as perfect active indicative; its pluperfect
   // (ᾔδειν…) functions as a past ("I knew"). Gloss avoids the word "present"
@@ -159,6 +221,20 @@
       { g: 'ᾔδειμεν', e: 'we knew (Pluperfect active indicative, 1st person pl.)', required: true },
       { g: 'ᾔδειτε', e: 'you knew (Pluperfect active indicative, 2nd person pl.)', required: true },
       { g: 'ᾔδεισαν', e: 'they knew (Pluperfect active indicative, 3rd person pl.)', required: true }
+    ]
+  });
+
+  // οἶδα's participle εἰδώς ("knowing") — Duff's base nom. masc. participle
+  // requirement. Morphologically a perfect active participle (εἰδώς, εἰδυῖα,
+  // εἰδός); the rest of its declension and the other moods are optional —
+  // see LEMMA_INVENTORY['οἶδα'].
+  window.registerSupplementalVocabSet('W7_OIDA_PARTICIPLE', {
+    label: 'οἶδα — perfect active participle (εἰδώς)',
+    week: 7,
+    chapter: 18,
+    cards: [
+      { g: 'εἰδώς', e: 'knowing (Perfect active participle, masc. Nom. sg.)', required: true },
+      { g: 'εἰδότες', e: 'knowing (Perfect active participle, masc. Nom. pl.)', required: true }
     ]
   });
 
