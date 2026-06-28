@@ -22,6 +22,8 @@ export function installKeyboardShortcuts(deps) {
     closeToggleInfoModal,
     isContactAuthorModalOpen,
     closeContactAuthorModal,
+    isInstallInstructionsOpen,
+    closeInstallInstructions,
     isDisclaimerModalOpen,
     isTransferModalOpen,
     closeTransferModal,
@@ -43,12 +45,16 @@ export function installKeyboardShortcuts(deps) {
     // Contact card can open stacked on top of the user guide, so close it first
     // (topmost wins) — must come before the shortcuts/user-guide check below.
     if (e.key === 'Escape' && isContactAuthorModalOpen()) { closeContactAuthorModal(); return; }
+    // Install how-to can open stacked on top of the user guide, so close it
+    // before the shortcuts check (topmost wins). Guarded with typeof for SW
+    // cross-version safety: an old cached main.js won't pass these in its deps.
+    if (e.key === 'Escape' && typeof isInstallInstructionsOpen === 'function' && isInstallInstructionsOpen()) { closeInstallInstructions(); return; }
     if (e.key === 'Escape' && isShortcutsModalOpen()) { closeShortcutsModal(); return; }
     if (e.key === 'Escape' && isWhatsNewV1_5ModalOpen()) { closeWhatsNewV1_5Modal(); return; }
     if (e.key === 'Escape' && isAspectDefaultOffModalOpen()) { closeAspectDefaultOffModal(); return; }
     if (e.key === 'Escape' && isToggleInfoModalOpen()) { closeToggleInfoModal(); return; }
     if (e.key === 'Escape' && isTransferModalOpen()) { closeTransferModal(); return; }
-    if (isDisclaimerModalOpen() || isTransferModalOpen() || isAnalyticsModalOpen() || isStudySelectorOpen() || isShortcutsModalOpen() || isWhatsNewV1_5ModalOpen() || isAspectDefaultOffModalOpen() || isToggleInfoModalOpen() || isContactAuthorModalOpen()) return;
+    if (isDisclaimerModalOpen() || isTransferModalOpen() || isAnalyticsModalOpen() || isStudySelectorOpen() || isShortcutsModalOpen() || isWhatsNewV1_5ModalOpen() || isAspectDefaultOffModalOpen() || isToggleInfoModalOpen() || isContactAuthorModalOpen() || (typeof isInstallInstructionsOpen === 'function' && isInstallInstructionsOpen())) return;
     if (!isReviewDeckMode() || !getSelectedKeys().length) return;
 
     if (isMorphologyMode()) {

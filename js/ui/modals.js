@@ -28,7 +28,11 @@ let host = {
   hasSelectedKeys: () => false,
   // Apply the first-launch study-pace choice (new users only). No-op default
   // keeps the consent flow working if the host doesn't wire it up.
-  setSpacingCadence: () => {}
+  setSpacingCadence: () => {},
+  // Fired once at the end of a fresh consent acceptance (new users only), after
+  // the study selector opens. Used to schedule the PWA install nudge. No-op
+  // default so the consent flow works even if the host doesn't wire it up.
+  onDisclaimerAccepted: () => {}
 };
 
 export function configureModals(deps) {
@@ -107,6 +111,9 @@ export function handleConsentAction() {
   }
   closeDisclaimerModal();
   openStudySelector();
+  // New-users-only hook: this branch runs only on a fresh consent acceptance,
+  // which is exactly when the PWA install nudge should be scheduled.
+  host.onDisclaimerAccepted();
 }
 
 export function initializeConsentGate() {

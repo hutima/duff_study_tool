@@ -183,6 +183,14 @@ import {
 } from '../ui/reader.js';
 import { installKeyboardShortcuts } from '../ui/keyboard.js';
 import { showLevelToast, showBadgeToast } from '../ui/toast.js';
+import {
+  initPwaInstall,
+  maybeScheduleInstallPrompt,
+  triggerInstall,
+  closeInstallInstructions,
+  isInstallInstructionsOpen,
+  dontShowInstallAgain
+} from '../ui/pwaInstall.js';
 import { installTouchSafeTapBridge } from '../ui/touchTapBridge.js';
 import { installClickShield, shieldClicksBriefly } from '../utils/clickShield.js';
 import {
@@ -382,7 +390,10 @@ configureModals({
     runtime.spacingCadence = cadence;
     syncToggleButtons();
     saveState();
-  }
+  },
+  // New-users-only: schedule the PWA install nudge right after the first-run
+  // consent flow opens the study selector.
+  onDisclaimerAccepted: () => maybeScheduleInstallPrompt()
 });
 configureProgress({
   accumulateUsageTime: () => accumulateUsageTime(),
@@ -3952,6 +3963,7 @@ installKeyboardShortcuts({
   isAspectDefaultOffModalOpen, closeAspectDefaultOffModal,
   isToggleInfoModalOpen, closeToggleInfoModal,
   isContactAuthorModalOpen, closeContactAuthorModal,
+  isInstallInstructionsOpen, closeInstallInstructions,
   isDisclaimerModalOpen, isTransferModalOpen, closeTransferModal,
   isReviewDeckMode,
   getSelectedKeys: () => runtime.selectedKeys,
@@ -3991,7 +4003,8 @@ const GLOBAL_CLICK_HANDLERS = {
   toggleRequiredOnly, toggleHardVocabReview, toggleStemNotes, toggleIrregularCards, toggleIrregularTense, toggleShuffle, toggleSpacedRepetition, toggleSpacingCadence, toggleSplitSelection, toggleAspectStep, toggleDimStep, toggleOptionalForms, toggleOptionalFormFilter, toggleDimValueFilter, toggleExcludeKnownMorphs, toggleParsingShuffleAll, toggleParsingCustomReview, toggleParsingCustomParadigm, setAllParsingCustomParadigms, toggleParsingReverse, toggleParsingLookup, pickLookupDimension, editLookupDimension, resetLookup, toggleAccentLookalikes, resetKnownMorphs, closeResetKnownModal, confirmResetKnownFocused, confirmResetKnownAll, clearParsingStats, toggleUnspacedDailyReset, triggerImportProgress,
   openReaderTab, selectReaderDrillChoice, advanceReaderDrill,
   closeWhatsNewV1_5Modal, closeAspectDefaultOffModal, closeToggleInfoModal, onDueHistogramToggle,
-  openContactAuthorModal, closeContactAuthorModal
+  openContactAuthorModal, closeContactAuthorModal,
+  triggerInstall, closeInstallInstructions, dontShowInstallAgain
 };
 if (typeof globalThis !== 'undefined') Object.assign(globalThis, GLOBAL_CLICK_HANDLERS);
 if (typeof window !== 'undefined' && window !== globalThis) Object.assign(window, GLOBAL_CLICK_HANDLERS);
@@ -4015,6 +4028,7 @@ buildChapterSelector();
 buildSupplementalSelector();
 buildAdvancedSelector();
 buildBookVocabSelector();
+initPwaInstall();
 initializeConsentGate();
 if (isReaderMode()) renderReaderModule();
 

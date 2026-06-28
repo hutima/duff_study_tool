@@ -1124,6 +1124,169 @@
     .level-toast-badge { min-width: 52px; padding: 7px 9px; font-size: calc((11px) * var(--text-scale)); }
   }
 
+  /* ── PWA install banner ──────────────────────────────────────────────
+     A persistent top banner modelled on the achievement toast (.level-toast)
+     but it NEVER auto-hides — only Install or ✕ clears it. z-index:950 keeps it
+     below the .consent-overlay (1000) so the how-to modal's backdrop covers it. */
+  .pwa-install-host {
+    position: fixed;
+    top: calc(env(safe-area-inset-top, 0px) + 12px);
+    left: 50%;
+    transform: translate(-50%, -8px);
+    width: min(92vw, 520px);
+    z-index: 950;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+  }
+  .pwa-install-host.show {
+    opacity: 1;
+    transform: translate(-50%, 0);
+    pointer-events: auto;
+  }
+  .pwa-install {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    border: 1px solid var(--gold);
+    background: linear-gradient(180deg, rgba(17, 18, 24, 0.96), rgba(24, 25, 34, 0.98));
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.34);
+    color: var(--text);
+    text-align: left;
+  }
+  .pwa-install-icon {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    border: 1px solid rgba(201,168,76,0.45);
+    background: rgba(201,168,76,0.14);
+    color: var(--gold-light);
+  }
+  .pwa-install-copy {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+  }
+  .pwa-install-title {
+    font-family: var(--font-display);
+    font-size: calc((14px) * var(--text-scale));
+    color: var(--gold-light);
+  }
+  .pwa-install-sub {
+    font-size: calc((13px) * var(--text-scale));
+    color: var(--muted);
+    line-height: 1.4;
+  }
+  .pwa-install-btn {
+    flex: 0 0 auto;
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--gold);
+    background: rgba(201,168,76,0.14);
+    color: var(--gold-light);
+    font-family: var(--font-display);
+    font-size: calc((12px) * var(--text-scale));
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.08s;
+  }
+  .pwa-install-btn:hover { background: rgba(201,168,76,0.24); border-color: var(--gold-light); }
+  .pwa-install-close {
+    flex: 0 0 auto;
+    background: none;
+    border: 0;
+    color: var(--muted);
+    font-size: calc((20px) * var(--text-scale));
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px 6px;
+    transition: color 0.08s;
+  }
+  .pwa-install-close:hover { color: var(--gold); }
+  html[data-theme="light"] .pwa-install {
+    background: linear-gradient(180deg, rgba(255, 251, 242, 0.98), rgba(248, 242, 230, 0.99));
+    border-color: rgba(168,132,45,0.55);
+    box-shadow: 0 14px 28px rgba(92, 71, 24, 0.14);
+  }
+  html[data-theme="light"] .pwa-install-icon,
+  html[data-theme="light"] .pwa-install-btn {
+    background: rgba(168,132,45,0.12);
+    border-color: rgba(168,132,45,0.35);
+  }
+  @media (max-width: 640px) {
+    .pwa-install { gap: 10px; padding: 10px 12px; }
+    .pwa-install-title { font-size: calc((13px) * var(--text-scale)); }
+    .pwa-install-sub { font-size: calc((12px) * var(--text-scale)); }
+    .pwa-install-icon { width: 36px; height: 36px; }
+  }
+
+  /* ── PWA install how-to modal (numbered steps) ───────────────────────── */
+  .install-steps {
+    list-style: none;
+    margin: 16px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .install-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    color: var(--cream);
+    line-height: 1.45;
+    font-size: calc((15px) * var(--text-scale));
+  }
+  .install-step-num {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    background: var(--gold);
+    color: #1a160a;
+    font-family: var(--font-display);
+    font-size: calc((14px) * var(--text-scale));
+    font-weight: 600;
+  }
+  /* Light theme's --gold is a dark umber, so white text reads better on it. */
+  html[data-theme="light"] .install-step-num {
+    color: #fff;
+  }
+  .install-step-text { min-width: 0; }
+  .install-step-text strong { color: var(--gold-light); }
+
+  /* Install how-to footer: left-aligned so Got it! / Don't show again sit
+     side-by-side rather than stretched apart. */
+  .consent-actions.install-actions {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .consent-actions.install-actions .ctrl-btn {
+    width: auto;
+    min-width: 0;
+  }
+
+  /* User-guide footer right cluster: Install app + Close side-by-side. */
+  .user-guide-actions-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
   .review-panel {
     display: none;
     background: var(--surface); border: 1px solid var(--border);
@@ -3118,6 +3281,15 @@
     border-radius: 16px;
     box-shadow: var(--shadow);
     padding: 26px 24px 22px;
+    /* Tall modals (consent gate, install how-to) would otherwise overflow
+       off-screen unreachably on phones. Cap to the viewport and scroll inside.
+       dvh override handles mobile browser chrome; the px fallback is for old
+       engines without dvh. */
+    max-height: calc(100vh - 32px);
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
   }
 
   /* Top-right ✕ on a modal (user guide, contact card). Anchors to the
