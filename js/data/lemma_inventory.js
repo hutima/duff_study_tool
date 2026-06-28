@@ -3275,6 +3275,82 @@
       OIDA_PERFECT_ACTIVE_PARTICIPLE, { core: false })
   ];
 
+  // ═══ Principal-parts sweep ═══════════════════════════════════════════
+  // Full perfect / aorist-passive / etc. paradigms for verbs whose six
+  // principal parts weren't all present in parsing. The 1sg principal parts +
+  // present infinitive are wired into each lemma's entry as `core: true` groups
+  // (required, chapter-gated); these full paradigms ride along as optional /
+  // extraForms for wrong-pick feedback + lookup.
+
+  // ── κρίνω (liquid; transitive, so all six parts exist) ──
+  const KRINO_PERFECT_ACTIVE_INDICATIVE = {
+    'κέκρικα':      'perfect active indicative first person singular',
+    'κέκρικας':     'perfect active indicative second person singular',
+    'κέκρικε(ν)':   'perfect active indicative third person singular',
+    'κεκρίκαμεν':   'perfect active indicative first person plural',
+    'κεκρίκατε':    'perfect active indicative second person plural',
+    'κεκρίκασι(ν)': 'perfect active indicative third person plural'
+  };
+  const KRINO_PERFECT_MP_INDICATIVE = {
+    'κέκριμαι':  'perfect middle/passive indicative first person singular',
+    'κέκρισαι':  'perfect middle/passive indicative second person singular',
+    'κέκριται':  'perfect middle/passive indicative third person singular',
+    'κεκρίμεθα': 'perfect middle/passive indicative first person plural',
+    'κέκρισθε':  'perfect middle/passive indicative second person plural',
+    'κέκρινται': 'perfect middle/passive indicative third person plural'
+  };
+  const KRINO_AORIST_PASSIVE_INDICATIVE = {
+    'ἐκρίθην':   'aorist passive indicative first person singular',
+    'ἐκρίθης':   'aorist passive indicative second person singular',
+    'ἐκρίθη':    'aorist passive indicative third person singular',
+    'ἐκρίθημεν': 'aorist passive indicative first person plural',
+    'ἐκρίθητε':  'aorist passive indicative second person plural',
+    'ἐκρίθησαν': 'aorist passive indicative third person plural'
+  };
+  const KRINO_PP_CORE = [
+    { chapter: 7,  core: true, family: 'κρίνω — present infinitive (required)',
+      forms: { 'κρίνειν': 'present active infinitive' } },
+    { chapter: 15, core: true, family: 'κρίνω — aorist passive principal part (required)',
+      forms: { 'ἐκρίθην': 'aorist passive indicative first person singular' } },
+    { chapter: 16, core: true, family: 'κρίνω — perfect active principal part (required)',
+      forms: { 'κέκρικα': 'perfect active indicative first person singular' } },
+    { chapter: 16, core: true, family: 'κρίνω — perfect middle/passive principal part (required)',
+      forms: { 'κέκριμαι': 'perfect middle/passive indicative first person singular' } },
+    { chapter: 15, family: 'κρίνω — aorist passive indicative (optional)', forms: KRINO_AORIST_PASSIVE_INDICATIVE },
+    { chapter: 16, family: 'κρίνω — perfect active indicative (optional)', forms: KRINO_PERFECT_ACTIVE_INDICATIVE },
+    { chapter: 16, family: 'κρίνω — perfect middle/passive indicative (optional)', forms: KRINO_PERFECT_MP_INDICATIVE }
+  ];
+  const KRINO_PP_EXTRA = { ...KRINO_AORIST_PASSIVE_INDICATIVE, ...KRINO_PERFECT_ACTIVE_INDICATIVE, ...KRINO_PERFECT_MP_INDICATIVE };
+
+  // ── μένω (liquid; intransitive → no perfect m/p, no aorist passive) ──
+  const MENO_AORIST_ACTIVE_INDICATIVE = {
+    'ἔμεινα':    'aorist active indicative first person singular',
+    'ἔμεινας':   'aorist active indicative second person singular',
+    'ἔμεινε(ν)': 'aorist active indicative third person singular',
+    'ἐμείναμεν': 'aorist active indicative first person plural',
+    'ἐμείνατε':  'aorist active indicative second person plural',
+    'ἔμειναν':   'aorist active indicative third person plural'
+  };
+  const MENO_PERFECT_ACTIVE_INDICATIVE = {
+    'μεμένηκα':      'perfect active indicative first person singular',
+    'μεμένηκας':     'perfect active indicative second person singular',
+    'μεμένηκε(ν)':   'perfect active indicative third person singular',
+    'μεμενήκαμεν':   'perfect active indicative first person plural',
+    'μεμενήκατε':    'perfect active indicative second person plural',
+    'μεμενήκασι(ν)': 'perfect active indicative third person plural'
+  };
+  const MENO_PP_CORE = [
+    { chapter: 7,  core: true, family: 'μένω — present infinitive (required)',
+      forms: { 'μένειν': 'present active infinitive' } },
+    { chapter: 11, core: true, family: 'μένω — aorist active principal part (required)',
+      forms: { 'ἔμεινα': 'aorist active indicative first person singular' } },
+    { chapter: 16, core: true, family: 'μένω — perfect active principal part (required)',
+      forms: { 'μεμένηκα': 'perfect active indicative first person singular' } },
+    { chapter: 11, family: 'μένω — aorist active indicative (optional)', forms: MENO_AORIST_ACTIVE_INDICATIVE },
+    { chapter: 16, family: 'μένω — perfect active indicative (optional)', forms: MENO_PERFECT_ACTIVE_INDICATIVE }
+  ];
+  const MENO_PP_EXTRA = { ...MENO_AORIST_ACTIVE_INDICATIVE, ...MENO_PERFECT_ACTIVE_INDICATIVE };
+
   const LEMMA_INVENTORY = {
     'First and second personal pronouns': {
       // Lookup/fallback only (not drill cards — the enclitics share the
@@ -3454,8 +3530,16 @@
       extraForms: {
         ...KRINO_PRESENT_ACTIVE_PARTICIPLE,
         ...KRINO_AORIST_ACTIVE_PARTICIPLE,
-        ...KRINO_AORIST_PASSIVE_PARTICIPLE
-      }
+        ...KRINO_AORIST_PASSIVE_PARTICIPLE,
+        ...KRINO_PP_EXTRA
+      },
+      optionalFormGroups: [...KRINO_PP_CORE]
+    },
+    'μένω': {
+      // Liquid verb, intransitive — no perfect middle/passive, no aorist
+      // passive. Principal parts: μένω, μενῶ, ἔμεινα, μεμένηκα.
+      extraForms: { ...MENO_PP_EXTRA },
+      optionalFormGroups: [...MENO_PP_CORE]
     },
     'φιλέω': {
       extraForms: {
