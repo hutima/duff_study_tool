@@ -1753,6 +1753,15 @@ function buildWhyThisFormNote(card, dims, category) {
     return 'εἰμί is irregular — its forms are learned individually, not built from a stem rule.';
   }
 
+  // ── οἶδα is a second (strong) perfect: no ‑κ‑ and no reduplication, so the
+  //    generic "reduplication + ‑κ‑" perfect rule below would mislead. ──
+  if (cat.includes('οἶδα')) {
+    if (tense === 'pluperfect') {
+      return 'The pluperfect ᾔδειν is irregular — the ᾐδ‑ stem takes ‑ειν, ‑εις, ‑ει, ‑ειμεν, ‑ειτε, ‑εισαν, and serves as a past.';
+    }
+    return 'οἶδα is a second (strong) perfect — no ‑κ‑ and no reduplication; the οἶδ‑/οἴδ‑ stem with the endings ‑α, ‑ας, ‑ε(ν), ‑αμεν, ‑ατε, ‑ασι(ν) is irregular and memorised.';
+  }
+
   // ── Infinitives: the ending is the whole tell ──
   if (mood === 'infinitive') {
     if (tense === 'present') return isActive ? 'Present active infinitive — ends in ‑ειν.' : 'Present middle/passive infinitive — ends in ‑εσθαι.';
