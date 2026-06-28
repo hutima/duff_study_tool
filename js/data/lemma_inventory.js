@@ -357,7 +357,14 @@
     { chapter: 17, core: true, family: 'λύω — aorist passive subjunctive (required)',
       forms: LUO_AORIST_PASSIVE_SUBJUNCTIVE },
     { chapter: 17, core: true, family: 'λύω — present middle/passive subjunctive (required)',
-      forms: LUO_PRESENT_MIDDLE_PASSIVE_SUBJUNCTIVE }
+      forms: LUO_PRESENT_MIDDLE_PASSIVE_SUBJUNCTIVE },
+    // Required principal part (1sg) + present infinitive. λύω's other five
+    // principal parts (λύω, λύσω, ἔλυσα, λέλυκα, ἐλύθην) are already required
+    // via its W-drill paradigms; only the perfect m/p was optional-only.
+    { chapter: 7,  core: true, family: 'λύω — present infinitive (required)',
+      forms: { 'λύειν': 'present active infinitive' } },
+    { chapter: 16, core: true, family: 'λύω — perfect middle/passive principal part (required)',
+      forms: { 'λέλυμαι': 'perfect middle/passive indicative first person singular' } }
   ];
 
   // Flat extraForms map for the fallback lookup. Duplicate-key
@@ -1092,7 +1099,43 @@
     'φιλούμενος': 'present middle/passive participle nominative singular masculine'
   };
 
+  // Perfect active + perfect middle/passive indicative (reduplication πε- on the
+  // long-vowel φιλη- stem). Full paradigms for the optional drill / wrong-pick
+  // lookup; the 1sg principal parts (πεφίληκα, πεφίλημαι) are pulled in as
+  // required via the core groups below.
+  const PHILEO_PERFECT_ACTIVE_INDICATIVE = {
+    'πεφίληκα':      'perfect active indicative first person singular',
+    'πεφίληκας':     'perfect active indicative second person singular',
+    'πεφίληκε(ν)':   'perfect active indicative third person singular',
+    'πεφιλήκαμεν':   'perfect active indicative first person plural',
+    'πεφιλήκατε':    'perfect active indicative second person plural',
+    'πεφιλήκασι(ν)': 'perfect active indicative third person plural'
+  };
+  const PHILEO_PERFECT_MP_INDICATIVE = {
+    'πεφίλημαι':   'perfect middle/passive indicative first person singular',
+    'πεφίλησαι':   'perfect middle/passive indicative second person singular',
+    'πεφίληται':   'perfect middle/passive indicative third person singular',
+    'πεφιλήμεθα':  'perfect middle/passive indicative first person plural',
+    'πεφίλησθε':   'perfect middle/passive indicative second person plural',
+    'πεφίληνται':  'perfect middle/passive indicative third person plural'
+  };
+
   const PHILEO_OPTIONAL_GROUPS = [
+    // Required principal parts (1sg) + present infinitive — core groups enter
+    // the deck unconditionally, each gated to where Duff teaches that part.
+    { chapter: 7,  core: true, family: 'φιλέω — present infinitive (required)',
+      forms: { 'φιλεῖν': 'present active infinitive' } },
+    { chapter: 15, core: true, family: 'φιλέω — aorist passive principal part (required)',
+      forms: { 'ἐφιλήθην': 'aorist passive indicative first person singular' } },
+    { chapter: 16, core: true, family: 'φιλέω — perfect active principal part (required)',
+      forms: { 'πεφίληκα': 'perfect active indicative first person singular' } },
+    { chapter: 16, core: true, family: 'φιλέω — perfect middle/passive principal part (required)',
+      forms: { 'πεφίλημαι': 'perfect middle/passive indicative first person singular' } },
+    // Full perfect paradigms — optional (wrong-pick / lookup).
+    { chapter: 16, family: 'φιλέω — perfect active indicative (optional)',
+      forms: PHILEO_PERFECT_ACTIVE_INDICATIVE },
+    { chapter: 16, family: 'φιλέω — perfect middle/passive indicative (optional)',
+      forms: PHILEO_PERFECT_MP_INDICATIVE },
     { chapter: 7,  family: 'φιλέω — present active imperative (optional)',
       forms: PHILEO_PRESENT_ACTIVE_IMPERATIVE },
     { chapter: 7,  family: 'φιλέω — aorist active imperative (optional)',
@@ -1121,6 +1164,8 @@
     ...PHILEO_AORIST_ACTIVE_IMPERATIVE,
     ...PHILEO_INFINITIVES,
     ...PHILEO_PRESENT_MP_PARTICIPLE,
+    ...PHILEO_PERFECT_ACTIVE_INDICATIVE,
+    ...PHILEO_PERFECT_MP_INDICATIVE,
     // Subjunctive last so φιλῇ resolves to "present active subjunctive
     // 3sg" (the most common single-form reading) rather than the m/p
     // 2sg from the present passive indicative spread above.
@@ -3230,6 +3275,375 @@
       OIDA_PERFECT_ACTIVE_PARTICIPLE, { core: false })
   ];
 
+  // ═══ Principal-parts sweep ═══════════════════════════════════════════
+  // Full perfect / aorist-passive / etc. paradigms for verbs whose six
+  // principal parts weren't all present in parsing. The 1sg principal parts +
+  // present infinitive are wired into each lemma's entry as `core: true` groups
+  // (required, chapter-gated); these full paradigms ride along as optional /
+  // extraForms for wrong-pick feedback + lookup.
+
+  // ── κρίνω (liquid; transitive, so all six parts exist) ──
+  const KRINO_PERFECT_ACTIVE_INDICATIVE = {
+    'κέκρικα':      'perfect active indicative first person singular',
+    'κέκρικας':     'perfect active indicative second person singular',
+    'κέκρικε(ν)':   'perfect active indicative third person singular',
+    'κεκρίκαμεν':   'perfect active indicative first person plural',
+    'κεκρίκατε':    'perfect active indicative second person plural',
+    'κεκρίκασι(ν)': 'perfect active indicative third person plural'
+  };
+  const KRINO_PERFECT_MP_INDICATIVE = {
+    'κέκριμαι':  'perfect middle/passive indicative first person singular',
+    'κέκρισαι':  'perfect middle/passive indicative second person singular',
+    'κέκριται':  'perfect middle/passive indicative third person singular',
+    'κεκρίμεθα': 'perfect middle/passive indicative first person plural',
+    'κέκρισθε':  'perfect middle/passive indicative second person plural',
+    'κέκρινται': 'perfect middle/passive indicative third person plural'
+  };
+  const KRINO_AORIST_PASSIVE_INDICATIVE = {
+    'ἐκρίθην':   'aorist passive indicative first person singular',
+    'ἐκρίθης':   'aorist passive indicative second person singular',
+    'ἐκρίθη':    'aorist passive indicative third person singular',
+    'ἐκρίθημεν': 'aorist passive indicative first person plural',
+    'ἐκρίθητε':  'aorist passive indicative second person plural',
+    'ἐκρίθησαν': 'aorist passive indicative third person plural'
+  };
+  const KRINO_PP_CORE = [
+    { chapter: 7,  core: true, family: 'κρίνω — present infinitive (required)',
+      forms: { 'κρίνειν': 'present active infinitive' } },
+    { chapter: 15, core: true, family: 'κρίνω — aorist passive principal part (required)',
+      forms: { 'ἐκρίθην': 'aorist passive indicative first person singular' } },
+    { chapter: 16, core: true, family: 'κρίνω — perfect active principal part (required)',
+      forms: { 'κέκρικα': 'perfect active indicative first person singular' } },
+    { chapter: 16, core: true, family: 'κρίνω — perfect middle/passive principal part (required)',
+      forms: { 'κέκριμαι': 'perfect middle/passive indicative first person singular' } },
+    { chapter: 15, family: 'κρίνω — aorist passive indicative (optional)', forms: KRINO_AORIST_PASSIVE_INDICATIVE },
+    { chapter: 16, family: 'κρίνω — perfect active indicative (optional)', forms: KRINO_PERFECT_ACTIVE_INDICATIVE },
+    { chapter: 16, family: 'κρίνω — perfect middle/passive indicative (optional)', forms: KRINO_PERFECT_MP_INDICATIVE }
+  ];
+  const KRINO_PP_EXTRA = { ...KRINO_AORIST_PASSIVE_INDICATIVE, ...KRINO_PERFECT_ACTIVE_INDICATIVE, ...KRINO_PERFECT_MP_INDICATIVE };
+
+  // ── μένω (liquid; intransitive → no perfect m/p, no aorist passive) ──
+  const MENO_AORIST_ACTIVE_INDICATIVE = {
+    'ἔμεινα':    'aorist active indicative first person singular',
+    'ἔμεινας':   'aorist active indicative second person singular',
+    'ἔμεινε(ν)': 'aorist active indicative third person singular',
+    'ἐμείναμεν': 'aorist active indicative first person plural',
+    'ἐμείνατε':  'aorist active indicative second person plural',
+    'ἔμειναν':   'aorist active indicative third person plural'
+  };
+  const MENO_PERFECT_ACTIVE_INDICATIVE = {
+    'μεμένηκα':      'perfect active indicative first person singular',
+    'μεμένηκας':     'perfect active indicative second person singular',
+    'μεμένηκε(ν)':   'perfect active indicative third person singular',
+    'μεμενήκαμεν':   'perfect active indicative first person plural',
+    'μεμενήκατε':    'perfect active indicative second person plural',
+    'μεμενήκασι(ν)': 'perfect active indicative third person plural'
+  };
+  const MENO_PP_CORE = [
+    { chapter: 7,  core: true, family: 'μένω — present infinitive (required)',
+      forms: { 'μένειν': 'present active infinitive' } },
+    { chapter: 11, core: true, family: 'μένω — aorist active principal part (required)',
+      forms: { 'ἔμεινα': 'aorist active indicative first person singular' } },
+    { chapter: 16, core: true, family: 'μένω — perfect active principal part (required)',
+      forms: { 'μεμένηκα': 'perfect active indicative first person singular' } },
+    { chapter: 11, family: 'μένω — aorist active indicative (optional)', forms: MENO_AORIST_ACTIVE_INDICATIVE },
+    { chapter: 16, family: 'μένω — perfect active indicative (optional)', forms: MENO_PERFECT_ACTIVE_INDICATIVE }
+  ];
+  const MENO_PP_EXTRA = { ...MENO_AORIST_ACTIVE_INDICATIVE, ...MENO_PERFECT_ACTIVE_INDICATIVE };
+
+  // ── μι-verbs (introduced Ch 19, so every part gates there) ──
+  // Not deponent (‑μι), so perfect m/p and aorist passive parse normally.
+  // Future / aorist-passive full paradigms already exist (optional); here we add
+  // the missing perfect paradigms + the 1sg principal parts as required core.
+  const DIDOMI_PERFECT_MP_INDICATIVE = {
+    'δέδομαι':  'perfect middle/passive indicative first person singular',
+    'δέδοσαι':  'perfect middle/passive indicative second person singular',
+    'δέδοται':  'perfect middle/passive indicative third person singular',
+    'δεδόμεθα': 'perfect middle/passive indicative first person plural',
+    'δέδοσθε':  'perfect middle/passive indicative second person plural',
+    'δέδονται': 'perfect middle/passive indicative third person plural'
+  };
+  const DIDOMI_PP_CORE = [
+    { chapter: 19, core: true, family: 'δίδωμι — present infinitive (required)',
+      forms: { 'διδόναι': 'present active infinitive' } },
+    { chapter: 19, core: true, family: 'δίδωμι — aorist passive principal part (required)',
+      forms: { 'ἐδόθην': 'aorist passive indicative first person singular' } },
+    { chapter: 19, core: true, family: 'δίδωμι — perfect middle/passive principal part (required)',
+      forms: { 'δέδομαι': 'perfect middle/passive indicative first person singular' } },
+    { chapter: 19, family: 'δίδωμι — perfect middle/passive indicative (optional)', forms: DIDOMI_PERFECT_MP_INDICATIVE }
+  ];
+
+  const TITHEMI_PERFECT_ACTIVE_INDICATIVE = {
+    'τέθεικα':      'perfect active indicative first person singular',
+    'τέθεικας':     'perfect active indicative second person singular',
+    'τέθεικε(ν)':   'perfect active indicative third person singular',
+    'τεθείκαμεν':   'perfect active indicative first person plural',
+    'τεθείκατε':    'perfect active indicative second person plural',
+    'τεθείκασι(ν)': 'perfect active indicative third person plural'
+  };
+  const TITHEMI_PERFECT_MP_INDICATIVE = {
+    'τέθειμαι':  'perfect middle/passive indicative first person singular',
+    'τέθεισαι':  'perfect middle/passive indicative second person singular',
+    'τέθειται':  'perfect middle/passive indicative third person singular',
+    'τεθείμεθα': 'perfect middle/passive indicative first person plural',
+    'τέθεισθε':  'perfect middle/passive indicative second person plural',
+    'τέθεινται': 'perfect middle/passive indicative third person plural'
+  };
+  const TITHEMI_PP_CORE = [
+    { chapter: 19, core: true, family: 'τίθημι — present infinitive (required)',
+      forms: { 'τιθέναι': 'present active infinitive' } },
+    { chapter: 19, core: true, family: 'τίθημι — future principal part (required)',
+      forms: { 'θήσω': 'future active indicative first person singular' } },
+    { chapter: 19, core: true, family: 'τίθημι — aorist passive principal part (required)',
+      forms: { 'ἐτέθην': 'aorist passive indicative first person singular' } },
+    { chapter: 19, core: true, family: 'τίθημι — perfect active principal part (required)',
+      forms: { 'τέθεικα': 'perfect active indicative first person singular' } },
+    { chapter: 19, core: true, family: 'τίθημι — perfect middle/passive principal part (required)',
+      forms: { 'τέθειμαι': 'perfect middle/passive indicative first person singular' } },
+    { chapter: 19, family: 'τίθημι — perfect active indicative (optional)', forms: TITHEMI_PERFECT_ACTIVE_INDICATIVE },
+    { chapter: 19, family: 'τίθημι — perfect middle/passive indicative (optional)', forms: TITHEMI_PERFECT_MP_INDICATIVE }
+  ];
+  const TITHEMI_PP_EXTRA = { ...TITHEMI_PERFECT_ACTIVE_INDICATIVE, ...TITHEMI_PERFECT_MP_INDICATIVE };
+
+  // ἵστημι: perfect ἕστηκα is active-intransitive ("I stand") — no perfect m/p.
+  // (Full paradigm reuses the existing HISTEMI_PERFECT_ACTIVE_INDICATIVE above.)
+  const HISTEMI_PP_CORE = [
+    { chapter: 19, core: true, family: 'ἵστημι — present infinitive (required)',
+      forms: { 'ἱστάναι': 'present active infinitive' } },
+    { chapter: 19, core: true, family: 'ἵστημι — future principal part (required)',
+      forms: { 'στήσω': 'future active indicative first person singular' } },
+    { chapter: 19, core: true, family: 'ἵστημι — aorist passive principal part (required)',
+      forms: { 'ἐστάθην': 'aorist passive indicative first person singular' } },
+    { chapter: 19, core: true, family: 'ἵστημι — perfect active principal part (required)',
+      forms: { 'ἕστηκα': 'perfect active indicative first person singular' } },
+    { chapter: 19, family: 'ἵστημι — perfect active indicative (optional)', forms: HISTEMI_PERFECT_ACTIVE_INDICATIVE }
+  ];
+
+  // δίδομαι is δίδωμι's middle/passive slice (ends ‑μαι → treated as deponent
+  // middle). Give it the present m/p infinitive + perfect m/p principal part.
+  const DIDOMAI_PP_CORE = [
+    { chapter: 19, core: true, family: 'δίδομαι — present infinitive (required)',
+      forms: { 'δίδοσθαι': 'present middle/passive infinitive' } },
+    { chapter: 19, core: true, family: 'δίδομαι — perfect middle/passive principal part (required)',
+      forms: { 'δέδομαι': 'perfect middle/passive indicative first person singular' } }
+  ];
+
+  // ── Second-aorist verbs (enter parsing at Ch 11 via their 2nd aorist) ──
+  // Their 2nd-aorist active is already required; here we add the rest of the
+  // six principal parts (1sg) + present infinitive as required core groups, and
+  // full paradigms (regular-ending) on the optional/extraForms side. Principal
+  // parts verified against standard NT/Koine principal-part charts.
+  // Gates: present/future/infinitive 11 · aorist passive 15 · perfect 16.
+
+  // Helper: a verb's principal-part core groups from a {part: [form, parse]} map.
+  function ppCore(lemma, parts) {
+    const out = [];
+    parts.forEach(([chapter, form, parse, label]) => {
+      out.push({ chapter, core: true, family: `${lemma} — ${label} (required)`, forms: { [form]: parse } });
+    });
+    return out;
+  }
+
+  // ἄγω (γ-stem). Aorist ἤγαγον already required.
+  const AGO_AORIST_PASSIVE_INDICATIVE = {
+    'ἤχθην': 'aorist passive indicative first person singular',
+    'ἤχθης': 'aorist passive indicative second person singular',
+    'ἤχθη':  'aorist passive indicative third person singular',
+    'ἤχθημεν':'aorist passive indicative first person plural',
+    'ἤχθητε': 'aorist passive indicative second person plural',
+    'ἤχθησαν':'aorist passive indicative third person plural'
+  };
+  const AGO_PP_CORE = [
+    ...ppCore('ἄγω', [
+      [11, 'ἄγω',   'present active indicative first person singular', 'present principal part'],
+      [11, 'ἄγειν', 'present active infinitive', 'present infinitive'],
+      [11, 'ἄξω',   'future active indicative first person singular', 'future principal part'],
+      [15, 'ἤχθην', 'aorist passive indicative first person singular', 'aorist passive principal part'],
+      [16, 'ἦχα',   'perfect active indicative first person singular', 'perfect active principal part'],
+      [16, 'ἦγμαι', 'perfect middle/passive indicative first person singular', 'perfect middle/passive principal part']
+    ]),
+    { chapter: 15, family: 'ἄγω — aorist passive indicative (optional)', forms: AGO_AORIST_PASSIVE_INDICATIVE }
+  ];
+  const AGO_PP_EXTRA = { 'ἄγω':'present active indicative first person singular', 'ἄξω':'future active indicative first person singular', 'ἦχα':'perfect active indicative first person singular', 'ἦγμαι':'perfect middle/passive indicative first person singular', ...AGO_AORIST_PASSIVE_INDICATIVE };
+
+  // λέγω (suppletive: ἐρ-/εἰπ-/εἰρη- stems). Aorist εἶπον already required.
+  const LEGO_AORIST_PASSIVE_INDICATIVE = {
+    'ἐρρέθην': 'aorist passive indicative first person singular',
+    'ἐρρέθης': 'aorist passive indicative second person singular',
+    'ἐρρέθη':  'aorist passive indicative third person singular',
+    'ἐρρέθημεν':'aorist passive indicative first person plural',
+    'ἐρρέθητε': 'aorist passive indicative second person plural',
+    'ἐρρέθησαν':'aorist passive indicative third person plural'
+  };
+  const LEGO_PP_CORE = [
+    ...ppCore('λέγω', [
+      [11, 'λέγω',   'present active indicative first person singular', 'present principal part'],
+      [11, 'λέγειν', 'present active infinitive', 'present infinitive'],
+      [11, 'ἐρῶ',    'future active indicative first person singular', 'future principal part'],
+      [15, 'ἐρρέθην','aorist passive indicative first person singular', 'aorist passive principal part'],
+      [16, 'εἴρηκα', 'perfect active indicative first person singular', 'perfect active principal part'],
+      [16, 'εἴρημαι','perfect middle/passive indicative first person singular', 'perfect middle/passive principal part']
+    ]),
+    { chapter: 15, family: 'λέγω — aorist passive indicative (optional)', forms: LEGO_AORIST_PASSIVE_INDICATIVE }
+  ];
+  const LEGO_PP_EXTRA = { 'λέγω':'present active indicative first person singular', 'ἐρῶ':'future active indicative first person singular', 'εἴρηκα':'perfect active indicative first person singular', 'εἴρημαι':'perfect middle/passive indicative first person singular', ...LEGO_AORIST_PASSIVE_INDICATIVE };
+
+  // ὁράω (suppletive: ὀπ-/ἰδ-/ὁρα- stems). Aorist εἶδον already required.
+  // No common perfect middle/passive.
+  const HORAO_AORIST_PASSIVE_INDICATIVE = {
+    'ὤφθην': 'aorist passive indicative first person singular',
+    'ὤφθης': 'aorist passive indicative second person singular',
+    'ὤφθη':  'aorist passive indicative third person singular',
+    'ὤφθημεν':'aorist passive indicative first person plural',
+    'ὤφθητε': 'aorist passive indicative second person plural',
+    'ὤφθησαν':'aorist passive indicative third person plural'
+  };
+  const HORAO_PP_CORE = [
+    ...ppCore('ὁράω', [
+      [11, 'ὁράω',   'present active indicative first person singular', 'present principal part'],
+      [11, 'ὁρᾶν',   'present active infinitive', 'present infinitive'],
+      [11, 'ὄψομαι', 'future middle indicative first person singular', 'future principal part'],
+      [15, 'ὤφθην',  'aorist passive indicative first person singular', 'aorist passive principal part'],
+      [16, 'ἑώρακα', 'perfect active indicative first person singular', 'perfect active principal part']
+    ]),
+    { chapter: 15, family: 'ὁράω — aorist passive indicative (optional)', forms: HORAO_AORIST_PASSIVE_INDICATIVE }
+  ];
+  const HORAO_PP_EXTRA = { 'ὁράω':'present active indicative first person singular', 'ὄψομαι':'future middle indicative first person singular', 'ἑώρακα':'perfect active indicative first person singular', ...HORAO_AORIST_PASSIVE_INDICATIVE };
+
+  // ἔχω. Aorist ἔσχον already required. No common aorist passive / perfect m/p.
+  const ECHO_PP_CORE = ppCore('ἔχω', [
+    [11, 'ἔχω',   'present active indicative first person singular', 'present principal part'],
+    [11, 'ἔχειν', 'present active infinitive', 'present infinitive'],
+    [11, 'ἕξω',   'future active indicative first person singular', 'future principal part'],
+    [16, 'ἔσχηκα','perfect active indicative first person singular', 'perfect active principal part']
+  ]);
+  const ECHO_PP_EXTRA = { 'ἔχω':'present active indicative first person singular', 'ἕξω':'future active indicative first person singular', 'ἔσχηκα':'perfect active indicative first person singular' };
+
+  // γινώσκω (regular-ending perfect/passive on γνω-/γνωσ- stem).
+  const GINOSKO_PERFECT_ACTIVE_INDICATIVE = {
+    'ἔγνωκα':'perfect active indicative first person singular',
+    'ἔγνωκας':'perfect active indicative second person singular',
+    'ἔγνωκε(ν)':'perfect active indicative third person singular',
+    'ἐγνώκαμεν':'perfect active indicative first person plural',
+    'ἐγνώκατε':'perfect active indicative second person plural',
+    'ἐγνώκασι(ν)':'perfect active indicative third person plural'
+  };
+  const GINOSKO_PERFECT_MP_INDICATIVE = {
+    'ἔγνωσμαι':'perfect middle/passive indicative first person singular',
+    'ἔγνωσαι':'perfect middle/passive indicative second person singular',
+    'ἔγνωσται':'perfect middle/passive indicative third person singular',
+    'ἐγνώσμεθα':'perfect middle/passive indicative first person plural',
+    'ἔγνωσθε':'perfect middle/passive indicative second person plural',
+    'ἔγνωνται':'perfect middle/passive indicative third person plural'
+  };
+  const GINOSKO_AORIST_PASSIVE_INDICATIVE = {
+    'ἐγνώσθην':'aorist passive indicative first person singular',
+    'ἐγνώσθης':'aorist passive indicative second person singular',
+    'ἐγνώσθη':'aorist passive indicative third person singular',
+    'ἐγνώσθημεν':'aorist passive indicative first person plural',
+    'ἐγνώσθητε':'aorist passive indicative second person plural',
+    'ἐγνώσθησαν':'aorist passive indicative third person plural'
+  };
+  const GINOSKO_PP_CORE = [
+    ...ppCore('γινώσκω', [
+      [11, 'γινώσκω',  'present active indicative first person singular', 'present principal part'],
+      [11, 'γινώσκειν','present active infinitive', 'present infinitive'],
+      [11, 'γνώσομαι', 'future middle indicative first person singular', 'future principal part'],
+      [15, 'ἐγνώσθην', 'aorist passive indicative first person singular', 'aorist passive principal part'],
+      [16, 'ἔγνωκα',   'perfect active indicative first person singular', 'perfect active principal part'],
+      [16, 'ἔγνωσμαι', 'perfect middle/passive indicative first person singular', 'perfect middle/passive principal part']
+    ]),
+    { chapter: 15, family: 'γινώσκω — aorist passive indicative (optional)', forms: GINOSKO_AORIST_PASSIVE_INDICATIVE },
+    { chapter: 16, family: 'γινώσκω — perfect active indicative (optional)', forms: GINOSKO_PERFECT_ACTIVE_INDICATIVE },
+    { chapter: 16, family: 'γινώσκω — perfect middle/passive indicative (optional)', forms: GINOSKO_PERFECT_MP_INDICATIVE }
+  ];
+  const GINOSKO_PP_EXTRA = { 'γινώσκω':'present active indicative first person singular', 'γνώσομαι':'future middle indicative first person singular', ...GINOSKO_PERFECT_ACTIVE_INDICATIVE, ...GINOSKO_PERFECT_MP_INDICATIVE, ...GINOSKO_AORIST_PASSIVE_INDICATIVE };
+
+  // ── Stage C2: ἔρχομαι, βάλλω, λαμβάνω, λείπω, γίνομαι ──
+  // βάλλω/λαμβάνω/λείπω/γίνομαι already carry most parts (optional); we promote
+  // their principal parts to required core + add the missing perfect m/p.
+  // ἔρχομαι is a present-deponent with active aorist (ἦλθον) + active perfect
+  // (ἐλήλυθα) and no passive — only its aorist existed, so we add the rest.
+  const ERCHOMAI_PP_PF_ACT = {
+    'ἐλήλυθα':    'perfect active indicative first person singular',
+    'ἐλήλυθας':   'perfect active indicative second person singular',
+    'ἐλήλυθε(ν)': 'perfect active indicative third person singular',
+    'ἐληλύθαμεν': 'perfect active indicative first person plural',
+    'ἐληλύθατε':  'perfect active indicative second person plural',
+    'ἐληλύθασι(ν)':'perfect active indicative third person plural'
+  };
+  const ERCHOMAI_PP_CORE = [
+    ...ppCore('ἔρχομαι', [
+      [11, 'ἔρχομαι',  'present middle/passive indicative first person singular', 'present principal part'],
+      [11, 'ἔρχεσθαι', 'present middle/passive infinitive', 'present infinitive'],
+      [11, 'ἐλεύσομαι','future middle indicative first person singular', 'future principal part'],
+      [16, 'ἐλήλυθα',  'perfect active indicative first person singular', 'perfect active principal part']
+    ]),
+    { chapter: 16, family: 'ἔρχομαι — perfect active indicative (optional)', forms: ERCHOMAI_PP_PF_ACT }
+  ];
+  const ERCHOMAI_PP_EXTRA = { 'ἔρχομαι':'present middle/passive indicative first person singular', 'ἐλεύσομαι':'future middle indicative first person singular', ...ERCHOMAI_PP_PF_ACT };
+
+  const BALLO_PP_PF_MP = {
+    'βέβλημαι':  'perfect middle/passive indicative first person singular',
+    'βέβλησαι':  'perfect middle/passive indicative second person singular',
+    'βέβληται':  'perfect middle/passive indicative third person singular',
+    'βεβλήμεθα': 'perfect middle/passive indicative first person plural',
+    'βέβλησθε':  'perfect middle/passive indicative second person plural',
+    'βέβληνται': 'perfect middle/passive indicative third person plural'
+  };
+  const BALLO_PP_CORE = [
+    ...ppCore('βάλλω', [
+      [11, 'βάλλω',   'present active indicative first person singular', 'present principal part'],
+      [11, 'βάλλειν', 'present active infinitive', 'present infinitive'],
+      [11, 'βαλῶ',    'future active indicative first person singular', 'future principal part'],
+      [15, 'ἐβλήθην', 'aorist passive indicative first person singular', 'aorist passive principal part'],
+      [16, 'βέβληκα', 'perfect active indicative first person singular', 'perfect active principal part'],
+      [16, 'βέβλημαι','perfect middle/passive indicative first person singular', 'perfect middle/passive principal part']
+    ]),
+    { chapter: 16, family: 'βάλλω — perfect middle/passive indicative (optional)', forms: BALLO_PP_PF_MP }
+  ];
+
+  const LAMBANO_PP_CORE = ppCore('λαμβάνω', [
+    [11, 'λαμβάνω',  'present active indicative first person singular', 'present principal part'],
+    [11, 'λαμβάνειν','present active infinitive', 'present infinitive'],
+    [11, 'λήμψομαι', 'future middle indicative first person singular', 'future principal part'],
+    [15, 'ἐλήμφθην', 'aorist passive indicative first person singular', 'aorist passive principal part'],
+    [16, 'εἴληφα',   'perfect active indicative first person singular', 'perfect active principal part'],
+    // εἴλημμαι: consonant-stem perfect m/p — 1sg principal part only (the full
+    // paradigm's assimilated 2sg/3sg are rare and error-prone).
+    [16, 'εἴλημμαι', 'perfect middle/passive indicative first person singular', 'perfect middle/passive principal part']
+  ]);
+
+  const LEIPO_PP_CORE = ppCore('λείπω', [
+    [11, 'λείπω',   'present active indicative first person singular', 'present principal part'],
+    [11, 'λείπειν', 'present active infinitive', 'present infinitive'],
+    [11, 'λείψω',   'future active indicative first person singular', 'future principal part'],
+    [15, 'ἐλείφθην','aorist passive indicative first person singular', 'aorist passive principal part'],
+    [16, 'λέλοιπα', 'perfect active indicative first person singular', 'perfect active principal part'],
+    [16, 'λέλειμμαι','perfect middle/passive indicative first person singular', 'perfect middle/passive principal part']
+  ]);
+
+  const GINOMAI_PP_PF_MP = {
+    'γεγένημαι':  'perfect middle/passive indicative first person singular',
+    'γεγένησαι':  'perfect middle/passive indicative second person singular',
+    'γεγένηται':  'perfect middle/passive indicative third person singular',
+    'γεγενήμεθα': 'perfect middle/passive indicative first person plural',
+    'γεγένησθε':  'perfect middle/passive indicative second person plural',
+    'γεγένηνται': 'perfect middle/passive indicative third person plural'
+  };
+  const GINOMAI_PP_CORE = [
+    ...ppCore('γίνομαι', [
+      [11, 'γίνομαι',   'present middle/passive indicative first person singular', 'present principal part'],
+      [11, 'γίνεσθαι',  'present middle/passive infinitive', 'present infinitive'],
+      [11, 'γενήσομαι', 'future middle indicative first person singular', 'future principal part'],
+      [11, 'ἐγενόμην',  'aorist middle indicative first person singular', 'aorist (middle) principal part'],
+      [15, 'ἐγενήθην',  'aorist passive indicative first person singular', 'aorist passive principal part'],
+      [16, 'γέγονα',    'perfect active indicative first person singular', 'perfect active principal part'],
+      [16, 'γεγένημαι', 'perfect middle/passive indicative first person singular', 'perfect middle/passive principal part']
+    ]),
+    { chapter: 16, family: 'γίνομαι — perfect middle/passive indicative (optional)', forms: GINOMAI_PP_PF_MP }
+  ];
+
   const LEMMA_INVENTORY = {
     'First and second personal pronouns': {
       // Lookup/fallback only (not drill cards — the enclitics share the
@@ -3306,13 +3720,15 @@
         ...BALLO_PRESENT_ACTIVE_PARTICIPLE,
         ...BALLO_EXTRA_FORMS,
         ...BALLO_AORIST_ACTIVE_PARTICIPLE,
-        ...BALLO_AORIST_PASSIVE_PARTICIPLE
+        ...BALLO_AORIST_PASSIVE_PARTICIPLE,
+        ...BALLO_PP_PF_MP
       },
       optionalFormGroups: [
         ...BALLO_OPTIONAL_GROUPS,
         ...BALLO_PARTICIPLE_OPTIONAL,
         { chapter: 15, family: 'βάλλω — aorist passive participle βληθείς (optional)',
-          forms: BALLO_AORIST_PASSIVE_PARTICIPLE }
+          forms: BALLO_AORIST_PASSIVE_PARTICIPLE },
+        ...BALLO_PP_CORE
       ]
     },
     'γίνομαι': {
@@ -3321,14 +3737,16 @@
         ...GINOMAI_AORIST_MIDDLE_PARTICIPLE,
         ...GINOMAI_PERFECT_ACTIVE_PARTICIPLE,
         ...GINOMAI_AORIST_PASSIVE_PARTICIPLE,
-        ...GINOMAI_OPTATIVE_ALL
+        ...GINOMAI_OPTATIVE_ALL,
+        ...GINOMAI_PP_PF_MP
       },
       optionalFormGroups: [
         ...GINOMAI_OPTIONAL_GROUPS,
         ...GINOMAI_OPTATIVE_GROUPS,
         ...GINOMAI_PARTICIPLE_OPTIONAL,
         { chapter: 15, family: 'γίνομαι — aorist passive participle γενηθείς (optional)',
-          forms: GINOMAI_AORIST_PASSIVE_PARTICIPLE }
+          forms: GINOMAI_AORIST_PASSIVE_PARTICIPLE },
+        ...GINOMAI_PP_CORE
       ]
     },
     'λαμβάνω': {
@@ -3337,14 +3755,16 @@
         ...LAMBANO_EXTRA_FORMS,
         ...LAMBANO_AORIST_ACTIVE_PARTICIPLE,
         ...LAMBANO_AORIST_PASSIVE_PARTICIPLE,
-        ...LAMBANO_OPTATIVE_ALL
+        ...LAMBANO_OPTATIVE_ALL,
+        'εἴλημμαι': 'perfect middle/passive indicative first person singular'
       },
       optionalFormGroups: [
         ...LAMBANO_OPTIONAL_GROUPS,
         ...LAMBANO_OPTATIVE_GROUPS,
         ...LAMBANO_PARTICIPLE_OPTIONAL,
         { chapter: 15, family: 'λαμβάνω — aorist passive participle λημφθείς (optional)',
-          forms: LAMBANO_AORIST_PASSIVE_PARTICIPLE }
+          forms: LAMBANO_AORIST_PASSIVE_PARTICIPLE },
+        ...LAMBANO_PP_CORE
       ]
     },
     'λείπω': {
@@ -3352,13 +3772,15 @@
         ...LEIPO_PRESENT_ACTIVE_PARTICIPLE,
         ...LEIPO_EXTRA_FORMS,
         ...LEIPO_AORIST_ACTIVE_PARTICIPLE,
-        ...LEIPO_AORIST_PASSIVE_PARTICIPLE
+        ...LEIPO_AORIST_PASSIVE_PARTICIPLE,
+        'λέλειμμαι': 'perfect middle/passive indicative first person singular'
       },
       optionalFormGroups: [
         ...LEIPO_OPTIONAL_GROUPS,
         ...LEIPO_PARTICIPLE_OPTIONAL,
         { chapter: 15, family: 'λείπω — aorist passive participle λειφθείς (optional)',
-          forms: LEIPO_AORIST_PASSIVE_PARTICIPLE }
+          forms: LEIPO_AORIST_PASSIVE_PARTICIPLE },
+        ...LEIPO_PP_CORE
       ]
     },
     // Suppletive / 2nd-aorist participle declensions — extraForms only,
@@ -3368,49 +3790,69 @@
       extraForms: {
         ...LEGO_PRESENT_ACTIVE_PARTICIPLE,
         ...LEGO_AORIST_ACTIVE_PARTICIPLE,
-        ...LEGO_AORIST_PASSIVE_PARTICIPLE
-      }
+        ...LEGO_AORIST_PASSIVE_PARTICIPLE,
+        ...LEGO_PP_EXTRA
+      },
+      optionalFormGroups: [...LEGO_PP_CORE]
     },
     'ὁράω': {
       extraForms: {
         ...ORAO_PRESENT_ACTIVE_PARTICIPLE,
         ...HORAO_AORIST_ACTIVE_PARTICIPLE,
-        ...HORAO_AORIST_PASSIVE_PARTICIPLE
-      }
+        ...HORAO_AORIST_PASSIVE_PARTICIPLE,
+        ...HORAO_PP_EXTRA
+      },
+      optionalFormGroups: [...HORAO_PP_CORE]
     },
     'ἔρχομαι': {
       extraForms: {
         ...ERCHOMAI_PRESENT_MIDDLE_PARTICIPLE,
-        ...ERCHOMAI_AORIST_ACTIVE_PARTICIPLE
-      }
+        ...ERCHOMAI_AORIST_ACTIVE_PARTICIPLE,
+        ...ERCHOMAI_PP_EXTRA
+      },
+      optionalFormGroups: [...ERCHOMAI_PP_CORE]
     },
     'ἔχω': {
       extraForms: {
         ...ECHO_PRESENT_ACTIVE_PARTICIPLE,
         ...ECHO_AORIST_ACTIVE_PARTICIPLE,
-        ...ECHO_AORIST_PASSIVE_PARTICIPLE
-      }
+        ...ECHO_AORIST_PASSIVE_PARTICIPLE,
+        ...ECHO_PP_EXTRA
+      },
+      optionalFormGroups: [...ECHO_PP_CORE]
     },
     'ἄγω': {
       extraForms: {
         ...AGO_PRESENT_ACTIVE_PARTICIPLE,
         ...AGO_AORIST_ACTIVE_PARTICIPLE,
-        ...AGO_AORIST_PASSIVE_PARTICIPLE
-      }
+        ...AGO_AORIST_PASSIVE_PARTICIPLE,
+        ...AGO_PP_EXTRA
+      },
+      optionalFormGroups: [...AGO_PP_CORE]
     },
     'γινώσκω': {
       extraForms: {
         ...GINOSKO_PRESENT_ACTIVE_PARTICIPLE,
         ...GINOSKO_AORIST_ACTIVE_PARTICIPLE,
-        ...GINOSKO_AORIST_PASSIVE_PARTICIPLE
-      }
+        ...GINOSKO_AORIST_PASSIVE_PARTICIPLE,
+        ...GINOSKO_PP_EXTRA
+      },
+      optionalFormGroups: [...GINOSKO_PP_CORE]
     },
     'κρίνω': {
       extraForms: {
         ...KRINO_PRESENT_ACTIVE_PARTICIPLE,
         ...KRINO_AORIST_ACTIVE_PARTICIPLE,
-        ...KRINO_AORIST_PASSIVE_PARTICIPLE
-      }
+        ...KRINO_AORIST_PASSIVE_PARTICIPLE,
+        ...KRINO_PP_EXTRA
+      },
+      optionalFormGroups: [...KRINO_PP_CORE]
+    },
+    'μένω': {
+      // Liquid verb, intransitive — no perfect middle/passive, no aorist
+      // passive. Principal parts: μένω, μενῶ, ἔμεινα, μεμένηκα.
+      extraForms: { ...MENO_PP_EXTRA },
+      optionalFormGroups: [...MENO_PP_CORE]
     },
     'φιλέω': {
       extraForms: {
@@ -3432,14 +3874,16 @@
         ...DIDOMI_PRESENT_ACTIVE_PARTICIPLE,
         ...DIDOMI_AORIST_ACTIVE_PARTICIPLE,
         ...DIDOMI_AORIST_PASSIVE_PARTICIPLE,
-        ...DIDOMI_OPTATIVE_ALL
+        ...DIDOMI_OPTATIVE_ALL,
+        ...DIDOMI_PERFECT_MP_INDICATIVE
       },
       optionalFormGroups: [
         ...DIDOMI_OPTIONAL_GROUPS,
         ...DIDOMI_OPTATIVE_GROUPS,
         ...DIDOMI_PARTICIPLE_OPTIONAL,
         { chapter: 19, family: 'δίδωμι — aorist passive participle δοθείς (optional)',
-          forms: DIDOMI_AORIST_PASSIVE_PARTICIPLE }
+          forms: DIDOMI_AORIST_PASSIVE_PARTICIPLE },
+        ...DIDOMI_PP_CORE
       ]
     },
     'τίθημι': {
@@ -3447,13 +3891,15 @@
         ...TITHEMI_EXTRA_FORMS,
         ...TITHEMI_PRESENT_ACTIVE_PARTICIPLE,
         ...TITHEMI_AORIST_ACTIVE_PARTICIPLE,
-        ...TITHEMI_AORIST_PASSIVE_PARTICIPLE
+        ...TITHEMI_AORIST_PASSIVE_PARTICIPLE,
+        ...TITHEMI_PP_EXTRA
       },
       optionalFormGroups: [
         ...TITHEMI_OPTIONAL_GROUPS,
         ...TITHEMI_PARTICIPLE_OPTIONAL,
         { chapter: 19, family: 'τίθημι — aorist passive participle τεθείς (optional)',
-          forms: TITHEMI_AORIST_PASSIVE_PARTICIPLE }
+          forms: TITHEMI_AORIST_PASSIVE_PARTICIPLE },
+        ...TITHEMI_PP_CORE
       ]
     },
     'ἵστημι': {
@@ -3462,18 +3908,20 @@
         ...HISTEMI_PRESENT_ACTIVE_PARTICIPLE,
         ...HISTEMI_SECOND_AORIST_ACTIVE_PARTICIPLE,
         ...HISTEMI_PERFECT_ACTIVE_PARTICIPLE,
-        ...HISTEMI_AORIST_PASSIVE_PARTICIPLE
+        ...HISTEMI_AORIST_PASSIVE_PARTICIPLE,
+        ...HISTEMI_PERFECT_ACTIVE_INDICATIVE
       },
       optionalFormGroups: [
         ...HISTEMI_OPTIONAL_GROUPS,
         ...HISTEMI_PARTICIPLE_OPTIONAL,
         { chapter: 19, family: 'ἵστημι — aorist passive participle σταθείς (optional)',
-          forms: HISTEMI_AORIST_PASSIVE_PARTICIPLE }
+          forms: HISTEMI_AORIST_PASSIVE_PARTICIPLE },
+        ...HISTEMI_PP_CORE
       ]
     },
     'δίδομαι': {
-      extraForms: DIDOMAI_EXTRA_FORMS,
-      optionalFormGroups: DIDOMAI_OPTIONAL_GROUPS
+      extraForms: { ...DIDOMAI_EXTRA_FORMS, ...DIDOMI_PERFECT_MP_INDICATIVE },
+      optionalFormGroups: [...DIDOMAI_OPTIONAL_GROUPS, ...DIDOMAI_PP_CORE]
     },
     // Hand-authored optional coverage (ported from Mounce #86). These verbs
     // aren't paradigm exemplars in duff's morphology data yet, so the optional
