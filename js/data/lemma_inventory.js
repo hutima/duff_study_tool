@@ -3167,9 +3167,10 @@
   ];
 
   // ─── οἶδα (defective second perfect, Ch 18) optional / lookup forms ─
-  // Required drill (W7_OIDA_*): perfect + pluperfect indicative, and the
-  // participle's nom. masc. (εἰδώς / εἰδότες). These add the perfect
-  // subjunctive, imperative, infinitive, and the participle's full declension.
+  // Required drill (W7_OIDA_*): perfect + pluperfect indicative, the
+  // infinitive (εἰδέναι), and the participle's nom. masc. (εἰδώς / εἰδότες).
+  // These add the perfect subjunctive, imperative, and the participle's full
+  // declension.
   // οἶδα is morphologically perfect throughout (present in meaning), active-
   // only, with no present/imperfect/aorist forms — see its impossible* lists.
   const OIDA_PERFECT_SUBJUNCTIVE = {
@@ -3217,13 +3218,14 @@
     ...OIDA_PERFECT_INFINITIVE,
     ...OIDA_PERFECT_ACTIVE_PARTICIPLE
   };
+  // The infinitive εἰδέναι is a REQUIRED drill form (W7_OIDA_INFINITIVE), so it
+  // is NOT an optional group — but it stays in OIDA_EXTRA_FORMS above for the
+  // lookup/fallback pool.
   const OIDA_OPTIONAL_GROUPS = [
     { chapter: 18, family: 'οἶδα — perfect subjunctive (optional)',
       forms: OIDA_PERFECT_SUBJUNCTIVE },
     { chapter: 18, family: 'οἶδα — perfect imperative ἴσθι (optional)',
       forms: OIDA_PERFECT_IMPERATIVE },
-    { chapter: 18, family: 'οἶδα — perfect infinitive εἰδέναι (optional)',
-      forms: OIDA_PERFECT_INFINITIVE },
     ...participleOptionalGroups(18, 'οἶδα — perfect active participle εἰδώς',
       OIDA_PERFECT_ACTIVE_PARTICIPLE, { core: false })
   ];

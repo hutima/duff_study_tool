@@ -228,11 +228,15 @@
   // requirement. Morphologically a perfect active participle (εἰδώς, εἰδυῖα,
   // εἰδός); the rest of its declension and the other moods are optional —
   // see LEMMA_INVENTORY['οἶδα'].
-  window.registerSupplementalVocabSet('W7_OIDA_PARTICIPLE', {
-    label: 'οἶδα — perfect active participle (εἰδώς)',
+  // οἶδα's infinitive εἰδέναι ("to know") + participle εἰδώς ("knowing") —
+  // both morphologically perfect active, Duff's base non-finite requirement.
+  // (Kept in one set: the parsing-card auto-generator needs ≥2 forms per set.)
+  window.registerSupplementalVocabSet('W7_OIDA_INF_PART', {
+    label: 'οἶδα — perfect active infinitive & participle',
     week: 7,
     chapter: 18,
     cards: [
+      { g: 'εἰδέναι', e: 'to know (Perfect active infinitive)', required: true },
       { g: 'εἰδώς', e: 'knowing (Perfect active participle, masc. Nom. sg.)', required: true },
       { g: 'εἰδότες', e: 'knowing (Perfect active participle, masc. Nom. pl.)', required: true }
     ]
