@@ -62,6 +62,7 @@ jobs:
           }
 
           const relaxed = { leechEnabled: true, lapseResumeCapDays: 14 };
+          const almostEqual = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-9, `${actual} ~= ${expected}`);
 
           test('fresh-card Again retries never become lapses or leeches', () => {
             const applyHardLapse = loadApplyHardLapse();
@@ -78,7 +79,7 @@ jobs:
             }
             assert.equal(progress.lapseCount, 0);
             assert.equal(progress.leechDrill, false);
-            assert.equal(progress.ease, 2.3);
+            almostEqual(progress.ease, 2.3);
           });
 
           test('repeated Again in one established-card relearn episode counts one lapse', () => {
@@ -91,7 +92,7 @@ jobs:
             };
             applyHardLapse(progress, relaxed, 1_800_000_000_000);
             assert.equal(progress.lapseCount, 1);
-            assert.equal(progress.ease, 2.1);
+            almostEqual(progress.ease, 2.1);
             assert.equal(progress.srsStage, 3);
             for (let n = 1; n <= 4; n++) {
               const now = 1_800_000_000_000 + n * 1000;
@@ -100,7 +101,7 @@ jobs:
             }
             assert.equal(progress.lapseCount, 1);
             assert.equal(progress.leechDrill, false);
-            assert.equal(progress.ease, 2.1);
+            almostEqual(progress.ease, 2.1);
             assert.equal(progress.srsStage, 3);
           });
 
@@ -193,12 +194,17 @@ jobs:
           text = text[:start] + replacement + text[end:]
           path.write_text(text)
 
-          for filename in ('sw.js', 'index.html'):
-            p = Path(filename)
-            src = p.read_text()
-            if 'v343' not in src:
-              raise SystemExit(f'expected v343 cache token in {filename}')
-            p.write_text(src.replace('v343', 'v344'))
+          p = Path('sw.js')
+          src = p.read_text()
+          if 'v343' not in src or '?v=343' not in src:
+            raise SystemExit('expected v343 cache name and ?v=343 assets in sw.js')
+          p.write_text(src.replace('v343', 'v344').replace('?v=343', '?v=344'))
+
+          p = Path('index.html')
+          src = p.read_text()
+          if '?v=343' not in src:
+            raise SystemExit('expected ?v=343 asset tokens in index.html')
+          p.write_text(src.replace('?v=343', '?v=344'))
           PY
 
       - name: Run green verification
