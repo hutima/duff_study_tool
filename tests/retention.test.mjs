@@ -4,10 +4,57 @@ import vm from 'node:vm';
 import { readFileSync } from 'node:fs';
 import * as Retention from '../js/domain/deck/retention.js';
 import { getBatch, rateBatch, sanitizeSessions } from '../js/domain/deck/retention.js';
+import { progressCardId } from '../js/domain/deck/filters.js';
+import { addVariantFaceSample, recordVariantRoundConfidence } from '../js/domain/srs/confidence.js';
 
 const cards = Array.from({ length: 700 }, (_, i) => ({ id: `card-${i}`, due: i < 80 }));
 
-function loadRetentionFlow(spacedRepetition) {
+test('20 base cards include all virtual faces without using extra slots', () => {
+  const families = Array.from({ length: 40 }, (_, i) => [
+    { id: `word-${i}` }, { id: `word-${i}::2aor` }, { id: `word-${i}::mi::0` }
+  ]).flat();
+  const batch = getBatch({}, 'families', families, () => true, Math.random, c => progressCardId(c.id));
+  assert.equal(new Set(batch.ids.map(progressCardId)).size, 20);
+  assert.equal(batch.ids.length, 60);
+  for (const id of batch.ids) {
+    const base = progressCardId(id);
+    assert.ok(batch.ids.includes(base) && batch.ids.includes(`${base}::2aor`) && batch.ids.includes(`${base}::mi::0`));
+  }
+  const restored = sanitizeSessions({ families: batch }).families;
+  assert.deepEqual(restored.ids, batch.ids, 'saving must not truncate the virtual faces at 20');
+  assert.deepEqual(restored.pending, batch.pending);
+});
+
+test('legacy and partially reviewed batches acquire missing enabled siblings', () => {
+  const family = [{ id: 'say' }, { id: 'say::2aor' }, { id: 'say::perfact' }];
+  const sessions = { deck: { ids: ['say'], pending: [], savedAt: 1 } };
+  const batch = getBatch(sessions, 'deck', family, c => c.id !== 'say', Math.random, c => progressCardId(c.id));
+  assert.deepEqual(batch.ids, family.map(c => c.id));
+  assert.deepEqual(batch.pending, ['say::2aor', 'say::perfact']);
+  assert.equal(batch.groupsVersion, 2);
+  const saved = JSON.parse(JSON.stringify(sessions));
+  assert.deepEqual(getBatch(saved, 'deck', family, () => false, Math.random, c => progressCardId(c.id)).pending, batch.pending);
+});
+
+test('a word with only one eligible face brings its siblings without importing unrelated words', () => {
+  const family = [{ id: 'say' }, { id: 'say::2aor' }, { id: 'unrelated' }];
+  const batch = getBatch({}, 'deck', family, c => c.id === 'say::2aor', Math.random, c => progressCardId(c.id));
+  assert.deepEqual(batch.ids, ['say', 'say::2aor']);
+  assert.deepEqual(batch.pending, ['say::2aor']);
+});
+
+test('enabling more virtual forms expands the same batch without sampling new base cards', () => {
+  const sessions = {};
+  const scope = [{ id: 'say' }, { id: 'say::2aor' }];
+  const batch = getBatch(sessions, 'deck', scope, () => true, Math.random, c => progressCardId(c.id));
+  rateBatch(batch, 'easy');
+  const expanded = [...scope, { id: 'say::perfact' }, { id: 'unrelated' }];
+  getBatch(sessions, 'deck', expanded, () => true, Math.random, c => progressCardId(c.id));
+  assert.deepEqual(batch.ids, ['say', 'say::2aor', 'say::perfact']);
+  assert.deepEqual(batch.pending, ['say::2aor', 'say::perfact']);
+});
+
+function loadRetentionFlow(spacedRepetition, deckCards = cards) {
   const source = readFileSync(new URL('../js/app/main.js', import.meta.url), 'utf8');
   const start = source.indexOf('function isRetentionActive()');
   const end = source.indexOf('function buildStudyDeck(', start);
@@ -16,11 +63,12 @@ function loadRetentionFlow(spacedRepetition) {
   const calls = [];
   const runtime = {
     retentionMode: true, retentionSessions: {}, studyMode: 'vocab',
-    originalDeck: cards, marks: {}, spacedRepetition,
+    originalDeck: deckCards, marks: {}, spacedRepetition,
     selectedKeys: ['1'], directionToGreek: false, deck: []
   };
   const context = vm.createContext({
     runtime, Retention,
+    progressCardId, getVariantCycleInfo: () => null,
     getDeckStateKey: () => `${runtime.directionToGreek}:${runtime.selectedKeys.join(',')}:${runtime.spacedRepetition}`,
     isCardDue: card => card.due && !scheduled.has(card.id),
     noteStudyInteraction() {}, clearSpacedUndoSnapshot() {},
@@ -38,6 +86,62 @@ function loadRetentionFlow(spacedRepetition) {
   return { context, runtime, elements, calls };
 }
 
+function loadVariantFlow() {
+  const family = [{ id: 'say', due: true }, { id: 'say::2aor', due: true }, { id: 'say::perfact', due: true }];
+  const flow = loadRetentionFlow(true, family);
+  const ctx = flow.context;
+  const progress = {};
+  Object.assign(ctx, {
+    clamp: (v, min, max) => Math.min(max, Math.max(min, v)),
+    SRS_VARIANT_HOLD_MS: 2 * 60 * 60 * 1000,
+    getDirectionalProgressStore: () => progress,
+    getDirectionalMarksStore: () => flow.runtime.marks,
+    derivedCardFaceKey: card => card.id.includes('::') ? card.id.split('::').slice(1).join('::') : 'base',
+    addVariantFaceSample, recordVariantRoundConfidence,
+    getActiveCadence: () => ({}),
+    setProgressDelay(p, delay, now) { p.dueAt = now + delay; p.intervalDays = delay / 86400000; },
+    applyCorrectOutcome(p, cadence, now) { p.dueAt = now + 86400000; flow.calls.push('scheduled'); },
+    recordStudyOutcome(id, outcome) { flow.calls.push(outcome); return ctx.getWordProgress(id, { persist: true }); }
+  });
+  const source = readFileSync(new URL('../js/app/main.js', import.meta.url), 'utf8');
+  // Exercise the actual shared-progress scheduler and round bookkeeping.
+  vm.runInContext(source.slice(source.indexOf('function getWordProgress('), source.indexOf('function sortCardsByDue(')), ctx);
+  vm.runInContext(source.slice(source.indexOf('function applySpacedReview('), source.indexOf('function getDueCount(')), ctx);
+  flow.runtime.deck = ctx.buildRetentionDeck();
+  return { ...flow, progress };
+}
+
+test('shared split-card rounds stay in the batch after Uncertain and schedule only after all Easy', () => {
+  const { context: flow, runtime, progress, calls } = loadVariantFlow();
+  assert.equal(runtime.deck.length, 3);
+  flow.retentionMark('easy');
+  assert.equal(runtime.deck.length, 2);
+  assert.equal(flow.retentionCounts(flow.retentionBatch()).done, 0);
+  flow.retentionMark('pass');
+  assert.equal(runtime.deck.length, 2);
+  flow.retentionMark('easy');
+  assert.equal(runtime.deck.length, 3, 'Uncertain resets the complete shared set in this batch');
+  assert.equal(flow.retentionCounts(flow.retentionBatch()).done, 0);
+  for (let i = 0; i < 3; i++) flow.retentionMark('easy');
+  assert.equal(runtime.deck.length, 0);
+  assert.equal(flow.retentionCounts(flow.retentionBatch()).done, 1);
+  assert.equal(calls.filter(c => c === 'scheduled').length, 1);
+  assert.ok(progress.say.dueAt > Date.now());
+});
+
+test('an expired shared round requeues its cleared siblings instead of falsely finishing the batch', () => {
+  const { context: flow, runtime, progress } = loadVariantFlow();
+  flow.retentionMark('easy');
+  assert.equal(runtime.deck.length, 2);
+  progress.say.cycleStartedAt = Date.now() - 3 * 60 * 60 * 1000;
+  progress.say.dueAt = Date.now() - 1;
+  runtime.deck = flow.buildRetentionDeck();
+  assert.equal(runtime.deck.length, 3);
+  assert.equal(flow.retentionCounts(flow.retentionBatch()).done, 0);
+  for (let i = 0; i < 3; i++) flow.retentionMark('easy');
+  assert.equal(runtime.deck.length, 0);
+});
+
 for (const spaced of [true, false]) test(`app flow completes and resumes batches (${spaced ? 'spaced' : 'unspaced'})`, () => {
   const { context: flow, runtime, elements, calls } = loadRetentionFlow(spaced);
   const original = Array.from(runtime.deck, c => c.id);
@@ -51,7 +155,7 @@ for (const spaced of [true, false]) test(`app flow completes and resumes batches
   flow.retentionMark('easy');
   assert.equal(runtime.deck.length, 19);
   flow.renderRetentionProgress();
-  assert.match(elements.get('progressText').textContent, /1 \/ 20 completed/);
+  assert.match(elements.get('progressText').textContent, /1 \/ 20 base cards completed/);
   runtime.retentionSessions = sanitizeSessions(JSON.parse(JSON.stringify(runtime.retentionSessions)));
   const remaining = Array.from(runtime.deck, c => c.id);
   runtime.deck = flow.buildRetentionDeck();
