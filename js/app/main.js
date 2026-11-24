@@ -136,6 +136,7 @@ import { clamp, isPlainObject, shuffleArray, escapeHtml, cloneForUndo } from '..
 import { formatUsageDuration, formatAnalyticsDate, formatAnalyticsDateTime, getUsageDayKey, getUnspacedArchiveDayKey } from '../utils/time.js';
 import { getStorage, isLikelyIOS } from '../utils/storage.js';
 import { compareGreekAlphabetical } from '../utils/greekSort.js';
+import * as Retention from '../domain/deck/retention.js';
 
 // Domain — SRS
 import { SRS_NEAR_WINDOW_MS, SRS_CYCLE_ADVANCE_MS, SESSION_IDLE_RESET_MS, getCadencePreset,
@@ -396,6 +397,8 @@ configureModals({
   onDisclaimerAccepted: () => maybeScheduleInstallPrompt()
 });
 configureProgress({
+  renderRetentionProgress: () => renderRetentionProgress(),
+  renderRetentionReview: () => renderRetentionReview(),
   accumulateUsageTime: () => accumulateUsageTime(),
   accumulateActiveStudyTime: () => accumulateActiveStudyTime(),
   updateUsageMeta: () => updateUsageMeta(),
@@ -440,6 +443,7 @@ configureProgress({
     .map((p) => p.lemma)
 });
 configureRender({
+  renderRetentionComplete: (area) => renderRetentionComplete(area),
   saveState: () => saveState(),
   syncLayoutVisibility: () => syncLayoutVisibility(),
   noteStudyInteraction: () => noteStudyInteraction(),
@@ -509,6 +513,9 @@ configureSelectors({
   }
 });
 configureNavigation({
+  retentionNavigate: (dir) => retentionNavigate(dir),
+  retentionMark: (outcome) => retentionMark(outcome),
+  isRetentionActive: () => isRetentionActive(),
   noteStudyInteraction: () => noteStudyInteraction(),
   isMorphologyMode: () => isMorphologyMode(),
   isParsingMode: () => isParsingMode(),
@@ -1913,6 +1920,10 @@ function onDueHistogramToggle(key, el) {
 }
 
 function syncToggleButtons() {
+  const retentionToggle = document.getElementById('retentionToggle');
+  if (retentionToggle) retentionToggle.setAttribute('aria-checked', runtime.retentionMode ? 'true' : 'false');
+  const retentionSwitch = document.getElementById('retentionBtn');
+  if (retentionSwitch) retentionSwitch.classList.toggle('on', !!runtime.retentionMode);
   const requiredSwitch  = document.getElementById('requiredBtn');
   // Mirror of the "Starred words only" toggle that also lives in the study
   // selector (under "Deselect all"); both drive the same runtime.requiredOnly.
@@ -2133,6 +2144,8 @@ function syncToggleButtons() {
 }
 
 function syncLayoutVisibility() {
+  const retentionToggle = document.getElementById('retentionToggle');
+  if (retentionToggle) retentionToggle.style.display = runtime.studyMode === 'vocab' ? 'flex' : 'none';
   const controlsBar = document.getElementById('controlsBar');
   const navRow = document.getElementById('navRow');
   const markRow = document.getElementById('markRow');
@@ -2312,6 +2325,18 @@ function syncLayoutVisibility() {
     }
   }
 
+  if (isRetentionActive()) {
+    // Keep navigation inside the fixed batch and leave the review clock alone.
+    for (const el of [prevBtn, undoBtn, navResetBtn, ffRow, resetActionsSection, spacedToggle, dailyResetToggle, shuffleToggle]) {
+      if (el) el.style.display = 'none';
+    }
+    if (markRow) markRow.style.display = runtime.deck.length ? 'flex' : 'none';
+    if (navRow) navRow.style.display = runtime.deck.length ? 'flex' : 'none';
+    if (nextBtn) {
+      nextBtn.textContent = 'Skip →';
+      nextBtn.classList.remove('spaced-again', 'nav-next-as-reset');
+    }
+  }
 }
 
 function ensureUsageStats(stats = runtime.appUsageStats) {
@@ -3178,7 +3203,129 @@ function avoidHeadCollision(deck, avoidHeadId) {
   return deck;
 }
 
+function isRetentionActive() {
+  return runtime.retentionMode && runtime.studyMode === 'vocab';
+}
+
+function retentionBatch() {
+  const key = getDeckStateKey();
+  return Retention.getBatch(runtime.retentionSessions, key, runtime.originalDeck,
+    card => runtime.spacedRepetition ? isCardDue(card) : runtime.marks[card.id] !== 'known');
+}
+
+function buildRetentionDeck() {
+  const batch = retentionBatch();
+  const byId = new Map(runtime.originalDeck.map(card => [card.id, card]));
+  const cards = batch.pending.map(id => byId.get(id)).filter(Boolean);
+  runtime.activeDeckCount = cards.length;
+  runtime.middleDeckCount = 0;
+  runtime.unspacedMiddleCount = 0;
+  runtime.currentIdx = 0;
+  return cards;
+}
+
+function refreshRetention() {
+  runtime.deck = buildRetentionDeck();
+  runtime.isFlipped = false;
+  clearSpacedUndoSnapshot();
+  renderCard();
+  renderProgress();
+  renderReview();
+  saveState();
+}
+
+function toggleRetentionMode() {
+  saveCurrentDeckStateToBank();
+  runtime.retentionMode = !runtime.retentionMode;
+  clearSpacedUndoSnapshot();
+  runtime.unspacedHistory = [];
+  syncToggleButtons();
+  if (runtime.selectedKeys.length) {
+    loadDeckFromKeys(runtime.selectedKeys, runtime.currentSession?.id || null);
+  } else {
+    saveState();
+    syncLayoutVisibility();
+  }
+}
+
+function nextRetentionBatch() {
+  if (!isRetentionActive() || retentionBatch().pending.length) return;
+  delete runtime.retentionSessions[getDeckStateKey()];
+  refreshRetention();
+}
+
+function retentionMark(outcome) {
+  if (!isRetentionActive()) return false;
+  const batch = retentionBatch();
+  const card = runtime.deck[0];
+  if (!card || !batch.pending.length) return true;
+  noteStudyInteraction();
+  const rated = outcome === 'easy' ? 'easy' : outcome === 'pass' ? 'pass' : 'again';
+  if (runtime.spacedRepetition) {
+    applySpacedReview(card, rated);
+  } else {
+    recordStudyOutcome(card.id, rated === 'easy' ? 'known' : rated === 'pass' ? 'pass' : 'review');
+    applyUnspacedSharedSchedule(card, rated);
+    if (rated === 'easy') runtime.marks[card.id] = 'known';
+    else delete runtime.marks[card.id];
+  }
+  Retention.rateBatch(batch, rated);
+  refreshRetention();
+  return true;
+}
+
+function retentionNavigate(dir) {
+  if (!isRetentionActive()) return false;
+  // Skip rotates within this batch without grading or replacing the card.
+  if (dir > 0 && runtime.deck.length) {
+    const batch = retentionBatch();
+    Retention.rateBatch(batch, 'skip');
+    noteStudyInteraction();
+    refreshRetention();
+  }
+  return true;
+}
+
+function renderRetentionComplete(area) {
+  if (!isRetentionActive() || runtime.deck.length || !runtime.originalDeck.length) return false;
+  const batch = retentionBatch();
+  area.innerHTML = batch.ids.length
+    ? `<div class="empty-state"><div class="big">✓</div><strong>Batch complete · ${batch.ids.length} cards</strong><p>Good stopping point. Your progress is saved.</p><button class="ctrl-btn" type="button" onclick="nextRetentionBatch()">Review next 20 →</button></div>`
+    : '<div class="empty-state"><div class="big">✓</div><strong>No eligible cards right now</strong><p>All cards in this selection are scheduled for later or already confirmed.</p><button class="ctrl-btn" type="button" onclick="nextRetentionBatch()">Check again</button></div>';
+  return true;
+}
+
+function renderRetentionProgress() {
+  if (!isRetentionActive()) return false;
+  const batch = retentionBatch();
+  const done = batch.ids.length - batch.pending.length;
+  const pct = batch.ids.length ? Math.round(done / batch.ids.length * 100) : 0;
+  const text = document.getElementById('progressText');
+  if (text) text.textContent = `Retention · ${done} / ${batch.ids.length} completed · ${batch.pending.length} remaining`;
+  const fill = document.getElementById('progressFill');
+  if (fill) fill.style.width = `${pct}%`;
+  const percent = document.getElementById('progressPercent');
+  if (percent) percent.textContent = `${pct}%`;
+  if (isAnalyticsModalOpen()) renderAnalyticsOverlay();
+  return true;
+}
+
+function renderRetentionReview() {
+  if (!isRetentionActive()) return false;
+  const batch = retentionBatch();
+  const tag = document.getElementById('reviewDeckTag');
+  if (tag) tag.textContent = 'Retention batch';
+  const stats = document.getElementById('reviewStats');
+  if (stats) stats.textContent = `${batch.ids.length - batch.pending.length} completed · ${batch.pending.length} left in this batch`;
+  const sort = document.getElementById('reviewSortRow');
+  if (sort) sort.innerHTML = '';
+  const list = document.getElementById('reviewList');
+  if (list) list.innerHTML = '<p>20 random eligible cards at a time. Hard and Uncertain repeat within this batch until you mark them Easy. Skip keeps the card in the batch. You can stop and resume anytime.</p>';
+  return true;
+}
+
 function buildStudyDeck(cards, options = {}) {
+  if (isRetentionActive()) return buildRetentionDeck();
   // Parsing owns its deck ordering: a status-weighted shuffle (orderParsingPool)
   // that floats unseen/wrong forms ahead of mastered ones, rather than the
   // spaced/unspaced pile machinery below. It carries no SRS schedule and no
@@ -3899,6 +4046,7 @@ function reshuffleUpcomingCards() {
 }
 
 function maybeReturnKnownCardToActivePile() {
+  if (isRetentionActive()) return false;
   if (runtime.spacedRepetition || isMorphologyMode() || KNOWN_CARD_RANDOM_RETURN_FLIP_ODDS <= 0) return false;
   if (!runtime.originalDeck.length || runtime.currentIdx >= runtime.deck.length) return false;
 
@@ -4034,6 +4182,7 @@ installKeyboardShortcuts({
 //  leave the page rendered-but-unclickable.
 // ═══════════════════════════════════════════════════════
 const GLOBAL_CLICK_HANDLERS = {
+  toggleRetentionMode, nextRetentionBatch,
   flipCard, navigate, markCard, handleNavNext, answerMorphologyChoice,
   revealMorphologyAnswer, rateMorphologySelfCheck, markMorphologyDontKnow,
   answerMorphologyStep, skipMorphologyStep, giveUpMorphologyStep, undoMorphologyStep, answerParsingReverseChoice,

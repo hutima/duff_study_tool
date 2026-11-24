@@ -7,6 +7,7 @@
 // in via configurePersistence — same pattern as the other UI modules.
 
 import { runtime } from './runtime.js';
+import * as Retention from '../domain/deck/retention.js';
 import { isPlainObject, shuffleArray } from '../utils/helpers.js';
 import { getStorage, isLikelyIOS } from '../utils/storage.js';
 import { shieldClicksBriefly } from '../utils/clickShield.js';
@@ -328,6 +329,8 @@ export function buildPersistedStatePayload(options = {}) {
     spacedByMode: runtime.spacedByMode,
     spacingCadence: runtime.spacingCadence,
     hardVocabReviewMode: runtime.hardVocabReviewMode,
+    retentionMode: runtime.retentionMode,
+    retentionSessions: Retention.sanitizeSessions(runtime.retentionSessions),
     studyMode: runtime.studyMode,
     appProfile: runtime.appProfile,
     morphSelfCheck: runtime.morphSelfCheck,
@@ -408,6 +411,8 @@ function sanitizeImportedState(candidate) {
   state.spacedByMode = sanitizeSpacedByMode(candidate.spacedByMode, candidate.spacedRepetition);
   state.spacingCadence = sanitizeSpacingCadence(candidate.spacingCadence);
   state.hardVocabReviewMode = !!candidate.hardVocabReviewMode;
+  state.retentionMode = candidate.retentionMode === true;
+  state.retentionSessions = Retention.sanitizeSessions(candidate.retentionSessions);
   state.splitSelection = !!candidate.splitSelection;
   state.modeSelections = isPlainObject(candidate.modeSelections) ? candidate.modeSelections : {};
   state.morphSelfCheck = !!candidate.morphSelfCheck;
@@ -947,6 +952,7 @@ export function getDeckStateKey(keys = runtime.selectedKeys, requiredFlag = runt
     requiredOnly: !!requiredFlag,
     spacedRepetition: !!spacedFlag,
     hardVocabReviewMode: !!runtime.hardVocabReviewMode,
+    ...(runtime.retentionMode && runtime.studyMode === 'vocab' ? { retentionMode: true } : {}),
     direction: host.getStudyStoreKey(),
     mode: runtime.studyMode
   });
@@ -965,6 +971,7 @@ export function markActiveDeckRef() {
     return;
   }
   runtime.activeDeckRef = {
+    retentionMode: runtime.retentionMode && runtime.studyMode === 'vocab',
     key: getDeckStateKey(runtime.selectedKeys, runtime.requiredOnly),
     selectedKeys: [...runtime.selectedKeys],
     currentSessionId: runtime.currentSession ? runtime.currentSession.id : null
@@ -1001,6 +1008,7 @@ function clearLegacySaves(storage) {
 
 export function saveCurrentDeckStateToBank() {
   const ref = runtime.activeDeckRef;
+  if (ref?.retentionMode) return; // retention has its own persistent batch queue
   if (!ref || !runtime.deck.length) return;
 
   runtime.deckStates[ref.key] = {
@@ -1142,6 +1150,8 @@ export function restoreState() {
     runtime.directionToGreek = !!saved.directionToGreek;
     runtime.spacedRepetition = saved.spacedRepetition !== false;
     runtime.hardVocabReviewMode = !!saved.hardVocabReviewMode;
+    runtime.retentionMode = saved.retentionMode === true;
+    runtime.retentionSessions = Retention.sanitizeSessions(saved.retentionSessions);
     runtime.splitSelection = !!saved.splitSelection;
     runtime.modeSelections = saved.modeSelections && typeof saved.modeSelections === 'object' ? saved.modeSelections : {};
     // Apply the same legacy-key rename to any per-mode selection snapshot so
@@ -1366,6 +1376,10 @@ export function restoreState() {
     runtime.unspacedPendingRecycle = !runtime.spacedRepetition && !!(usableDeckState && usableDeckState.unspacedPendingRecycle);
     runtime.isFlipped = false;
     host.clearSpacedUndoSnapshot();
+    if (runtime.retentionMode && runtime.studyMode === 'vocab') {
+      runtime.deck = host.buildStudyDeck(runtime.originalDeck);
+      runtime.currentIdx = 0;
+    }
     markActiveDeckRef();
 
     setActiveSessionButton();
