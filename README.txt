@@ -12,6 +12,12 @@ FEATURE SET
 
 Study modes (top-level mode strip)
 - Vocab — Greek ↔ English flashcards with optional direction reversal.
+  Retention toggle: a synthetic deck of up to 20 random currently eligible
+  cards from the selection. Hard/Uncertain retry inside the batch until Easy;
+  Skip rotates without grading. Finish before choosing the next random set.
+  Batches resume across reloads and selection/direction changes. In spaced
+  mode, only currently due cards can enter a new batch; unspaced uses
+  unconfirmed cards. Ratings still update the existing progress/schedule.
 - Grammar — multiple-choice parsing / morphology / concept questions
   with inline wrong-answer explanations and an optional "self-check"
   mode that reveals the answer without grading.

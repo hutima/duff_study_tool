@@ -276,6 +276,8 @@ export const runtime = {
   // it only affects how future flips schedule, not already-due cards.
   spacingCadence: 'intensive',
   hardVocabReviewMode: false, // restrict vocab deck to cards missed >10× and still under 40% confidence
+  retentionMode: false,
+  retentionSessions: {}, // fixed synthetic batches, keyed by selection/direction
   activeDeckCount: 0,
   // Cards in the "middle deck" — currently due but not yet seen this session.
   // Builds up as deferred cards' timers expire mid-session; gets dumped into

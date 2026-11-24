@@ -118,6 +118,7 @@ export function configureNavigation(deps) {
 }
 
 export function navigate(dir, options = {}) {
+  if (host.retentionNavigate?.(dir)) return;
   if (!runtime.deck.length) return;
   host.noteStudyInteraction();
 
@@ -318,6 +319,7 @@ export function navigate(dir, options = {}) {
 }
 
 export function markCard(outcome) {
+  if (host.retentionMark?.(outcome)) return;
   // outcome: 'again' | 'pass' | 'easy'
   if (host.isMorphologyMode() || host.isParsingMode()) return;
   host.noteStudyInteraction();
@@ -1324,6 +1326,7 @@ export function toggleDimValueFilter(dimKey, value) {
 }
 
 export function reshuffleEligible() {
+  if (host.isRetentionActive?.()) return;
   if (!runtime.selectedKeys.length) return;
 
   // Parsing: rebuild through its canonical builder so the reshuffle honours
@@ -1368,6 +1371,7 @@ export function reshuffleEligible() {
 }
 
 function fastForwardScheduling(advanceMs) {
+  if (host.isRetentionActive?.()) return;
   if (!runtime.spacedRepetition || !runtime.originalDeck.length) return;
   host.advanceScheduledCards(runtime.originalDeck, advanceMs);
   runtime.deck = host.buildStudyDeck(runtime.originalDeck);
@@ -1804,6 +1808,7 @@ export function confirmResetToStart() {
 }
 
 function performResetStatsKeepSettings() {
+  runtime.retentionSessions = {};
   host.clearSpacedUndoSnapshot();
 
   runtime.globalWordMarks = { g2e: {}, e2g: {}, morph: {} };

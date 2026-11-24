@@ -158,6 +158,7 @@ export function renderCard() {
   }
 
   if (!runtime.deck.length) {
+    if (host.renderRetentionComplete?.(area)) return;
     let emptyMessage;
     if (host.isParsingMode()) {
       // A paradigm IS focused but the deck came back empty: with "Exclude
