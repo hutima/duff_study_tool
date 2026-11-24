@@ -3210,11 +3210,55 @@ function isRetentionActive() {
 function retentionBatch() {
   const key = getDeckStateKey();
   return Retention.getBatch(runtime.retentionSessions, key, runtime.originalDeck,
-    card => runtime.spacedRepetition ? isCardDue(card) : runtime.marks[card.id] !== 'known');
+    card => runtime.spacedRepetition ? isCardDue(card) : runtime.marks[card.id] !== 'known',
+    Math.random, card => progressCardId(card.id));
+}
+
+function syncRetentionVariantBatch(batch) {
+  if (!runtime.spacedRepetition) return;
+  const members = new Set(batch.ids);
+  const groups = new Map();
+  for (const card of runtime.originalDeck) {
+    if (!members.has(card.id)) continue;
+    const id = progressCardId(card.id);
+    if (!groups.has(id)) groups.set(id, []);
+    groups.get(id).push(card);
+  }
+  for (const cards of groups.values()) {
+    const info = getVariantCycleInfo(cards[0]);
+    if (!info) continue;
+    const progress = getWordProgress(cards[0].id);
+    const groupIds = new Set(cards.map(card => card.id));
+    const hasPending = batch.pending.some(id => groupIds.has(id));
+    if (!hasPending && !progress.cycleStartedAt) continue;
+    // Let the existing scheduler close expired rounds and record confidence.
+    // A round reset (timeout or Uncertain) requeues the whole word in this
+    // same batch; batch completion must never conceal an unfinished set.
+    if (progress.cycleStartedAt > 0 && Date.now() >= progress.cycleStartedAt + SRS_VARIANT_HOLD_MS) {
+      isCardDue(cards[0]);
+    }
+    const passed = new Set(progress.cycleFacesPassed || []);
+    const needsReview = progress.cycleStartedAt > 0
+      ? cards.filter(card => !passed.has(derivedCardFaceKey(card)))
+      : cards.filter(isCardDue);
+    const required = new Set(needsReview.map(card => card.id));
+    batch.pending = batch.pending.filter(id => !groupIds.has(id) || required.has(id));
+    const queued = new Set(batch.pending);
+    for (const card of needsReview) {
+      if (!queued.has(card.id)) batch.pending.push(card.id);
+    }
+  }
+}
+
+function retentionCounts(batch) {
+  const baseIds = new Set(batch.ids.map(progressCardId));
+  const pendingBaseIds = new Set(batch.pending.map(progressCardId));
+  return { total: baseIds.size, done: baseIds.size - pendingBaseIds.size, virtual: batch.ids.length - baseIds.size };
 }
 
 function buildRetentionDeck() {
   const batch = retentionBatch();
+  syncRetentionVariantBatch(batch);
   const byId = new Map(runtime.originalDeck.map(card => [card.id, card]));
   const cards = batch.pending.map(id => byId.get(id)).filter(Boolean);
   runtime.activeDeckCount = cards.length;
@@ -3289,8 +3333,9 @@ function retentionNavigate(dir) {
 function renderRetentionComplete(area) {
   if (!isRetentionActive() || runtime.deck.length || !runtime.originalDeck.length) return false;
   const batch = retentionBatch();
+  const counts = retentionCounts(batch);
   area.innerHTML = batch.ids.length
-    ? `<div class="empty-state"><div class="big">✓</div><strong>Batch complete · ${batch.ids.length} cards</strong><p>Good stopping point. Your progress is saved.</p><button class="ctrl-btn" type="button" onclick="nextRetentionBatch()">Review next 20 →</button></div>`
+    ? `<div class="empty-state"><div class="big">✓</div><strong>Batch complete · ${counts.total} base cards</strong><p>${counts.virtual} virtual cards included. Good stopping point. Your progress is saved.</p><button class="ctrl-btn" type="button" onclick="nextRetentionBatch()">Review next 20 →</button></div>`
     : '<div class="empty-state"><div class="big">✓</div><strong>No eligible cards right now</strong><p>All cards in this selection are scheduled for later or already confirmed.</p><button class="ctrl-btn" type="button" onclick="nextRetentionBatch()">Check again</button></div>';
   return true;
 }
@@ -3298,10 +3343,10 @@ function renderRetentionComplete(area) {
 function renderRetentionProgress() {
   if (!isRetentionActive()) return false;
   const batch = retentionBatch();
-  const done = batch.ids.length - batch.pending.length;
-  const pct = batch.ids.length ? Math.round(done / batch.ids.length * 100) : 0;
+  const counts = retentionCounts(batch);
+  const pct = counts.total ? Math.round(counts.done / counts.total * 100) : 0;
   const text = document.getElementById('progressText');
-  if (text) text.textContent = `Retention · ${done} / ${batch.ids.length} completed · ${batch.pending.length} remaining`;
+  if (text) text.textContent = `Retention · ${counts.done} / ${counts.total} base cards completed · ${batch.pending.length} cards left${counts.virtual ? ` · ${counts.virtual} virtual cards included` : ''}`;
   const fill = document.getElementById('progressFill');
   if (fill) fill.style.width = `${pct}%`;
   const percent = document.getElementById('progressPercent');
@@ -3313,14 +3358,15 @@ function renderRetentionProgress() {
 function renderRetentionReview() {
   if (!isRetentionActive()) return false;
   const batch = retentionBatch();
+  const counts = retentionCounts(batch);
   const tag = document.getElementById('reviewDeckTag');
   if (tag) tag.textContent = 'Retention batch';
   const stats = document.getElementById('reviewStats');
-  if (stats) stats.textContent = `${batch.ids.length - batch.pending.length} completed · ${batch.pending.length} left in this batch`;
+  if (stats) stats.textContent = `${counts.done} / ${counts.total} base cards completed · ${batch.pending.length} cards left · ${counts.virtual} virtual cards included`;
   const sort = document.getElementById('reviewSortRow');
   if (sort) sort.innerHTML = '';
   const list = document.getElementById('reviewList');
-  if (list) list.innerHTML = '<p>20 random eligible cards at a time. Hard and Uncertain repeat within this batch until you mark them Easy. Skip keeps the card in the batch. You can stop and resume anytime.</p>';
+  if (list) list.innerHTML = '<p>20 random eligible base cards at a time, plus all their enabled virtual cards. Virtual cards do not use the 20-card allowance. Each word stays in this batch until its forms clear their shared review round. Hard and Uncertain repeat; Skip keeps the card in the batch. You can stop and resume anytime.</p>';
   return true;
 }
 
