@@ -4,6 +4,7 @@ import vm from 'node:vm';
 import { readFileSync } from 'node:fs';
 import * as Retention from '../js/domain/deck/retention.js';
 import { getBatch, rateBatch, sanitizeSessions } from '../js/domain/deck/retention.js';
+import { getUnspacedArchiveDayKey } from '../js/utils/time.js';
 import { progressCardId } from '../js/domain/deck/filters.js';
 import { addVariantFaceSample, recordVariantRoundConfidence } from '../js/domain/srs/confidence.js';
 
@@ -27,7 +28,7 @@ test('20 base cards include all virtual faces without using extra slots', () => 
 
 test('legacy and partially reviewed batches acquire missing enabled siblings', () => {
   const family = [{ id: 'say' }, { id: 'say::2aor' }, { id: 'say::perfact' }];
-  const sessions = { deck: { ids: ['say'], pending: [], savedAt: 1 } };
+  const sessions = { deck: { ids: ['say'], pending: [], savedAt: Date.now() } };
   const batch = getBatch(sessions, 'deck', family, c => c.id !== 'say', Math.random, c => progressCardId(c.id));
   assert.deepEqual(batch.ids, family.map(c => c.id));
   assert.deepEqual(batch.pending, ['say::2aor', 'say::perfact']);
@@ -68,6 +69,7 @@ function loadRetentionFlow(spacedRepetition, deckCards = cards) {
   };
   const context = vm.createContext({
     runtime, Retention,
+    maybeAutoResetUnspacedArchives() {}, noteUnspacedArchiveActivity() {},
     progressCardId, getVariantCycleInfo: () => null,
     getDeckStateKey: () => `${runtime.directionToGreek}:${runtime.selectedKeys.join(',')}:${runtime.spacedRepetition}`,
     isCardDue: card => card.due && !scheduled.has(card.id),
@@ -236,4 +238,134 @@ test('restoring filters corrupt queues, limits size, and drops removed cards', (
   assert.deepEqual(sanitizeSessions([]), {});
   const many = Object.fromEntries(Array.from({ length: 40 }, (_, i) => [String(i), { ids: ['a'], pending: ['a'], savedAt: i }]));
   assert.equal(Object.keys(sanitizeSessions(many)).length, 16);
+});
+
+
+for (const spaced of [true, false]) test(`pick new 20 works before completion and preserves reviews (${spaced ? 'spaced' : 'unspaced'})`, () => {
+  const { context: flow, runtime, calls } = loadRetentionFlow(spaced);
+  const original = runtime.deck.map(card => card.id);
+  flow.retentionMark('easy');
+  const marked = { ...runtime.marks };
+  const graded = [...calls];
+  flow.pickNewRetentionBatch();
+  assert.equal(runtime.deck.length, 20);
+  assert.ok(runtime.deck.every(card => !original.includes(card.id)));
+  assert.deepEqual(runtime.marks, marked);
+  assert.deepEqual(calls, graded, 'replacing a batch never grades or postpones cards');
+  const saved = sanitizeSessions(JSON.parse(JSON.stringify(runtime.retentionSessions)));
+  const pending = Array.from(runtime.deck, card => card.id);
+  runtime.retentionSessions = saved;
+  runtime.deck = flow.buildRetentionDeck();
+  assert.deepEqual(Array.from(runtime.deck, card => card.id), pending);
+});
+
+test('replacement favors new words and fills a small pool without splitting families', () => {
+  const families = Array.from({ length: 25 }, (_, i) => [{ id: `word-${i}` }, { id: `word-${i}::2aor` }]).flat();
+  const sessions = {};
+  const group = card => progressCardId(card.id);
+  const first = getBatch(sessions, 'deck', families, () => true, () => 0, group);
+  const second = getBatch(sessions, 'deck', families, () => true, () => 0, group, { replace: true });
+  const oldWords = new Set(first.ids.map(progressCardId));
+  const newWords = new Set(second.ids.map(progressCardId));
+  assert.equal(newWords.size, 20);
+  assert.equal([...newWords].filter(id => !oldWords.has(id)).length, 5);
+  assert.equal(second.ids.length, 40);
+  assert.deepEqual(second.pending, second.ids);
+  const small = getBatch(sessions, 'small', families.slice(0, 6), () => true);
+  rateBatch(small, 'easy');
+  assert.equal(getBatch(sessions, 'small', families.slice(0, 6), () => true, Math.random, group, { replace: true }).pending.length, 6);
+  assert.equal(getBatch(sessions, 'empty', families, () => false, Math.random, group, { replace: true }).ids.length, 0);
+});
+
+test('batch day rolls at 5 AM, independently of save time and reloads', () => {
+  const at = (day, hour, minute = 0) => new Date(2026, 10, day, hour, minute).getTime();
+  const sessions = {};
+  const batch = getBatch(sessions, 'deck', cards, card => card.due, () => 0, undefined, { now: at(24, 23) });
+  rateBatch(batch, 'easy');
+  assert.equal(batch.dayKey, '2026-11-24');
+  const restored = sanitizeSessions(JSON.parse(JSON.stringify(sessions)));
+  assert.equal(getBatch(restored, 'deck', cards, () => false, () => 0, undefined, { now: at(25, 4, 59) }).pending.length, 19);
+  assert.equal(restored.deck.dayKey, '2026-11-24', 'resuming before cutoff must not move the day anchor');
+  assert.equal(Retention.isBatchCurrent(restored.deck, at(25, 5)), false);
+  const next = getBatch(restored, 'deck', cards, card => card.due, () => 0, undefined, { now: at(25, 5) });
+  assert.equal(next.dayKey, '2026-11-25');
+  assert.equal(next.pending.length, 20);
+  assert.ok(next.ids.every(id => !batch.ids.includes(id)));
+  while (next.pending.length) rateBatch(next, 'easy');
+  assert.equal(getBatch(restored, 'deck', cards, () => true, () => 0, undefined, { now: at(25, 23) }).pending.length, 0);
+  assert.equal(getBatch(restored, 'deck', cards, () => true, () => 0, undefined, { now: at(26, 5) }).pending.length, 20);
+});
+
+test('legacy batches use their last saved day and expired inactive selections refresh when revisited', () => {
+  const old = new Date(2026, 10, 23, 12).getTime();
+  const now = new Date(2026, 10, 24, 12).getTime();
+  const sessions = sanitizeSessions({ deck: { ids: ['card-0'], pending: [], savedAt: old } });
+  assert.equal(sessions.deck.dayKey, getUnspacedArchiveDayKey(old));
+  const batch = getBatch(sessions, 'deck', cards, card => card.due, () => 0, undefined, { now });
+  assert.equal(batch.pending.length, 20);
+  assert.equal(batch.dayKey, getUnspacedArchiveDayKey(now));
+});
+
+test('foreground refresh and rating across cutoff rebuild without grading the stale card', () => {
+  const { context: flow, runtime, calls } = loadRetentionFlow(true);
+  const old = runtime.deck.map(card => card.id);
+  runtime.retentionSessions[flow.getDeckStateKey()].dayKey = '2000-01-01';
+  assert.equal(flow.retentionMark('easy'), true);
+  assert.deepEqual(calls, []);
+  assert.equal(runtime.deck.length, 20);
+  assert.ok(runtime.deck.every(card => !old.includes(card.id)));
+  assert.equal(flow.maybeRefreshRetentionDay(), false, 'fresh day does not replace the batch again');
+});
+
+
+test('completed unspaced retention is eligible again the next day even with the normal daily-reset toggle off', () => {
+  const { context: flow, runtime } = loadRetentionFlow(false, cards.slice(0, 7));
+  runtime.globalWordMarks = { g2e: runtime.marks, e2g: { reverse: 'known' }, morph: { grammar: 'known' } };
+  runtime.unspacedAutoResetEnabled = false;
+  Object.assign(flow, {
+    getUnspacedArchiveDayKey,
+    ensureDirectionalStores() {},
+    getDirectionalMarksStore: () => runtime.globalWordMarks.g2e
+  });
+  const source = readFileSync(new URL('../js/app/main.js', import.meta.url), 'utf8');
+  vm.runInContext(source.slice(source.indexOf('function noteUnspacedArchiveActivity('), source.indexOf('function getUnspacedCycleEntry(')), flow);
+  while (runtime.deck.length) flow.retentionMark('easy');
+  assert.equal(Object.keys(runtime.marks).length, 7);
+  assert.equal(runtime.lastUnspacedArchiveDayKey, getUnspacedArchiveDayKey());
+  runtime.lastUnspacedArchiveDayKey = '2000-01-01';
+  runtime.retentionSessions[flow.getDeckStateKey()].dayKey = '2000-01-01';
+  assert.equal(flow.maybeRefreshRetentionDay(), true);
+  assert.equal(runtime.deck.length, 7, 'all archived words return to the next daily batch');
+  assert.deepEqual(runtime.globalWordMarks.g2e, {});
+  assert.deepEqual(runtime.globalWordMarks.e2g, {});
+  assert.deepEqual(runtime.globalWordMarks.morph, { grammar: 'known' });
+  runtime.retentionMode = false;
+  runtime.lastUnspacedArchiveDayKey = '2000-01-01';
+  runtime.marks.kept = 'known';
+  assert.equal(flow.maybeAutoResetUnspacedArchives(), false, 'normal decks still honor their own toggle');
+  assert.equal(runtime.marks.kept, 'known');
+});
+
+
+test('new-batch control is visible during retention and hides in other modes', () => {
+  const { context: flow, runtime, elements } = loadRetentionFlow(true);
+  flow.renderRetentionProgress();
+  assert.equal(elements.get('pickNewRetentionBtn').style.display, '');
+  runtime.studyMode = 'parsing';
+  flow.renderRetentionProgress();
+  assert.equal(elements.get('pickNewRetentionBtn').style.display, 'none');
+});
+
+test('Reshuffle delegates to picking a new retention batch', () => {
+  const source = readFileSync(new URL('../js/ui/navigation.js', import.meta.url), 'utf8');
+  const start = source.indexOf('export function reshuffleEligible()');
+  const end = source.indexOf('function fastForwardScheduling(', start);
+  let picked = 0;
+  const context = vm.createContext({ host: {
+    isRetentionActive: () => true,
+    pickNewRetentionBatch: () => { picked++; }
+  } });
+  vm.runInContext(source.slice(start, end).replace('export function', 'function'), context);
+  context.reshuffleEligible();
+  assert.equal(picked, 1);
 });

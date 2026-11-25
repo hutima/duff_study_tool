@@ -1,3 +1,5 @@
+import { getUnspacedArchiveDayKey } from '../../utils/time.js';
+
 // A synthetic review deck. Eligibility is supplied by the existing scheduler;
 // Sample base-word groups; their virtual faces ride along without using a slot.
 export const BATCH_SIZE = 20;
@@ -11,11 +13,18 @@ export function sanitizeSessions(value) {
     const ids = [...new Set(batch.ids.filter(id => typeof id === 'string'))].slice(0, MAX_BATCH_FACES);
     const allowed = new Set(ids);
     const pending = [...new Set(batch.pending.filter(id => allowed.has(id)))];
-    return [key, { ids, pending, groupsVersion: batch.groupsVersion === 2 ? 2 : 1, savedAt: Number(batch.savedAt) || 0 }];
+    const savedAt = Number(batch.savedAt) || 0;
+    const dayKey = typeof batch.dayKey === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(batch.dayKey)
+      ? batch.dayKey : getUnspacedArchiveDayKey(savedAt || Date.now());
+    return [key, { ids, pending, groupsVersion: batch.groupsVersion === 2 ? 2 : 1, savedAt, dayKey }];
   }));
 }
 
-export function getBatch(sessions, key, cards, eligible, random = Math.random, groupKey = card => card.id) {
+export function isBatchCurrent(batch, now = Date.now()) {
+  return !!batch && (batch.dayKey || getUnspacedArchiveDayKey(batch.savedAt || now)) === getUnspacedArchiveDayKey(now);
+}
+
+export function getBatch(sessions, key, cards, eligible, random = Math.random, groupKey = card => card.id, { replace = false, now = Date.now() } = {}) {
   const allowed = new Set(cards.map(card => card.id));
   const groups = new Map();
   const byId = new Map();
@@ -26,6 +35,8 @@ export function getBatch(sessions, key, cards, eligible, random = Math.random, g
     byId.set(card.id, card);
   }
   let batch = sessions[key];
+  const previousGroups = new Set((batch?.ids || []).filter(id => allowed.has(id)).map(id => groupKey(byId.get(id))));
+  if (replace || !isBatchCurrent(batch, now)) batch = null;
   if (batch) {
     batch.ids = batch.ids.filter(id => allowed.has(id));
     batch.pending = batch.pending.filter(id => allowed.has(id));
@@ -47,18 +58,25 @@ export function getBatch(sessions, key, cards, eligible, random = Math.random, g
   }
   if (!batch || !batch.ids.length) {
     const eligibleIds = new Set(cards.filter(eligible).map(card => card.id));
-    const pool = [...groups.values()].filter(ids => [...ids].some(id => eligibleIds.has(id)));
-    // Partial Fisher–Yates: uniformly sample up to 20 base words, without
-    // replacement. Every enabled sibling in the selection joins its word.
-    const size = Math.min(BATCH_SIZE, pool.length);
-    for (let i = 0; i < size; i++) {
-      const j = i + Math.floor(random() * (pool.length - i));
-      [pool[i], pool[j]] = [pool[j], pool[i]];
+    const pool = [...groups.entries()].filter(([, ids]) => [...ids].some(id => eligibleIds.has(id)));
+    // Sample new words first, then fill from the old batch if the eligible
+    // pool is small. A word's virtual faces always travel together.
+    const fresh = pool.filter(([group]) => !previousGroups.has(group));
+    const previous = pool.filter(([group]) => previousGroups.has(group));
+    const selected = [];
+    for (const candidates of [fresh, previous]) {
+      const size = Math.min(BATCH_SIZE - selected.length, candidates.length);
+      for (let i = 0; i < size; i++) {
+        const j = i + Math.floor(random() * (candidates.length - i));
+        [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+      }
+      selected.push(...candidates.slice(0, size));
     }
-    const ids = pool.slice(0, size).flatMap(group => [...group]);
-    batch = sessions[key] = { ids, pending: ids.filter(id => eligibleIds.has(id)), groupsVersion: 2, savedAt: Date.now() };
+    const ids = selected.flatMap(([, group]) => [...group]);
+    batch = sessions[key] = { ids, pending: ids.filter(id => eligibleIds.has(id)), groupsVersion: 2, savedAt: now, dayKey: getUnspacedArchiveDayKey(now) };
   }
-  batch.savedAt = Date.now();
+  batch.dayKey ||= getUnspacedArchiveDayKey(now);
+  batch.savedAt = now;
   return batch;
 }
 

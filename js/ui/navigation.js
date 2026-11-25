@@ -1326,7 +1326,7 @@ export function toggleDimValueFilter(dimKey, value) {
 }
 
 export function reshuffleEligible() {
-  if (host.isRetentionActive?.()) return;
+  if (host.isRetentionActive?.()) return host.pickNewRetentionBatch();
   if (!runtime.selectedKeys.length) return;
 
   // Parsing: rebuild through its canonical builder so the reshuffle honours

@@ -16,8 +16,10 @@ Study modes (top-level mode strip)
   plus all their enabled virtual cards (which do not use the 20-card limit).
   Shared split-card sets stay together until their review round is complete.
   Hard/Uncertain retry inside the batch until Easy;
-  Skip rotates without grading. Finish before choosing the next random set.
-  Batches resume across reloads and selection/direction changes. In spaced
+  Skip rotates without grading. Pick new 20 at any time to favor different
+  eligible words while keeping recorded reviews. Batches resume across reloads
+  and selection/direction changes within the day, then refresh at 5 AM local
+  time. Unspaced archives also clear daily while Retention is on. In spaced
   mode, only words with currently due forms enter a new batch; unspaced uses
   words with unconfirmed forms. Ratings still update the existing schedule.
 - Grammar — multiple-choice parsing / morphology / concept questions

@@ -516,6 +516,7 @@ configureNavigation({
   retentionNavigate: (dir) => retentionNavigate(dir),
   retentionMark: (outcome) => retentionMark(outcome),
   isRetentionActive: () => isRetentionActive(),
+  pickNewRetentionBatch: () => pickNewRetentionBatch(),
   noteStudyInteraction: () => noteStudyInteraction(),
   isMorphologyMode: () => isMorphologyMode(),
   isParsingMode: () => isParsingMode(),
@@ -2419,6 +2420,7 @@ function startUsageTracking() {
         runtime.appUsageStats.lastActiveAt = Date.now();
         updateUsageMeta();
         maybeAutoResetUnspacedArchivesAndRefresh();
+        maybeRefreshRetentionDay();
       }
     });
 
@@ -2436,6 +2438,8 @@ function startUsageTracking() {
   if (!runtime.usageTickHandle) {
     runtime.usageTickHandle = window.setInterval(() => {
       if (document.hidden) return;
+      maybeAutoResetUnspacedArchivesAndRefresh();
+      maybeRefreshRetentionDay();
       const now = Date.now();
       const delta = accumulateUsageTime(now);
       const activeDelta = accumulateActiveStudyTime(now);
@@ -2471,10 +2475,11 @@ function noteUnspacedArchiveActivity() {
 
 // Clears all unspaced 'known' marks across g2e and e2g when the local
 // archive-day key has rolled past the 5 AM cutoff since the last archive
-// activity. Morph marks are untouched. Returns true if anything was
+// activity. Retention always uses this daily reset, even when the normal
+// deck's optional reset is off. Morph marks are untouched. Returns true if anything was
 // cleared so callers can rebuild the active deck.
 function maybeAutoResetUnspacedArchives() {
-  if (!runtime.unspacedAutoResetEnabled) return false;
+  if (!runtime.unspacedAutoResetEnabled && !runtime.retentionMode) return false;
   const todayKey = getUnspacedArchiveDayKey();
   const lastKey = runtime.lastUnspacedArchiveDayKey || '';
   if (!lastKey) {
@@ -3207,11 +3212,12 @@ function isRetentionActive() {
   return runtime.retentionMode && runtime.studyMode === 'vocab';
 }
 
-function retentionBatch() {
+function retentionBatch(options) {
+  maybeAutoResetUnspacedArchives();
   const key = getDeckStateKey();
   return Retention.getBatch(runtime.retentionSessions, key, runtime.originalDeck,
     card => runtime.spacedRepetition ? isCardDue(card) : runtime.marks[card.id] !== 'known',
-    Math.random, card => progressCardId(card.id));
+    Math.random, card => progressCardId(card.id), options);
 }
 
 function syncRetentionVariantBatch(batch) {
@@ -3293,13 +3299,28 @@ function toggleRetentionMode() {
 }
 
 function nextRetentionBatch() {
+  if (maybeRefreshRetentionDay()) return;
   if (!isRetentionActive() || retentionBatch().pending.length) return;
-  delete runtime.retentionSessions[getDeckStateKey()];
+  pickNewRetentionBatch();
+}
+
+function pickNewRetentionBatch() {
+  if (!isRetentionActive() || !runtime.selectedKeys.length) return;
+  retentionBatch({ replace: true });
   refreshRetention();
+}
+
+function maybeRefreshRetentionDay() {
+  if (!isRetentionActive() || !runtime.selectedKeys.length) return false;
+  const batch = runtime.retentionSessions[getDeckStateKey()];
+  if (!batch || Retention.isBatchCurrent(batch)) return false;
+  refreshRetention();
+  return true;
 }
 
 function retentionMark(outcome) {
   if (!isRetentionActive()) return false;
+  if (maybeRefreshRetentionDay()) return true;
   const batch = retentionBatch();
   const card = runtime.deck[0];
   if (!card || !batch.pending.length) return true;
@@ -3310,8 +3331,10 @@ function retentionMark(outcome) {
   } else {
     recordStudyOutcome(card.id, rated === 'easy' ? 'known' : rated === 'pass' ? 'pass' : 'review');
     applyUnspacedSharedSchedule(card, rated);
-    if (rated === 'easy') runtime.marks[card.id] = 'known';
-    else delete runtime.marks[card.id];
+    if (rated === 'easy') {
+      runtime.marks[card.id] = 'known';
+      noteUnspacedArchiveActivity();
+    } else delete runtime.marks[card.id];
   }
   Retention.rateBatch(batch, rated);
   refreshRetention();
@@ -3320,6 +3343,7 @@ function retentionMark(outcome) {
 
 function retentionNavigate(dir) {
   if (!isRetentionActive()) return false;
+  if (maybeRefreshRetentionDay()) return true;
   // Skip rotates within this batch without grading or replacing the card.
   if (dir > 0 && runtime.deck.length) {
     const batch = retentionBatch();
@@ -3341,6 +3365,8 @@ function renderRetentionComplete(area) {
 }
 
 function renderRetentionProgress() {
+  const pickButton = document.getElementById('pickNewRetentionBtn');
+  if (pickButton) pickButton.style.display = isRetentionActive() && runtime.selectedKeys.length ? '' : 'none';
   if (!isRetentionActive()) return false;
   const batch = retentionBatch();
   const counts = retentionCounts(batch);
@@ -3366,7 +3392,7 @@ function renderRetentionReview() {
   const sort = document.getElementById('reviewSortRow');
   if (sort) sort.innerHTML = '';
   const list = document.getElementById('reviewList');
-  if (list) list.innerHTML = '<p>20 random eligible base cards at a time, plus all their enabled virtual cards. Virtual cards do not use the 20-card allowance. Each word stays in this batch until its forms clear their shared review round. Hard and Uncertain repeat; Skip keeps the card in the batch. You can stop and resume anytime.</p>';
+  if (list) list.innerHTML = '<p>20 random eligible base cards at a time, plus all their enabled virtual cards. Virtual cards do not use the 20-card allowance. Each word stays in this batch until its forms clear their shared review round. Hard and Uncertain repeat; Skip keeps the card in the batch. Pick new 20 at any time to reshuffle eligible words; recorded reviews are kept. Batches reset daily at 5 AM local time. You can stop and resume within the day.</p>';
   return true;
 }
 
@@ -4228,7 +4254,7 @@ installKeyboardShortcuts({
 //  leave the page rendered-but-unclickable.
 // ═══════════════════════════════════════════════════════
 const GLOBAL_CLICK_HANDLERS = {
-  toggleRetentionMode, nextRetentionBatch,
+  toggleRetentionMode, nextRetentionBatch, pickNewRetentionBatch,
   flipCard, navigate, markCard, handleNavNext, answerMorphologyChoice,
   revealMorphologyAnswer, rateMorphologySelfCheck, markMorphologyDontKnow,
   answerMorphologyStep, skipMorphologyStep, giveUpMorphologyStep, undoMorphologyStep, answerParsingReverseChoice,
