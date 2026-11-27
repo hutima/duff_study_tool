@@ -118,6 +118,7 @@ export function configureNavigation(deps) {
 }
 
 export function navigate(dir, options = {}) {
+  if (host.parsingFlipNavigate?.(dir)) return;
   if (host.retentionNavigate?.(dir)) return;
   if (!runtime.deck.length) return;
   host.noteStudyInteraction();
@@ -319,6 +320,7 @@ export function navigate(dir, options = {}) {
 }
 
 export function markCard(outcome) {
+  if (host.parsingFlipMark?.(outcome)) return;
   if (host.retentionMark?.(outcome)) return;
   // outcome: 'again' | 'pass' | 'easy'
   if (host.isMorphologyMode() || host.isParsingMode()) return;
@@ -678,6 +680,8 @@ export function toggleShuffle() {
   runtime.shuffled = !runtime.shuffled;
   runtime.flipsSinceReshuffle = 0;
   host.syncToggleButtons();
+
+  if (host.isParsingFlipActive?.()) return host.shuffleParsingFlip(runtime.shuffled);
 
   // Parsing owns its ordering (orderParsingPool: shown-fewest-first, then the
   // status-weighted bias when shuffle is on; strict paradigm order when off).
@@ -1079,6 +1083,8 @@ export function toggleParsingLookup() {
   if (!host.isParsingMode()) return;
   runtime.parsingLookup = !runtime.parsingLookup;
   if (runtime.parsingLookup) {
+    runtime.parsingFlipMode = false;
+    runtime.parsingFlipSession = null;
     runtime.parsingReverse = false;
     runtime.parsingShuffleAll = false;
     runtime.parsingCustomReview = false;
@@ -1326,6 +1332,7 @@ export function toggleDimValueFilter(dimKey, value) {
 }
 
 export function reshuffleEligible() {
+  if (host.isParsingFlipActive?.()) return host.shuffleParsingFlip(true);
   if (host.isRetentionActive?.()) return host.pickNewRetentionBatch();
   if (!runtime.selectedKeys.length) return;
 
@@ -1401,6 +1408,7 @@ export function fastForwardOneWeek() {
 }
 
 export function resetCurrentDeck() {
+  if (host.isParsingFlipActive?.()) return host.restartParsingFlip();
   if (!runtime.selectedKeys.length) {
     host.clearSpacedUndoSnapshot();
     host.clearSavedState();

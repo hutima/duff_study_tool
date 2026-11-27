@@ -112,6 +112,8 @@ export const runtime = {
   // paradigm — the student picks the form that matches. Off by default;
   // the forward dimensional walk stays the parsing baseline.
   parsingReverse: false,
+  parsingFlipMode: false, // recognition-only flip cards; opt-in
+  parsingFlipSession: null, // transient queue, never part of proficiency stats
   // Lookup mode. When on (parsing mode only), parsing stops quizzing and
   // becomes an interactive paradigm reference: the student selects a focused
   // paradigm, then proceeds through the dimension breadcrumbs (tense → voice →

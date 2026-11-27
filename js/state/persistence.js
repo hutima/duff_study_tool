@@ -350,6 +350,7 @@ export function buildPersistedStatePayload(options = {}) {
     parsingCustomReview: runtime.parsingCustomReview,
     parsingCustomParadigms: runtime.parsingCustomParadigms,
     parsingReverse: runtime.parsingReverse,
+    parsingFlipMode: runtime.parsingFlipMode === true,
     parsingLookup: runtime.parsingLookup,
     accentLookalikes: runtime.accentLookalikes,
     optionalFormFilters: runtime.optionalFormFilters,
@@ -460,8 +461,15 @@ function sanitizeImportedState(candidate) {
   state.parsingCustomReview = !!candidate.parsingCustomReview;
   state.parsingCustomParadigms = sanitizeParadigmKeyMap(candidate.parsingCustomParadigms);
   state.parsingReverse = !!candidate.parsingReverse;
+  state.parsingFlipMode = candidate.parsingFlipMode === true;
   // Lookup mode (interactive paradigm reference) defaults to false (off).
   state.parsingLookup = !!candidate.parsingLookup;
+  if (state.parsingLookup) state.parsingFlipMode = false;
+  if (state.parsingFlipMode) {
+    state.parsingReverse = false;
+    state.parsingShuffleAll = false;
+    state.parsingCustomReview = false;
+  }
   state.accentLookalikes = !!candidate.accentLookalikes;
   // Sub-filters default to true (every category included) so toggling
   // the parent on without touching filters reproduces the original
@@ -954,7 +962,8 @@ export function getDeckStateKey(keys = runtime.selectedKeys, requiredFlag = runt
     hardVocabReviewMode: !!runtime.hardVocabReviewMode,
     ...(runtime.retentionMode && runtime.studyMode === 'vocab' ? { retentionMode: true } : {}),
     direction: host.getStudyStoreKey(),
-    mode: runtime.studyMode
+    mode: runtime.studyMode,
+    ...(runtime.studyMode === 'parsing' && runtime.parsingFlipMode ? { parsingFlipMode: true } : {})
   });
 }
 
@@ -972,6 +981,7 @@ export function markActiveDeckRef() {
   }
   runtime.activeDeckRef = {
     retentionMode: runtime.retentionMode && runtime.studyMode === 'vocab',
+    parsingFlipMode: runtime.parsingFlipMode && runtime.studyMode === 'parsing',
     key: getDeckStateKey(runtime.selectedKeys, runtime.requiredOnly),
     selectedKeys: [...runtime.selectedKeys],
     currentSessionId: runtime.currentSession ? runtime.currentSession.id : null
@@ -1008,7 +1018,7 @@ function clearLegacySaves(storage) {
 
 export function saveCurrentDeckStateToBank() {
   const ref = runtime.activeDeckRef;
-  if (ref?.retentionMode) return; // retention has its own persistent batch queue
+  if (ref?.retentionMode || ref?.parsingFlipMode) return; // dedicated queues own their lifecycle
   if (!ref || !runtime.deck.length) return;
 
   runtime.deckStates[ref.key] = {
@@ -1212,10 +1222,18 @@ export function restoreState() {
     runtime.parsingCustomParadigms = sanitizeParadigmKeyMap(saved.parsingCustomParadigms);
     // English → Greek parsing direction (default false).
     runtime.parsingReverse = !!saved.parsingReverse;
+    runtime.parsingFlipMode = saved.parsingFlipMode === true;
+    runtime.parsingFlipSession = null;
     // Lookup mode (interactive paradigm reference; default false). The walk
     // state itself (morphLookupState) is ephemeral and intentionally not
     // restored — it resamples from the live paradigm data on first render.
     runtime.parsingLookup = !!saved.parsingLookup;
+    if (runtime.parsingLookup) runtime.parsingFlipMode = false;
+    if (runtime.parsingFlipMode) {
+      runtime.parsingReverse = false;
+      runtime.parsingShuffleAll = false;
+      runtime.parsingCustomReview = false;
+    }
     // Accent/breathing look-alike distractors in the reverse drill (default false).
     runtime.accentLookalikes = !!saved.accentLookalikes;
     // Per-category sub-filters: default each to true if missing.
@@ -1376,7 +1394,8 @@ export function restoreState() {
     runtime.unspacedPendingRecycle = !runtime.spacedRepetition && !!(usableDeckState && usableDeckState.unspacedPendingRecycle);
     runtime.isFlipped = false;
     host.clearSpacedUndoSnapshot();
-    if (runtime.retentionMode && runtime.studyMode === 'vocab') {
+    if ((runtime.retentionMode && runtime.studyMode === 'vocab')
+      || (runtime.studyMode === 'parsing' && runtime.parsingFlipMode && !runtime.parsingLookup)) {
       runtime.deck = host.buildStudyDeck(runtime.originalDeck);
       runtime.currentIdx = 0;
     }
