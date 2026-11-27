@@ -22,7 +22,7 @@ Study modes (top-level mode strip)
   time. Unspaced archives also clear daily while Retention is on. In spaced
   mode, only words with currently due forms enter a new batch; unspaced uses
   words with unconfirmed forms. Ratings still update the existing schedule.
-- Grammar — multiple-choice parsing / morphology / concept questions
+- Quiz — multiple-choice parsing / morphology / concept questions
   with inline wrong-answer explanations and an optional "self-check"
   mode that reveals the answer without grading.
 - Parsing — dimensional walk through every paradigm form (article,
@@ -30,6 +30,11 @@ Study modes (top-level mode strip)
   participles, etc.) one dimension at a time: aspect → tense → voice →
   mood → person → number → case → gender. Distractors are gated to
   plausible values for the form so wrong answers are instructive.
+  Optional Parsing flip cards (off by default) turn the focused root into
+  recognition cards: Greek form → parsing and meaning. Chapter, optional-form,
+  and variant filters still apply. Hard/Uncertain repeat, Easy clears the
+  current session, and Pass skips. This transient deck records no accuracy,
+  XP, confidence, or SRS changes; a reload starts a new recognition run.
   Walks every form once before any repeats per paradigm. After each
   card a parse-comparison summary shows your guess vs. the correct
   parse and, on misses, lists the forms in that paradigm that would

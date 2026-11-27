@@ -159,3 +159,18 @@ neighborhood. The tables above are the source of truth for *what exists*; line
 numbers are a convenience.
 
 Retention review note (2026-11): the newest user-guide changelog entry documents the 20-base-card allowance and grouped virtual forms. The touch bridge targets `summary` elements directly so changelog/version disclosures expand inside `#shortcutsOverlay` instead of activating its backdrop close handler.
+
+## Recognition mode additions (v348)
+
+- The top study-mode shortcut order is **Vocab → Parsing → Quiz → Reader**.
+  `modeShortcutMorphBtn` keeps its internal morph-mode ID but is labeled Quiz.
+- `parsingFlipToggle` / `parsingFlipBtn` in Advanced review settings enable
+  recognition flip cards (off by default, visible only in Parsing). The focused
+  root, chapter, optional forms, and per-value parsing filters control the pool.
+  Multi-paradigm and reverse-choice controls are hidden in this mode.
+- `parsingFlipPassBtn` is the fourth mark button, visible only in recognition
+  mode. Hard / Uncertain / Easy / Pass manage an ephemeral practice queue.
+- `cardArea` uses the vocab two-face shell for recognition, with all in-scope
+  parses of a shared Greek form on the back. Completed-deck buttons do not
+  trigger the lesson selector; only non-interactive empty-state content does.
+- `pickNewRetentionBtn` below the card picks a new eligible 20-word batch.

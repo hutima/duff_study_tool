@@ -397,6 +397,8 @@ configureModals({
   onDisclaimerAccepted: () => maybeScheduleInstallPrompt()
 });
 configureProgress({
+  renderParsingFlipProgress: () => renderParsingFlipProgress(),
+  renderParsingFlipReview: () => renderParsingFlipReview(),
   renderRetentionProgress: () => renderRetentionProgress(),
   renderRetentionReview: () => renderRetentionReview(),
   accumulateUsageTime: () => accumulateUsageTime(),
@@ -513,6 +515,11 @@ configureSelectors({
   }
 });
 configureNavigation({
+  parsingFlipNavigate: (dir) => parsingFlipNavigate(dir),
+  parsingFlipMark: (outcome) => parsingFlipMark(outcome),
+  isParsingFlipActive: () => isParsingFlipActive(),
+  restartParsingFlip: () => restartParsingFlip(),
+  shuffleParsingFlip: (randomize) => shuffleParsingFlip(randomize),
   retentionNavigate: (dir) => retentionNavigate(dir),
   retentionMark: (outcome) => retentionMark(outcome),
   isRetentionActive: () => isRetentionActive(),
@@ -1632,7 +1639,7 @@ function syncParadigmFocusUi() {
   // future", so nothing needs hiding or substituting here.
   const PARSING_DROPDOWN_SUBSTITUTIONS = {};
   const isHiddenFromParsing = (lemma) => Object.prototype.hasOwnProperty.call(PARSING_DROPDOWN_SUBSTITUTIONS, lemma);
-  const available = listAvailableParadigms(aggregateKeys).filter((p) => !isHiddenFromParsing(p.lemma));
+  const available = listAvailableParadigms(aggregateKeys).filter((p) => !isHiddenFromParsing(p.lemma) && (!runtime.parsingFlipMode || !isParsingIncompatibleLemma(p.lemma)));
   if (!available.length) {
     select.innerHTML = '<option value="">No paradigms in current selection</option>';
     select.value = '';
@@ -1645,7 +1652,7 @@ function syncParadigmFocusUi() {
   // of their group (single-lemma categories don't — that would just equal
   // picking the lemma).
   const grouped = listAvailableParadigmsByCategory(aggregateKeys)
-    .map((g) => ({ category: g.category, lemmas: g.lemmas.filter((p) => !isHiddenFromParsing(p.lemma)) }))
+    .map((g) => ({ category: g.category, lemmas: g.lemmas.filter((p) => !isHiddenFromParsing(p.lemma) && (!runtime.parsingFlipMode || !isParsingIncompatibleLemma(p.lemma))) }))
     .filter((g) => g.lemmas.length);
   const shuffleableCategories = new Set(grouped.filter((g) => g.lemmas.length >= 2).map((g) => g.category));
 
@@ -1653,9 +1660,9 @@ function syncParadigmFocusUi() {
   // face of the shuffle-all toggle (see setMorphFocusedParadigm / the
   // PARSING_SHUFFLE_ALL_VALUE sentinel) — mirrors the chapter dropdown's "Build
   // mode" entry driving Lookup mode.
-  const sentinelOpt = `<option value="${PARSING_SHUFFLE_ALL_VALUE}">All paradigms through selected chapter</option>`;
+  const sentinelOpt = runtime.parsingFlipMode ? '' : `<option value="${PARSING_SHUFFLE_ALL_VALUE}">All paradigms through selected chapter</option>`;
   const groupsHtml = grouped.map((g) => {
-    const shuffleOpt = shuffleableCategories.has(g.category)
+    const shuffleOpt = !runtime.parsingFlipMode && shuffleableCategories.has(g.category)
       ? `<option value="${escapeAttr(makeCategoryShuffleValue(g.category))}">${escapeAttr(categoryShuffleLabel(g.category))}</option>`
       : '';
     const opts = g.lemmas
@@ -1677,7 +1684,7 @@ function syncParadigmFocusUi() {
   const currentValue = runtime.morphFocusedParadigm;
   const currentCategory = parseCategoryShuffleValue(currentValue);
   let chosen;
-  if (currentCategory) {
+  if (currentCategory && !runtime.parsingFlipMode) {
     // A "shuffle all of type" selection stays put while its category still
     // has two or more shuffleable lemmas in scope; otherwise it falls back to
     // the first concrete lemma (e.g. the chapter dropped below where the type
@@ -1921,6 +1928,10 @@ function onDueHistogramToggle(key, el) {
 }
 
 function syncToggleButtons() {
+  const flipToggle = document.getElementById('parsingFlipToggle');
+  if (flipToggle) flipToggle.setAttribute('aria-checked', runtime.parsingFlipMode ? 'true' : 'false');
+  const flipSwitch = document.getElementById('parsingFlipBtn');
+  if (flipSwitch) flipSwitch.classList.toggle('on', !!runtime.parsingFlipMode);
   const retentionToggle = document.getElementById('retentionToggle');
   if (retentionToggle) retentionToggle.setAttribute('aria-checked', runtime.retentionMode ? 'true' : 'false');
   const retentionSwitch = document.getElementById('retentionBtn');
@@ -2145,6 +2156,13 @@ function syncToggleButtons() {
 }
 
 function syncLayoutVisibility() {
+  const flipActive = isParsingFlipActive();
+  const retentionPicker = document.getElementById('pickNewRetentionBtn');
+  if (retentionPicker) retentionPicker.style.display = isRetentionActive() && runtime.selectedKeys.length ? '' : 'none';
+  const flipToggle = document.getElementById('parsingFlipToggle');
+  if (flipToggle) flipToggle.style.display = isParsingMode() ? 'flex' : 'none';
+  const flipPass = document.getElementById('parsingFlipPassBtn');
+  if (flipPass) flipPass.style.display = flipActive ? '' : 'none';
   const retentionToggle = document.getElementById('retentionToggle');
   if (retentionToggle) retentionToggle.style.display = runtime.studyMode === 'vocab' ? 'flex' : 'none';
   const controlsBar = document.getElementById('controlsBar');
@@ -2325,6 +2343,20 @@ function syncLayoutVisibility() {
       nextBtn.classList.remove('spaced-again', 'nav-next-as-reset');
     }
   }
+
+  if (flipActive) {
+    for (const el of [prevBtn, undoBtn, ffRow,
+      document.getElementById('parsingShuffleAllToggle'), document.getElementById('parsingCustomReviewToggle'),
+      document.getElementById('parsingReverseToggle'), document.getElementById('accentLookalikeToggle'),
+      document.getElementById('parsingCustomParadigmsRow')]) {
+      if (el) el.style.display = 'none';
+    }
+    if (resetActionsSection) resetActionsSection.style.display = 'none';
+    if (paradigmFocusRowPrimary) paradigmFocusRowPrimary.style.display = 'flex';
+    if (navResetBtn) navResetBtn.style.display = '';
+    if (markRow) { markRow.style.display = runtime.deck.length ? 'flex' : 'none'; markRow.classList.add('recognition-marks'); }
+    if (nextBtn) { nextBtn.textContent = 'Pass →'; nextBtn.classList.remove('spaced-again', 'nav-next-as-reset'); }
+  } else if (markRow) markRow.classList.remove('recognition-marks');
 
   if (isRetentionActive()) {
     // Keep navigation inside the fixed batch and leave the review clock alone.
@@ -2614,7 +2646,8 @@ function buildFilteredFocusedParadigmCards() {
   const opts = {
     includeOptional: !!runtime.includeOptionalForms,
     optionalFilters: runtime.optionalFormFilters,
-    dimValueFilters: runtime.dimValueFilters
+    dimValueFilters: runtime.dimValueFilters,
+    includeSyncretic: isParsingFlipActive()
   };
   // "Custom paradigm set" wins over everything else: pool only the
   // paradigms the user has ticked, shuffled together. (Mutually exclusive
@@ -2758,6 +2791,7 @@ function noteParsingCardShown(cardId) {
 // starts fresh. A plain reshuffle deliberately does NOT reset it: the budget
 // should keep bounding repeats across reshuffles within the same run.
 function resetParsingShowCounts() {
+  runtime.parsingFlipSession = null;
   runtime.parsingShowCounts = {};
   runtime.parsingLastShownCardId = null;
 }
@@ -2773,7 +2807,7 @@ function resetParsingShowCounts() {
 function rebuildParsingCycle(options = {}) {
   const pool = buildFilteredFocusedParadigmCards();
   runtime.originalDeck = pool;
-  const ordered = orderParsingPool(pool);
+  const ordered = isParsingFlipActive() ? buildParsingFlipDeck(pool) : orderParsingPool(pool);
   avoidHeadCollision(ordered, options.avoidHeadId);
   runtime.deck = ordered;
   runtime.activeDeckCount = ordered.length;
@@ -3208,6 +3242,123 @@ function avoidHeadCollision(deck, avoidHeadId) {
   return deck;
 }
 
+// Recognition queues are transient. Only the mode preference is persisted;
+// rating these cards never calls the scheduler or records parsing attempts.
+function isParsingFlipActive() {
+  return isParsingMode() && runtime.parsingFlipMode && !runtime.parsingLookup;
+}
+
+function toggleParsingFlipMode() {
+  if (!isParsingMode()) return;
+  saveCurrentDeckStateToBank();
+  runtime.parsingFlipMode = !runtime.parsingFlipMode;
+  if (runtime.parsingFlipMode) {
+    runtime.parsingLookup = false;
+    runtime.parsingReverse = false;
+    runtime.parsingShuffleAll = false;
+    runtime.parsingCustomReview = false;
+    const available = listAvailableParadigms(getAggregateSelectionKeys())
+      .filter(p => !isParsingIncompatibleLemma(p.lemma));
+    if (!available.some(p => p.lemma === runtime.morphFocusedParadigm)) {
+      runtime.morphFocusedParadigm = available[0]?.lemma || null;
+    }
+  }
+  runtime.parsingFlipSession = null;
+  resetMorphStepState();
+  resetMorphAnswerState();
+  rebuildMorphDeckForStepMode();
+  syncToggleButtons();
+  saveState();
+}
+
+function buildParsingFlipDeck(cards) {
+  const forms = new Map();
+  for (const card of cards || []) {
+    const key = `${card.lemma}‖${String(card.form || '').normalize('NFC')}`;
+    if (!forms.has(key)) forms.set(key, { ...card, recognitionAnswers: [] });
+    const entry = forms.get(key);
+    if (!entry.recognitionAnswers.some(c => c.parsedAnswer === card.parsedAnswer && c.answer === card.answer)) {
+      entry.recognitionAnswers.push(card);
+    }
+  }
+  const pool = [...forms.values()];
+  const ordered = runtime.shuffled ? shuffleArray(pool) : pool;
+  runtime.parsingFlipSession = { ids: ordered.map(c => c.id), pending: ordered.map(c => c.id), cards: ordered };
+  runtime.activeDeckCount = ordered.length;
+  runtime.currentIdx = 0;
+  return ordered;
+}
+
+function refreshParsingFlip() {
+  const session = runtime.parsingFlipSession;
+  const byId = new Map((session?.cards || []).map(c => [c.id, c]));
+  runtime.deck = (session?.pending || []).map(id => byId.get(id)).filter(Boolean);
+  runtime.activeDeckCount = runtime.deck.length;
+  runtime.currentIdx = 0;
+  runtime.isFlipped = false;
+  renderCard();
+  renderProgress();
+  renderReview();
+  saveState();
+}
+
+function parsingFlipMark(outcome) {
+  if (!isParsingFlipActive()) return false;
+  const session = runtime.parsingFlipSession;
+  if (!session || !runtime.deck.length) return true;
+  // Easy clears this run; Hard, Uncertain, and neutral Pass rotate the queue.
+  Retention.rateBatch(session, outcome);
+  refreshParsingFlip();
+  return true;
+}
+
+function parsingFlipNavigate(dir) {
+  if (!isParsingFlipActive()) return false;
+  if (dir > 0) parsingFlipMark('skip');
+  return true;
+}
+
+function shuffleParsingFlip(randomize = true) {
+  if (!isParsingFlipActive() || !runtime.parsingFlipSession) return;
+  const session = runtime.parsingFlipSession;
+  const remaining = new Set(session.pending);
+  session.pending = randomize ? shuffleArray([...session.pending]) : session.ids.filter(id => remaining.has(id));
+  refreshParsingFlip();
+}
+
+function restartParsingFlip() {
+  if (!isParsingFlipActive()) return;
+  runtime.deck = buildParsingFlipDeck(buildFilteredFocusedParadigmCards());
+  refreshParsingFlip();
+}
+
+function renderParsingFlipProgress() {
+  if (!isParsingFlipActive()) return false;
+  const total = runtime.parsingFlipSession?.ids.length || 0;
+  const done = total - runtime.deck.length;
+  const pct = total ? Math.round(100 * done / total) : 0;
+  const text = document.getElementById('progressText');
+  if (text) text.textContent = `Recognition · ${done} / ${total} forms cleared this session`;
+  const fill = document.getElementById('progressFill');
+  if (fill) fill.style.width = `${pct}%`;
+  const percent = document.getElementById('progressPercent');
+  if (percent) percent.textContent = `${pct}%`;
+  return true;
+}
+
+function renderParsingFlipReview() {
+  if (!isParsingFlipActive()) return false;
+  const tag = document.getElementById('reviewDeckTag');
+  if (tag) tag.textContent = 'Parsing recognition';
+  const stats = document.getElementById('reviewStats');
+  if (stats) stats.textContent = `${runtime.deck.length} forms left in this session`;
+  const sort = document.getElementById('reviewSortRow');
+  if (sort) sort.innerHTML = '';
+  const list = document.getElementById('reviewList');
+  if (list) list.innerHTML = '<p>Flip to check the parsing and meaning. Hard and Uncertain repeat; Easy clears a form for this session; Pass skips without grading. Chapter and variant filters set the form pool. Recognition does not update accuracy, XP, confidence, or review schedules.</p>';
+  return true;
+}
+
 function isRetentionActive() {
   return runtime.retentionMode && runtime.studyMode === 'vocab';
 }
@@ -3397,6 +3548,7 @@ function renderRetentionReview() {
 }
 
 function buildStudyDeck(cards, options = {}) {
+  if (isParsingFlipActive()) return buildParsingFlipDeck(cards);
   if (isRetentionActive()) return buildRetentionDeck();
   // Parsing owns its deck ordering: a status-weighted shuffle (orderParsingPool)
   // that floats unseen/wrong forms ahead of mastered ones, rather than the
@@ -4118,6 +4270,7 @@ function reshuffleUpcomingCards() {
 }
 
 function maybeReturnKnownCardToActivePile() {
+  if (isParsingMode()) return false;
   if (isRetentionActive()) return false;
   if (runtime.spacedRepetition || isMorphologyMode() || KNOWN_CARD_RANDOM_RETURN_FLIP_ODDS <= 0) return false;
   if (!runtime.originalDeck.length || runtime.currentIdx >= runtime.deck.length) return false;
@@ -4255,6 +4408,7 @@ installKeyboardShortcuts({
 // ═══════════════════════════════════════════════════════
 const GLOBAL_CLICK_HANDLERS = {
   toggleRetentionMode, nextRetentionBatch, pickNewRetentionBatch,
+  toggleParsingFlipMode, parsingFlipMark, restartParsingFlip,
   flipCard, navigate, markCard, handleNavNext, answerMorphologyChoice,
   revealMorphologyAnswer, rateMorphologySelfCheck, markMorphologyDontKnow,
   answerMorphologyStep, skipMorphologyStep, giveUpMorphologyStep, undoMorphologyStep, answerParsingReverseChoice,
@@ -4325,11 +4479,10 @@ if (cardArea) {
   cardArea.addEventListener('click', (event) => {
     const target = event.target;
     if (!target || !(target instanceof Element)) return;
-    // Parsing-mode stem-recall redirect button uses .empty-state for layout
-    // but has its own onclick that switches mode + loads the supplemental
-    // deck. Opening the study selector on top of that would be a confusing
-    // double-effect, so skip the delegate for it.
-    if (target.closest('.parsing-redirect-btn')) return;
+    // Completion and redirect actions own their click. Only bare empty-state
+    // content opens the selector; a nested button may already have rebuilt
+    // the deck by the time this delegated listener receives the event.
+    if (target.closest('button, a, input, select, [role="button"]')) return;
     if (target.closest('.empty-state')) openStudySelector();
   });
 }
